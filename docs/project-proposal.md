@@ -15,10 +15,10 @@
 
 **Contexto Académico:**
 - **Ciclo Formativo:** 2º FP Desarrollo de Aplicaciones Multiplataforma
-- **Centro Educativo:** IES Albarregas (Almendralejo, Badajoz)
+- **Centro Educativo:** IES Albarregas (Mérida, Badajoz)
 - **Curso Académico:** 2025/26
 - **Fecha de Inicio:** 17 de octubre de 2025
-- **Fecha de Entrega:** 31 de enero de 2026
+- **Fecha de Entrega:** *******
 
 ## Descripción Ejecutiva del Proyecto
 
