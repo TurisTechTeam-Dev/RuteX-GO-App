@@ -178,7 +178,7 @@ Andrés Fernández Expósito, Joel Manuel García Villarino, Diego Vivas Paredes
 - 🐙 **Organización GitHub:** [@TurisTechTeam-Dev](https://github.com/TurisTechTeam-Dev)
 - 📂 **Repositorio Principal:** [rutex-go-project](https://github.com/TurisTechTeam-Dev/rutex-go-project)
 - 🎫 **Issues y Soporte:** [GitHub Issues](https://github.com/TurisTechTeam-Dev/rutex-go-project/issues)
-- 📧 **Email del Equipo:** *[Pendiente configurar email corporativo]*
+- 📧 **Email del Equipo:** *[turistechteam@gmail.com]*
 - 🏫 **Centro Académico:** IES Albarregas, Mérida (Badajoz)
 
 ### Contacto Individual:
