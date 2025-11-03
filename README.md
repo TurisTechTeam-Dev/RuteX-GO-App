@@ -16,8 +16,8 @@ RuteX Go es una aplicación móvil gamificada desarrollada por TurisTech Team qu
 | Desarrollador | GitHub | Especialización |
 |---------------|--------|-----------------|
 | **Andrés Fernández Expósito** | [@AndresFE0209](https://github.com/AndresFE0209) | Backend & Coordinación |
-| **Joel Manuel García Villarino** | *Pendiente* | Android Nativo & UX |
-| **Diego Vivas Paredes** | *Pendiente* | Multiplataforma & Arquitectura |
+| **Joel Manuel García Villarino** | [@Joeljole1987](https://github.com/Joeljole1987) | Backend |
+| **Diego Vivas Paredes** | [@DiegoVP963](https://github.com/DiegoVP963) | Frontend & UX/UI |
 
 **Centro Educativo:** IES Albarregas (Mérida, Badajoz)  
 **Ciclo Formativo:** 2º FP Desarrollo de Aplicaciones Multiplataforma  
