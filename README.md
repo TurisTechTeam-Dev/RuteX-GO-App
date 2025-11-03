@@ -87,7 +87,7 @@ rutex-go-project/
 
 | Sprint | Fechas | Objetivos Principales | Estado | Responsable |
 |--------|--------|-----------------------|--------|-------------|
-| **Sprint 1** | 17/10 - 31/10 | Definición, Análisis y Diseño | 🔄 En progreso | Andrés |
+| **Sprint 1** | 17/10 - 15/12 | Definición, Análisis y Diseño | 🔄 En progreso | Todos |
 | **Sprint 2** | 01/11 - 15/11 | Fundamentos Técnicos y Firebase | ⏳ Pendiente | Diego |
 | **Sprint 3** | 16/11 - 30/11 | Geolocalización y Sistema de Rutas | ⏳ Pendiente | Joel |
 | **Sprint 4** | 01/12 - 15/12 | Gamificación Core y Trivias | ⏳ Pendiente | Andrés |
@@ -96,9 +96,9 @@ rutex-go-project/
 | **Sprint 7** | 16/01 - 31/01 | Finalización, Documentación y Deploy | ⏳ Pendiente | Todos |
 
 ### Entregables por Evaluación
-- **1ª Evaluación (31/10):** Propuesta, análisis de requisitos, mockups y arquitectura
-- **2ª Evaluación (15/01):** MVP funcional con características principales implementadas
-- **3ª Evaluación (31/01):** Aplicación completa, documentación final y presentación
+- **1ª Evaluación (15/12):** Propuesta, análisis de requisitos, mockups y arquitectura
+- **2ª Evaluación (**/03):** MVP funcional con características principales implementadas
+- **3ª Evaluación (**/06):** Aplicación completa, documentación final y presentación
 
 ## 📱 Capturas de Pantalla
 
@@ -158,7 +158,7 @@ Este proyecto es desarrollado como **Trabajo Final de Grado** por estudiantes de
 🟢 **Fase Actual:** Sprint 1 - Análisis y Diseño (1ª Evaluación)  
 🟡 **Progreso General:** Documentación inicial completada, análisis en curso  
 🔵 **Próximos Hitos:** Mockups UI/UX, diagramas de arquitectura, casos de uso  
-📈 **Cobertura Documentación:** 60% completada (objetivo 100% para 31/10)
+📈 **Cobertura Documentación:** 60% completada (objetivo 100% para 01/12)
 
 ## 🏆 Logros y Reconocimientos
 
@@ -182,9 +182,9 @@ Andrés Fernández Expósito, Joel Manuel García Villarino, Diego Vivas Paredes
 - 🏫 **Centro Académico:** IES Albarregas, Mérida (Badajoz)
 
 ### Contacto Individual:
-- **Andrés Fernández:** [@AndresFE0209](https://github.com/AndresFE0209) - *Coordinador del Proyecto*
-- **Joel García:** *[Pendiente]* - *Especialista Mobile & UX*  
-- **Diego Vivas:** *[Pendiente]* - *Arquitecto de Software*
+- **Andrés Fernández:** [@AndresFE0209](https://github.com/AndresFE0209) - *Backend & Coordinación*
+- **Joel García:** [@Joeljole1987](https://github.com/Joeljole1987) - *Backend & Diseño UX/UI*  
+- **Diego Vivas:** [@DiegoVP963](https://github.com/DiegoVP963) - *Frontend & Diseño UX/UI*
 
 ---
 
