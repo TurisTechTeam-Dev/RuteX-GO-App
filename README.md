@@ -97,7 +97,7 @@ Su objetivo es transformar la visita al patrimonio histórico en una experiencia
 - **GitHub Actions** - CI/CD automatizado y despliegue
 - **Firebase Console** - Gestión del backend y analíticas
 
---
+---
 
 ## 📁 Estructura del repositorio
 --------------------------
