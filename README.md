@@ -114,7 +114,7 @@ rutex-go-project/
 
 ---
 
-I## 🛠️ Instalación y ejecución
+## 🛠️ Instalación y ejecución
 
 ### 📌 Requisitos
 - Android Studio 2020.3+  
