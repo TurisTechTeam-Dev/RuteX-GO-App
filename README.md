@@ -100,7 +100,7 @@ Su objetivo es transformar la visita al patrimonio histórico en una experiencia
 ---
 
 ## 📁 Estructura del repositorio
---------------------------
+
 rutex-go-project/  
 ├─ docs/                  — Documentación académica y técnica (memoria, análisis, diseño)  
 ├─ mobile-app/            — Código fuente de la aplicación  
