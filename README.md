@@ -158,7 +158,6 @@ git checkout -b feature/<nombre-funcionalidad>
 *[Pendiente - Se añadirán mockups en Sprint 1 y capturas reales en Sprint 6]*
 2]
 
-
 ---
 
 ## 🏗️ Arquitectura y decisiones técnicas
