@@ -2,10 +2,12 @@
 
 ### *Aplicación móvil gamificada para turismo cultural en Extremadura*
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)  
-[![Issues](https://img.shields.io/github/issues/TurisTechTeam-Dev/rutex-go-project.svg)](https://github.com/TurisTechTeam-Dev/rutex-go-project/issues)  
-[![Platform: Android](https://img.shields.io/badge/Platform-Android-green.svg)](https://developer.android.com)  
-[![Backend: Firebase](https://img.shields.io/badge/Backend-Firebase-orange.svg)](https://firebase.google.com)
+<p align="center">
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg"/></a>
+  <a href="https://github.com/TurisTechTeam-Dev/rutex-go-project/issues"><img src="https://img.shields.io/github/issues/TurisTechTeam-Dev/rutex-go-project.svg"/></a>
+  <a href="https://developer.android.com"><img src="https://img.shields.io/badge/Platform-Android-green.svg"/></a>
+  <a href="https://firebase.google.com"><img src="https://img.shields.io/badge/Backend-Firebase-orange.svg"/></a>
+</p>
 
 ## 👥 Equipo de Desarrollo - TurisTech Team
 
