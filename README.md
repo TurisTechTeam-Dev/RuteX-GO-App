@@ -157,7 +157,7 @@ git checkout -b feature/<nombre-funcionalidad>
 
 *[Pendiente - Se añadirán mockups en Sprint 1 y capturas reales en Sprint 6]*
 2]
-```
+
 
 ---
 
@@ -169,14 +169,14 @@ git checkout -b feature/<nombre-funcionalidad>
 - **ADR-003:** Firestore como base de datos por flexibilidad del modelo NoSQL.
 
 ### 📚 Colecciones Firestore
-```
+
 /users  
 /cities  
 /routes  
 /monuments  
 /missions  
 /rankings
-```
+
 
 ### 🔗 Integraciones
 - Google Maps: mapas, distancias y marcadores.  
@@ -236,6 +236,7 @@ Andrés Fernández Expósito, Joel Manuel García Villarino, Diego Vivas Paredes
 *Desarrollado con ❤️ por TurisTech Team para impulsar el turismo cultural en Extremadura*
 
 ---
+
 **IES Albarregas** | **Desarrollo de Aplicaciones Multiplataforma** | **Curso 2025/26**
 
 
