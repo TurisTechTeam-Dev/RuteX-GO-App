@@ -1,15 +1,13 @@
 # RuteX Go 🏛️📱
 
-**Aplicación Móvil Gamificada para Turismo Cultural en Extremadura**
+### *Aplicación móvil gamificada para turismo cultural en Extremadura*
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![GitHub Issues](https://img.shields.io/github/issues/TurisTechTeam-Dev/rutex-go-project.svg)](https://github.com/TurisTechTeam-Dev/rutex-go-project/issues)
-[![Android](https://img.shields.io/badge/Platform-Android-green.svg)](https://developer.android.com)
-[![Firebase](https://img.shields.io/badge/Backend-Firebase-orange.svg)](https://firebase.google.com)
-
-## 📋 Descripción del Proyecto
-
-RuteX Go es una aplicación móvil gamificada desarrollada por TurisTech Team que transforma el turismo cultural en Extremadura mediante rutas interactivas que combinan patrimonio histórico, tecnología moderna y elementos de juego. Los usuarios pueden explorar monumentos, participar en trivias educativas y desbloquear logros mientras descubren la riqueza cultural de la región.
+<p align="center">
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg"/></a>
+  <a href="https://github.com/TurisTechTeam-Dev/rutex-go-project/issues"><img src="https://img.shields.io/github/issues/TurisTechTeam-Dev/rutex-go-project.svg"/></a>
+  <a href="https://developer.android.com"><img src="https://img.shields.io/badge/Platform-Android-green.svg"/></a>
+  <a href="https://firebase.google.com"><img src="https://img.shields.io/badge/Backend-Firebase-orange.svg"/></a>
+</p>
 
 ## 👥 Equipo de Desarrollo - TurisTech Team
 
@@ -18,11 +16,56 @@ RuteX Go es una aplicación móvil gamificada desarrollada por TurisTech Team qu
 | **Andrés Fernández Expósito** | [@AndresFE0209](https://github.com/AndresFE0209) | Backend & Coordinación |
 | **Joel Manuel García Villarino** | [@Joeljole1987](https://github.com/Joeljole1987) | Backend & Diseño UX/UI |
 | **Diego Vivas Paredes** | [@DiegoVP963](https://github.com/DiegoVP963) | Frontend & Diseño UX/UI |
+| **María Mercedes Martínez Fragoso** | [@MercedesOrg01](https://github.com/MercedesOrg01) | Tutora del Proyecto |
 
 **Centro Educativo:** IES Albarregas (Mérida, Badajoz)  
 **Ciclo Formativo:** 2º FP Desarrollo de Aplicaciones Multiplataforma  
 **Curso Académico:** 2025/26  
 **Organización GitHub:** [@TurisTechTeam-Dev](https://github.com/TurisTechTeam-Dev)
+
+---
+
+## 🌟 Resumen
+**RuteX Go** es una app móvil gamificada creada por **TurisTech Team** para potenciar el turismo cultural en Extremadura mediante rutas geolocalizadas, contenido histórico multimedia y dinámicas de gamificación (trivias, rangos, logros y rankings).  
+Su objetivo es transformar la visita al patrimonio histórico en una experiencia educativa, interactiva y sostenible.
+
+---
+
+## 📑 Índice
+- [🚀 Estado del proyecto](#-estado-del-proyecto)  
+- [✨ Características principales](#-características-principales)  
+- [🧩 Tecnologías](#-tecnologías)  
+- [📁 Estructura del repositorio](#-estructura-del-repositorio)  
+- [🛠️ Instalación y ejecución](#️-instalación-y-ejecución)  
+- [🏗️ Arquitectura y decisiones técnicas](#️-arquitectura-y-decisiones-técnicas)  
+- [📌 Requisitos no funcionales](#-requisitos-no-funcionales)  
+- [📚 Documentación académica](#-documentación-académica)  
+- [🤝 Cómo contribuir](#-cómo-contribuir)  
+- [📝 Licencia y autores](#-licencia-y-autores)  
+- [📞 Contacto](#-contacto)
+
+---
+
+## 🚀 Estado del proyecto
+| Fase | Estado |
+|------|--------|
+| **Sprint 1** – Análisis y Diseño | 🟡 En progreso |
+| **Entregable E1** | Prototipo funcional centrado en Mérida (auth, rutas, trivial básico, puntos/rangos) |
+
+🔮 **Roadmap próximo:** mapas interactivos, gamificación avanzada, integración con comercios locales, pruebas y despliegue.
+
+---
+
+## ✨ Características principales
+- 🗺️ Rutas culturales geolocalizadas con marcadores.  
+- 🎯 Misiones y trivias asociadas a cada punto de interés.  
+- 🏅 Sistema de puntos, rangos e insignias.  
+- 🏆 Rankings locales y globales.  
+- 👤 Autenticación y gestión de usuarios.  
+- 🖼️ Contenido multimedia (texto, imágenes, audio).  
+- 🔔 Futuro: recompensas comerciales, notificaciones push y posibles mejoras con RA.
+
+---
 
 ## 🎯 Objetivos del Proyecto
 
@@ -33,22 +76,13 @@ RuteX Go es una aplicación móvil gamificada desarrollada por TurisTech Team qu
 - ✅ **Sostenibilidad:** Promover turismo responsable alineado con los ODS 2030
 - ✅ **Formación Académica:** Aplicar conocimientos DAM en proyecto real con impacto social
 
-## 🌟 Características Principales
-
-- 🗺️ **Rutas Culturales Geolocalizadas** - Navegación GPS precisa por monumentos extremeños
-- 🎮 **Sistema de Gamificación Completo** - Trivias interactivas, logros e insignias temáticas
-- 🏆 **Clasificaciones Competitivas** - Rankings locales, globales y competiciones semanales
-- 🏛️ **Contenido Cultural Rico** - Información histórica detallada con multimedia HD
-- 🌍 **Soporte Multiidioma** - Español, inglés y portugués para turismo internacional
-- 🛍️ **Integración Comercial** - Conexión con restaurantes, tiendas y servicios locales
-- 📱 **Diseño Responsive y Accesible** - Interfaz intuitiva adaptable a diferentes dispositivos
+---
 
 ## 🛠️ Tecnologías Utilizadas
 
 ### Frontend
 - **Android Nativo** - Kotlin/Java con Jetpack Compose
 - **Flutter/Dart** - Desarrollo multiplataforma (Fase 2)
-- **Material Design 3** - Sistema de diseño consistente y moderno
 
 ### Backend
 - **Firebase Suite Completa** - Authentication, Firestore, Storage, Functions
@@ -63,25 +97,44 @@ RuteX Go es una aplicación móvil gamificada desarrollada por TurisTech Team qu
 - **GitHub Actions** - CI/CD automatizado y despliegue
 - **Firebase Console** - Gestión del backend y analíticas
 
-## 📁 Estructura del Proyecto
+---
 
+## 📁 Estructura del repositorio
+
+rutex-go-project/  
+├─ docs/                  — Documentación académica y técnica (memoria, análisis, diseño)  
+├─ mobile-app/            — Código fuente de la aplicación  
+│  ├─ android-native/     — Implementación Android (Kotlin)  
+│  └─ flutter/            — Implementación Flutter (fase 2)  
+├─ backend/               — Funciones y configuraciones de Firebase  
+├─ assets/                — Recursos multimedia (imágenes, audio)  
+├─ tests/                 — Pruebas unitarias e integración  
+├─ scripts/               — Automatización y utilidades  
+└─ README.md              — Este archivo
+
+---
+
+## 🛠️ Instalación y ejecución
+
+### 📌 Requisitos
+- Android Studio 2020.3+  
+- Android SDK API 24+  
+- Proyecto Firebase configurado  
+- Google Maps API Key  
+
+### 📥 Clonado
+```bash
+git clone https://github.com/TurisTechTeam-Dev/rutex-go-project.git
+cd rutex-go-project
+git checkout -b feature/<nombre-funcionalidad>
 ```
-rutex-go-project/
-├── 📁 docs/                    # Documentación completa del TFG
-│   ├── 📄 project-proposal.md  # Propuesta completa del proyecto
-│   ├── 📁 analysis/            # Análisis de requisitos y casos de uso
-│   ├── 📁 design/              # Mockups, diagramas y arquitectura
-│   ├── 📁 sprints/             # Documentación por iteraciones
-│   └── 📁 deliverables/        # Entregables por evaluación
-├── 📁 mobile-app/              # Código fuente de la aplicación
-│   ├── 📁 android-native/      # Implementación Android Kotlin/Java
-│   └── 📁 flutter/             # Implementación Flutter (Fase 2)
-├── 📁 backend/                 # Configuración y funciones Firebase
-├── 📁 assets/                  # Recursos multimedia y diseño
-├── 📁 tests/                   # Pruebas unitarias e integración
-├── 📁 scripts/                 # Scripts de utilidad y automatización
-└── 📄 README.md               # Este archivo
-```
+
+### ⚠️ Notas importantes
+- No subir claves ni archivos sensibles (**google-services.json**).  
+- Instrucciones de compilación específicas en:  
+  `mobile-app/android-native/README.md` (Sprint 2).
+
+---
 
 ## 📅 Cronograma de Desarrollo (Metodología Ágil)
 
@@ -103,37 +156,38 @@ rutex-go-project/
 ## 📱 Capturas de Pantalla
 
 *[Pendiente - Se añadirán mockups en Sprint 1 y capturas reales en Sprint 6]*
+2]
 
-## 🚀 Instalación y Configuración
+---
 
-### Prerrequisitos para Desarrollo
-- **Android Studio** Arctic Fox (2020.3.1) o superior
-- **Android SDK** 24+ (Android 7.0 Nougat)
-- **Firebase Project** configurado con APIs habilitadas
-- **Google Maps API Key** con permisos de geolocalización
-- **Git** para control de versiones
+## 🏗️ Arquitectura y decisiones técnicas
 
-### Clonar y Configurar (Para Colaboradores del Equipo)
-```bash
-# Clonar el repositorio
-git clone https://github.com/TurisTechTeam-Dev/rutex-go-project.git
-cd rutex-go-project
+### 📌 ADRs principales
+- **ADR-001:** Firebase como BaaS (rápido, escalable y flexible).  
+- **ADR-002:** Kotlin como base; Flutter para futuro multiplataforma.  
+- **ADR-003:** Firestore como base de datos por flexibilidad del modelo NoSQL.
 
-# Configurar ramas de trabajo
-git checkout -b feature/nombre-funcionalidad
+### 📚 Colecciones Firestore
 
-# Instalar dependencias (cuando esté disponible el código)
-# [Instrucciones específicas se añadirán en Sprint 2]
-```
+/users  
+/cities  
+/routes  
+/monuments  
+/missions  
+/rankings
 
-## 📖 Documentación Completa
 
-- 📋 [Propuesta Completa del Proyecto](docs/project-proposal.md)
-- 🔍 [Análisis Detallado de Requisitos](docs/analysis/requirements.md)
-- 🎨 [Casos de Uso y Diagramas](docs/analysis/use-cases.md) *(Próximamente)*
-- 🏗️ [Arquitectura Técnica del Sistema](docs/design/architecture.md) *(Próximamente)*
-- 📱 [Mockups y Diseño de UI](docs/design/mockups.md) *(Próximamente)*
-- 📊 [Metodología y Planificación](docs/sprints/) *(En desarrollo)*
+### 🔗 Integraciones
+- Google Maps: mapas, distancias y marcadores.  
+- Firebase Storage: contenido multimedia.  
+- Firebase Messaging: notificaciones.
+
+---
+
+## 📚 Documentación académica
+La documentación completa está en: `docs/memoria.md`.
+
+---
 
 ## 🤝 Proceso de Contribución
 
@@ -146,23 +200,9 @@ Este proyecto es desarrollado como **Trabajo Final de Grado** por estudiantes de
 4. **Pull Request** para revisión del código entre compañeros
 5. **Merge a develop** tras aprobación de al menos 1 compañero
 6. **Deploy a main** solo para versiones estables
+7. Incluye documentación y pruebas.
 
-### Estándares de Código:
-- Commits en español con formato: `Tipo: Descripción clara`
-- Documentación de funciones y clases críticas
-- Pruebas unitarias para lógica de negocio importante
-- Revisión de código obligatoria antes de merge
-
-## 📊 Estado Actual del Proyecto
-
-🟢 **Fase Actual:** Sprint 1 - Análisis y Diseño (1ª Evaluación)  
-🟡 **Progreso General:** Documentación inicial completada, análisis en curso  
-🔵 **Próximos Hitos:** Mockups UI/UX, diagramas de arquitectura, casos de uso  
-📈 **Cobertura Documentación:** 60% completada (objetivo 100% para 01/12)
-
-## 🏆 Logros y Reconocimientos
-
-*[Se actualizará durante el desarrollo con hitos importantes alcanzados]*
+---
 
 ## 📄 Licencia y Derechos
 
@@ -170,6 +210,8 @@ Este proyecto está licenciado bajo la **Licencia MIT** - ver [LICENSE](LICENSE)
 
 **Copyright (c) 2025 TurisTechTeam-Dev**  
 Andrés Fernández Expósito, Joel Manuel García Villarino, Diego Vivas Paredes
+
+---
 
 ## 📞 Contacto y Soporte
 
@@ -193,6 +235,7 @@ Andrés Fernández Expósito, Joel Manuel García Villarino, Diego Vivas Paredes
 *Desarrollado con ❤️ por TurisTech Team para impulsar el turismo cultural en Extremadura*
 
 ---
+
 **IES Albarregas** | **Desarrollo de Aplicaciones Multiplataforma** | **Curso 2025/26**
 
 
