@@ -204,8 +204,6 @@ Por el momento, sin cambios registrados.
 
 ---
 
-**TurisTech Team – Proyecto RuteX Go – 2024/2025**  
-
 ## Conclusiones y Consideraciones Futuras
 
 ### Viabilidad del Proyecto
