@@ -74,20 +74,21 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-    subgraph Mobile[App Móvil RuteX Go]
-        UI[UI - Pantallas Flutter]
-        State[Gestión de Estado\n(MVVM / BLoC)]
-        Services[Servicios Internos]
+
+    subgraph Mobile["App Móvil RuteX Go"]
+        UI["UI - Pantallas Flutter"]
+        State["Gestión de Estado (MVVM - BLoC)"]
+        Services["Servicios Internos (Firebase · Maps · QR)"]
     end
 
-    subgraph Backend[Firebase]
-        Auth[Firebase Auth]
-        Firestore[Firestore Database]
-        Storage[Firebase Storage]
-        Messaging[Cloud Messaging]
+    subgraph Backend["Firebase"]
+        Auth["Firebase Auth"]
+        Firestore["Firestore DB"]
+        Storage["Firebase Storage"]
+        Messaging["Cloud Messaging"]
     end
 
-    Maps[(Google Maps API)]
+    Maps["Google Maps API"]
 
     UI --> State
     State --> Services
