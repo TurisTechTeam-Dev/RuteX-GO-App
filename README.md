@@ -117,25 +117,31 @@ El objetivo principal es transformar la visita turística en una experiencia edu
 
 ---
 
-## 📁 Estructura del repositorio
+## 📁 Estructura del Repositorio
 
+```text
 rutex-go-project/
-├─ docs/ # Documentación técnica y académica
-│ ├─ technical_documentation.md
-│ └─ memoria.md
-├─ mobile-app/ # Proyecto principal en Flutter
-│ ├─ lib/ # Código fuente (UI, lógica, providers, servicios)
-│ ├─ ios/ # Configuración iOS (generada por Flutter)
-│ ├─ android/ # Configuración Android (generada por Flutter)
-│ ├─ assets/ # Imágenes y recursos de la app
-│ └─ pubspec.yaml # Dependencias del proyecto Flutter
-├─ backend/ # Archivos y configuración de Firebase
-│ ├─ firestore.rules
-│ ├─ storage.rules
-│ └─ firebase.json
-├─ tests/ # Pruebas unitarias e integración
-├─ scripts/ # Scripts de automatización (si aplica)
-└─ README.md
+├─ docs/                          # Documentación técnica y académica
+│  ├─ technical_documentation.md  # Documentación técnica del sistema
+│  └─ memoria.md                  # Memoria académica del proyecto
+│
+├─ mobile-app/                    # Proyecto principal en Flutter
+│  ├─ lib/                        # Código fuente (UI, lógica, providers, servicios)
+│  ├─ ios/                        # Configuración iOS generada por Flutter
+│  ├─ android/                    # Configuración Android generada por Flutter
+│  ├─ assets/                     # Imágenes y recursos gráficos
+│  └─ pubspec.yaml                # Dependencias del proyecto Flutter
+│
+├─ backend/                       # Configuración y reglas de Firebase
+│  ├─ firestore.rules             # Reglas de seguridad de Firestore
+│  ├─ storage.rules               # Reglas de seguridad de Storage
+│  └─ firebase.json               # Configuración del proyecto Firebase
+│
+├─ tests/                         # Pruebas unitarias e integración
+│
+├─ scripts/                       # Scripts de automatización (si aplica)
+│
+└─ README.md                      # Descripción general del proyecto
 
 ---
 
