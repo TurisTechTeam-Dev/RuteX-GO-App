@@ -281,10 +281,13 @@ El objetivo es garantizar un desarrollo ágil, una experiencia fluida y la posib
 
 ```mermaid
 flowchart LR
-    User((Usuario))
-    App[RuteX Go<br/>App Flutter]
-    Firebase[(Firebase<br/>Auth · Firestore · Storage)]
-    Maps[(Google Maps API)]
+    User((👤<br/>Usuario))
+
+    App[[📱 RuteX Go<br/>App Flutter]]
+
+    Firebase[(🔥 Firebase<br/>Auth · Firestore · Storage)]
+    
+    Maps[(🗺️ Google Maps API)]
 
     User --> App
     App --> Firebase
@@ -298,25 +301,25 @@ flowchart LR
 ```mermaid
 flowchart TB
 
-    subgraph Mobile["App Móvil – Flutter"]
-        UI["UI / Pantallas"]
-        State["Gestión de Estado"]
-        Services["Servicios: Firebase · Maps · QR"]
+    subgraph Mobile["📱 App Móvil RuteX Go"]
+        UI["🖥️ UI<br/>Pantallas Flutter"]
+        State["⚙️ Gestión de Estado<br/>(Provider / BLoC)"]
+        Services["🔌 Servicios Internos<br/>(Firebase · Maps · QR)"]
     end
 
-    subgraph Firebase["Backend en la Nube"]
-        Auth["Authentication"]
-        DB["Firestore Database"]
-        Storage["Storage"]
-        Messaging["Cloud Messaging"]
+    subgraph Backend["🔥 Firebase (Backend)"]
+        Auth["🔑 Auth"]
+        Firestore["🗂️ Firestore DB"]
+        Storage["🖼️ Storage"]
+        Messaging["📨 Cloud Messaging"]
     end
 
-    Maps["Google Maps API"]
+    Maps["🗺️ Google Maps API"]
 
     UI --> State
     State --> Services
     Services --> Auth
-    Services --> DB
+    Services --> Firestore
     Services --> Storage
     Services --> Messaging
     Services --> Maps
