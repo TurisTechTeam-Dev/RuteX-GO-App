@@ -1,7 +1,7 @@
 # RuteX Go 🏛️📱
 ### *Aplicación móvil gamificada para turismo cultural en Extremadura*
 
-[![Licencia MIT](https://img.shields.io/badge/Licencia-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![Licencia](https://img.shields.io/badge/Licencia-Propietaria-blue.svg)
 [![Issues](https://img.shields.io/github/issues/TurisTechTeam-Dev/rutex-go-project.svg)](https://github.com/TurisTechTeam-Dev/rutex-go-project/issues)
 [![Plataforma Android](https://img.shields.io/badge/Plataforma-Android-green.svg)](https://developer.android.com)
 [![Backend Firebase](https://img.shields.io/badge/Backend-Firebase-orange.svg)](https://firebase.google.com)
@@ -502,10 +502,13 @@ Antes de solicitar un PR:
 
 ## 📄 Licencia y Derechos
 
-Este proyecto está licenciado bajo la **Licencia MIT** - ver [LICENSE](LICENSE) para detalles completos.
+Este proyecto está protegido por una **Licencia Propietaria**.  
+No se permite la copia, distribución, modificación ni uso comercial sin autorización expresa del equipo desarrollador.
 
-**Copyright (c) 2025 TurisTechTeam-Dev**  
-Andrés Fernández Expósito, Joel Manuel García Villarino, Diego Vivas Paredes
+Consulta el archivo [LICENSE](LICENSE) para más detalles.
+
+© 2025 TurisTechTeam-Dev  
+Andrés Fernández Expósito · Joel Manuel García Villarino · Diego Vivas Paredes
 
 ---
 
