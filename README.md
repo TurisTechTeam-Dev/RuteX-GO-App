@@ -248,8 +248,6 @@ flutter build appbundle
 
 ---
 
-## 🏗️ Arquitectura y decisiones técnicas
-
 ## 🏗️ Arquitectura y Decisiones Técnicas
 
 RuteX Go está construida con una arquitectura moderna, modular y escalable.  
