@@ -1,47 +1,47 @@
 # RuteX Go 🏛️📱
-
 ### *Aplicación móvil gamificada para turismo cultural en Extremadura*
 
-<p align="center">
-  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg"/></a>
-  <a href="https://github.com/TurisTechTeam-Dev/rutex-go-project/issues"><img src="https://img.shields.io/github/issues/TurisTechTeam-Dev/rutex-go-project.svg"/></a>
-  <a href="https://developer.android.com"><img src="https://img.shields.io/badge/Platform-Android-green.svg"/></a>
-  <a href="https://firebase.google.com"><img src="https://img.shields.io/badge/Backend-Firebase-orange.svg"/></a>
-</p>
+[![Licencia MIT](https://img.shields.io/badge/Licencia-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Issues](https://img.shields.io/github/issues/TurisTechTeam-Dev/rutex-go-project.svg)](https://github.com/TurisTechTeam-Dev/rutex-go-project/issues)
+[![Plataforma Android](https://img.shields.io/badge/Plataforma-Android-green.svg)](https://developer.android.com)
+[![Backend Firebase](https://img.shields.io/badge/Backend-Firebase-orange.svg)](https://firebase.google.com)
 
-## 👥 Equipo de Desarrollo - TurisTech Team
+## 👥 Equipo de Desarrollo — TurisTech Team
 
-| Desarrollador | GitHub | Especialización |
-|---------------|--------|-----------------|
+| Desarrollador | GitHub | Rol |
+|---------------|--------|-----|
 | **Andrés Fernández Expósito** | [@AndresFE0209](https://github.com/AndresFE0209) | Backend & Coordinación |
 | **Joel Manuel García Villarino** | [@Joeljole1987](https://github.com/Joeljole1987) | Backend & Diseño UX/UI |
 | **Diego Vivas Paredes** | [@DiegoVP963](https://github.com/DiegoVP963) | Frontend & Diseño UX/UI |
-| **María Mercedes Martínez Fragoso** | [@MercedesOrg01](https://github.com/MercedesOrg01) | Tutora del Proyecto |
+| **María Mercedes Martínez Fragoso** | [@MercedesOrg01](https://github.com/MercedesOrg01) | Tutora del proyecto |
 
-**Centro Educativo:** IES Albarregas (Mérida, Badajoz)  
-**Ciclo Formativo:** 2º FP Desarrollo de Aplicaciones Multiplataforma  
-**Curso Académico:** 2025/26  
+**Centro:** IES Albarregas (Mérida, Badajoz)  
+**Ciclo:** 2º FP Desarrollo de Aplicaciones Multiplataforma  
+**Curso:** 2025/26  
 **Organización GitHub:** [@TurisTechTeam-Dev](https://github.com/TurisTechTeam-Dev)
 
 ---
 
 ## 🌟 Resumen
-**RuteX Go** es una app móvil gamificada creada por **TurisTech Team** para potenciar el turismo cultural en Extremadura mediante rutas geolocalizadas, contenido histórico multimedia y dinámicas de gamificación (trivias, rangos, logros y rankings).  
-Su objetivo es transformar la visita al patrimonio histórico en una experiencia educativa, interactiva y sostenible.
+
+**RuteX Go** es una aplicación móvil gamificada orientada a potenciar el turismo cultural en Extremadura.  
+Permite recorrer rutas temáticas, escanear códigos QR en monumentos, resolver trivias y ganar puntos para ascender de rango.  
+El objetivo principal es transformar la visita turística en una experiencia educativa, interactiva y accesible.
 
 ---
 
 ## 📑 Índice
-- [🚀 Estado del proyecto](#-estado-del-proyecto)  
-- [✨ Características principales](#-características-principales)  
-- [🧩 Tecnologías](#-tecnologías)  
-- [📁 Estructura del repositorio](#-estructura-del-repositorio)  
-- [🛠️ Instalación y ejecución](#️-instalación-y-ejecución)  
-- [🏗️ Arquitectura y decisiones técnicas](#️-arquitectura-y-decisiones-técnicas)  
-- [📌 Requisitos no funcionales](#-requisitos-no-funcionales)  
-- [📚 Documentación académica](#-documentación-académica)  
-- [🤝 Cómo contribuir](#-cómo-contribuir)  
-- [📝 Licencia y autores](#-licencia-y-autores)  
+
+- [🚀 Estado del Proyecto](#-estado-del-proyecto)
+- [✨ Características Principales](#-características-principales)
+- [🎯 Objetivos](#-objetivos)
+- [🛠️ Tecnologías Utilizadas](#️-tecnologías-utilizadas)
+- [📁 Estructura del Repositorio](#-estructura-del-repositorio)
+- [⚙️ Instalación y Ejecución](#️-instalación-y-ejecución)
+- [🏗️ Arquitectura y Decisiones Técnicas](#️-arquitectura-y-decisiones-técnicas)
+- [📚 Documentación](#-documentación)
+- [🤝 Contribución](#-contribución)
+- [📄 Licencia](#-licencia)
 - [📞 Contacto](#-contacto)
 
 ---
@@ -52,18 +52,27 @@ Su objetivo es transformar la visita al patrimonio histórico en una experiencia
 | **Sprint 1** – Análisis y Diseño | 🟡 En progreso |
 | **Entregable E1** | Prototipo funcional centrado en Mérida (auth, rutas, trivial básico, puntos/rangos) |
 
-🔮 **Roadmap próximo:** mapas interactivos, gamificación avanzada, integración con comercios locales, pruebas y despliegue.
+🔮 **Próximos pasos del roadmap:**
+- Integración del mapa en Flutter
+- Validación por QR en monumentos
+- Misiones y trivias
+- Sistema de rangos y ranking
+- Optimización visual según diseño Figma
+- Pruebas y despliegue
 
 ---
 
-## ✨ Características principales
-- 🗺️ Rutas culturales geolocalizadas con marcadores.  
-- 🎯 Misiones y trivias asociadas a cada punto de interés.  
-- 🏅 Sistema de puntos, rangos e insignias.  
-- 🏆 Rankings locales y globales.  
-- 👤 Autenticación y gestión de usuarios.  
-- 🖼️ Contenido multimedia (texto, imágenes, audio).  
-- 🔔 Futuro: recompensas comerciales, notificaciones push y posibles mejoras con RA.
+## ✨ Características Principales
+
+- 🗺️ Rutas culturales geolocalizadas
+- 🧭 Mapa interactivo con marcadores
+- 📌 Validación de monumentos mediante códigos QR
+- 🎯 Misiones y trivias educativas
+- 🏅 Sistema de puntos, rangos y recompensas
+- 🏆 Ranking por ciudad
+- 👤 Autenticación y gestión de usuario
+- 🖼️ Contenido multimedia
+- 🔔 Futuro: notificaciones push, recompensas locales y realidad aumentada
 
 ---
 
@@ -80,59 +89,137 @@ Su objetivo es transformar la visita al patrimonio histórico en una experiencia
 
 ## 🛠️ Tecnologías Utilizadas
 
-### Frontend
-- **Android Nativo** - Kotlin/Java con Jetpack Compose
-- **Flutter/Dart** - Desarrollo multiplataforma (Fase 2)
+### Frontend (Tecnología principal)
+- **Flutter (Dart)** — Framework principal para el desarrollo de la aplicación móvil.
+  - Multiplataforma (Android / iOS)
+  - UI declarativa y moderna
+  - Rápido desarrollo y mantenimiento
+  - Ecosistema amplio de librerías (QR, Maps, Providers, etc.)
 
 ### Backend
-- **Firebase Suite Completa** - Authentication, Firestore, Storage, Functions
-- **Google Maps API** - Geolocalización y mapas interactivos
-- **Firebase Analytics** - Métricas y comportamiento de usuarios
-- **Firebase Cloud Messaging** - Notificaciones push inteligentes
+- **Firebase Authentication** — Registro, inicio de sesión y seguridad.
+- **Cloud Firestore** — Base de datos NoSQL para usuarios, rutas, monumentos y misiones.
+- **Firebase Storage** — Imágenes y recursos multimedia.
+- **Firebase Cloud Messaging** — Notificaciones push (para fases futuras).
+- **Firebase Analytics** — Métricas y análisis de uso.
+- **Firebase Hosting / Functions (futuro)** — Para administración o lógica backend avanzada.
+
+### Servicios Integrados
+- **Google Maps API** — Mapa interactivo, marcadores y orientación del usuario.
+- **QR Scanner (mobile_scanner / qr_code_scanner)** — Validación de monumentos por código QR.
 
 ### Herramientas de Desarrollo
-- **Android Studio** - IDE principal para desarrollo nativo
-- **Visual Studio Code** - Editor para Flutter y documentación
-- **Git + GitHub** - Control de versiones y colaboración en equipo
-- **GitHub Actions** - CI/CD automatizado y despliegue
-- **Firebase Console** - Gestión del backend y analíticas
+- **Visual Studio Code** — Editor principal para desarrollo Flutter.
+- **Android Studio** — Herramientas Android (AVD, SDK, firma, builds nativas).
+- **Git + GitHub** — Control de versiones y colaboración.
+- **GitHub Projects / Issues** — Gestión del proyecto y tareas.
+- **Firebase Console** — Configuración del backend, reglas, analíticas y despliegues.
 
 ---
 
 ## 📁 Estructura del repositorio
 
-rutex-go-project/  
-├─ docs/                  — Documentación académica y técnica (memoria, análisis, diseño)  
-├─ mobile-app/            — Código fuente de la aplicación  
-│  ├─ android-native/     — Implementación Android (Kotlin)  
-│  └─ flutter/            — Implementación Flutter (fase 2)  
-├─ backend/               — Funciones y configuraciones de Firebase  
-├─ assets/                — Recursos multimedia (imágenes, audio)  
-├─ tests/                 — Pruebas unitarias e integración  
-├─ scripts/               — Automatización y utilidades  
-└─ README.md              — Este archivo
+rutex-go-project/
+├─ docs/ # Documentación técnica y académica
+│ ├─ technical_documentation.md
+│ └─ memoria.md
+├─ mobile-app/ # Proyecto principal en Flutter
+│ ├─ lib/ # Código fuente (UI, lógica, providers, servicios)
+│ ├─ ios/ # Configuración iOS (generada por Flutter)
+│ ├─ android/ # Configuración Android (generada por Flutter)
+│ ├─ assets/ # Imágenes y recursos de la app
+│ └─ pubspec.yaml # Dependencias del proyecto Flutter
+├─ backend/ # Archivos y configuración de Firebase
+│ ├─ firestore.rules
+│ ├─ storage.rules
+│ └─ firebase.json
+├─ tests/ # Pruebas unitarias e integración
+├─ scripts/ # Scripts de automatización (si aplica)
+└─ README.md
 
 ---
 
-## 🛠️ Instalación y ejecución
+## ⚙️ Instalación y Ejecución
 
-### 📌 Requisitos
-- Android Studio 2020.3+  
-- Android SDK API 24+  
-- Proyecto Firebase configurado  
-- Google Maps API Key  
+### 📌 Requisitos previos
 
-### 📥 Clonado
-```bash
+Para ejecutar RuteX Go necesitas:
+
+- Flutter SDK 3.x
+- Dart SDK (incluido con Flutter)
+- Android Studio o Visual Studio Code con extensiones Flutter/Dart
+- Emulador Android o dispositivo físico
+- Proyecto Firebase configurado
+- Archivo `google-services.json`
+- Google Maps API Ke
+
+---
+
+### 📥 Clonar el repositorio
+
+```
 git clone https://github.com/TurisTechTeam-Dev/rutex-go-project.git
-cd rutex-go-project
-git checkout -b feature/<nombre-funcionalidad>
+
+cd rutex-go-project/mobile-app
 ```
 
+---
+
+### 📦 Instalar dependencias
+
+```
+flutter pub get
+```
+
+---
+
+### ▶️ Ejecutar la app
+
+```
+flutter run
+```
+
+---
+
 ### ⚠️ Notas importantes
-- No subir claves ni archivos sensibles (**google-services.json**).  
-- Instrucciones de compilación específicas en:  
-  `mobile-app/android-native/README.md` (Sprint 2).
+
+NO subir google-services.json al repositorio.
+
+Configurar la Google Maps API Key en:
+android/app/src/main/AndroidManifest.xml
+
+pubspec.yaml contiene todas las dependencias del proyecto.
+
+Ejecutar flutter doctor para verificar la configuración del entorno.
+
+---
+
+### 📌 Comandos útiles
+
+Ver dispositivos disponibles
+```
+flutter devices
+```
+
+Ejecutar en modo release
+```
+flutter run --release
+```
+
+Formatear el código
+```
+flutter format lib
+```
+
+Construir APK
+```
+flutter build apk
+```
+
+Construir AppBundle
+```
+flutter build appbundle
+```
 
 ---
 
@@ -140,13 +227,7 @@ git checkout -b feature/<nombre-funcionalidad>
 
 | Sprint | Fechas | Objetivos Principales | Estado | Responsable |
 |--------|--------|-----------------------|--------|-------------|
-| **Sprint 1** | 17/10 - 15/12 | Definición, Análisis y Diseño | 🔄 En progreso | Todos |
-| **Sprint 2** | 01/11 - 15/11 | Fundamentos Técnicos y Firebase | ⏳ Pendiente | Diego |
-| **Sprint 3** | 16/11 - 30/11 | Geolocalización y Sistema de Rutas | ⏳ Pendiente | Joel |
-| **Sprint 4** | 01/12 - 15/12 | Gamificación Core y Trivias | ⏳ Pendiente | Andrés |
-| **Sprint 5** | 16/12 - 30/12 | Rankings y Características Sociales | ⏳ Pendiente | Diego |
-| **Sprint 6** | 01/01 - 15/01 | Integración, Pruebas y Optimización | ⏳ Pendiente | Joel |
-| **Sprint 7** | 16/01 - 31/01 | Finalización, Documentación y Deploy | ⏳ Pendiente | Todos |
+| **Sprint 1** | 17/10 - 15/12 | Definición, Análisis y Diseño | 🔄 Finalizado | Todos |
 
 ### Entregables por Evaluación
 - **1ª Evaluación (15/12):** Propuesta, análisis de requisitos, mockups y arquitectura
@@ -162,10 +243,81 @@ git checkout -b feature/<nombre-funcionalidad>
 
 ## 🏗️ Arquitectura y decisiones técnicas
 
-### 📌 ADRs principales
-- **ADR-001:** Firebase como BaaS (rápido, escalable y flexible).  
-- **ADR-002:** Kotlin como base; Flutter para futuro multiplataforma.  
-- **ADR-003:** Firestore como base de datos por flexibilidad del modelo NoSQL.
+## 🏗️ Arquitectura y Decisiones Técnicas
+
+RuteX Go está construida con una arquitectura moderna, modular y escalable.  
+El objetivo es garantizar un desarrollo ágil, una experiencia fluida y la posibilidad de ampliar el proyecto a nuevas ciudades y funcionalidades en el futuro.
+
+---
+
+### ⚙️ Stack Tecnológico
+
+- **Flutter (Dart)** → Framework principal para la app móvil  
+- **Firebase** → Autenticación, base de datos, almacenamiento y analíticas  
+- **Google Maps API** → Mapas interactivos y ubicación del usuario  
+- **QR Scanner** → Validación de llegada a monumentos  
+
+---
+
+### 📌 Decisiones Técnicas Clave (ADRs)
+
+- **ADR-001 — Firebase como BaaS**  
+  Se elige Firebase para simplificar backend, aumentar seguridad y acelerar el desarrollo.
+
+- **ADR-002 — Flutter como base tecnológica**  
+  Permite crear una app rápida, moderna y multiplataforma, con un único código.
+
+- **ADR-003 — Firestore como base de datos NoSQL**  
+  Ideal para datos flexibles: ciudades, rutas, monumentos, misiones y rankings.
+
+---
+
+### 🧱 Vista general de la arquitectura (C1)
+
+```mermaid
+flowchart LR
+    User((Usuario))
+    App[RuteX Go\nApp Flutter]
+    Firebase[(Firebase\nAuth · Firestore · Storage)]
+    Maps[(Google Maps API)]
+
+    User --> App
+    App --> Firebase
+    App --> Maps
+```
+
+---
+
+### 🧩 Vista de Contenedores (C2)
+
+```mermaid
+flowchart TB
+
+    subgraph Mobile["App Móvil – Flutter"]
+        UI["UI / Pantallas"]
+        State["Gestión de Estado"]
+        Services["Servicios: Firebase · Maps · QR"]
+    end
+
+    subgraph Firebase["Backend en la Nube"]
+        Auth["Authentication"]
+        DB["Firestore Database"]
+        Storage["Storage"]
+        Messaging["Cloud Messaging"]
+    end
+
+    Maps["Google Maps API"]
+
+    UI --> State
+    State --> Services
+    Services --> Auth
+    Services --> DB
+    Services --> Storage
+    Services --> Messaging
+    Services --> Maps
+```
+
+---
 
 ### 📚 Colecciones Firestore
 
@@ -177,30 +329,166 @@ git checkout -b feature/<nombre-funcionalidad>
 /rankings
 
 
-### 🔗 Integraciones
-- Google Maps: mapas, distancias y marcadores.  
-- Firebase Storage: contenido multimedia.  
-- Firebase Messaging: notificaciones.
+## 🔗 Integraciones del Sistema
+
+RuteX Go combina varios servicios cloud y APIs externas para ofrecer una experiencia turística precisa, fluida y segura.  
+Estas son las integraciones que componen el núcleo del sistema:
 
 ---
 
-## 📚 Documentación académica
-La documentación completa está en: `docs/memoria.md`.
+### 🧩 Firebase (Backend Principal)
+
+#### ✔ Firebase Authentication  
+Gestión segura de usuarios:  
+- Registro  
+- Login  
+- Recuperación de contraseña  
+- Sesiones persistentes  
+
+#### ✔ Firestore Database  
+Base de datos NoSQL utilizada para almacenar:  
+- Usuarios  
+- Rutas  
+- Monumentos  
+- Misiones  
+- Rankings  
+
+Ventajas clave: escalabilidad, tiempo real y reglas de seguridad integradas.
+
+#### ✔ Firebase Storage  
+Almacenamiento de imágenes y contenido multimedia ligero, manteniendo la app rápida y optimizada.
+
+---
+
+### 🗺️ Google Maps Platform
+
+#### ✔ Google Maps API  
+Usado para:  
+- Mostrar la ubicación aproximada del usuario  
+- Renderizar el mapa de la ciudad  
+- Mostrar marcadores de monumentos  
+- Facilitar la orientación durante la ruta  
+
+⚠️ *La validación de llegada no depende del GPS, solo de la visualización.*
+
+---
+
+### 📸 Lector QR
+
+#### ✔ mobile_scanner / qr_code_scanner  
+Tecnología empleada para validar físicamente la llegada al monumento:  
+- Escaneo del QR en el punto de interés  
+- Verificación del monumento correspondiente  
+- Desbloqueo de la misión asociada  
+
+Este método sustituye a la detección por proximidad GPS, aumentando la precisión y fiabilidad.
+
+---
+
+### 🟡 Integraciones Recomendadas (Futuras Iteraciones)
+
+- **Firebase Cloud Messaging** → Notificaciones push  
+- **Firebase Analytics** → Métricas de uso y eventos  
+- **Google Directions API** → Navegación paso a paso  
+
+---
+
+### 🟣 Integraciones Futuras (Visión a Largo Plazo)
+
+- **NFC / Beacons** → Validación automática sin escaneo  
+- **Realidad Aumentada (ARCore)** → Información histórica superpuesta  
+- **Integración con comercios locales** → Recompensas y promociones  
+
+---
+
+## 📚 Documentación Académica
+
+Toda la documentación generada durante el desarrollo del proyecto se encuentra en la carpeta: /docs/
+
+Incluye:
+
+- **Memoria del Proyecto**  
+  Documento completo con análisis, requisitos, diseño y conclusiones.
+
+- **Documentación Técnica**  
+  Explicación detallada de la arquitectura, módulos funcionales, modelo de datos, integraciones, requisitos no funcionales y plan de pruebas.  
+  👉 Archivo principal: `docs/technical_documentation.md`
+
+- **Análisis de Requisitos**  
+  Historias de usuario, backlog, casos de uso y criterios de aceptación.
+
+- **Diseño UI/UX**  
+  Enlaces a prototipos, mockups y componentes definidos en Figma.
+
+- **Plan de Pruebas**  
+  Estrategia de test, casos de prueba, KPIs y evaluaciones realizadas.
+
+- **Diagramas**  
+  - Arquitectura (C1, C2)  
+  - Modelo de datos (ERD)  
+  - Diagramas de flujo y navegación  
+  - Estructura del sistema  
+
+Esta carpeta reúne toda la documentación necesaria para entender el proyecto y su desarrollo.
 
 ---
 
 ## 🤝 Proceso de Contribución
 
-Este proyecto es desarrollado como **Trabajo Final de Grado** por estudiantes de **DAM** en **IES Albarregas**.
+Este repositorio forma parte del proyecto académico RuteX Go (DAM – IES Albarregas).  
+Para mantener una estructura clara y un flujo de trabajo organizado, seguimos una metodología basada en ramas, revisiones y control de calidad.
 
-### Flujo de Trabajo para el Equipo:
-1. **Asignación de tareas** por sprint en reuniones de planificación
-2. **Crear rama específica:** `git checkout -b feature/nueva-funcionalidad`
-3. **Desarrollo en rama aislada** con commits descriptivos
-4. **Pull Request** para revisión del código entre compañeros
-5. **Merge a develop** tras aprobación de al menos 1 compañero
-6. **Deploy a main** solo para versiones estables
-7. Incluye documentación y pruebas.
+### 🧭 Flujo de trabajo del equipo
+
+1. **Asignación de tareas por sprint**  
+   Cada tarea se define en reuniones de planificación y se registra en GitHub Projects o Trello.
+   
+2. **Crear una rama para cada nueva funcionalidad**
+  `git checkout -b feature/nueva-funcionalidad`
+
+3. **Desarrollar en la rama creada**  
+- Commits pequeños y descriptivos  
+- Mensajes claros con prefijos recomendados:
+  - `feat:` Nueva funcionalidad  
+  - `fix:` Corrección de errores  
+  - `refactor:` Mejora de código  
+  - `docs:` Actualización de documentación
+
+4. **Subir cambios al repositorio remoto**
+  `git push origin feature/nombre-funcionalidad`
+
+5. **Crear un Pull Request (PR)**  
+  - Comparar con la rama `develop`  
+  - Descripción clara del cambio  
+  - Adjuntar capturas o referencias si es necesario  
+  - Esperar revisión de al menos 1 miembro del equipo
+
+6. **Revisión de código**  
+  El equipo revisa:
+    - Correcta implementación  
+    - Legibilidad del código  
+    - Estándares de arquitectura  
+    - Posibles errores o mejoras  
+
+7. **Aprobación y merge a `develop`**  
+  Solo se integra cuando está probado y revisado.
+
+8. **Merge a `main` para versiones estables**  
+  La rama `main` representa el estado estable del proyecto (entregas, demos, releases).
+
+### 📌 Buenas prácticas
+
+- Mantén tu rama actualizada con: `git pull origin develop`
+- Nunca subir `google-services.json` ni claves sensibles.  
+- Acompaña cada nueva funcionalidad con su documentación correspondiente en `/docs`.  
+- Usa nombres consistentes en ramas, commits y PRs.  
+- Borra ramas ya integradas para mantener limpio el repositorio.
+
+### 🧪 Pruebas antes de entregar
+Antes de solicitar un PR:
+- Ejecutar la aplicación en un dispositivo/emulador.  
+- Validar que las funcionalidades nuevas no rompen módulos existentes.  
+- Revisar errores en consola. 
 
 ---
 
@@ -215,18 +503,23 @@ Andrés Fernández Expósito, Joel Manuel García Villarino, Diego Vivas Paredes
 
 ## 📞 Contacto y Soporte
 
+Si deseas contactar con el equipo, resolver dudas o proponer mejoras, puedes hacerlo a través de los siguientes canales.
+
 **TurisTech Team - Desarrollo de Software Turístico**
+
+### 📡 Canales Oficiales
 
 - 🐙 **Organización GitHub:** [@TurisTechTeam-Dev](https://github.com/TurisTechTeam-Dev)
 - 📂 **Repositorio Principal:** [rutex-go-project](https://github.com/TurisTechTeam-Dev/rutex-go-project)
 - 🎫 **Issues y Soporte:** [GitHub Issues](https://github.com/TurisTechTeam-Dev/rutex-go-project/issues)
-- 📧 **Email del Equipo:** *[turistechteam@gmail.com]*
-- 🏫 **Centro Académico:** IES Albarregas, Mérida (Badajoz)
+- 📧 **Email del Equipo:** turistechteam@gmail.com
+- 🏫 **Centro Académico:** IES Albarregas — Mérida (Badajoz)
 
-### Contacto Individual:
-- **Andrés Fernández:** [@AndresFE0209](https://github.com/AndresFE0209) - *Backend & Coordinación*
-- **Joel García:** [@Joeljole1987](https://github.com/Joeljole1987) - *Backend & Diseño UX/UI*  
-- **Diego Vivas:** [@DiegoVP963](https://github.com/DiegoVP963) - *Frontend & Diseño UX/UI*
+
+### 👥 Contacto individual
+- **Andrés Fernández:** [@AndresFE0209](https://github.com/AndresFE0209) — *Backend & Coordinación*
+- **Joel García:** [@Joeljole1987](https://github.com/Joeljole1987) — *Backend & Diseño UX/UI*
+- **Diego Vivas:** [@DiegoVP963](https://github.com/DiegoVP963) — *Frontend & Diseño UX/UI*
 
 ---
 
