@@ -142,6 +142,7 @@ rutex-go-project/
 ├─ scripts/                       # Scripts de automatización (si aplica)
 │
 └─ README.md                      # Descripción general del proyecto
+```
 
 ---
 
