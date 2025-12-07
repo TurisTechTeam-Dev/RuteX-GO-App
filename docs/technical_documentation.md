@@ -72,6 +72,8 @@ flowchart LR
 
 ### 2.2 Vista de Contenedores (C2)
 
+La vista C2 muestra los principales contenedores lógicos que forman el sistema, así como sus relaciones. Representa cómo se divide la aplicación internamente y qué servicios externos utiliza para funcionar.
+
 ```mermaid
 flowchart TB
 
@@ -79,6 +81,7 @@ flowchart TB
         UI["UI - Pantallas Flutter"]
         State["Gestión de Estado (MVVM - BLoC)"]
         Services["Servicios Internos (Firebase · Maps · QR)"]
+        Logger["Logger Service (Eventos y Errores)"]
     end
 
     subgraph Backend["Firebase"]
@@ -86,6 +89,8 @@ flowchart TB
         Firestore["Firestore DB"]
         Storage["Firebase Storage"]
         Messaging["Cloud Messaging"]
+        Analytics["Firebase Analytics"]
+        Crashlytics["Firebase Crashlytics"]
     end
 
     Maps["Google Maps API"]
@@ -97,20 +102,30 @@ flowchart TB
     Services --> Storage
     Services --> Messaging
     Services --> Maps
+
+    %% Envío de eventos y errores
+    Logger --> Analytics
+    Logger --> Crashlytics
 ```
 
-- **App móvil**
-  - UI / Pantallas.
-  - Gestores de estado (MVVM/BLoC).
-  - Servicios para Firebase y Maps.
+**Descripción de los contenedores principales:**
+
+- **App móvil RuteX Go**
+  - *UI:* pantallas desarrolladas en Flutter.  
+  - *Gestión de Estado:* coordinación entre UI y lógica de negocio mediante MVVM/BLoC.  
+  - *Servicios internos:* módulos que gestionan Firestore, Auth, el lector QR, el mapa y el GPS.  
+  - *Logger Service:* centraliza el envío de eventos (Analytics) y errores (Crashlytics).
+
 - **Firebase**
-  - Auth → autenticación.
-  - Firestore → datos de usuarios, rutas, misiones, rankings.
-  - Storage → imágenes.
-  - Cloud Messaging → notificaciones (futuras).
+  - *Auth:* gestiona el inicio de sesión y el registro.  
+  - *Firestore:* almacena ciudades, rutas, monumentos, misiones, usuarios y rankings.  
+  - *Storage:* almacén para imágenes (cuando se habilite).  
+  - *Cloud Messaging:* previsto para notificaciones futuras.  
+  - *Analytics:* registra eventos clave de uso para mejorar la aplicación.  
+  - *Crashlytics:* recopila errores y fallos de ejecución en tiempo real.
+
 - **Google Maps API**
-  - Renderizado de mapas.
-  - Obtención y seguimiento de la posición del usuario.
+  - Ofrece el mapa interactivo y la posición aproximada del usuario para navegación visual.
 
 ---
 
