@@ -282,8 +282,8 @@ El objetivo es garantizar un desarrollo ágil, una experiencia fluida y la posib
 ```mermaid
 flowchart LR
     User((Usuario))
-    App[RuteX Go\nApp Flutter]
-    Firebase[(Firebase\nAuth · Firestore · Storage)]
+    App[RuteX Go<br/>App Flutter]
+    Firebase[(Firebase<br/>Auth · Firestore · Storage)]
     Maps[(Google Maps API)]
 
     User --> App
