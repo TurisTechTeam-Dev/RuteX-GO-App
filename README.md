@@ -3,7 +3,7 @@
 
 ![Licencia](https://img.shields.io/badge/Licencia-Propietaria-blue.svg)
 [![Issues](https://img.shields.io/github/issues/TurisTechTeam-Dev/rutex-go-project.svg)](https://github.com/TurisTechTeam-Dev/rutex-go-project/issues)
-[![Plataforma Android](https://img.shields.io/badge/Plataforma-Android-green.svg)](https://developer.android.com)
+[![Flutter](https://img.shields.io/badge/Framework-Flutter-blue.svg)](https://flutter.dev)
 [![Backend Firebase](https://img.shields.io/badge/Backend-Firebase-orange.svg)](https://firebase.google.com)
 
 ## 👥 Equipo de Desarrollo — TurisTech Team
