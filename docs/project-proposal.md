@@ -204,24 +204,50 @@ Por el momento, sin cambios registrados.
 
 ---
 
+## 12. Licencia y Derechos de Uso
+
+RuteX Go es un proyecto académico desarrollado por TurisTech Team y se encuentra protegido bajo una **Licencia Propietaria**.
+
+Esto implica que:
+
+- No se permite la copia, distribución, modificación o uso comercial del software sin autorización expresa del equipo desarrollador.
+- Todo el código, diseños, documentación, bases de datos y materiales asociados son propiedad de sus autores.
+- El uso del software queda limitado estrictamente a fines académicos dentro del marco del proyecto DAM del IES Albarregas, salvo acuerdo posterior.
+
+Para los términos completos, consultar el archivo **LICENSE** incluido en el repositorio.
+
+**Propietarios del software:**  
+Andrés Fernández Expósito, Joel Manuel García Villarino y Diego Vivas Paredes (TurisTech Team).
+
+---
+
 ## Conclusiones y Consideraciones Futuras
 
 ### Viabilidad del Proyecto
-RuteX Go representa un proyecto técnicamente viable y educativamente valioso que aprovecha tecnologías maduras (Android, Firebase) para crear una solución innovadora en el sector turístico. La combinación de gamificación, contenido cultural y tecnología móvil posiciona el proyecto como una contribución significativa tanto al portfolio académico del equipo como al panorama de aplicaciones turísticas en Extremadura.
+RuteX Go representa un proyecto técnica y académicamente sólido, basado en tecnologías modernas y ampliamente utilizadas en la industria (Flutter y Firebase).  
+La combinación de gamificación, rutas culturales y validación mediante QR ofrece un enfoque innovador y atractivo para el turismo en Extremadura. El sistema está diseñado para crecer y adaptarse sin necesidad de modificar su estructura fundamental, lo que facilita su mantenimiento y evolución.
 
 ### Escalabilidad y Sostenibilidad
-El proyecto está diseñado con arquitectura escalable que permite:
-- **Expansión geográfica** a otras ciudades extremeñas y regiones españolas
-- **Evolución tecnológica** hacia multiplataforma (iOS, web) en futuras iteraciones
-- **Modelo de negocio** sostenible mediante partnerships con instituciones turísticas
-- **Comunidad de usuarios** autosostenible mediante gamificación y contenido generado
+La arquitectura modular y el modelo de datos permiten:
+
+- **Expansión geográfica** a nuevas ciudades y regiones.  
+- **Evolución tecnológica** hacia nuevas plataformas (iOS, web).  
+- **Integración con servicios turísticos** públicos o privados.  
+- **Crecimiento del contenido** sin reestructurar la base técnica.  
+- **Desarrollo sostenible** gracias al uso de tecnologías cloud y sin servidores propios.
+
+El enfoque centrado en la gamificación refuerza la retención de usuarios y permite la creación de una comunidad activa en torno al patrimonio cultural.
 
 ### Oportunidades de Continuidad
-Post-académicamente, RuteX Go ofrece múltiples caminos de desarrollo:
-- **Comercialización** con instituciones turísticas regionales
-- **Incubación empresarial** como startup de tecnología turística
-- **Colaboración académica** con universidades e instituciones culturales
-- **Contribución open source** a la comunidad de desarrollo turístico
+Tras la finalización académica, el proyecto puede evolucionar hacia múltiples líneas de trabajo:
+
+- **Comercialización** en colaboración con instituciones turísticas y entidades culturales.  
+- **Incubación empresarial** como solución tecnológica para turismo inteligente.  
+- **Colaboración académica** con centros educativos, universidades y museos.  
+- **Publicación controlada de componentes no críticos** para fomentar la investigación y la innovación, sin comprometer la propiedad intelectual del software.  
+- **Ampliación del ecosistema** mediante panel administrativo, nuevas rutas, funcionalidades sociales y tecnologías avanzadas (AR, NFC, beacons).
+
+RuteX Go está diseñado para convertirse en una solución real y profesional, manteniendo el código fuente bajo una **licencia propietaria** que protege los derechos de los autores y permite una futura explotación comercial estructurada.
 
 ---
 
