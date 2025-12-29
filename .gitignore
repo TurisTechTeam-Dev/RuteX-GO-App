@@ -1,34 +1,78 @@
-# Gradle files
-.gradle/
+# -------------------------------------------------------------------
+# FLUTTER & DART
+# -------------------------------------------------------------------
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
 build/
+bin/
+# Si usas web
+build/web
 
-# Local configuration file (sdk path, etc)
-local.properties
+# -------------------------------------------------------------------
+# ANDROID (Específicos para el módulo de Android en Flutter)
+# -------------------------------------------------------------------
+.gradle/
+**/android/.gradle/
+**/android/local.properties
+**/android/app/src/main/res/generated/
+**/android/app/build.gradle.swp
 
-# Log/OS Files
-*.log
-
-# Android Studio generated files and folders
-captures/
-.externalNativeBuild/
-.cxx/
-*.aab
+# Archivos de compilación de Android
 *.apk
+*.aab
+*.dex
 output-metadata.json
 
-# IntelliJ
-*.iml
+# -------------------------------------------------------------------
+# IOS (Específicos para el módulo de iOS en Flutter)
+# -------------------------------------------------------------------
+ios/Pods/
+ios/.generated/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+ios/ServiceDefinitions.json
+ios/Runner/GeneratedPluginRegistrant.h
+ios/Runner/GeneratedPluginRegistrant.m
+DerivedData/
+*.moved-aside
+
+# -------------------------------------------------------------------
+# IDEs (IntelliJ, Android Studio, VS Code)
+# -------------------------------------------------------------------
 .idea/
+*.iml
+*.iws
+*.ipr
 misc.xml
 deploymentTargetDropDown.xml
 render.experimental.xml
+modules.xml
+workspace.xml
+.vscode/
 
-# Keystore files
+# -------------------------------------------------------------------
+# FIREBASE & SECRETOS (Seguridad)
+# -------------------------------------------------------------------
+# Ignorar las llaves de Firebase si el repositorio es público
+google-services.json
+GoogleService-Info.plist
+
+# Keystore y llaves de firma de apps
 *.jks
 *.keystore
+*.p12
+*.key
+*.pem
 
-# Google Services (e.g. APIs or Firebase)
-google-services.json
-
-# Android Profiling
+# -------------------------------------------------------------------
+# SISTEMA OPERATIVO Y LOGS
+# -------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+*.log
+captures/
+.externalNativeBuild/
+.cxx/
 *.hprof
