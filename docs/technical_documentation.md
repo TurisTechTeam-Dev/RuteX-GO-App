@@ -328,17 +328,15 @@ A continuación, se detalla cada colección con sus campos y tipos de datos.
 
 Contiene la información principal de cada usuario.
 
-| Campo             | Tipo                   | Obligatorio | Descripción |
-|------------------|------------------------|-------------|-------------|
-| uid              | string                 | ✔           | ID único del usuario (Firebase Auth). |
-| name             | string                 | ✔           | Nombre del usuario. |
-| email            | string                 | ✔           | Correo asociado a la cuenta. |
-| city             | string                 | ❌          | Ciudad seleccionada para las rutas. |
-| rank             | number                 | ✔           | Nivel o rango obtenido mediante puntos. |
-| points           | number                 | ✔           | Total de puntos acumulados. |
-| routesCompleted  | array<string>          | ❌          | Rutas finalizadas. |
-| createdAt        | timestamp              | ✔           | Fecha de creación del usuario. |
-| lastLogin        | timestamp              | ❌          | Último acceso registrado. |
+| Campo | Tipo | Descripción |
+| :--- | :--- | :--- |
+| name | string | Nombre completo del usuario. |
+| email | string | Correo electrónico registrado. |
+| rank | string | Título actual del jugador (ej: "Explorador", "Legionario"). |
+| points | number | Total de puntos acumulados en la cuenta global. |
+| routesCompleted | array<string> | IDs de las rutas que el usuario ya ha finalizado. |
+| createdAt | timestamp | Fecha de creación del perfil. |
+| lastLogin | timestamp | Registro del último acceso a la aplicación. |
 
 ---
 
@@ -346,14 +344,11 @@ Contiene la información principal de cada usuario.
 
 Define las ciudades disponibles en la aplicación.
 
-| Campo        | Tipo        | Obligatorio | Descripción |
-|--------------|-------------|-------------|-------------|
-| id           | string      | ✔           | Identificador único. |
-| name         | string      | ✔           | Nombre de la ciudad. |
-| description  | string      | ❌          | Breve descripción. |
-| isActive     | boolean     | ✔           | Determina si la ciudad está disponible. |
-| imageURL     | string(url) | ❌          | Imagen representativa. |
-| createdAt    | timestamp   | ✔           | Fecha de creación. |
+| Campo | Tipo | Descripción |
+| :--- | :--- | :--- |
+| name | string | Nombre de la ciudad (ej: "Mérida"). |
+| isActive | boolean | Estado de disponibilidad de la ciudad en la app. |
+| imageURL | string(url) | Imagen representativa de la ciudad. |
 
 ---
 
@@ -361,18 +356,15 @@ Define las ciudades disponibles en la aplicación.
 
 Define las rutas culturales de cada ciudad.
 
-| Campo               | Tipo             | Obligatorio | Descripción |
-|---------------------|------------------|-------------|-------------|
-| id                  | string           | ✔           | Identificador de la ruta. |
-| cityId              | string           | ✔           | Ciudad a la que pertenece. |
-| name                | string           | ✔           | Nombre visible de la ruta. |
-| description         | string           | ❌          | Descripción opcional. |
-| durationMinutes     | number           | ✔           | Duración estimada. |
-| difficulty          | string(enum)     | ❌          | “facil”, “media” o “dificil”. |
-| monumentIds         | array<string>    | ✔           | Lista ordenada de monumentos. |
-| totalRewardPoints   | number           | ✔           | Puntos otorgados por completarla. |
-| isActive            | boolean          | ✔           | Determina si está disponible. |
-| createdAt           | timestamp        | ✔           | Fecha de creación. |
+| Campo | Tipo | Descripción |
+| :--- | :--- | :--- |
+| cityId | string | Referencia al documento de la ciudad. |
+| name | string | Título de la ruta turística. |
+| durationEst | string | Texto informativo sobre el tiempo (ej: "1h 30min"). |
+| difficulty | string | Nivel de esfuerzo (Fácil, Media, Difícil). |
+| monumentIds | array<string> | Lista ordenada de IDs de monumentos que componen la ruta. |
+| totalRewardPoints | number | Puntos máximos que se pueden obtener al completarla. |
+| isActive | boolean | Determina si la ruta está activa para los usuarios. |
 
 ---
 
@@ -380,68 +372,47 @@ Define las rutas culturales de cada ciudad.
 
 Cada monumento contiene información histórica, ubicación y un enlace a su misión.
 
-| Campo        | Tipo                                | Obligatorio | Descripción |
-|--------------|-------------------------------------|-------------|-------------|
-| id           | string                              | ✔           | ID del monumento. |
-| cityId       | string                              | ✔           | Ciudad a la que pertenece. |
-| name         | string                              | ✔           | Nombre del monumento. |
-| description  | string                              | ❌          | Información histórica. |
-| location     | object(lat:number, lng:number)      | ✔           | Coordenadas GPS (para navegación en mapa). |
-| imageURL     | string(url)                         | ❌          | Imagen del monumento. |
-| missionId    | string                              | ✔           | ID de la misión asociada. |
-| order        | number                              | ✔           | Orden dentro de la ruta. |
-| createdAt    | timestamp                           | ✔           | Fecha de creación. |
+| Campo | Tipo | Descripción |
+| :--- | :--- | :--- |
+| name | string | Nombre del punto de interés. |
+| description | string | Texto histórico o informativo del lugar. |
+| location | geopoint | Coordenadas GPS exactas para el mapa. |
+| imageURL | string(url) | Fotografía del monumento. |
+| mission | map | Objeto que contiene la gamificación y trivias. |
+
+**Estructura del campo `mission`:**
+- `title` (string): Título de la misión específica.
+- `pointsReward` (number): Recompensa por completar este monumento.
+- `questions` (array<map>): Lista de trivias asociadas:
+    - `question` (string): Enunciado de la pregunta.
+    - `options` (array<string>): Lista de las 4 opciones posibles.
+    - `correctIndex` (number): Índice (0, 1, 2 o 3) de la respuesta válida.
 
 ---
 
-## 4.5 Colección: `missions`
+## 4.5 Colección: `results`
+*Esta colección almacena el histórico de partidas para la pantalla de resumen final.*
 
-Define las misiones educativas asociadas a cada monumento.
-
-| Campo          | Tipo                              | Obligatorio | Descripción |
-|----------------|-----------------------------------|-------------|-------------|
-| id             | string                            | ✔           | ID de la misión. |
-| monumentId     | string                            | ✔           | Monumento asociado. |
-| title          | string                            | ✔           | Título de la misión. |
-| questions      | array<questionObject>             | ✔           | Preguntas tipo test. |
-| pointsReward   | number                            | ✔           | Puntos otorgados. |
-| createdAt      | timestamp                         | ✔           | Fecha de creación. |
-
-**Estructura de `questionObject`:**
-
-| Campo         | Tipo             | Obligatorio |
-|---------------|------------------|-------------|
-| question      | string           | ✔           |
-| options       | array<string>    | ✔           |
-| correctIndex  | number           | ✔           |
+| Campo | Tipo | Descripción |
+| :--- | :--- | :--- |
+| userId | string | ID del usuario que realizó la ruta. |
+| routeId | string | ID de la ruta completada. |
+| pointsObtained | number | Puntos totales ganados en esta sesión. |
+| timeUsed | string | Tiempo real que el usuario tardó en terminar. |
+| completedAt | timestamp | Fecha y hora exacta de la finalización. |
+| details | array<map> | Resumen detallado: `pregunta`, `respuesta_usuario`, `respuesta_correcta`, `es_acierto`. |
 
 ---
 
-## 4.6 Colección: `rankings`
-
-Gestiona las posiciones de los usuarios dentro de una ciudad.
-
-| Campo        | Tipo       | Obligatorio | Descripción |
-|--------------|------------|-------------|-------------|
-| id           | string     | ✔           | ID único del ranking (recomendado: cityId_userId). |
-| cityId       | string     | ✔           | Ciudad asociada. |
-| userId       | string     | ✔           | Usuario dentro del ranking. |
-| userName     | string     | ✔           | Nombre del usuario. |
-| points       | number     | ✔           | Puntos acumulados. |
-| rank         | number     | ✔           | Posición actual. |
-| lastUpdated  | timestamp  | ✔           | Fecha de actualización. |
-
----
-
-## 4.7 Diagrama ER del Modelo de Datos
+## 4.6 Diagrama ER del Modelo de Datos
 
 ```mermaid
 erDiagram
+    USERS ||--o{ RESULTS : genera
     CITIES ||--o{ ROUTES : contiene
     ROUTES ||--o{ MONUMENTS : incluye
-    MONUMENTS ||--|| MISSIONS : tiene
-    USERS ||--o{ RANKINGS : participa
-    USERS }o--o{ ROUTES : completa
+    ROUTES ||--o{ RESULTS : registra
+    MONUMENTS ||--o{ RESULTS : detalla
 ```
 
 ---
