@@ -308,33 +308,29 @@ Futuras mejoras posibles:
 
 # 4. Modelo de Datos
 
-El modelo de datos de RuteX Go está construido sobre Firebase Firestore, una base de datos NoSQL orientada a documentos.  
-Su estructura es flexible y permite añadir nuevas ciudades, rutas o misiones sin necesidad de reestructurar el sistema.
+El modelo de datos de **RuteX Go** está construido sobre **Firebase Firestore**, una base de datos NoSQL orientada a documentos. Esta estructura está diseñada para minimizar las lecturas de red, permitiendo que la aplicación funcione de manera fluida y escalable.
 
 Las colecciones principales son:
 
-- `users`
-- `cities`
-- `routes`
-- `monuments`
-- `missions`
-- `rankings`
-
-A continuación, se detalla cada colección con sus campos y tipos de datos.
+- `users`: Perfiles de usuario y estadísticas globales.
+- `cities`: Catálogo de ciudades disponibles.
+- `routes`: Guías de los recorridos turísticos.
+- `points_of_interest`: Puntos de interés (POI) con misiones y trivias integradas.
+- `results`: Historial detallado de rutas completadas para el resumen final.
 
 ---
 
 ## 4.1 Colección: `users`
 
-Contiene la información principal de cada usuario.
+Almacena la información principal y el progreso acumulado de cada usuario registrado.
 
 | Campo | Tipo | Descripción |
 | :--- | :--- | :--- |
 | name | string | Nombre completo del usuario. |
-| email | string | Correo electrónico registrado. |
-| rank | string | Título actual del jugador (ej: "Explorador", "Legionario"). |
-| points | number | Total de puntos acumulados en la cuenta global. |
-| routesCompleted | array<string> | IDs de las rutas que el usuario ya ha finalizado. |
+| email | string | Correo electrónico asociado a la cuenta. |
+| rank | string | Título obtenido basado en puntos (ej: "Explorador", "Legionario"). |
+| points | number | Total de puntos acumulados globalmente. |
+| routesCompleted | array<string> | Lista de identificadores de las rutas finalizadas. |
 | createdAt | timestamp | Fecha de creación del perfil. |
 | lastLogin | timestamp | Registro del último acceso a la aplicación. |
 
@@ -342,77 +338,80 @@ Contiene la información principal de cada usuario.
 
 ## 4.2 Colección: `cities`
 
-Define las ciudades disponibles en la aplicación.
+Define las ciudades disponibles donde se pueden realizar rutas.
 
 | Campo | Tipo | Descripción |
 | :--- | :--- | :--- |
 | name | string | Nombre de la ciudad (ej: "Mérida"). |
-| isActive | boolean | Estado de disponibilidad de la ciudad en la app. |
-| imageURL | string(url) | Imagen representativa de la ciudad. |
+| isActive | boolean | Determina si la ciudad es visible y seleccionable. |
+| imageURL | string(url) | Imagen representativa de la ciudad para la UI. |
 
 ---
 
 ## 4.3 Colección: `routes`
 
-Define las rutas culturales de cada ciudad.
+Define las plantillas de los recorridos culturales en cada ciudad.
 
 | Campo | Tipo | Descripción |
 | :--- | :--- | :--- |
-| cityId | string | Referencia al documento de la ciudad. |
-| name | string | Título de la ruta turística. |
-| durationEst | string | Texto informativo sobre el tiempo (ej: "1h 30min"). |
-| difficulty | string | Nivel de esfuerzo (Fácil, Media, Difícil). |
-| monumentIds | array<string> | Lista ordenada de IDs de monumentos que componen la ruta. |
-| totalRewardPoints | number | Puntos máximos que se pueden obtener al completarla. |
-| isActive | boolean | Determina si la ruta está activa para los usuarios. |
+| cityId | string | Referencia al ID del documento de la ciudad. |
+| name | string | Título visible de la ruta turística. |
+| durationEst | string | Tiempo aproximado de recorrido (ej: "1h 30min"). |
+| difficulty | string | Nivel de dificultad (Fácil, Media, Difícil). |
+| poiIds | array<string> | Lista ordenada de IDs de puntos de interés que componen la ruta. |
+| totalRewardPoints | number | Suma total de puntos que otorga la ruta al finalizar. |
+| isActive | boolean | Estado operativo de la ruta. |
 
 ---
 
-## 4.4 Colección: `monuments`
+## 4.4 Colección: `points_of_interest`
 
-Cada monumento contiene información histórica, ubicación y un enlace a su misión.
+Contiene la información histórica, ubicación geográfica y la lógica de la misión/trivia.
 
 | Campo | Tipo | Descripción |
 | :--- | :--- | :--- |
-| name | string | Nombre del punto de interés. |
-| description | string | Texto histórico o informativo del lugar. |
-| location | geopoint | Coordenadas GPS exactas para el mapa. |
-| imageURL | string(url) | Fotografía del monumento. |
-| mission | map | Objeto que contiene la gamificación y trivias. |
+| name | string | Nombre del punto de interés (museo, monumento, etc.). |
+| description | string | Información histórica o curiosidades del lugar. |
+| location | geopoint | Coordenadas GPS (Latitud/Longitud) para el mapa y geovallas. |
+| imageURL | string(url) | URL de la fotografía del POI. |
+| mission | map | Objeto que encapsula la gamificación. |
 
-**Estructura del campo `mission`:**
+**Estructura interna de `mission`:**
 - `title` (string): Título de la misión específica.
-- `pointsReward` (number): Recompensa por completar este monumento.
-- `questions` (array<map>): Lista de trivias asociadas:
+- `pointsReward` (number): Puntos obtenidos al completar esta parada.
+- `questions` (array<map>): Lista de preguntas tipo test:
     - `question` (string): Enunciado de la pregunta.
-    - `options` (array<string>): Lista de las 4 opciones posibles.
-    - `correctIndex` (number): Índice (0, 1, 2 o 3) de la respuesta válida.
+    - `options` (array<string>): Lista de las 4 opciones de respuesta.
+    - `correctIndex` (number): Índice (0-3) de la respuesta correcta.
 
 ---
 
 ## 4.5 Colección: `results`
-*Esta colección almacena el histórico de partidas para la pantalla de resumen final.*
+
+Almacena el registro histórico de cada ruta finalizada. Es la fuente de datos para la pantalla de resumen.
 
 | Campo | Tipo | Descripción |
 | :--- | :--- | :--- |
-| userId | string | ID del usuario que realizó la ruta. |
-| routeId | string | ID de la ruta completada. |
-| pointsObtained | number | Puntos totales ganados en esta sesión. |
-| timeUsed | string | Tiempo real que el usuario tardó en terminar. |
-| completedAt | timestamp | Fecha y hora exacta de la finalización. |
-| details | array<map> | Resumen detallado: `pregunta`, `respuesta_usuario`, `respuesta_correcta`, `es_acierto`. |
+| userId | string | ID del usuario que completó la ruta. |
+| routeId | string | ID de la ruta realizada. |
+| pointsObtained | number | Puntos reales ganados en esa partida. |
+| timeUsed | string | Tiempo real empleado por el usuario. |
+| completedAt | timestamp | Fecha y hora de finalización del recorrido. |
+| details | array<map> | Resumen de cada respuesta: `pregunta`, `respuesta_usuario`, `respuesta_correcta`, `es_acierto`. |
 
 ---
 
 ## 4.6 Diagrama ER del Modelo de Datos
 
+A continuación se presenta la relación lógica entre las colecciones:
+
 ```mermaid
 erDiagram
     USERS ||--o{ RESULTS : genera
     CITIES ||--o{ ROUTES : contiene
-    ROUTES ||--o{ MONUMENTS : incluye
+    ROUTES ||--o{ POINTS_OF_INTEREST : incluye
     ROUTES ||--o{ RESULTS : registra
-    MONUMENTS ||--o{ RESULTS : detalla
+    POINTS_OF_INTEREST ||--o{ RESULTS : detalla
 ```
 
 ---
