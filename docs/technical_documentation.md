@@ -379,6 +379,7 @@ dependencies:
   google_maps_flutter: ^latest
   mobile_scanner: ^latest
   provider: ^latest
+```
 
 ---
 
