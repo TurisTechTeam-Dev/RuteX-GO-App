@@ -24,17 +24,17 @@
 
 # 1. Introducción
 
-RuteX Go es una aplicación móvil gamificada diseñada para transformar la experiencia turística en ciudades con un alto valor patrimonial. La app guía al usuario a través de rutas culturales, combina navegación mediante mapa con la validación de llegada a monumentos mediante códigos QR y ofrece misiones educativas que otorgan puntos y rangos dentro del sistema de gamificación.
+RuteX Go es una aplicación móvil gamificada diseñada para transformar la experiencia turística en ciudades con un alto valor patrimonial. La app guía al usuario a través de rutas culturales, combina navegación mediante mapa con la validación de llegada a puntos de interés mediante códigos QR y ofrece misiones educativas que otorgan puntos y rangos dentro del sistema de gamificación.
 
 El propósito de esta documentación es describir de forma clara y estructurada la arquitectura del proyecto, sus módulos funcionales, el modelo de datos utilizado, las integraciones que emplea, los requisitos no funcionales y el plan de pruebas realizado. Está orientada a evaluadores académicos y desarrolladores que requieran entender la base técnica del sistema.
 
 ## Objetivos Técnicos Principales
 
 - Implementar una arquitectura modular, escalable y mantenible.  
-- Utilizar Firebase como backend para autenticación, base de datos y almacenamiento.  
+- Utilizar Firebase como backend para autenticación, base de datos (**Cloud Firestore**) y almacenamiento.  
 - Integrar Google Maps API para ayudar al usuario a orientarse durante las rutas.  
 - Diseñar un modelo de datos flexible para permitir la expansión a nuevas ciudades y contenidos.  
-- Garantizar un rendimiento estable y una experiencia intuitiva en dispositivos móviles.  
+- Garantizar un rendimiento estable y una validación de presencia física fiable mediante tecnología QR.  
 
 RuteX Go se sustenta sobre **Firebase** como Backend-as-a-Service, lo que permite un desarrollo rápido y seguro, y sobre **Google Maps API**, que facilita la visualización del mapa y la ubicación aproximada del usuario durante las rutas.
 
@@ -56,8 +56,8 @@ Representa el sistema desde una perspectiva de alto nivel, mostrando cómo inter
 ```mermaid
 flowchart LR
     User((Usuario))
-    App[RuteX Go\nAplicación Móvil]
-    Firebase[(Firebase\nAuth · Firestore · Storage)]
+    App[RuteX Go Aplicación Móvil]
+    Firebase[(Firebase Auth · Firestore · Storage)]
     Maps[(Google Maps API)]
 
     User --> App
@@ -66,7 +66,7 @@ flowchart LR
 ```
 
 - **Usuario** → interactúa con la app móvil.
-- **App móvil RuteX Go (Flutter/Kotlin)** → UI, lógica de presentación y orquestación.
+- **App móvil RuteX Go (Flutter)** → UI, lógica de presentación y orquestación.
 - **Firebase** → Auth, Firestore, Storage, Messaging.
 - **Google Maps API** → mapas, geolocalización y cálculo de distancias.
 
@@ -111,198 +111,93 @@ flowchart TB
 **Descripción de los contenedores principales:**
 
 - **App móvil RuteX Go**
-  - *UI:* pantallas desarrolladas en Flutter.  
-  - *Gestión de Estado:* coordinación entre UI y lógica de negocio mediante MVVM/BLoC.  
-  - *Servicios internos:* módulos que gestionan Firestore, Auth, el lector QR, el mapa y el GPS.  
-  - *Logger Service:* centraliza el envío de eventos (Analytics) y errores (Crashlytics).
+  - **UI:** Interfaz desarrollada en Flutter centrada en la experiencia del turista.
+  - **Gestión de Estado:** Implementación del patrón MVVM para desacoplar la vista de la lógica de datos.
+  - **Servicios internos:** Capa de abstracción para el manejo de Cloud Firestore, Firebase Auth y el módulo de escaneo QR.
+  - **Logger Service:** Módulo encargado de reportar eventos de usuario y fallos críticos de la aplicación.
 
 - **Firebase**
-  - *Auth:* gestiona el inicio de sesión y el registro.  
-  - *Firestore:* almacena ciudades, rutas, monumentos, misiones, usuarios y rankings.  
-  - *Storage:* almacén para imágenes (cuando se habilite).  
-  - *Cloud Messaging:* previsto para notificaciones futuras.  
-  - *Analytics:* registra eventos clave de uso para mejorar la aplicación.  
-  - *Crashlytics:* recopila errores y fallos de ejecución en tiempo real.
+  - **Auth:** Gestión segura de identidades (Login/Registro).
+  - **Firestore:** Almacenamiento documental de usuarios, ciudades, rutas, puntos de interés y resultados.
+  - **Storage:** Repositorio de imágenes para puntos de interés y portadas de ciudades.
+  - **Analytics & Crashlytics:** Herramientas de monitoreo de rendimiento y comportamiento del usuario.
 
 - **Google Maps API**
-  - Ofrece el mapa interactivo y la posición aproximada del usuario para navegación visual.
+  - Proporciona las capas de mapas y la visualización de la posición del usuario en tiempo real durante el recorrido de las rutas.
 
 ---
 
 ### 2.3 Decisiones de Arquitectura (ADR)
 
-### ADR-001 – Firebase como BaaS  
-Firebase permite autenticación segura, base de datos en tiempo real, almacenamiento, analíticas y despliegue sin necesidad de servidores propios. Reduce coste y complejidad.
+### ADR-001 – Firebase como Backend-as-a-Service (BaaS)
+Se ha seleccionado Firebase para gestionar la infraestructura serverless, permitiendo autenticación segura, almacenamiento y analíticas sin la necesidad de administrar servidores propios. Esta decisión reduce drásticamente el coste operativo y la complejidad del despliegue inicial.
 
-### ADR-002 – Flutter + Kotlin  
-Permite desarrollar interfaces modernas y multiplataforma, acelerando el desarrollo y asegurando consistencia visual. 
-Kotlin se usa en funcionalidades que requieran acceso directo al hardware o SDKs específicos del sistema operativo.
+### ADR-002 – Desarrollo Multiplataforma con Flutter
+La elección de Flutter permite desarrollar interfaces modernas y consistentes para múltiples plataformas desde un único código base. Se reserva el uso de **Kotlin** exclusivamente para integraciones nativas que requieran acceso directo al hardware del dispositivo o SDKs específicos del sistema operativo que no estén cubiertos por plugins de Flutter.
 
-### ADR-003 – Firestore como base de datos NoSQL  
-Ideal para estructuras dinámicas, consultas rápidas y sincronización en tiempo real. La app puede escalar fácilmente añadiendo nuevas rutas, ciudades y contenido sin reestructurar la base.
-
-Ofrece sincronización en tiempo real y reglas de seguridad integradas con Firebase Auth.
+### ADR-003 – Cloud Firestore como Base de Datos NoSQL
+Se adopta Firestore por su modelo orientado a documentos, ideal para estructuras de datos dinámicas y consultas de baja latencia. Su capacidad de sincronización en tiempo real y la integración nativa de reglas de seguridad con Firebase Auth garantizan que los datos de los usuarios y las rutas estén protegidos y actualizados instantáneamente.
 
 ---
 
 # 3. Módulos Funcionales
 
-RuteX Go se estructura en una serie de módulos funcionales que trabajan de manera conjunta para ofrecer una experiencia turística gamificada.  
-El GPS se utiliza únicamente para orientar al usuario en el mapa, mientras que la validación de llegada a los monumentos se realiza mediante códigos QR, garantizando precisión y fiabilidad.
+RuteX Go se estructura en una serie de módulos funcionales que trabajan de manera conjunta para ofrecer una experiencia turística gamificada. El GPS se utiliza únicamente para orientar al usuario en el mapa, mientras que la validación de llegada a los **puntos de interés** se realiza mediante códigos QR, garantizando precisión y fiabilidad en la validación física.
 
 Los módulos principales son:
 
-- Autenticación
-- Selección de ciudad
-- Rutas
-- Escaneo QR
-- Misiones y trivias
-- Rankings
-- Perfil del usuario
+- **Autenticación:** Gestión de acceso y registro de usuarios.
+- **Selección de Ciudad:** Filtrado dinámico de contenido según la ubicación de interés.
+- **Rutas y Navegación:** Visualización de itinerarios y orientación mediante el mapa.
+- **Escaneo QR:** Validación técnica de llegada al punto de interés.
+- **Misiones y Trivias:** Lógica de gamificación y aprendizaje interactivo.
+- **Resultados y Progresión:** Registro de historial de rutas y actualización del rango global del usuario.
+- **Perfil del Usuario:** Visualización de estadísticas, puntos acumulados y logros.
 
 ---
 
 ## 3.1 Módulo de Autenticación
+Gestionado íntegramente mediante el SDK de Firebase Authentication para garantizar un estándar de seguridad elevado.
 
-Gestionado mediante Firebase Authentication.
-
-**Funciones:**
-- Registro con email y contraseña  
-- Inicio de sesión  
-- Recuperación de contraseña  
-- Manejo de errores comunes  
-- Creación del documento `users/{uid}` en Firestore  
-
----
+* **Funciones:** Registro de usuarios, inicio de sesión seguro, recuperación de contraseña mediante flujo de email y manejo de errores (formatos inválidos, contraseñas débiles).
+* **Persistencia:** Gestión automática del estado de la sesión y generación del documento de perfil en la colección users/{uid} tras el registro exitoso.
+* **Dependencias:** firebase_auth, cloud_firestore.
 
 ## 3.2 Módulo de Selección de Ciudad
+Actúa como el filtro principal de contenido, permitiendo que la aplicación escale geográficamente de forma sencilla.
 
-Permite al usuario elegir en qué ciudad quiere realizar las rutas.
+* **Funciones:** Consulta en tiempo real de la colección cities en Firestore, visualización de tarjetas con imagen y nombre de la ciudad, y filtrado dinámico de rutas según el cityId seleccionado.
+* **Escalabilidad:** Permite la incorporación de nuevas sedes turísticas simplemente añadiendo documentos a la base de datos sin necesidad de actualizar el código de la app.
+* **Dependencias:** cloud_firestore, provider.
 
-**Funciones:**
-- Cargar ciudades desde Firestore (`cities`)  
-- Mostrar ciudades disponibles  
-- Filtrar rutas según ciudad seleccionada  
-- Guardar selección en `users.city`  
+## 3.3 Módulo de Rutas y Navegación
+Presenta los itinerarios culturales y supervisa el recorrido del usuario integrando la lógica de navegación.
 
-Este módulo hace posible escalar a más ciudades sin cambiar la estructura de la app.
+* **Funciones:** Visualización de fichas técnicas (duración, dificultad, puntos totales), renderizado de marcadores interactivos en el mapa y seguimiento del progreso del usuario.
+* **Uso del GPS:** Se emplea exclusivamente para mostrar la ubicación en tiempo real y ayudar a la orientación. No activa misiones de forma automática, cumpliendo con los requisitos de eficiencia energética (NFR-005).
+* **Dependencias:** google_maps_flutter, geolocator.
 
----
+## 3.4 Módulo de Validación (QR)
+Este componente es el núcleo de seguridad que confirma la presencia física del usuario en el punto de interés.
 
-## 3.3 Módulo de Rutas
+* **Proceso de validación:** El usuario escanea el código físico; la app extrae el ID y lo contrasta con el poiId esperado en la secuencia de la ruta actual.
+* **Ventajas:** Elimina el margen de error del GPS en zonas urbanas densas y evita la validación fraudulenta mediante aplicaciones de ubicación simulada (Mock Locations).
+* **Dependencias:** mobile_scanner (hardware de cámara), cloud_firestore (validación lógica).
 
-Presenta las rutas disponibles en cada ciudad y permite iniciar su recorrido.
+## 3.5 Módulo de Misiones e Interacción (Trivias)
+Núcleo educativo y de gamificación que transforma la visita en una experiencia interactiva.
 
-**Funciones principales:**
-- Mostrar lista de rutas con:  
-  - Nombre  
-  - Duración  
-  - Dificultad  
-  - Puntos totales  
-- Navegación por mapa usando GPS  
-- Visualización de monumentos sobre el mapa  
-- Indicador del monumento actual y los siguientes  
-- Acceso directo al escáner QR  
-- Seguimiento visual del progreso del usuario  
+* **Estructura:** Cuestionarios de 3 preguntas con 4 opciones cada una, con corrección automática y feedback inmediato.
+* **Sistema de puntos:** Se asigna puntuación base por acierto y un "Bonus de Excelencia" si se completa la misión sin errores.
+* **Impacto en perfil:** Al finalizar, se realiza una operación atómica en Firestore para actualizar los puntos totales del usuario, su rango y la tabla de resultados.
+* **Dependencias:** cloud_firestore.
 
----
+## 3.6 Módulo de Perfil y Resultados
+Panel centralizado donde el usuario consulta su evolución y el historial de sus expediciones.
 
-### Uso del GPS (solo navegación)
-El GPS no activa misiones ni valida llegada.  
-Se utiliza únicamente para:
-
-- Mostrar la ubicación aproximada del usuario  
-- Ayudarle a orientarse  
-- Calcular distancia aproximada a monumentos  
-
-Cumple con los requisitos funcionales (HU-014) y no funcionales (NFR-005).
-
----
-
-### Validación del monumento (QR)
-
-La llegada al monumento se confirma mediante un código QR.
-
-**Proceso:**
-1. El usuario llega al monumento.  
-2. Escanea el QR asociado.  
-3. La app obtiene el ID del monumento desde el QR.  
-4. Si coincide con el monumento que corresponde en la ruta → se desbloquea la misión.  
-
-**Ventajas:**
-- Precisión total  
-- Sin errores por señal GPS baja  
-- Evita trampas de ubicación simulada  
-- Flujo claro para el usuario  
-
----
-
-## 3.4 Módulo de Escaneo QR
-
-Módulo encargado de validar la llegada al monumento.
-
-**Características:**
-- Escáner QR integrado  
-- Validación del ID del monumento  
-- Bloqueo si el QR no corresponde al punto actual  
-- Desbloqueo automático de la misión asociada  
-- Manejo de errores: QR inválido, cámara sin permisos, etc.  
-
-Dependencias usadas (según la implementación elegida):  
-`qr_code_scanner` o `mobile_scanner`.
-
----
-
-## 3.5 Módulo de Misiones y Trivias
-
-Cada monumento incluye una misión con preguntas educativas.
-
-**Características:**
-- 3 preguntas tipo test por misión  
-- 4 opciones por pregunta  
-- Corrección automática  
-- Puntuación basada en aciertos  
-- Bonus por completar sin errores  
-- Guardado del progreso en Firestore  
-
-Actualiza:  
-- `users.points`  
-- `users.rank`  
-- `rankings`  
-
----
-
-## 3.6 Módulo de Rankings
-
-Tabla de puntuaciones por ciudad.
-
-**Funciones:**
-- Actualización automática tras cada misión  
-- Vista ordenada por puntos  
-- Ranking por ciudad  
-
-Extensible a versiones futuras:  
-- Ranking semanal/mensual  
-- Ranking global  
-- Ranking entre amigos  
-
----
-
-## 3.7 Módulo de Perfil del Usuario
-
-Muestra información principal:
-
-- Nombre  
-- Email  
-- Ciudad activa  
-- Rango actual  
-- Puntos totales  
-- Rutas completadas  
-
-Futuras mejoras posibles:
-- Personalización de avatar  
-- Historial de misiones  
-- Logros y badges  
+* **Gestión de Perfil:** Visualización del rango global (Novato, Explorador, Legionario, etc.) calculado dinámicamente según el puntaje acumulado.
+* **Historial de Rutas:** Listado detallado obtenido de la colección results, mostrando fechas de realización, puntos obtenidos y nivel de acierto en las trivias.
+* **Dependencias:** cloud_firestore, intl (formateo de fechas y números).
 
 ---
 
@@ -418,109 +313,61 @@ erDiagram
 
 # 5. Integraciones y Dependencias
 
-RuteX Go utiliza una serie de servicios externos y paquetes que permiten implementar autenticación, base de datos, navegación por mapa y validación mediante códigos QR.  
-Las integraciones están clasificadas según su relevancia dentro del MVP.
+RuteX Go utiliza una serie de servicios externos y paquetes que permiten implementar autenticación, base de datos, navegación por mapa y validación mediante códigos QR. Las integraciones están clasificadas según su relevancia dentro del producto mínimo viable (MVP).
 
 ---
 
 ## 5.1 Integraciones confirmadas para el MVP
 
 ### Firebase Authentication
-Servicio utilizado para:
-- Registro de nuevos usuarios  
-- Inicio de sesión  
-- Recuperación de contraseña  
-
-Permite gestionar autorizaciones de forma segura sin crear un backend propio.
-
----
+Servicio encargado de gestionar la identidad de los usuarios de forma segura.
+- **Uso:** Registro de nuevos usuarios, inicio de sesión y recuperación de contraseña.
+- **Seguridad:** Permite gestionar autorizaciones sin necesidad de un backend propio, delegando el cifrado y la seguridad a la infraestructura de Google.
 
 ### Firestore (Firebase)
-Base de datos principal del proyecto.
-
-Almacena información de:
-- Usuarios  
-- Ciudades  
-- Rutas  
-- Monumentos  
-- Misiones  
-- Rankings  
-
-Su estructura NoSQL facilita ampliaciones sin necesidad de modificar esquemas.
-
----
+Base de datos NoSQL principal del proyecto.
+- **Contenido:** Almacena información crítica como perfiles de usuarios, ciudades, rutas, monumentos (POI), misiones y resultados históricos.
+- **Flexibilidad:** Su estructura basada en documentos facilita ampliaciones futuras del modelo de datos sin necesidad de migraciones de esquemas complejas.
 
 ### Google Maps API
-Usada exclusivamente para ayudar al usuario a orientarse durante las rutas.
-
-Funciones:
-- Mostrar el mapa de la ciudad  
-- Mostrar la ubicación aproximada del usuario  
-- Mostrar marcadores de los monumentos  
-
-No se utiliza para validar llegada al monumento.
-
----
+Herramienta de apoyo visual para la orientación del turista durante las rutas.
+- **Funciones:** Visualización del mapa urbano, ubicación aproximada del usuario y renderizado de marcadores de monumentos.
+- **Criterio:** No se utiliza para validaciones lógicas de llegada, evitando errores por falta de precisión satelital.
 
 ### Lector de Códigos QR
-Recurso utilizado para validar que el usuario llega físicamente al monumento.
+Mecanismo principal para validar la presencia física del usuario en el monumento.
+- **Proceso:** Escaneo del código, obtención del ID codificado, validación contra el monumento activo de la ruta y desbloqueo de la misión.
+- **Ventajas:** Ofrece precisión total independientemente de la señal GPS y evita la manipulación de la ubicación mediante software de terceros.
+- **Paquetes recomendados:** `mobile_scanner` o `qr_code_scanner`.
 
-Proceso:
-1. El usuario escanea el QR del monumento.  
-2. La app obtiene el ID codificado.  
-3. Se valida que corresponde al monumento actual de la ruta.  
-4. La misión asociada se desbloquea.  
 
-Ventajas:
-- Precisión total  
-- No depende de la señal GPS  
-- Evita falsificación de ubicación  
-- Flujo de uso claro para el usuario  
-
-Paquetes recomendados:
-- `qr_code_scanner`  
-- `mobile_scanner`
 
 ---
 
 ## 5.2 Integraciones recomendadas (futuras fases)
 
 ### Firebase Storage
-Para almacenar imágenes en alta calidad:
-- Monumentos  
-- Ciudades  
-- Recursos visuales del sistema  
-
-Opcional para el MVP.
-
----
+Destinado al almacenamiento de activos multimedia de alta resolución.
+- **Uso:** Imágenes detalladas de monumentos, ciudades y recursos visuales específicos del sistema.
+- **Estado:** Opcional para el MVP (los recursos iniciales pueden servirse mediante URLs externas o assets locales).
 
 ### Firebase Cloud Messaging
-Permite notificaciones push en versiones posteriores:
-- Nuevas rutas añadidas  
-- Recompensas  
-- Eventos turísticos  
+Sistema de notificaciones push para mejorar la retención de usuarios.
+- **Uso:** Avisos sobre nuevas rutas disponibles, recompensas obtenidas y eventos turísticos locales.
 
 ---
 
 ## 5.3 Integraciones futuras (post-MVP)
 
-### Google Directions API
-Para navegación guiada paso a paso entre monumentos.
-
----
-
-### NFC / Beacons
-Validación automática de llegada sin necesidad de escanear QR.
-
----
-
-### Realidad Aumentada (ARCore / ARKit)
-Para superponer contenido histórico sobre los monumentos.
+* **Google Directions API:** Implementación de navegación guiada paso a paso entre puntos de interés.
+* **NFC / Beacons:** Validación automática de llegada por proximidad mediante sensores físicos.
+* **Realidad Aumentada (ARCore / ARKit):** Visualización de contenido histórico digital superpuesto sobre los monumentos físicos.
 
 ---
 
 ## 5.4 Dependencias iniciales en Flutter
+
+Para garantizar el funcionamiento de los módulos mencionados, el archivo `pubspec.yaml` incluirá las siguientes dependencias base:
 
 ```yaml
 dependencies:
@@ -530,9 +377,8 @@ dependencies:
   firebase_auth: ^latest
   cloud_firestore: ^latest
   google_maps_flutter: ^latest
-  qr_code_scanner: ^latest
+  mobile_scanner: ^latest
   provider: ^latest
-```
 
 ---
 
@@ -659,11 +505,11 @@ El prototipo completo del sistema está desarrollado en Figma.
 
 El diseño UI/UX se estructura sobre los siguientes principios:
 
-- **Simplicidad:** Pantallas limpias, sin sobrecarga visual.
-- **Claridad:** Jerarquía bien definida en títulos, textos y botones.
-- **Coherencia:** Todos los módulos comparten la misma guía de estilos.
-- **Accesibilidad:** Colores con buen contraste, tipografías legibles y elementos grandes.
-- **Gamificación:** El usuario percibe progreso mediante rangos, puntos y misiones.
+- **Simplicidad:** Pantallas limpias, sin sobrecarga visual para evitar la fatiga del usuario.
+- **Claridad:** Jerarquía bien definida en títulos, textos y botones de acción principal.
+- **Coherencia:** Todos los módulos comparten la misma guía de estilos, paleta de colores e iconografía.
+- **Accesibilidad:** Colores con buen contraste para lectura en exteriores, tipografías legibles y elementos de interacción de gran tamaño.
+- **Gamificación:** El usuario percibe su progreso visualmente mediante barras de estado, cambio de rangos y puntos acumulados.
 
 Estos principios permiten que la navegación sea intuitiva y agradable durante las rutas turísticas.
 
@@ -701,25 +547,25 @@ La tipografía elegida para toda la aplicación es **Montserrat**, por su legibi
 
 ## 7.4 Estilo Visual y Componentes
 
-Los componentes mantienen una estética consistente:
+Los componentes mantienen una estética consistente en toda la interfaz para reforzar la identidad de marca y facilitar la interacción:
 
-- Botones con esquinas redondeadas
-- Tarjetas con sombra suave
-- Iconos claros y minimalistas
-- Mapa integrado con marcadores personalizados
-- Barra de navegación inferior simple
-- Tarjetas rectangulares para rutas y misiones
+- Botones con esquinas redondeadas para un aspecto moderno y amigable.
+- Tarjetas con sombra suave para generar profundidad y jerarquía.
+- Iconos claros y minimalistas que facilitan el reconocimiento de funciones.
+- Mapa integrado con marcadores personalizados según el tipo de monumento.
+- Barra de navegación inferior simple para acceso rápido a las secciones clave.
+- Tarjetas rectangulares para una organización limpia de rutas y misiones.
 
 **Componentes destacados:**
 
-- `PrimaryButton`
-- `SecondaryButton`
-- `RouteCard`
-- `MissionCard`
-- `QRScannerButton`
-- `NavigationBar`
-- `RankingItem`
-- `MapMarker (custom)`
+- `PrimaryButton`: Botón de acción principal en verde oscuro.
+- `SecondaryButton`: Botón para acciones secundarias o de cancelación.
+- `RouteCard`: Tarjeta con imagen y detalles básicos de cada ruta.
+- `MissionCard`: Contenedor para las trivias y preguntas educativas.
+- `QRScannerButton`: Acceso directo y destacado al lector de códigos.
+- `NavigationBar`: Menú persistente para Inicio, Mapa y Perfil.
+- `RankingItem`: Elemento visual para mostrar la posición, puntos y rango del usuario.
+- `MapMarker (custom)`: Iconografía personalizada sobre la API de Google Maps.
 
 ---
 
@@ -745,45 +591,45 @@ El flujo garantiza que el usuario siempre sabe “cuál es el siguiente paso”.
 
 ## 7.6 Pantallas del Prototipo
 
-Las pantallas definidas en Figma incluyen:
+Las pantallas definidas en Figma cubren todo el ecosistema de la aplicación, desde el primer contacto hasta el seguimiento de la progresión del usuario:
 
 ### 🔹 Autenticación
-- Inicio de sesión  
-- Registro  
-- Recuperación de contraseña  
+- Inicio de sesión: Acceso mediante credenciales.
+- Registro: Creación de cuenta con validaciones de campos.
+- Recuperación de contraseña: Flujo de envío de email para restablecimiento.
 
 ### 🔹 Selección de Ciudad
-- Lista de ciudades activas  
-- Vista previa con imagen y descripción  
+- Lista de ciudades activas: Catálogo visual de las ubicaciones disponibles.
+- Vista previa: Tarjeta con imagen representativa y breve descripción histórica.
 
 ### 🔹 Rutas Disponibles
-- Tarjetas con duración, dificultad y puntos  
-- Orden de visita  
+- Tarjetas informativas: Muestran duración estimada, nivel de dificultad y puntos totales a obtener.
+- Orden de visita: Previsualización de los monumentos incluidos.
 
 ### 🔹 Detalle de Ruta
-- Descripción  
-- Lista ordenada de monumentos  
-- Botón para iniciar la ruta  
+- Descripción: Contexto histórico de la ruta seleccionada.
+- Lista ordenada: Secuencia lógica de monumentos a visitar.
+- Botón de inicio: Activa el seguimiento de la ruta y la navegación.
 
 ### 🔹 Vista de Mapa
-- Ubicación actual del usuario  
-- Marcadores de los monumentos  
-- Acceso al lector QR  
+- Ubicación actual: Posicionamiento en tiempo real del usuario.
+- Marcadores (POIs): Representación visual de los monumentos en el plano urbano.
+- Acceso QR: Botón flotante destacado para iniciar la validación.
 
 ### 🔹 Escáner QR
-- Cámara integrada  
-- Validación del monumento actual  
-- Manejo de errores  
+- Cámara integrada: Interfaz de lectura en tiempo real.
+- Validación: Comprobación automática del monumento actual.
+- Manejo de errores: Feedback visual si el código es incorrecto o no corresponde al punto.
 
 ### 🔹 Misiones
-- Tres preguntas por monumento  
-- Interfaz clara y directa  
-- Puntuación inmediata  
+- Interfaz de trivia: Tres preguntas por monumento con diseño limpio.
+- Interacción: Selección de opciones y avance automático.
+- Puntuación: Resumen inmediato de aciertos y bonus.
 
 ### 🔹 Perfil del Usuario
-- Puntos  
-- Rango  
-- Rutas completadas  
+- Estadísticas: Visualización de puntos totales acumulados.
+- Rango: Insignia y título actual (ej. Explorador).
+- Historial: Listado de rutas finalizadas con éxito.
 
 ---
 
@@ -803,8 +649,7 @@ Incluye:
 
 # 8. Plan de Pruebas y KPIs
 
-El plan de pruebas de RuteX Go tiene como objetivo asegurar que la aplicación funciona de forma estable, cumple los requisitos funcionales y no funcionales y ofrece una buena experiencia al usuario.  
-El proceso incluye pruebas unitarias, de integración, funcionales, de rendimiento, de usabilidad y pruebas reales en entornos turísticos.
+El plan de pruebas de RuteX Go tiene como objetivo asegurar que la aplicación funciona de forma estable, cumple los requisitos funcionales y no funcionales y ofrece una buena experiencia al usuario. El proceso incluye pruebas unitarias, de integración, funcionales, de rendimiento, de usabilidad y pruebas reales en entornos turísticos.
 
 ---
 
@@ -824,119 +669,111 @@ El proceso incluye pruebas unitarias, de integración, funcionales, de rendimien
 Se centran en funciones pequeñas e independientes:
 
 - Validación de respuestas de misiones  
-- Cálculo de puntuaciones  
-- Carga de datos desde Firestore  
-- Manejo de estados básicos  
-- Formateo de datos visualizados  
+- Cálculo de puntuaciones y aplicación de bonus  
+- Carga de documentos individuales desde Firestore  
+- Manejo de estados lógicos básicos  
+- Formateo de fechas y puntos visualizados  
 
 **Objetivo:** verificar que cada unidad del código funciona correctamente de manera aislada.
 
 ---
 
 ### 8.2.2 Pruebas de Integración
-Verifican la interacción entre distintos módulos:
+Verifican la interacción entre distintos módulos y servicios externos:
 
-- Autenticación ↔ Firestore  
-- Rutas ↔ Monumentos  
-- Monumentos ↔ Misiones  
-- Misiones ↔ Rankings  
-- Escaneo QR ↔ Validación de monumento  
-- Mapa ↔ GPS  
+- Autenticación ↔ Firestore (creación de perfil post-registro)  
+- Rutas ↔ Monumentos (carga de POIs vinculados)  
+- Monumentos ↔ Misiones (activación de trivia por ID)  
+- Misiones ↔ Perfil (actualización de puntos y rango)  
+- Escaneo QR ↔ Validación de monumento (contraste de identificadores)  
+- Mapa ↔ GPS (posicionamiento de la capa de usuario sobre Google Maps)  
 
-**Objetivo:** asegurar que los componentes funcionan bien cuando colaboran.
+**Objetivo:** asegurar que los componentes funcionan bien cuando colaboran entre sí.
 
 ---
 
 ### 8.2.3 Pruebas Funcionales (End-to-End)
 Simulan el recorrido completo del usuario real:
 
-1. Iniciar sesión  
-2. Seleccionar ciudad  
-3. Seleccionar ruta  
-4. Ver monumentos en el mapa  
-5. Llegar a un monumento  
-6. Escanear el QR  
-7. Completar la misión  
-8. Obtener puntuación y avanzar  
+1. Iniciar sesión o registrarse.  
+2. Seleccionar una ciudad del catálogo.  
+3. Seleccionar e iniciar una ruta específica.  
+4. Orientarse mediante el mapa de monumentos.  
+5. Llegar físicamente a un monumento.  
+6. Escanear el código QR correspondiente.  
+7. Completar la misión/trivia educativa.  
+8. Obtener puntuación, actualizar el rango y avanzar al siguiente punto.  
 
 **Objetivo:** validar que el flujo principal de la aplicación funciona sin interrupciones.
 
 ---
 
 ### 8.2.4 Pruebas de Usabilidad
-Realizadas con usuarios piloto:
+Realizadas con usuarios piloto para evaluar la experiencia:
 
-- Claridad de los textos y botones  
-- Facilidad de entender la navegación  
-- Tiempo para completar misiones  
-- Opinión general del diseño visual  
+- Claridad de los textos, iconos y botones de acción.  
+- Facilidad para comprender el flujo de navegación.  
+- Tiempo medio empleado para completar las misiones.  
+- Opinión general sobre la estética y el diseño visual.  
 
-**Objetivo:** asegurar una experiencia intuitiva y accesible.
+**Objetivo:** asegurar una experiencia de usuario intuitiva y accesible.
 
 ---
 
 ### 8.2.5 Pruebas de Rendimiento
-Prueban que la app cumple con los Requisitos No Funcionales:
+Prueban que la app cumple con los Requisitos No Funcionales definidos:
 
-- Tiempos de carga < 3 segundos  
-- Consumo razonable de batería  
-- Renderizado fluido del mapa  
-- Escaneo QR sin retardos  
-- Respuesta estable del GPS  
+- Tiempos de carga inferiores a 3 segundos en todas las vistas.  
+- Consumo de batería optimizado durante el uso prolongado del GPS.  
+- Renderizado fluido del mapa sin caídas de frames.  
+- Activación y procesamiento del escáner QR sin retardos.  
 
-**Objetivo:** garantizar un rendimiento óptimo y constante.
+**Objetivo:** garantizar un rendimiento óptimo y constante en dispositivos de diversas gamas.
 
 ---
 
 ### 8.2.6 Pruebas Piloto en Entorno Real
-Realizadas en Mérida:
+Realizadas específicamente en la ciudad de Mérida para validar el sistema en exteriores:
 
-- Teatro Romano  
-- Templo de Diana  
-- Alcazaba  
-- Zona centro  
+- **Puntos de control:** Teatro Romano, Templo de Diana, Alcazaba y zona centro.  
+- **Escenarios de prueba:** Escaneo QR en condiciones de luz solar directa o sombras, precisión del GPS entre edificios históricos y rendimiento de la app con cobertura de datos móviles limitada (3G/4G).  
 
-Pruebas realizadas:
-
-- Escaneo QR en condiciones de luz variadas  
-- Comportamiento del GPS entre edificios  
-- Rendimiento con cobertura limitada  
-- Validación correcta de misiones  
-
-**Objetivo:** confirmar que el MVP funciona en situaciones reales de uso turístico.
+**Objetivo:** confirmar que el MVP es robusto en situaciones reales de uso turístico.
 
 ---
 
 ## 8.3 Estrategia General de Testing
 
-La estrategia se divide en tres fases:
+La estrategia se divide en tres fases críticas para asegurar la calidad del software:
 
 ### 🟩 Fase 1 — Pruebas internas
-- Verificación de módulos individuales  
-- Revisión de UI y navegación  
-- Corrección continua durante el desarrollo  
+- Verificación de módulos individuales y lógica de negocio.
+- Revisión exhaustiva de la interfaz de usuario (UI) y navegación.
+- Corrección continua durante el ciclo de desarrollo (metodología ágil).
 
 ### 🟦 Fase 2 — Pruebas con usuarios reales (piloto)
-- Se realizan pruebas en rutas reales  
-- Recogida de opiniones y problemas detectados  
-- Ajustes de diseño y flujo  
+- Ejecución de pruebas en rutas turísticas reales bajo condiciones de campo.
+- Recogida de opiniones cualitativas y registro de problemas técnicos detectados.
+- Ajustes finales de diseño y optimización del flujo de usuario.
 
 ### 🟥 Fase 3 — Revisión final
-- Validación de requisitos funcionales y no funcionales  
-- Comprobación de rendimiento  
-- Generación de documentación final  
+- Validación estricta de todos los requisitos funcionales y no funcionales.
+- Comprobación final de rendimiento y estrés en el servidor (Firestore).
+- Generación de la documentación técnica y manuales finales.
 
 ---
 
 ## 8.4 KPIs (Indicadores Clave de Rendimiento)
 
+Los KPIs permiten medir el éxito técnico y la aceptación por parte del usuario de forma cuantitativa.
+
 ### KPIs Técnicos
 | KPI | Objetivo |
 |-----|----------|
 | Tiempo de carga | < 3 segundos |
-| Fallos/crashes | < 1% |
-| Precisión del GPS | Estable en exteriores |
-| Latencia del escaneo QR | < 0.5 segundos |
+| Fallos/crashes | < 1% de las sesiones |
+| Precisión del GPS | Estable en entornos de exteriores |
+| Latencia del escaneo QR | < 0.5 segundos tras el enfoque |
 
 ---
 
@@ -944,28 +781,30 @@ La estrategia se divide en tres fases:
 | KPI | Objetivo |
 |-----|----------|
 | Misiones completadas | > 70% de usuarios piloto |
-| Flujo intuitivo | > 80% navega sin ayuda |
-| Satisfacción general | > 4/5 |
-| Tiempo medio para volver a rutas | < 2 segundos |
+| Flujo intuitivo | > 80% navega sin ayuda externa |
+| Satisfacción general | > 4/5 en encuestas de satisfacción |
+| Tiempo medio para volver a rutas | < 2 segundos (transición fluida) |
 
 ---
 
 ### KPIs de Usabilidad
 | KPI | Objetivo |
 |-----|----------|
-| Clics necesarios por acción | 1–3 |
-| Tiempo para completar una misión | < 2 minutos |
-| Errores de QR | < 5% |
+| Clics necesarios por acción | 1–3 clics máximo |
+| Tiempo para completar una misión | < 2 minutos por monumento |
+| Errores de QR | < 5% de intentos fallidos |
 
 ---
 
 ## 8.5 Herramientas de Testing
 
-- **Flutter DevTools** → inspección y rendimiento  
-- **Firebase Crashlytics** → seguimiento de errores  
-- **Android Studio Profiler** → análisis de CPU, memoria y batería  
-- **Google Maps Logs** → depuración de posición y mapa  
-- **Dispositivos reales** → pruebas de campo  
+Para la ejecución de este plan, se utilizan herramientas líderes en el ecosistema móvil:
+
+- **Flutter DevTools:** Inspección de widgets y análisis de rendimiento de frames.
+- **Firebase Crashlytics:** Seguimiento y reporte de errores en tiempo real en dispositivos físicos.
+- **Android Studio Profiler:** Análisis detallado del consumo de CPU, memoria RAM y batería.
+- **Google Maps Logs:** Depuración de la carga de mapas y precisión de coordenadas.
+- **Dispositivos reales:** Pruebas de campo en terminales con diversas versiones de Android/iOS.
 
 ---
 
@@ -973,13 +812,13 @@ La estrategia se divide en tres fases:
 
 El plan definido cubre todos los aspectos necesarios para garantizar:
 
-- Funcionamiento estable  
-- Interacciones correctas entre módulos  
-- Fluidez en el uso diario  
-- Cumplimiento de los requisitos originales  
-- Base sólida para mejorar futuras versiones  
+- Un funcionamiento estable y seguro de la plataforma.
+- Interacciones correctas entre los módulos de validación y gamificación.
+- Una experiencia de usuario fluida y gratificante en el uso diario.
+- El cumplimiento riguroso de los requisitos originales del proyecto.
+- Una base técnica sólida para escalar el sistema en futuras versiones.
 
-RuteX Go queda evaluada adecuadamente para su presentación y evolución en próximas etapas del proyecto.
+RuteX Go queda evaluada adecuadamente para su presentación y evolución en las próximas etapas del proyecto.
 
 ---
 
@@ -989,13 +828,13 @@ El desarrollo de RuteX Go ha permitido construir una arquitectura sólida basada
 
 Las decisiones técnicas adoptadas garantizan:
 
-- Una base de datos flexible preparada para crecer con nuevas ciudades y rutas.  
-- Un sistema de autenticación seguro sin necesidad de un backend propio.  
-- Un modelo de navegación claro que orienta al usuario sin depender de proximidad GPS.  
-- Un mecanismo fiable de validación mediante códigos QR, que mejora la precisión en monumentos.  
-- Un flujo de usuario estable y bien estructurado gracias a la separación de módulos.  
+- **Base de datos flexible:** Preparada para crecer con nuevas ciudades y rutas de manera orgánica.
+- **Seguridad nativa:** Un sistema de autenticación robusto sin necesidad de gestionar un backend propio.
+- **Navegación clara:** Orientación efectiva que no compromete la batería ni depende de la precisión del GPS para la lógica de juego.
+- **Fiabilidad en campo:** El uso de códigos QR garantiza la presencialidad del usuario, eliminando el fraude por ubicación simulada.
+- **Modularidad:** Un sistema bien estructurado que facilita el mantenimiento y la actualización de componentes independientes.
 
-La arquitectura está preparada para evolucionar en futuras fases, añadiendo nuevas funcionalidades avanzadas sin necesidad de reescribir el sistema. La calidad del diseño UI/UX junto con la planificación de pruebas asegura que la experiencia del usuario sea coherente, fluida y atractiva.
+La arquitectura está preparada para evolucionar en futuras fases, añadiendo funcionalidades avanzadas sin necesidad de reescribir el sistema base. La calidad del diseño UI/UX, junto con la planificación de pruebas, asegura que la experiencia del usuario sea coherente, fluida y atractiva.
 
 RuteX Go se encuentra en una etapa sólida para continuar su crecimiento y convertirse en una plataforma turística gamificada de referencia en Extremadura.
 
@@ -1009,68 +848,60 @@ La planificación del roadmap permite visualizar la evolución del proyecto más
 
 ## 10.1 Mejoras previstas a corto plazo
 
-Estas mejoras se plantean para próximas evaluaciones:
+Estas mejoras se plantean como evolución directa para las próximas evaluaciones:
 
 ### 🔹 Firebase Storage
-- Almacenar imágenes y recursos multimedia de alta calidad.  
-- Reducir el tamaño final de la aplicación.  
+- Implementación para alojar imágenes y recursos multimedia de alta resolución de forma remota.
+- Optimización del peso de la aplicación al no incluir todos los activos en el paquete local.
 
-### 🔹 Notificaciones push (Firebase Cloud Messaging)
-- Avisos de nuevas rutas.  
-- Recordatorios de misiones pendientes.  
-- Mensajes promocionales o históricos.  
+### 🔹 Notificaciones Push (Firebase Cloud Messaging)
+- Envío de alertas sobre nuevas rutas añadidas al catálogo.
+- Recordatorios de misiones pendientes para incentivar el retorno del usuario.
 
-### 🔹 Sistema de logros y recompensas
-- Badges visuales para hitos conseguidos.  
-- Logros temáticos según épocas o rutas.  
+### 🔹 Sistema de Logros y Recompensas
+- Desbloqueo de insignias (badges) visuales por hitos conseguidos.
+- Logros temáticos basados en la época histórica de las rutas completadas.
 
-### 🔹 Mejoras del mapa
-- Opciones de vista detallada.  
-- Trazado de rutas entre monumentos.  
-- Mayor optimización de carga.  
+### 🔹 Mejoras del Mapa
+- Inclusión de capas de vista detallada (satélite/terreno).
+- Trazado de líneas de ruta (polylines) entre monumentos para guiar el camino.
 
-### 🔹 Panel de administración
-- Gestión interna de contenido (ciudades, rutas, preguntas).  
-- Estadísticas para evaluadores y docentes.  
+### 🔹 Panel de Administración
+- Desarrollo de una interfaz web para la gestión de contenidos (ciudades, rutas y preguntas).
+- Panel de estadísticas para el seguimiento del uso por parte de evaluadores y docentes.
 
 ---
 
 ## 10.2 Evolución a medio plazo
 
 ### 🔵 Google Directions API
-Proporcionar navegación guiada paso a paso al usuario.
+Integración de navegación paso a paso con indicaciones de voz y tiempo estimado de llegada entre monumentos.
 
-### 🔵 Funcionalidades sociales
-- Rankings semanales/mensuales  
-- Seguimiento entre amigos  
-- Eventos gamificados  
+### 🔵 Funcionalidades Sociales
+- Implementación de rankings competitivos semanales y mensuales.
+- Posibilidad de seguir el progreso de amigos y compartir logros en redes sociales.
 
-### 🔵 Ampliación a nuevas ciudades de Extremadura
-- Cáceres  
-- Badajoz  
-- Trujillo  
-- Plasencia  
-
-La estructura de datos está preparada para ello.
+### 🔵 Ampliación Geográfica
+- Expansión del catálogo a nuevas ciudades clave de Extremadura como Cáceres, Badajoz, Trujillo y Plasencia. La estructura de datos actual ya permite esta escalabilidad sin cambios en el código.
 
 ---
 
 ## 10.3 Evolución a largo plazo
 
 ### 🟣 Tecnologías de proximidad avanzadas
-- NFC  
-- Beacons  
-Permiten validar la llegada sin necesidad de escaneo QR.
+- **NFC:** Validación automática por contacto.
+- **Beacons:** Detección de presencia por Bluetooth de baja energía para activar contenido sin intervención del usuario.
+- Permiten validar la llegada de forma pasiva, complementando o sustituyendo el escaneo QR.
 
 ### 🟣 Realidad aumentada (AR)
-- Recreación histórica sobre monumentos  
-- Elementos 3D interactivos  
-- Explicaciones visuales superpuestas  
+- Recreación histórica digital sobre las ruinas o monumentos actuales.
+- Elementos 3D interactivos que permitan visualizar el aspecto original de los edificios.
+- Explicaciones visuales y guías virtuales superpuestas en la cámara del dispositivo.
 
 ### 🟣 Expansión multiplataforma
-- Publicación en iOS  
-- Panel web de administración  
-- Kioscos turísticos digitales  
+- Publicación oficial en la App Store (iOS) mediante el mismo código base de Flutter.
+- Panel web de administración avanzado para la gestión de contenidos.
+- Integración en kioscos turísticos digitales situados en puntos estratégicos de las ciudades.
 
 ---
 
@@ -1078,17 +909,16 @@ Permiten validar la llegada sin necesidad de escaneo QR.
 
 La visión de RuteX Go es convertirse en una plataforma turística gamificada capaz de integrarse con instituciones, museos y comercios locales. Su estructura técnica permite:
 
-- Escalar geográficamente  
-- Integrar nuevas tecnologías  
-- Ampliar la experiencia educativa y cultural  
-- Evolucionar hacia un producto profesional  
+- Escalar geográficamente a cualquier región del mundo.
+- Integrar nuevas tecnologías emergentes de forma modular.
+- Ampliar la experiencia educativa y cultural mediante contenido multimedia.
+- Evolucionar desde un prototipo académico hacia un producto profesional de alto impacto.
 
 ---
 
 ## 10.5 Conclusión del Roadmap
 
-El MVP actual sienta los cimientos necesarios para avanzar con seguridad hacia versiones más completas.  
-La aplicación está lista para crecer tanto en complejidad técnica como en contenido, manteniendo siempre la filosofía principal:
+El MVP actual sienta los cimientos necesarios para avanzar con seguridad hacia versiones más completas. La aplicación está lista para crecer tanto en complejidad técnica como en contenido, manteniendo siempre la filosofía principal:
 
 **Un turismo cultural más interactivo, educativo y accesible.**
 
