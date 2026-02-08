@@ -1,6 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart'; //
+import 'firebase_options.dart'; //
 
-void main() => runApp(const RutexApp());
+void main() async {
+  // Asegura que los bindings de Flutter estén listos
+  WidgetsFlutterBinding.ensureInitialized();
+
+  try {
+    // Inicialización oficial de Firebase
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    // Mensaje de éxito en la consola de Android Studio
+    print("----------------------------------------------------------");
+    print("¡CONEXIÓN EXITOSA: RutexGo ya está hablando con Firebase!");
+    print("----------------------------------------------------------");
+  } catch (e) {
+    // Mensaje en caso de error de red o configuración
+    print("----------------------------------------------------------");
+    print("ERROR AL CONECTAR CON FIREBASE: $e");
+    print("----------------------------------------------------------");
+  }
+
+  runApp(const RutexApp());
+}
 
 class RutexApp extends StatelessWidget {
   const RutexApp({super.key});
@@ -9,6 +32,7 @@ class RutexApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
+      title: 'RutexGo',
       home: SplashScreen(),
     );
   }
@@ -31,7 +55,7 @@ class SplashScreen extends StatelessWidget {
   }
 }
 
-// Widget que podrás reutilizar en el Login y otras pantallas
+// Widget reutilizable para mantener la estética del mapa de fondo
 class FondoConMapa extends StatelessWidget {
   final Widget child;
 
@@ -41,14 +65,14 @@ class FondoConMapa extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Capa inferior: El mapa de Extremadura
+        // Capa inferior: El mapa de Extremadura centrado
         Center(
           child: Image.asset(
             'assets/Mapa Fondo Extremadura.jpeg',
             fit: BoxFit.contain,
           ),
         ),
-        // Capa superior: Lo que pongas dentro (en este caso, el logo)
+        // Capa superior: El contenido (Logo, botones de login, etc.)
         Center(child: child),
       ],
     );
