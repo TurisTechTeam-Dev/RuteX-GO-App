@@ -215,84 +215,124 @@ Las colecciones principales son:
 
 ---
 
-## 4.1 Colección: `users`
+## 4.1 Colección: `usuarios`
 
 Almacena la información principal y el progreso acumulado de cada usuario registrado.
 
 | Campo | Tipo | Descripción |
 | :--- | :--- | :--- |
-| name | string | Nombre completo del usuario. |
+| nombre | string | Nombre completo del usuario. |
 | email | string | Correo electrónico asociado a la cuenta. |
-| rank | string | Título obtenido basado en puntos (ej: "Explorador", "Legionario"). |
-| points | number | Total de puntos acumulados globalmente. |
-| routesCompleted | array<string> | Lista de identificadores de las rutas finalizadas. |
-| createdAt | timestamp | Fecha de creación del perfil. |
-| lastLogin | timestamp | Registro del último acceso a la aplicación. |
+| rango | string | ID o referencia al título obtenido basado en puntos. |
+| puntos | number | Total de puntos acumulados globalmente. |
+| rutas_completadas | array<string> | Lista de identificadores de las rutas finalizadas. |
+| fecha_creacion | timestamp | Fecha y hora de creación del perfil. |
+| ultimo_acceso | timestamp | Registro del último acceso a la aplicación. |
+| isAdmin | boolean | Indica si el usuario tiene privilegios de administrador. |
 
 ---
 
-## 4.2 Colección: `cities`
+## 4.2 Colección: `ciudades`
 
 Define las ciudades disponibles donde se pueden realizar rutas.
 
 | Campo | Tipo | Descripción |
 | :--- | :--- | :--- |
-| name | string | Nombre de la ciudad (ej: "Mérida"). |
-| isActive | boolean | Determina si la ciudad es visible y seleccionable. |
+| nombre | string | Nombre de la ciudad (ej: "Mérida"). |
+| provincia | string | Provincia a la que pertenece la ciudad. |
 | imageURL | string(url) | Imagen representativa de la ciudad para la UI. |
+| isActive | boolean | Determina si la ciudad es visible y seleccionable. |
 
 ---
 
-## 4.3 Colección: `routes`
+## 4.3 Colección: `rutas`
 
 Define las plantillas de los recorridos culturales en cada ciudad.
 
 | Campo | Tipo | Descripción |
 | :--- | :--- | :--- |
-| cityId | string | Referencia al ID del documento de la ciudad. |
-| name | string | Título visible de la ruta turística. |
-| durationEst | string | Tiempo aproximado de recorrido (ej: "1h 30min"). |
-| difficulty | string | Nivel de dificultad (Fácil, Media, Difícil). |
-| poiIds | array<string> | Lista ordenada de IDs de puntos de interés que componen la ruta. |
-| totalRewardPoints | number | Suma total de puntos que otorga la ruta al finalizar. |
-| isActive | boolean | Estado operativo de la ruta. |
+| dificultad | string | Nivel de dificultad de la ruta (ej: "Facil"). |
+| duracion | string | Tiempo estimado para completar el recorrido. |
+| id_ciudad | string | ID de referencia de la ciudad a la que pertenece la ruta. |
+| id_puntos_interes | array<string> | Lista de IDs de los puntos de interés que componen la ruta. |
+| isActive | boolean | Define si la ruta está disponible para los usuarios. |
+| nombre | string | Título o nombre de la ruta (ej: "Espectáculos"). |
+| puntos_totales | number | Suma total de puntos que se pueden obtener en la ruta. |
 
 ---
 
-## 4.4 Colección: `points_of_interest`
+## 4.4 Colección: `puntos_interes`
 
-Contiene la información histórica, ubicación geográfica y la lógica de la misión/trivia.
+Información específica sobre los lugares clave que el usuario debe visitar durante una ruta.
 
 | Campo | Tipo | Descripción |
 | :--- | :--- | :--- |
-| name | string | Nombre del punto de interés (museo, monumento, etc.). |
-| description | string | Información histórica o curiosidades del lugar. |
-| location | geopoint | Coordenadas GPS (Latitud/Longitud) para el mapa y geovallas. |
-| imageURL | string(url) | URL de la fotografía del POI. |
-| mission | map | Objeto que encapsula la gamificación. |
-
-**Estructura interna de `mission`:**
-- `title` (string): Título de la misión específica.
-- `pointsReward` (number): Puntos obtenidos al completar esta parada.
-- `questions` (array<map>): Lista de preguntas tipo test:
-    - `question` (string): Enunciado de la pregunta.
-    - `options` (array<string>): Lista de las 4 opciones de respuesta.
-    - `correctIndex` (number): Índice (0-3) de la respuesta correcta.
+| descripcion | string | Reseña histórica o informativa detallada del lugar. |
+| imagen | string | URL o referencia a la imagen del punto de interés. |
+| localizacion | geopoint | Coordenadas geográficas (latitud y longitud) del punto. |
+| nombre | string | Nombre oficial del monumento o lugar (ej: "Anfiteatro Romano"). |
+| qr_code | string | Código identificador único para la validación mediante QR. |
+| radio_activacion | number | Distancia en metros para activar el punto por proximidad. |
 
 ---
 
-## 4.5 Colección: `results`
+## 4.5 Colección: `misiones`
 
-Almacena el registro histórico de cada ruta finalizada. Es la fuente de datos para la pantalla de resumen.
+Contiene los desafíos tipo trivia asociados a cada punto de interés.
 
 | Campo | Tipo | Descripción |
 | :--- | :--- | :--- |
-| userId | string | ID del usuario que completó la ruta. |
-| routeId | string | ID de la ruta realizada. |
-| pointsObtained | number | Puntos reales ganados en esa partida. |
-| timeUsed | string | Tiempo real empleado por el usuario. |
-| completedAt | timestamp | Fecha y hora de finalización del recorrido. |
-| details | array<map> | Resumen de cada respuesta: `pregunta`, `respuesta_usuario`, `respuesta_correcta`, `es_acierto`. |
+| puntos_premio | number | Cantidad de puntos otorgados al completar la misión. |
+| puntos_interes_id | string | ID del punto de interés al que pertenece esta misión. |
+| titulo | string | Título descriptivo del desafío. |
+| preguntas | array<map> | Lista de preguntas con sus opciones y el índice de la respuesta correcta. |
+
+### Estructura del objeto `preguntas` (dentro de `misiones`)
+
+Cada elemento dentro del array `preguntas` es un objeto de tipo mapa que contiene los siguientes campos:
+
+| Campo | Tipo | Descripción |
+| :--- | :--- | :--- |
+| pregunta_1 | string | El enunciado de la pregunta a mostrar al usuario. |
+| respuesta_1 | string | Primera opción de respuesta (ej: "a) 25 a.C."). |
+| respuesta_2 | string | Segunda opción de respuesta (ej: "b) 8 a.C."). |
+| respuesta_3 | string | Tercera opción de respuesta (ej: "c) 16 a.C."). |
+| indice_correcta | number | El índice numérico que identifica cuál de las respuestas es la correcta. |
+
+---
+
+## 4.6 Colección: `resultado`
+
+Almacena el registro de las partidas finalizadas por los usuarios para generar el resumen histórico y estadísticas de juego.
+
+| Campo | Tipo | Descripción |
+| :--- | :--- | :--- |
+| id_ruta | string | Identificador de la ruta que el usuario ha completado. |
+| id_usuario | string | Identificador único del usuario que ha realizado la ruta. |
+| puntos_partida | number | Cantidad de puntos obtenidos por el usuario en esa sesión específica. |
+| tiempo_empleado | string | Tiempo real que el usuario ha tardado en completar el recorrido. |
+| tiempo_total | string | Tiempo de referencia o duración estimada total de la ruta. |
+| detalles_mision | map | Mapa que contiene el desglose técnico o información adicional de la partida. |
+
+---
+
+## 4.7 Colección: `config_rangos`
+
+Define la jerarquía de niveles y los requisitos de puntuación para la progresión del usuario.
+
+| Campo | Tipo | Descripción |
+| :--- | :--- | :--- |
+| rangos | array<map> | Lista de objetos que definen cada escalafón del sistema de niveles. |
+
+### Estructura del objeto `rangos`
+
+Cada elemento dentro del array representa un nivel alcanzable:
+
+| Campo | Tipo | Descripción |
+| :--- | :--- | :--- |
+| nombre | string | Título del rango (ej: "Esclavo", "Ciudadano", "Legionario"). |
+| puntos_necesarios | number | Cantidad mínima de puntos globales requerida para alcanzar este rango. |
+| logo | string | URL o referencia al icono representativo del nivel. |
 
 ---
 
@@ -301,12 +341,70 @@ Almacena el registro histórico de cada ruta finalizada. Es la fuente de datos p
 A continuación se presenta la relación lógica entre las colecciones:
 
 ```mermaid
-erDiagram
-    USERS ||--o{ RESULTS : genera
-    CITIES ||--o{ ROUTES : contiene
-    ROUTES ||--o{ POINTS_OF_INTEREST : incluye
-    ROUTES ||--o{ RESULTS : registra
-    POINTS_OF_INTEREST ||--o{ RESULTS : detalla
+    erDiagram
+    usuario ||--o{ resultado : "genera"
+    usuario }o--|| config_rangos : "progresa segun"
+    ciudades ||--o{ rutas : "contiene"
+    rutas ||--o{ puntos_interes : "se compone de"
+    puntos_interes ||--o{ misiones : "contiene"
+    rutas ||--o{ resultado : "registra"
+
+    usuario {
+        string email
+        timestamp fecha_creacion
+        boolean isAdmin
+        string nombre
+        number puntos
+        string rango
+        array rutas_completadas
+        timestamp ultimo_acceso
+    }
+
+    ciudades {
+        string imagen
+        boolean isActive
+        string nombre
+        string provincia
+    }
+
+    rutas {
+        string dificultad
+        string duracion
+        string id_ciudad
+        array id_puntos_interes
+        boolean isActive
+        string nombre
+        number puntos_totales
+    }
+
+    puntos_interes {
+        string descripcion
+        string imagen
+        geopoint localizacion
+        string nombre
+        string qr_code
+        number radio_activacion
+    }
+
+    misiones {
+        string titulo
+        string puntos_interes_id
+        number puntos_premio
+        array preguntas
+    }
+
+    resultado {
+        string id_ruta
+        string id_usuario
+        number puntos_partida
+        string tiempo_empleado
+        string tiempo_total
+        map detalles_mision
+    }
+
+    config_rangos {
+        array rangos
+    }
 ```
 
 ---
