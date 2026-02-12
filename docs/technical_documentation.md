@@ -340,53 +340,87 @@ Cada elemento dentro del array representa un nivel alcanzable:
 
 ---
 
-## 4.8 Diagrama ER del Modelo de Datos
+### 4.8 Diagrama de Referencias Lógicas
 
-A continuación se presenta la relación lógica entre las colecciones:
+A continuación se detalla la estructura lógica de las colecciones y sus referencias, definiendo la organización y el tipado de la información almacenada en el sistema.
 
 ```mermaid
 erDiagram
-    usuario ||--o| config_rangos : "referencia ID en 'rango'"
-    usuario ||--o{ resultado : "referencia ID en 'id_usuario'"
-    ciudades ||--o{ rutas : "referencia ID en 'id_ciudad'"
-    rutas ||--o{ puntos_interes : "referencia array IDs en 'id_puntos_interes'"
-    puntos_interes ||--o| misiones : "referencia ID en 'puntos_interes_id'"
-    rutas ||--o{ resultado : "referencia ID en 'id_ruta'"
+    usuario ||--o| config_rangos : "referencia campo 'rango'"
+    usuario ||--o{ resultado : "referencia campo 'id_usuario'"
+    ciudades ||--o{ rutas : "referencia campo 'id_ciudad'"
+    rutas ||--o{ puntos_interes : "referencia array 'id_puntos_interes'"
+    puntos_interes ||--o| misiones : "referencia campo 'puntos_interes_id'"
+    rutas ||--o{ resultado : "referencia campo 'id_ruta'"
 
     usuario {
+        string nombre
         string email
         string rango
         number puntos
         array_string rutas_completadas
+        timestamp fecha_creacion
+        timestamp ultimo_acceso
+        boolean isAdmin
     }
+
     ciudades {
         string nombre
         string provincia
+        string imagen
+        boolean isActive
     }
+
     rutas {
+        string nombre
         string id_ciudad
         array_string id_puntos_interes
         string dificultad
+        string duracion
+        number puntos_totales
+        boolean isActive
     }
+
     puntos_interes {
-        string qr_code
-        geopoint localizacion
         string nombre
+        string descripcion
+        geopoint localizacion
+        string qr_code
+        number radio_activacion
+        string imagen
     }
+
     misiones {
-        string puntos_interes_id
         string titulo
+        string puntos_interes_id
+        number puntos_premio
         array_map preguntas
     }
+
     resultado {
         string id_usuario
         string id_ruta
         number puntos_partida
+        string tiempo_empleado
+        string tiempo_total
+        map detalles_mision
     }
+
     config_rangos {
         array_map rangos
     }
 ```
+
+---
+
+### 4.9 Disparadores de Datos y Validación (Triggers)
+
+El flujo de datos representado en el diagrama anterior se dinamiza mediante dos mecanismos de validación clave que vinculan la base de datos con el entorno físico del usuario:
+
+* **Validación por Geolocalización:** El campo `localizacion` (Geopoint) y el `radio_activacion` en la colección `puntos_interes` actúan como un disparador geoespacial. La aplicación compara en tiempo real la ubicación del dispositivo con las coordenadas almacenadas para habilitar el acceso a la misión correspondiente.
+* **Validación por Código QR:** El campo `qr_code` sirve como un mecanismo de integridad presencial. Funciona como una clave de acceso que el usuario debe escanear para confirmar su llegada al punto físico, permitiendo que la aplicación realice una consulta a la colección `misiones` y presente la trivia asociada.
+
+Estos disparadores aseguran que la persistencia en la colección `resultado` solo se produzca tras una interacción verificada con el patrimonio histórico, garantizando la veracidad de los puntos obtenidos.
 
 ---
 
