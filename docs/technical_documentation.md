@@ -207,11 +207,15 @@ El modelo de datos de **RuteX Go** está construido sobre **Firebase Firestore**
 
 Las colecciones principales son:
 
-- `users`: Perfiles de usuario y estadísticas globales.
-- `cities`: Catálogo de ciudades disponibles.
-- `routes`: Guías de los recorridos turísticos.
-- `points_of_interest`: Puntos de interés (POI) con misiones y trivias integradas.
-- `results`: Historial detallado de rutas completadas para el resumen final.
+Las colecciones principales son:
+
+- **`usuario`**: Almacena los perfiles de usuario, credenciales de administrador, puntos acumulados y el progreso global de rutas completadas.
+- **`ciudades`**: Catálogo de las localidades disponibles donde se desarrollan las experiencias turísticas.
+- **`rutas`**: Guías de los recorridos turísticos vinculadas a una ciudad, que agrupan diversos puntos de interés.
+- **`puntos_interes`**: Ubicaciones físicas clave con información histórica, coordenadas geográficas y validación mediante códigos QR.
+- **`misiones`**: Desafíos de tipo trivia (preguntas y respuestas) asociados a cada punto de interés para gamificar la visita.
+- **`resultado`**: Historial detallado de las rutas finalizadas, incluyendo tiempos y puntuaciones obtenidas por sesión.
+- **`config_rangos`**: Configuración del sistema de niveles y progresión basado en la puntuación del usuario.
 
 ---
 
@@ -336,74 +340,45 @@ Cada elemento dentro del array representa un nivel alcanzable:
 
 ---
 
-## 4.6 Diagrama ER del Modelo de Datos
+## 4.8 Diagrama ER del Modelo de Datos
 
 A continuación se presenta la relación lógica entre las colecciones:
 
 ```mermaid
     erDiagram
-    usuario ||--o{ resultado : "genera"
-    usuario }o--|| config_rangos : "progresa segun"
-    ciudades ||--o{ rutas : "contiene"
-    rutas ||--o{ puntos_interes : "se compone de"
-    puntos_interes ||--o{ misiones : "contiene"
-    rutas ||--o{ resultado : "registra"
+    usuario o..o| config_rangos : "referencia ID en campo 'rango'"
+    usuario o..o{ resultado : "referencia ID en 'id_usuario'"
+    ciudades o..o{ rutas : "referencia ID en 'id_ciudad'"
+    rutas o..o{ puntos_interes : "referencia array IDs en 'id_puntos_interes'"
+    puntos_interes o..o| misiones : "referencia ID en 'puntos_interes_id'"
+    rutas o..o{ resultado : "referencia ID en 'id_ruta'"
 
     usuario {
-        string email
-        timestamp fecha_creacion
-        boolean isAdmin
-        string nombre
-        number puntos
         string rango
-        array rutas_completadas
-        timestamp ultimo_acceso
+        number puntos
+        array_string rutas_completadas
     }
-
     ciudades {
-        string imagen
-        boolean isActive
         string nombre
-        string provincia
     }
-
     rutas {
-        string dificultad
-        string duracion
         string id_ciudad
-        array id_puntos_interes
-        boolean isActive
-        string nombre
-        number puntos_totales
+        array_string id_puntos_interes
     }
-
     puntos_interes {
-        string descripcion
-        string imagen
-        geopoint localizacion
-        string nombre
         string qr_code
-        number radio_activacion
+        geopoint localizacion
     }
-
     misiones {
-        string titulo
         string puntos_interes_id
-        number puntos_premio
-        array preguntas
+        array_map preguntas
     }
-
     resultado {
-        string id_ruta
         string id_usuario
-        number puntos_partida
-        string tiempo_empleado
-        string tiempo_total
-        map detalles_mision
+        string id_ruta
     }
-
     config_rangos {
-        array rangos
+        array_map rangos
     }
 ```
 
