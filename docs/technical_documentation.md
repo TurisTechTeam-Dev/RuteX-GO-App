@@ -345,37 +345,43 @@ Cada elemento dentro del array representa un nivel alcanzable:
 A continuación se presenta la relación lógica entre las colecciones:
 
 ```mermaid
-    erDiagram
-    usuario o..o| config_rangos : "referencia ID en campo 'rango'"
-    usuario o..o{ resultado : "referencia ID en 'id_usuario'"
-    ciudades o..o{ rutas : "referencia ID en 'id_ciudad'"
-    rutas o..o{ puntos_interes : "referencia array IDs en 'id_puntos_interes'"
-    puntos_interes o..o| misiones : "referencia ID en 'puntos_interes_id'"
-    rutas o..o{ resultado : "referencia ID en 'id_ruta'"
+erDiagram
+    usuario ||--o| config_rangos : "referencia ID en 'rango'"
+    usuario ||--o{ resultado : "referencia ID en 'id_usuario'"
+    ciudades ||--o{ rutas : "referencia ID en 'id_ciudad'"
+    rutas ||--o{ puntos_interes : "referencia array IDs en 'id_puntos_interes'"
+    puntos_interes ||--o| misiones : "referencia ID en 'puntos_interes_id'"
+    rutas ||--o{ resultado : "referencia ID en 'id_ruta'"
 
     usuario {
+        string email
         string rango
         number puntos
         array_string rutas_completadas
     }
     ciudades {
         string nombre
+        string provincia
     }
     rutas {
         string id_ciudad
         array_string id_puntos_interes
+        string dificultad
     }
     puntos_interes {
         string qr_code
         geopoint localizacion
+        string nombre
     }
     misiones {
         string puntos_interes_id
+        string titulo
         array_map preguntas
     }
     resultado {
         string id_usuario
         string id_ruta
+        number puntos_partida
     }
     config_rangos {
         array_map rangos
