@@ -35,22 +35,24 @@ class _SplashScreenState extends State<SplashScreen> {
               fit: BoxFit.contain,
             ),
           ),
-          // 2. Contenido central (Logo + Cargando)
+
+          // 2. Logo centrado
           Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(
-                  'assets/logos finales rutexgo1.2.png',
-                  width: 300,
-                ),
-                const SizedBox(height: 50), // Espacio entre logo y carga
-                // 3. Círculo de carga
-                const CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.deepPurple),
-                  strokeWidth: 3,
-                ),
-              ],
+            child: Image.asset(
+              'assets/logos finales rutexgo1.2.png',
+              width: 300,
+            ),
+          ),
+
+          // 3. Círculo de carga
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 100),
+              child: const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.deepPurple),
+                strokeWidth: 4,
+              ),
             ),
           ),
         ],
