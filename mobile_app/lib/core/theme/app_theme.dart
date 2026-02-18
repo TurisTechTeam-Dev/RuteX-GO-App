@@ -43,12 +43,15 @@ class AppTheme {
         // Inputs
         bodyMedium: TextStyle(
           fontSize: 14,
-          fontWeight: FontWeight.w400
+          fontWeight: FontWeight.w400,
+          color: AppColors.negroSuave
         ),
 
         // FootNote
         labelMedium: TextStyle(
-
+          fontSize: 12,
+          fontWeight: FontWeight.w400,
+          color: AppColors.negroSuave
         ),
       ),
 
