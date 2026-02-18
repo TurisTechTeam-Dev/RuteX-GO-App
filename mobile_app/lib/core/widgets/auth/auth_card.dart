@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_app/core/widgets/inputs/custom_inputs.dart';
 
 class AuthCard extends StatelessWidget {
   final List<Widget> children;
@@ -7,13 +6,31 @@ class AuthCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
+    return Padding(
+      
+      padding: const EdgeInsets.symmetric(horizontal: 25),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.3),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: children,
-        )
+        ),
       ),
     );
   }

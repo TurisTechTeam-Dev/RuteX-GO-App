@@ -58,13 +58,13 @@ class AppTheme {
       // 2. CARD THEME
       cardTheme: CardThemeData(
         color: AppColors.blanco,
-        elevation: 8,
+        elevation: 10,
         shadowColor: Colors.black26,
-        surfaceTintColor: Colors.white, // Evita el tinte azul de Material 3
+        surfaceTintColor: Colors.white,
         margin: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20), // El redondeado de tu diseño
-          side: const BorderSide(color: Color(0xFFE0E0E0), width: 0.5), // Un borde sutil opcional
+          borderRadius: BorderRadius.circular(20),
+
         ),
       ),
 
