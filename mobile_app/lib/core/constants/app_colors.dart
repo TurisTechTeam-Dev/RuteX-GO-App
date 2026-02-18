@@ -8,7 +8,7 @@ class AppColors {
   static const Color negroSuave = Color(0xFF2F3333);
   static const Color negro = Color(0xFF0B0B0B);
 
-  static const Color inputBackground = Color(0xFF3F5F1);
+  static const Color inputBackground = Color(0xFFE9E6DC);
   static const Color error =  Color(0xFFFF0000);
 
 }

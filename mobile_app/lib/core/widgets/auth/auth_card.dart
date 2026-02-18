@@ -1,34 +1,39 @@
 import 'package:flutter/material.dart';
 
+import '../../constants/app_colors.dart';
+
 class AuthCard extends StatelessWidget {
   final List<Widget> children;
-  const AuthCard({super.key, required this.children});
+
+  const AuthCard({
+    super.key,
+    required this.children,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      
-      padding: const EdgeInsets.symmetric(horizontal: 25),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 24,
+          vertical: 28,
+        ),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.3),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.3),
-            width: 1.5,
-          ),
+          color: Colors.white.withOpacity(0.30),
+          borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 15,
-              offset: const Offset(0, 8),
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 30,
+              offset: const Offset(0, 12),
             ),
           ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: children,
         ),
       ),

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
+
 import '../../../core/routes/app_routes.dart';
 import '../../../core/widgets/auth/auth_card.dart';
 import '../../../core/widgets/inputs/custom_inputs.dart';
 import '../../../core/widgets/buttons/custom_button.dart';
+import '../data/auth_repository_impl.dart';
+import '../domain/usescases/login_usecase.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,14 +17,23 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // 1. Controladores para capturar el texto
+
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  late final LoginUseCase _loginUseCase;
 
   bool _isLoading = false;
   String? _errorMessage;
 
-  // 2. Lógica de Login con Firebase
+  @override
+  void initState() {
+    super.initState();
+
+    final repository = AuthRepositoryImpl(FirebaseAuth.instance);
+    _loginUseCase = LoginUseCase(repository);
+  }
+
   Future<void> _handleLogin() async {
     setState(() {
       _isLoading = true;
@@ -28,35 +41,24 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
+      await _loginUseCase(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
       );
 
       if (mounted) {
         Navigator.pushReplacementNamed(context, AppRoutes.home);
       }
-    } on FirebaseAuthException catch (e) {
-      setState(() => _errorMessage = _mapError(e.code));
-    } catch (e) {
-      setState(() => _errorMessage = "Ocurrió un error inesperado.");
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
 
-  String _mapError(String code) {
-    switch (code) {
-      case 'user-not-found':
-        return "El correo no está registrado.";
-      case 'wrong-password':
-        return "La contraseña es incorrecta.";
-      case 'invalid-email':
-        return "El formato del email no es válido.";
-      case 'user-disabled':
-        return "Este usuario ha sido deshabilitado.";
-      default:
-        return "Error al iniciar sesión. Inténtalo de nuevo.";
+    } catch (e) {
+      setState(() {
+        _errorMessage =
+            e.toString().replaceFirst("Exception: ", "");
+      });
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -69,12 +71,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
+
           // FONDO
           Container(
             decoration: const BoxDecoration(
@@ -84,15 +88,19 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
-          Container(color: Colors.black.withOpacity(0.05)),
 
-          // CONTENIDO
+          Container(
+            color: Colors.white.withOpacity(0.30),
+          ),
+
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+
+                  // LOGO
                   Hero(
                     tag: 'logo',
                     child: Image.asset(
@@ -100,23 +108,45 @@ class _LoginScreenState extends State<LoginScreen> {
                       height: size.height * 0.18,
                     ),
                   ),
-                  const SizedBox(height: 30),
 
+                  const SizedBox(height: 20),
+
+                  // TEXTO DESCRIPTIVO
+                  Text(
+                    '"Descubre rutas culturales,\n'
+                        'aprende y juega recorriendo\n'
+                        'la historia de Extremadura."',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      height: 1.4,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+
+                  const SizedBox(height: 25),
+
+                  // CARD LOGIN
                   AuthCard(
                     children: [
+
                       Text(
                         "Iniciar Sesión",
-                        style: Theme.of(context).textTheme.displayLarge
-                            ?.copyWith(fontSize: 24, color: Colors.black),
+                        style: Theme.of(context)
+                            .textTheme
+                            .displayLarge
+                            ?.copyWith(
+                          fontSize: 24,
+                          color: Colors.black,
+                        ),
                       ),
+
                       const SizedBox(height: 25),
 
-                      // INPUTS con controladores
                       custom_input(
                         label: 'Email',
                         hint: 'tu@email.com',
-                        controller:
-                            _emailController, // Asegúrate de que tu widget acepte controller
+                        controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                       ),
 
@@ -128,8 +158,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         keyboardType: TextInputType.visiblePassword,
                       ),
 
-                      // Mensaje de error si existe
                       if (_errorMessage != null) ...[
+                        const SizedBox(height: 10),
                         Text(
                           _errorMessage!,
                           style: const TextStyle(
@@ -137,37 +167,45 @@ class _LoginScreenState extends State<LoginScreen> {
                             fontSize: 12,
                           ),
                         ),
-                        const SizedBox(height: 10),
                       ],
 
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 15),
 
-                      // BOTÓN con estado de carga
-                      custom_button(
-                        text: _isLoading ? "CARGANDO..." : "ENTRAR",
-                        onPressed: _isLoading ? () {} : _handleLogin,
+                      CustomButton(
+                        text: _isLoading
+                            ? "CARGANDO..."
+                            : "ENTRAR",
+                        onPressed:
+                        _isLoading ? null : _handleLogin,
                       ),
 
                       const SizedBox(height: 20),
 
-                      // ENLACE A REGISTRO
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment:
+                        MainAxisAlignment.center,
                         children: [
                           const Text("¿No tienes cuenta? "),
                           GestureDetector(
-                            onTap: () => Navigator.pushNamed(
-                              context,
-                              AppRoutes.register,
-                            ),
+                            onTap: () {
+                              Navigator.pushNamed(
+                                context,
+                                AppRoutes.register,
+                              );
+                            },
                             child: Text(
                               "Regístrate",
-                              style: Theme.of(context).textTheme.bodyMedium
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
                                   ?.copyWith(
-                                    color: Theme.of(context).primaryColor,
-                                    fontWeight: FontWeight.bold,
-                                    decoration: TextDecoration.underline,
-                                  ),
+                                color: Theme.of(context)
+                                    .primaryColor,
+                                fontWeight:
+                                FontWeight.bold,
+                                decoration:
+                                TextDecoration.underline,
+                              ),
                             ),
                           ),
                         ],
