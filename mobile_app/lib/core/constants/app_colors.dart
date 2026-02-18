@@ -9,5 +9,6 @@ class AppColors {
   static const Color negro = Color(0xFF0B0B0B);
 
   static const Color inputBackground = Color(0xFF3F5F1);
+  static const Color error =  Color(0xFFFF0000);
 
 }
