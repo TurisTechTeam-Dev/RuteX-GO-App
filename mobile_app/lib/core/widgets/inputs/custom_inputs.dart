@@ -2,32 +2,45 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
- class Custom_input extends StatelessWidget {
- final String label;
-  
+ class custom_input extends StatelessWidget {
+  final String label;
+  final String hint;
   final bool isPassword;
   final TextInputType keyboardType;
+  final TextEditingController? controller;
 
-  const Custom_input({
+  const custom_input({
     super.key,
     required this.label,
+    required this.hint,
     this.isPassword = false, 
     this.keyboardType = TextInputType.text,
+    this.controller,
   });
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      obscureText: isPassword,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: Colors.black,
+          ),
         ),
-        filled: true,
-        fillColor: Colors.grey[50], // Un toque de color de fondo
-      ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          obscureText: isPassword,
+          keyboardType: keyboardType,
+          decoration: InputDecoration(
+            hintText: hint,
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
     );
   }
-}
+ }

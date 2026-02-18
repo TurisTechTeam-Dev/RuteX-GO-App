@@ -55,7 +55,28 @@ class AppTheme {
         ),
       ),
 
+      // 2. CARD THEME
+      cardTheme: CardThemeData(
+        color: AppColors.blanco,
+        elevation: 8,
+        shadowColor: Colors.black26,
+        surfaceTintColor: Colors.white, // Evita el tinte azul de Material 3
+        margin: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20), // El redondeado de tu diseño
+          side: const BorderSide(color: Color(0xFFE0E0E0), width: 0.5), // Un borde sutil opcional
+        ),
+      ),
 
+      // 3. INPUT DECORATION THEME
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: const Color(0xFFF3F5F1),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: AppColors.verdeClaro),
+        ),
+      ),
     );
   }
 }
