@@ -6,6 +6,10 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       primaryColor: AppColors.verde,
+      scaffoldBackgroundColor: AppColors.blanco,
+
+
+
 
     ),
   }
