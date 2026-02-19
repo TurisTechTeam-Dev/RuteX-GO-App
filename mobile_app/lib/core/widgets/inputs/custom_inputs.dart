@@ -30,49 +30,51 @@ import 'package:flutter/material.dart';
             color: Colors.black,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         TextFormField(
           controller: controller,
           obscureText: isPassword,
           keyboardType: keyboardType,
-          style: Theme.of(context).textTheme.bodyLarge,
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            fontSize: 15,
+          ),
           decoration: InputDecoration(
             hintText: hint,
             filled: true,
             fillColor: const Color(0xFFE9E6DC),
 
             contentPadding: const EdgeInsets.symmetric(
-              horizontal: 18,
-              vertical: 18,
+              horizontal: 16,
+              vertical: 12, // 🔥 más bajo
             ),
 
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(14), // 🔥 menos redondo
               borderSide: const BorderSide(
                 color: Color(0xFF4CAF70),
-                width: 2,
+                width: 1.5, // 🔥 más fino
               ),
             ),
 
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(14),
               borderSide: const BorderSide(
                 color: Color(0xFF4CAF70),
-                width: 2,
+                width: 1.5,
               ),
             ),
 
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(14),
               borderSide: const BorderSide(
                 color: Color(0xFF007A3D),
-                width: 2.5,
+                width: 2,
               ),
             ),
           ),
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
       ],
     );
   }

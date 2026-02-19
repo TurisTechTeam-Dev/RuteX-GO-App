@@ -49,7 +49,6 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         Navigator.pushReplacementNamed(context, AppRoutes.home);
       }
-
     } catch (e) {
       setState(() {
         _errorMessage =
@@ -71,8 +70,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery
+        .of(context)
+        .size;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -93,55 +93,46 @@ class _LoginScreenState extends State<LoginScreen> {
             color: Colors.white.withOpacity(0.30),
           ),
 
-          Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+          SingleChildScrollView(
+            child: Column(
+              children: [
 
-                  // LOGO
-                  Hero(
-                    tag: 'logo',
-                    child: Image.asset(
-                      'assets/logos finales rutexgo1.2.png',
-                      height: size.height * 0.18,
-                    ),
+                const SizedBox(height: 100),
+
+                // LOGO
+                Hero(
+                  tag: 'logo',
+                  child: Image.asset(
+                    'assets/logos finales rutexgo1.2.png',
+                    height: size.height * 0.22,
                   ),
+                ),
 
-                  const SizedBox(height: 20),
+                const SizedBox(height: 30),
 
-                  // TEXTO DESCRIPTIVO
-                  Text(
-                    '"Descubre rutas culturales,\n'
-                        'aprende y juega recorriendo\n'
-                        'la historia de Extremadura."',
+                // TEXTO DESCRIPTIVO
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2),
+                  child: Text(
+                    '"Descubre rutas culturales, aprende y juega recorriendo la historia de Extremadura."',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      height: 1.4,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w500,
+                      height: 1.45,
+                      letterSpacing: 0.06,
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
+                ),
 
-                  const SizedBox(height: 25),
+                const SizedBox(height: 14),
 
-                  // CARD LOGIN
-                  AuthCard(
+                // CARD
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 45),
+                  child: AuthCard(
                     children: [
-
-                      Text(
-                        "Iniciar Sesión",
-                        style: Theme.of(context)
-                            .textTheme
-                            .displayLarge
-                            ?.copyWith(
-                          fontSize: 24,
-                          color: Colors.black,
-                        ),
-                      ),
-
-                      const SizedBox(height: 25),
 
                       custom_input(
                         label: 'Email',
@@ -174,16 +165,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       CustomButton(
                         text: _isLoading
                             ? "CARGANDO..."
-                            : "ENTRAR",
+                            : "Iniciar Sesión",
                         onPressed:
                         _isLoading ? null : _handleLogin,
                       ),
 
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 18),
 
                       Row(
-                        mainAxisAlignment:
-                        MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Text("¿No tienes cuenta? "),
                           GestureDetector(
@@ -195,16 +185,16 @@ class _LoginScreenState extends State<LoginScreen> {
                             },
                             child: Text(
                               "Regístrate",
-                              style: Theme.of(context)
+                              style: Theme
+                                  .of(context)
                                   .textTheme
                                   .bodyMedium
                                   ?.copyWith(
-                                color: Theme.of(context)
+                                color: Theme
+                                    .of(context)
                                     .primaryColor,
-                                fontWeight:
-                                FontWeight.bold,
-                                decoration:
-                                TextDecoration.underline,
+                                fontWeight: FontWeight.bold,
+                                decoration: TextDecoration.underline,
                               ),
                             ),
                           ),
@@ -212,8 +202,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ],
                   ),
-                ],
-              ),
+                ),
+
+                const SizedBox(height: 60),
+              ],
             ),
           ),
         ],
