@@ -6,16 +6,16 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       fontFamily: 'Montserrat',
-      primaryColor: AppColors.verde,
-      scaffoldBackgroundColor: AppColors.blanco,
+      primaryColor: AppColors.verdePrincipal,
+      scaffoldBackgroundColor: AppColors.blancoPuro,
 
       colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.verde,
-        primary: AppColors.verde,
+        seedColor: AppColors.verdePrincipal,
+        primary: AppColors.verdePrincipal,
         secondary: AppColors.verdeClaro,
-        surface: AppColors.blanco,
-        onSurface: AppColors.negro,
-        error: AppColors.error
+        surface: AppColors.blancoPuro,
+        onSurface: AppColors.negroTexto,
+        error: AppColors.error,
       ),
 
       textTheme: const TextTheme(
@@ -23,86 +23,105 @@ class AppTheme {
         displayLarge: TextStyle(
           fontSize: 28,
           fontWeight: FontWeight.w700,
-          color: AppColors.negro
+          color: AppColors.negroTexto
         ),
 
         //H2 Subtitulos
         displayMedium: TextStyle(
           fontSize: 22,
           fontWeight: FontWeight.w600,
-          color: AppColors.negro
+          color: AppColors.negroTexto
         ),
 
         // Body / Informacion
         bodyLarge: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w400,
-          color: AppColors.negro
+          color: AppColors.negroTexto
         ),
 
         // Inputs
         bodyMedium: TextStyle(
-          fontSize: 14,
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+            color: AppColors.grisSombra
+        ),
+
+        // TextButton
+        labelLarge: TextStyle(
+          fontSize: 16,
           fontWeight: FontWeight.w400,
-          color: AppColors.negroSuave
+            color: AppColors.verdePrincipal
         ),
 
         // FootNote
         labelMedium: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w400,
-          color: AppColors.negroSuave
-        ),
+          color: AppColors.grisSombra
+        )
       ),
+
 
       // 2. CARD THEME
       cardTheme: CardThemeData(
-        color: AppColors.blanco,
-        elevation: 10,
-        shadowColor: Colors.black26,
-        surfaceTintColor: Colors.white,
+        color: AppColors.tarjetaTransparente,
+        elevation: 0,
         margin: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-
+          borderRadius: BorderRadius.circular(12),
         ),
       ),
 
       // 3. INPUT DECORATION THEME
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: const Color(0xFFE9E6DC),
-
+        fillColor: AppColors.cremaInput,
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 18,
-          vertical: 18,
+          horizontal: 10,
+          vertical: 10,
         ),
-
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(
-            color: AppColors.verdeClaro,
-            width: 2,
-          ),
-        ),
-
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(
-            color: AppColors.verdeClaro,
+            color: AppColors.verdeBorde,
             width: 2,
           ),
         ),
-
+        // Borde al seleccionar (Focused)
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(
-            color: AppColors.verde,
+            color: AppColors.verdePrincipal,
             width: 2.5,
           ),
         ),
+        // Estilo del hint
+        hintStyle: TextStyle(
+          color: AppColors.grisSombra.withValues(alpha: 0.4),
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+        ),
       ),
 
+      // 4. ELEVATED BUTTON THEME
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.verdePrincipal,
+          foregroundColor: AppColors.blancoPuro,
+          elevation: 2,
+          shadowColor: AppColors.sombraSuave,
+          minimumSize: const Size(double.infinity, 48),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          textStyle: const TextStyle(
+            fontFamily: 'Montserrat',
+            fontWeight: FontWeight.w700,
+            fontSize: 16,
+          ),
+        ),
+      ),
     );
   }
 }

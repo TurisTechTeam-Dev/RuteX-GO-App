@@ -1,8 +1,7 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import '../../constants/app_colors.dart';
 
- class custom_input extends StatelessWidget {
+class custom_input extends StatelessWidget {
   final String label;
   final String hint;
   final bool isPassword;
@@ -13,7 +12,7 @@ import 'package:flutter/material.dart';
     super.key,
     required this.label,
     required this.hint,
-    this.isPassword = false, 
+    this.isPassword = false,
     this.keyboardType = TextInputType.text,
     this.controller,
   });
@@ -27,10 +26,10 @@ import 'package:flutter/material.dart';
           label,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w700,
-            color: Colors.black,
+            color: AppColors.negroTexto,
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 10),
         TextFormField(
           controller: controller,
           obscureText: isPassword,
@@ -41,41 +40,43 @@ import 'package:flutter/material.dart';
           decoration: InputDecoration(
             hintText: hint,
             filled: true,
-            fillColor: const Color(0xFFE9E6DC),
+            fillColor: AppColors.cremaInput,
 
             contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 12, // 🔥 más bajo
+              horizontal: 10,
+              vertical: 10,
             ),
 
+            // Borde base
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14), // 🔥 menos redondo
+              borderRadius: BorderRadius.circular(10),
               borderSide: const BorderSide(
-                color: Color(0xFF4CAF70),
-                width: 1.5, // 🔥 más fino
-              ),
-            ),
-
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: Color(0xFF4CAF70),
-                width: 1.5,
-              ),
-            ),
-
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: Color(0xFF007A3D),
+                color: AppColors.verdeBorde,
                 width: 2,
+              ),
+            ),
+
+            // Borde cuando no está seleccionado
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(
+                color: AppColors.verdeBorde,
+                width: 2,
+              ),
+            ),
+
+            // Borde cuando el usuario hace clic
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(
+                color: AppColors.verdePrincipal,
+                width: 2.5,
               ),
             ),
           ),
         ),
-
         const SizedBox(height: 20),
       ],
     );
   }
- }
+}
