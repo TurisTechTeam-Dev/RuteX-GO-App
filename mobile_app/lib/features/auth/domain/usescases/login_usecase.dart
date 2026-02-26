@@ -10,9 +10,6 @@ class LoginUseCase {
       throw Exception("Debes completar todos los campos.");
     }
 
-    await repository.login( 
-      email: email,
-      password: password,
-    );
+    await repository.login(email: email, password: password);
   }
 }

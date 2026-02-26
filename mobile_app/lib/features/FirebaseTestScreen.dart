@@ -23,15 +23,16 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
     try {
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
+            email: _emailController.text.trim(),
+            password: _passwordController.text.trim(),
+          );
 
-      setState(() => _status = "✅ Login exitoso: ${userCredential.user?.email}");
+      setState(
+        () => _status = "✅ Login exitoso: ${userCredential.user?.email}",
+      );
 
       // Si el login funciona, intentamos traer los datos de Firestore automáticamente
       _fetchUserData(userCredential.user!.uid);
-
     } catch (e) {
       setState(() => _status = "❌ Error Auth: $e");
     }
@@ -52,7 +53,10 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
           _status += "\n✅ Datos de Firestore cargados.";
         });
       } else {
-        setState(() => _status += "\n❓ No existe documento para este UID en Firestore.");
+        setState(
+          () =>
+              _status += "\n❓ No existe documento para este UID en Firestore.",
+        );
       }
     } catch (e) {
       setState(() => _status += "\n❌ Error Firestore: $e");
@@ -82,20 +86,29 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
               // Campos de texto
               TextField(
                 controller: _emailController,
-                decoration: const InputDecoration(labelText: "Email del Turista", border: OutlineInputBorder()),
+                decoration: const InputDecoration(
+                  labelText: "Email del Turista",
+                  border: OutlineInputBorder(),
+                ),
               ),
               const SizedBox(height: 10),
               TextField(
                 controller: _passwordController,
                 obscureText: true,
-                decoration: const InputDecoration(labelText: "Contraseña", border: OutlineInputBorder()),
+                decoration: const InputDecoration(
+                  labelText: "Contraseña",
+                  border: OutlineInputBorder(),
+                ),
               ),
 
               const SizedBox(height: 20),
 
               ElevatedButton(
                 onPressed: _loginTest,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple, foregroundColor: Colors.white),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple,
+                  foregroundColor: Colors.white,
+                ),
                 child: const Text("Probar Login y Firestore"),
               ),
 
@@ -111,7 +124,10 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("Estado:", style: TextStyle(fontWeight: FontWeight.bold)),
+                    const Text(
+                      "Estado:",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     Text(_status),
                   ],
                 ),
@@ -121,11 +137,16 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
 
               // Panel de Datos del Usuario
               if (_userData != null) ...[
-                const Text("Datos del Perfil (Firestore):", style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  "Datos del Perfil (Firestore):",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 Card(
                   child: ListTile(
                     leading: const Icon(Icons.person, color: Colors.deepPurple),
-                    title: Text("Nombre: ${_userData!['nombre'] ?? 'Sin nombre'}"),
+                    title: Text(
+                      "Nombre: ${_userData!['nombre'] ?? 'Sin nombre'}",
+                    ),
                     subtitle: Text("Puntos: ${_userData!['puntos'] ?? '0'}"),
                   ),
                 ),

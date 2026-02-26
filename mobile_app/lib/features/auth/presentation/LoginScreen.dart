@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-
 import '../../../core/constants/app_colors.dart';
 import '../../../core/routes/app_routes.dart';
 import '../../../core/widgets/auth/auth_card.dart';
@@ -18,7 +17,6 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -52,8 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage =
-            e.toString().replaceFirst("Exception: ", "");
+        _errorMessage = e.toString().replaceFirst("Exception: ", "");
       });
     } finally {
       if (mounted) {
@@ -92,7 +89,6 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               children: [
                 const SizedBox(height: 80), // Bajamos un poco menos el logo
-
                 // LOGO
                 Hero(
                   tag: 'logo',
@@ -152,14 +148,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
-                          onPressed: () { /* Navegar a recuperar */ },
+                          onPressed: () {
+                            /* Navegar a recuperar */
+                          },
                           style: TextButton.styleFrom(padding: EdgeInsets.zero),
                           child: Text(
                             "¿Has olvidado tu contraseña?",
-                            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                              fontSize: 11,
-                              color: AppColors.grisSombra,
-                            ),
+                            style: Theme.of(context).textTheme.labelMedium
+                                ?.copyWith(
+                                  fontSize: 11,
+                                  color: AppColors.grisSombra,
+                                ),
                           ),
                         ),
                       ),
@@ -172,18 +171,22 @@ class _LoginScreenState extends State<LoginScreen> {
                         children: [
                           Text(
                             "¿No tienes cuenta?  ",
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(fontWeight: FontWeight.w700),
                           ),
                           GestureDetector(
-                            onTap: () => Navigator.pushNamed(context, AppRoutes.register),
+                            onTap: () => Navigator.pushNamed(
+                              context,
+                              AppRoutes.register,
+                            ),
                             child: Text(
                               "Regístrate",
                               style: TextStyle(
-                                color: AppColors.verdePrincipal, // Corregido a Verde
+                                color: AppColors
+                                    .verdePrincipal, // Corregido a Verde
                                 fontWeight: FontWeight.bold,
-                                decoration: TextDecoration.none, // En la captura no parece subrayado
+                                decoration: TextDecoration
+                                    .none, // En la captura no parece subrayado
                               ),
                             ),
                           ),

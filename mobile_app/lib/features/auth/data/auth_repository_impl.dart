@@ -8,10 +8,7 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this.firebaseAuth);
 
   @override
-  Future<void> login({
-    required String email,
-    required String password,
-  }) async {
+  Future<void> login({required String email, required String password}) async {
     try {
       await firebaseAuth.signInWithEmailAndPassword(
         email: email,

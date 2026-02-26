@@ -23,19 +23,16 @@ class CustomCard extends StatelessWidget {
       height: height,
       padding: padding ?? const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.blancoTarjeta.withValues(alpha: 0.3),
+        color: AppColors.blancoTarjeta,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: AppColors.negroTexto,
-          width: 2,
-        ),
+        border: Border.all(color: AppColors.negroTexto, width: 2),
 
         boxShadow: [
           BoxShadow(
-            color: AppColors.sombraSuave,
-            blurRadius: 6,
+            color: Colors.black,
             offset: const Offset(0, 4),
-            blurStyle: BlurStyle.outer
+            blurRadius: 4,
+            spreadRadius: 0,
           ),
         ],
       ),

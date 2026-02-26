@@ -3,10 +3,10 @@ abstract class Failure {
   const Failure(this.mensaje);
 }
 
-class ServerFailure extends Failure{
+class ServerFailure extends Failure {
   const ServerFailure(super.mensaje);
 }
 
-class AuthFailure extends Failure{
+class AuthFailure extends Failure {
   const AuthFailure(super.mensaje);
 }

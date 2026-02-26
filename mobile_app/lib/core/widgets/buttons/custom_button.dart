@@ -36,17 +36,12 @@ class CustomButton extends StatelessWidget {
           backgroundColor: AppColors.verdePrincipal,
           foregroundColor: AppColors.blancoPuro,
           elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           padding: const EdgeInsets.symmetric(horizontal: 16),
         ),
         child: Text(
           text,
-          style: const TextStyle(
-            fontWeight: FontWeight.w700,
-            fontSize: 16,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
         ),
       ),
     );

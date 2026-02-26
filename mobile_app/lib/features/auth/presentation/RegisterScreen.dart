@@ -32,10 +32,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           Center(
             child: Opacity(
               opacity: 0.3,
-              child: Image.asset(
-                'assets/Mapa Fondo Extremadura.jpeg',
-
-              ),
+              child: Image.asset('assets/Mapa Fondo Extremadura.jpeg'),
             ),
           ),
 
@@ -99,14 +96,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 value: _aceptaTerminos,
                                 activeColor: AppColors.verdePrincipal,
                                 visualDensity: VisualDensity.compact,
-                                onChanged: (value) => setState(() => _aceptaTerminos = value!),
+                                onChanged: (value) =>
+                                    setState(() => _aceptaTerminos = value!),
                               ),
                               Text(
                                 "Acepto términos y condiciones",
-                                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                                  fontSize: 12,
-                                  color: AppColors.negroTexto,
-                                ),
+                                style: Theme.of(context).textTheme.labelMedium
+                                    ?.copyWith(
+                                      fontSize: 12,
+                                      color: AppColors.negroTexto,
+                                    ),
                               ),
                             ],
                           ),
@@ -117,7 +116,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         CustomButton(
                           text: "Crear cuenta",
                           onPressed: () {
-                            if(_aceptaTerminos) {
+                            if (_aceptaTerminos) {
                               // Lógica
                             }
                           },

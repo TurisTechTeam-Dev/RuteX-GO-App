@@ -34,9 +34,7 @@ class custom_input extends StatelessWidget {
           controller: controller,
           obscureText: isPassword,
           keyboardType: keyboardType,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            fontSize: 15,
-          ),
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 15),
           decoration: InputDecoration(
             hintText: hint,
             filled: true,

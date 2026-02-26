@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 
 class AppTheme {
-  static ThemeData get lightTheme{
+  static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
       fontFamily: 'Montserrat',
@@ -23,54 +23,51 @@ class AppTheme {
         displayLarge: TextStyle(
           fontSize: 28,
           fontWeight: FontWeight.w700,
-          color: AppColors.negroTexto
+          color: AppColors.negroTexto,
         ),
 
         //H2 Subtitulos
         displayMedium: TextStyle(
           fontSize: 22,
           fontWeight: FontWeight.w600,
-          color: AppColors.negroTexto
+          color: AppColors.negroTexto,
         ),
 
         // Body / Informacion
         bodyLarge: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w400,
-          color: AppColors.negroTexto
+          color: AppColors.negroTexto,
         ),
 
         // Inputs
         bodyMedium: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-            color: AppColors.grisSombra
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+          color: AppColors.grisSombra,
         ),
 
         // TextButton
         labelLarge: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w400,
-            color: AppColors.verdePrincipal
+          color: AppColors.verdePrincipal,
         ),
 
         // FootNote
         labelMedium: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w400,
-          color: AppColors.grisSombra
-        )
+          color: AppColors.grisSombra,
+        ),
       ),
-
 
       // 2. CARD THEME
       cardTheme: CardThemeData(
         color: AppColors.tarjetaTransparente,
         elevation: 0,
         margin: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
 
       // 3. INPUT DECORATION THEME
@@ -83,10 +80,7 @@ class AppTheme {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(
-            color: AppColors.verdeBorde,
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: AppColors.verdeBorde, width: 2),
         ),
         // Borde al seleccionar (Focused)
         focusedBorder: OutlineInputBorder(
@@ -112,9 +106,7 @@ class AppTheme {
           elevation: 2,
           shadowColor: AppColors.sombraSuave,
           minimumSize: const Size(double.infinity, 48),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           textStyle: const TextStyle(
             fontFamily: 'Montserrat',
             fontWeight: FontWeight.w700,

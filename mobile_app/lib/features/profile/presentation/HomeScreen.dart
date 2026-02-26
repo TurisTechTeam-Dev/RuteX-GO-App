@@ -1,9 +1,44 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile_app/features/profile/data/profile_remote_datasource.dart';
+import 'package:mobile_app/features/profile/data/profile_repository_impl.dart';
+import 'package:mobile_app/features/profile/domain/usecases/get_completed_routes.dart';
+import 'package:mobile_app/features/profile/domain/usecases/get_user_profile.dart';
+
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/cards/custom_cards.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  late final GetUserProfile getUserProfile;
+  late final GetCompletedRoutes getCompletedRoutes;
+
+  late Future<Map<String, dynamic>> userFuture;
+  late Future<List<Map<String, dynamic>>> routesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final firestore = FirebaseFirestore.instance;
+    final remote = ProfileRemoteDatasource(firestore);
+    final repository = ProfileRepositoryImpl(remote);
+
+    getUserProfile = GetUserProfile(repository);
+    getCompletedRoutes = GetCompletedRoutes(repository);
+
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+
+    userFuture = getUserProfile(uid);
+    routesFuture = getCompletedRoutes(uid);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,179 +47,172 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
-          "RuteX Go",
-          style: TextStyle(
-            color: AppColors.verdePrincipal,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.menu, color: AppColors.verdePrincipal),
+            icon: const Icon(Icons.menu, color: AppColors.negroTexto),
             onPressed: () {},
           ),
         ],
       ),
-      body: Stack(
-        children: [
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: userFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-          // 🔹 FONDO IGUAL QUE LOGIN
-          Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/Mapa Fondo Extremadura.jpeg'),
-                opacity: 0.4,
-                fit: BoxFit.contain,
+          if (snapshot.hasError) {
+            return const Center(child: Text("Error al cargar el usuario"));
+          }
+
+          final userData = snapshot.data!;
+
+          return Stack(
+            children: [
+              // 🔹 FONDO
+              Container(
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/Mapa Fondo Extremadura.jpeg'),
+                    opacity: 0.4,
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
-            ),
-          ),
 
-          // 🔹 CONTENIDO
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+              SafeArea(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Línea superior
+                    Container(height: 2, color: AppColors.negroTexto),
 
-                  const SizedBox(height: 10),
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _userCard(userData),
+                          const SizedBox(height: 20),
 
-                  // CARD USUARIO
-                  _userCard(),
+                          const StrokeTitle(text: "Estadísticas"),
+                          const SizedBox(height: 12),
 
-                  const SizedBox(height: 20),
+                          _statsCard(userData),
+                          const SizedBox(height: 20),
 
-                  // ESTADÍSTICAS
-                  const Text(
-                    "Estadísticas",
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.verdePrincipal,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  _statsCard(),
-
-                  const SizedBox(height: 20),
-
-                  // RUTAS COMPLETADAS
-                  const Text(
-                    "Rutas Completadas",
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.verdePrincipal,
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // 🔥 SOLO ESTO HACE SCROLL
-                  Expanded(
-                    child: ListView(
-                      children: [
-
-                        _routeCard(
-                          title: "Ruta Romana (Mérida)",
-                          missions: "1/3",
-                          date: "08/10/2025",
-                          points: "100 pts",
-                        ),
-
-                        const SizedBox(height: 12),
-
-                        _routeCard(
-                          title: "Ruta Cotidiana (Mérida)",
-                          missions: "2/3",
-                          date: "15/10/2025",
-                          points: "100 pts",
-                        ),
-
-                        const SizedBox(height: 12),
-
-                        // 👉 NUEVA RUTA PARA PROBAR SCROLL
-                        _routeCard(
-                          title: "Ruta Imperial (Mérida)",
-                          missions: "3/3",
-                          date: "22/10/2025",
-                          points: "150 pts",
-                        ),
-
-                        const SizedBox(height: 20),
-                      ],
-                    ),
-                  ),
-
-                  // BOTÓN FIJO
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.verdePrincipal,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                          const StrokeTitle(text: "Rutas Completadas"),
+                        ],
                       ),
-                      onPressed: () {},
-                      child: const Text(
-                        "¡Visitar!",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.blancoPuro,
+                    ),
+
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: ListView(
+                          children: [
+                            _routeCard(
+                              title: "Ruta Romana (Mérida)",
+                              missions: "1/3",
+                              date: "08/10/2025",
+                              points: "100 pts",
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            _routeCard(
+                              title: "Ruta Cotidiana (Mérida)",
+                              missions: "2/3",
+                              date: "15/10/2025",
+                              points: "100 pts",
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            _routeCard(
+                              title: "Ruta Imperial (Mérida)",
+                              missions: "3/3",
+                              date: "22/10/2025",
+                              points: "150 pts",
+                            ),
+
+                            const SizedBox(height: 20),
+                          ],
                         ),
                       ),
                     ),
-                  ),
 
-                  const SizedBox(height: 10),
-                ],
+                    // Línea inferior
+                    Container(height: 2, color: AppColors.negroTexto),
+
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.verdePrincipal,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 12,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            onPressed: () {},
+                            child: const Text(
+                              "¡Visitar!",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.blancoPuro,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }
 
-  static Widget _userCard() {
+  static Widget _userCard(Map<String, dynamic> userData) {
     return CustomCard(
       padding: const EdgeInsets.all(16),
-      child: const Row(
+      child: Row(
         children: [
-          CircleAvatar(
+          const CircleAvatar(
             radius: 30,
             backgroundColor: AppColors.verdePrincipal,
             child: Icon(Icons.person, color: AppColors.blancoPuro),
           ),
-          SizedBox(width: 16),
+          const SizedBox(width: 16),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "DiegoVP01",
-                style: TextStyle(
+                userData['nombre'] ?? 'Sin nombre',
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   color: AppColors.negroTexto,
                 ),
               ),
-              SizedBox(height: 4),
-              Text(
-                "Explorador novato desde Oct 2025",
-                style: TextStyle(
-                  color: AppColors.grisNeutro,
-                ),
+              const SizedBox(height: 4),
+              const Text(
+                "Explorador novato",
+                style: TextStyle(color: AppColors.grisNeutro),
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Text(
-                "Rango: Legionario",
-                style: TextStyle(
-                  color: AppColors.verdePrincipal,
-                ),
+                "Rango: ${userData['rango'] ?? 'Sin rango'}",
+                style: const TextStyle(color: AppColors.verdePrincipal),
               ),
             ],
           ),
@@ -193,21 +221,52 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  static Widget _statsCard() {
+  static Widget _statsCard(Map<String, dynamic> userData) {
     return CustomCard(
+      width: double.infinity,
       padding: const EdgeInsets.all(16),
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Rutas completadas: 2"),
-          SizedBox(height: 6),
-          Text("Misiones: 6/6"),
-          SizedBox(height: 6),
-          Text("Puntos totales: 480"),
-          SizedBox(height: 6),
-          Text("Monumentos visitados: 6"),
-          SizedBox(height: 6),
-          Text("Medallas: 3"),
+          Text(
+            "Rutas completadas: ${(userData['rutas_completadas'] as List?)?.length ?? 0}",
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.negroTexto,
+            ),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            "Misiones: 6/6",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.negroTexto,
+            ),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            "Puntos totales: 480",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.negroTexto,
+            ),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            "Monumentos visitados: 6",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.negroTexto,
+            ),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            "Medallas: 3",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.negroTexto,
+            ),
+          ),
         ],
       ),
     );
@@ -220,6 +279,7 @@ class HomeScreen extends StatelessWidget {
     required String points,
   }) {
     return CustomCard(
+      width: double.infinity,
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -232,9 +292,59 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Text("Misiones: $missions"),
+          Text(
+            "Misiones: $missions",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.negroTexto,
+            ),
+          ),
           const SizedBox(height: 6),
-          Text("Ruta completada: $date"),
+          Text(
+            "Ruta completada: $date",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.negroTexto,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class StrokeTitle extends StatelessWidget {
+  final String text;
+
+  const StrokeTitle({super.key, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Stack(
+        children: [
+          // Borde verde
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              foreground: Paint()
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = 1.5
+                ..color = AppColors.verdePrincipal,
+            ),
+          ),
+
+          // Texto negro
+          Text(
+            text,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: AppColors.negroTexto,
+            ),
+          ),
         ],
       ),
     );

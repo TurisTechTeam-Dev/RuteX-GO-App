@@ -17,10 +17,10 @@ class AuthCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-              color: AppColors.grisSombra.withValues(alpha: 0.2),
+            color: AppColors.grisSombra.withValues(alpha: 0.2),
             blurRadius: 4,
             offset: const Offset(0, 4),
-            blurStyle: BlurStyle.outer
+            blurStyle: BlurStyle.outer,
           ),
         ],
       ),

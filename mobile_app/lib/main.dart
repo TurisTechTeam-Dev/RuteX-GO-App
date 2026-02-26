@@ -6,9 +6,7 @@ import 'core/routes/app_routes.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(const RutexApp());
 }
@@ -21,10 +19,7 @@ class RutexApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'RutexGo',
-      theme: ThemeData(
-        useMaterial3: true,
-        primarySwatch: Colors.deepPurple,
-      ),
+      theme: ThemeData(useMaterial3: true, primarySwatch: Colors.deepPurple),
       initialRoute: AppRoutes.splash,
       routes: AppRoutes.getRoutes(),
     );
