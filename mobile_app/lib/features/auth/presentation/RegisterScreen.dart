@@ -17,7 +17,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _nombreController = TextEditingController();
   final _apellidoController = TextEditingController();
   final _emailController = TextEditingController();
-  final _contrasenaController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _aceptaTerminos = false;
 
   @override
@@ -86,7 +86,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         custom_input(
                           label: 'Contraseña',
                           hint: 'Introduce tu contraseña',
-                          controller: _contrasenaController,
+                          controller: _passwordController,
                           isPassword: true,
                         ),
 
