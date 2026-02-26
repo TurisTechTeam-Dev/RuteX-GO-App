@@ -112,7 +112,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
 
-                        const SizedBox(height: 5),
+                        const SizedBox(height: 10),
 
                         CustomButton(
                           text: "Crear cuenta",
@@ -123,7 +123,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           },
                         ),
 
-                        const SizedBox(height: 15),
+                        const SizedBox(height: 16),
 
                         // FOOTER
                         Row(
