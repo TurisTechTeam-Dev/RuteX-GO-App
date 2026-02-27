@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_app/features/profile/data/profile_remote_datasource.dart';
 import 'package:mobile_app/features/profile/data/profile_repository_impl.dart';
-import 'package:mobile_app/features/profile/domain/usecases/get_completed_routes.dart';
-import 'package:mobile_app/features/profile/domain/usecases/get_user_profile.dart';
+import 'package:mobile_app/features/profile/domain/usecases/ProfileUsesCases.dart';
+
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/cards/custom_cards.dart';
@@ -17,11 +17,12 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late final GetUserProfile getUserProfile;
-  late final GetCompletedRoutes getCompletedRoutes;
+  late final ProfileUsesCases _profileUsesCases;
+  late final ProfileRepositoryImpl repository;
 
   late Future<Map<String, dynamic>> userFuture;
   late Future<List<Map<String, dynamic>>> routesFuture;
+  late Future<Map<String, dynamic>> rangosFuture;
 
   @override
   void initState() {
@@ -29,16 +30,30 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final firestore = FirebaseFirestore.instance;
     final remote = ProfileRemoteDatasource(firestore);
-    final repository = ProfileRepositoryImpl(remote);
+    repository = ProfileRepositoryImpl(remote);
 
-    getUserProfile = GetUserProfile(repository);
-    getCompletedRoutes = GetCompletedRoutes(repository);
+    _profileUsesCases = ProfileUsesCases(repository);
 
     final uid = FirebaseAuth.instance.currentUser!.uid;
 
-    userFuture = getUserProfile(uid);
-    routesFuture = getCompletedRoutes(uid);
+    userFuture = _profileUsesCases.getUserProfile(uid);
+    routesFuture = _profileUsesCases.getCompletedRoutes(uid);
+    rangosFuture = _profileUsesCases.getConfigRangos("3CpvEa6pk5fvifbr73jW");
   }
+
+  String _calcularNombreRango(int puntos, List<dynamic> listaRangos){
+    String nombre = "Esclavo";
+    int puntosMax = -1;
+
+    for (var rango in listaRangos){
+      if(puntos >= rango['puntos_necesarios'] && rango['puntos_necesarios'] > puntosMax){
+        puntosMax = rango['puntos_necesarios'];
+        nombre = rango['nombre'];
+      }
+    }
+    return nombre;
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -56,134 +71,147 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: FutureBuilder<Map<String, dynamic>>(
         future: userFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+        builder: (context, userSnapshot) {
+          if (userSnapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (snapshot.hasError) {
+          if (userSnapshot.hasError || !userSnapshot.hasData) {
             return const Center(child: Text("Error al cargar el usuario"));
           }
 
-          final userData = snapshot.data!;
+          final userData = userSnapshot.data!;
 
-          return Stack(
-            children: [
-              // 🔹 FONDO
-              Container(
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/Mapa Fondo Extremadura.jpeg'),
-                    opacity: 0.4,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
+          return FutureBuilder<Map<String, dynamic>>(
+              future: rangosFuture,
+              builder: (context, rangosSnapshot){
+                if(rangosSnapshot.connectionState == ConnectionState.waiting){
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if(rangosSnapshot.hasError || !rangosSnapshot.hasData){
+                  return const Center(child: Text("Error al cargar los rangos"));
+                }
+                final rangosData = rangosSnapshot.data!;
 
-              SafeArea(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                final nombreRango = _calcularNombreRango(
+                    userData ['puntos'] ?? 0,
+                    rangosData['rangos']);
+
+
+                return Stack(
                   children: [
-                    // Línea superior
-                    Container(height: 2, color: AppColors.negroTexto),
-
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _userCard(userData),
-                          const SizedBox(height: 20),
-
-                          const StrokeTitle(text: "Estadísticas"),
-                          const SizedBox(height: 12),
-
-                          _statsCard(userData),
-                          const SizedBox(height: 20),
-
-                          const StrokeTitle(text: "Rutas Completadas"),
-                        ],
-                      ),
-                    ),
-
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: ListView(
-                          children: [
-                            _routeCard(
-                              title: "Ruta Romana (Mérida)",
-                              missions: "1/3",
-                              date: "08/10/2025",
-                              points: "100 pts",
-                            ),
-
-                            const SizedBox(height: 12),
-
-                            _routeCard(
-                              title: "Ruta Cotidiana (Mérida)",
-                              missions: "2/3",
-                              date: "15/10/2025",
-                              points: "100 pts",
-                            ),
-
-                            const SizedBox(height: 12),
-
-                            _routeCard(
-                              title: "Ruta Imperial (Mérida)",
-                              missions: "3/3",
-                              date: "22/10/2025",
-                              points: "150 pts",
-                            ),
-
-                            const SizedBox(height: 20),
-                          ],
+                    // 🔹 FONDO
+                    Container(
+                      decoration: const BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('assets/Mapa Fondo Extremadura.jpeg'),
+                          opacity: 0.4,
+                          fit: BoxFit.contain,
                         ),
                       ),
                     ),
 
-                    // Línea inferior
-                    Container(height: 2, color: AppColors.negroTexto),
-
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                    SafeArea(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.verdePrincipal,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 12,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                          // Línea superior
+                          Container(height: 2, color: AppColors.negroTexto),
+
+                          Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Pasamos el nombre calculado
+                                _userCard(userData, nombreRango),
+                                const SizedBox(height: 20),
+
+                                const StrokeTitle(text: "Estadísticas"),
+                                const SizedBox(height: 12),
+
+                                _statsCard(userData),
+                                const SizedBox(height: 20),
+
+                                const StrokeTitle(text: "Rutas Completadas"),
+                              ],
+                            ),
+                          ),
+
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: ListView(
+                                children: [
+                                  _routeCard(
+                                    title: "Ruta Romana (Mérida)",
+                                    missions: "1/3",
+                                    date: "08/10/2025",
+                                    points: "100 pts",
+                                  ),
+                                  const SizedBox(height: 12),
+                                  _routeCard(
+                                    title: "Ruta Cotidiana (Mérida)",
+                                    missions: "2/3",
+                                    date: "15/10/2025",
+                                    points: "100 pts",
+                                  ),
+                                  const SizedBox(height: 12),
+                                  _routeCard(
+                                    title: "Ruta Imperial (Mérida)",
+                                    missions: "3/3",
+                                    date: "22/10/2025",
+                                    points: "150 pts",
+                                  ),
+                                  const SizedBox(height: 20),
+                                ],
                               ),
                             ),
-                            onPressed: () {},
-                            child: const Text(
-                              "¡Visitar!",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.blancoPuro,
-                              ),
+                          ),
+
+                          // Línea inferior
+                          Container(height: 2, color: AppColors.negroTexto),
+
+                          Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.verdePrincipal,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 24,
+                                      vertical: 12,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  onPressed: () {},
+                                  child: const Text(
+                                    "¡Visitar!",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.blancoPuro,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
                     ),
                   ],
-                ),
-              ),
-            ],
-          );
+                );
+              });
         },
       ),
     );
   }
 
-  static Widget _userCard(Map<String, dynamic> userData) {
+  static Widget _userCard(Map<String, dynamic> userData, String nombreRango) {
     return CustomCard(
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -211,7 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 4),
               Text(
-                "Rango: ${userData['rango'] ?? 'Sin rango'}",
+                "Rango: $nombreRango",
                 style: const TextStyle(color: AppColors.verdePrincipal),
               ),
             ],

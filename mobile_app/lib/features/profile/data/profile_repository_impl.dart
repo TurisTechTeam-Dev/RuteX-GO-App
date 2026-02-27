@@ -15,4 +15,15 @@ class ProfileRepositoryImpl implements ProfileRepository {
   Future<List<Map<String, dynamic>>> getCompletedRoutes(String uid) async {
     return await remoteDatasource.getCompletedRoutes(uid);
   }
+
+  @override
+  Future <Map<String, dynamic>> getConfigRangos (String rangoId) async{
+    return await remoteDatasource.getConfigRangos(rangoId);
+  }
+
+  @override
+  Future<void> logout() {
+    // TODO: implement logout
+    throw UnimplementedError();
+  }
 }

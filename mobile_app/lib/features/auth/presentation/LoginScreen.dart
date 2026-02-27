@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:mobile_app/features/auth/domain/usescases/AuthUseCases.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/routes/app_routes.dart';
@@ -7,7 +9,7 @@ import '../../../core/widgets/auth/auth_card.dart';
 import '../../../core/widgets/inputs/custom_inputs.dart';
 import '../../../core/widgets/buttons/custom_button.dart';
 import '../data/auth_repository_impl.dart';
-import '../domain/usescases/login_usecase.dart';
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,7 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  late final LoginUseCase _loginUseCase;
+  late final AuthUsesCases _authUseCases;
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -29,8 +31,11 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
 
-    final repository = AuthRepositoryImpl(FirebaseAuth.instance);
-    _loginUseCase = LoginUseCase(repository);
+    final repository = AuthRepositoryImpl(
+      FirebaseAuth.instance,
+      FirebaseFirestore.instance,
+    );
+    _authUseCases = AuthUsesCases(repository);
   }
 
   Future<void> _handleLogin() async {
@@ -40,7 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      await _loginUseCase(
+      await _authUseCases.login(
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
@@ -71,6 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
