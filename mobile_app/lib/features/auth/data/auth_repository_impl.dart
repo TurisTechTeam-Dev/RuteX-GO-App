@@ -1,6 +1,7 @@
 // features/auth/data/repositories/auth_repository_impl.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import '../domain/repositories/AuthRepository.dart';
 
 
@@ -11,12 +12,24 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this.firebaseAuth, this.firestore);
 
   @override
+  Stream<User?> get authStateChanges => firebaseAuth.authStateChanges();
+
+  @override
   Future<void> login({required String email, required String password}) async {
     try {
-      await firebaseAuth.signInWithEmailAndPassword(
+      UserCredential userCredential = await firebaseAuth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
+
+      if (userCredential.user != null) {
+        await firestore
+            .collection('usuarios')
+            .doc(userCredential.user!.uid)
+            .update({
+          'ultimo_acceso': FieldValue.serverTimestamp(),
+        });
+      }
     } on FirebaseAuthException catch (e) {
       throw Exception(_mapError(e.code));
     }
@@ -25,7 +38,6 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> register({
     required String nombre,
-    required String apellido,
     required String usuario,
     required String email,
     required String password,
@@ -39,17 +51,27 @@ class AuthRepositoryImpl implements AuthRepository {
       await firestore.collection('usuarios').doc(uid).set({
         'uid': uid,
         'nombre': nombre,
-        'apellido': apellido,
         'usuario': usuario,
         'email': email,
         'fecha_creacion': FieldValue.serverTimestamp(),
         'ultimo_acceso': FieldValue.serverTimestamp(),
+        'puntos': 0,
+        'rutas_completadas': [],
         'isAdmin': false,
       });
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
         throw Exception("El correo electrónico ya está registrado.");
       }
+      throw Exception(_mapError(e.code));
+    }
+  }
+
+  @override
+  Future<void> recoverPassword(String email) async{
+    try{
+      await firebaseAuth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e){
       throw Exception(_mapError(e.code));
     }
   }

@@ -7,6 +7,7 @@ class custom_input extends StatelessWidget {
   final bool isPassword;
   final TextInputType keyboardType;
   final TextEditingController? controller;
+  final String? Function(String?)? validator;
 
   const custom_input({
     super.key,
@@ -15,6 +16,7 @@ class custom_input extends StatelessWidget {
     this.isPassword = false,
     this.keyboardType = TextInputType.text,
     this.controller,
+    this.validator,
   });
 
   @override
@@ -34,6 +36,7 @@ class custom_input extends StatelessWidget {
           controller: controller,
           obscureText: isPassword,
           keyboardType: keyboardType,
+          validator: validator,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 15),
           decoration: InputDecoration(
             hintText: hint,
@@ -69,6 +72,15 @@ class custom_input extends StatelessWidget {
               borderSide: const BorderSide(
                 color: AppColors.verdePrincipal,
                 width: 2.5,
+              ),
+            ),
+
+            // Borde cuando salta error
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(
+              color: AppColors.error,
+              width: 2,
               ),
             ),
           ),

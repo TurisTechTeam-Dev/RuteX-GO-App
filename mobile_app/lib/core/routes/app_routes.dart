@@ -13,7 +13,6 @@ import '../../features/routes/presentation/CitySelectionScreen.dart';
 import '../../features/routes/presentation/RouteSelectionScreen.dart';
 
 class AppRoutes {
-  static const String splash = '/';
   static const String login = '/login';
   static const String register = '/register';
   static const String home = '/home';
@@ -26,7 +25,6 @@ class AppRoutes {
 
   static Map<String, WidgetBuilder> getRoutes() {
     return {
-      splash: (context) => const SplashScreen(),
       login: (context) => const LoginScreen(),
       register: (context) => const RegisterScreen(),
       home: (context) => const HomeScreen(),

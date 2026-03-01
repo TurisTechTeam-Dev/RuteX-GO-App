@@ -6,6 +6,7 @@ import '../../../core/widgets/auth/auth_card.dart';
 import '../../../core/widgets/inputs/custom_inputs.dart';
 import '../../../core/widgets/buttons/custom_button.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/utils/validadores.dart'; // ✅ Import necesario
 import '../data/auth_repository_impl.dart';
 import '../domain/usescases/AuthUseCases.dart';
 
@@ -17,15 +18,19 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _usuarioController = TextEditingController();
   final _nombreController = TextEditingController();
-  final _apellidoController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
   bool _aceptaTerminos = false;
   bool _isLoading = false;
+  bool _isButtonEnabled = false;
 
   late final AuthUsesCases _authUseCases;
+
   @override
   void initState() {
     super.initState();
@@ -34,39 +39,75 @@ class _RegisterScreenState extends State<RegisterScreen> {
       FirebaseFirestore.instance,
     );
     _authUseCases = AuthUsesCases(repository);
+
+    // Escuchar cambios para habilitar botón
+    _usuarioController.addListener(_validateForm);
+    _nombreController.addListener(_validateForm);
+    _emailController.addListener(_validateForm);
+    _passwordController.addListener(_validateForm);
+    _confirmPasswordController.addListener(_validateForm);
+  }
+
+  void _validateForm(){
+    setState(() {
+      _isButtonEnabled = _usuarioController.text.isNotEmpty &&
+          _nombreController.text.isNotEmpty &&
+          _emailController.text.isNotEmpty &&
+          _passwordController.text.isNotEmpty &&
+          _confirmPasswordController.text.isNotEmpty &&
+          _aceptaTerminos;
+    });
+  }
+
+  @override
+  void dispose() {
+    _usuarioController.dispose();
+    _nombreController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
   }
 
   Future<void> _handleRegister() async {
-    if (!_aceptaTerminos) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Debes aceptar los términos y condiciones.")),
-      );
-      return;
-    }
+    if (_formKey.currentState!.validate() && _aceptaTerminos) {
 
-    setState(() => _isLoading = true);
+      setState(() => _isLoading = true);
 
-    try {
-      await _authUseCases.register(
-        nombre: _nombreController.text.trim(),
-        apellido: _apellidoController.text.trim(),
-        usuario: _usuarioController.text.trim(),
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
-
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, AppRoutes.home);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString().replaceAll("Exception: ", ""))),
+      try {
+        await _authUseCases.register(
+          nombre: _nombreController.text.trim(),
+          usuario: _usuarioController.text.trim(),
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
         );
+
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, AppRoutes.home);
+        }
+      } catch (e) {
+        if (mounted) {
+          String errorMessage = "Error al registrarse";
+
+          if (e.toString().contains('email-already-in-use')) {
+            errorMessage = "El correo electrónico ya está registrado.";
+          } else {
+            errorMessage = e.toString().replaceAll("Exception: ", "");
+          }
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(errorMessage)),
+          );
+        }
+        debugPrint(e.toString());
+      } finally {
+        if (mounted) setState(() => _isLoading = false);
       }
-      print(e);
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+    } else if (!_aceptaTerminos) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text("Debes aceptar los términos y condiciones.")),
+      );
     }
   }
 
@@ -75,7 +116,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
           // 1. FONDO
@@ -109,83 +150,99 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 30),
                     child: AuthCard(
                       children: [
-                        custom_input(
-                          label: 'Usuario',
-                          hint: 'Introduce tu nombre de usuario',
-                          controller: _usuarioController,
-                        ),
-                        custom_input(
-                          label: 'Nombre',
-                          hint: 'Introduce tu nombre',
-                          controller: _nombreController,
-                        ),
-                        custom_input(
-                          label: 'Apellidos',
-                          hint: 'Introduce tus apellidos',
-                          controller: _apellidoController,
-                        ),
-                        custom_input(
-                          label: 'Email',
-                          hint: 'Introduce tu email',
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                        ),
-                        custom_input(
-                          label: 'Contraseña',
-                          hint: 'Introduce tu contraseña',
-                          controller: _passwordController,
-                          isPassword: true,
-                        ),
-
-                        // CHECKBOX
-                        Transform.translate(
-                          offset: const Offset(-8, 0),
-                          child: Row(
+                        Form(
+                          key: _formKey,
+                          child: Column(
                             children: [
-                              Checkbox(
-                                value: _aceptaTerminos,
-                                activeColor: AppColors.verdePrincipal,
-                                visualDensity: VisualDensity.compact,
-                                onChanged: (value) =>
-                                    setState(() => _aceptaTerminos = value!),
+                              custom_input(
+                                label: 'Usuario',
+                                hint: 'Introduce tu nombre de usuario',
+                                controller: _usuarioController,
+                                validator: (value) => Validadores.validarCampoVacio(value, 'Usuario'),
                               ),
-                              Text(
-                                "Acepto términos y condiciones",
-                                style: Theme.of(context).textTheme.labelMedium
-                                    ?.copyWith(
-                                      fontSize: 12,
-                                      color: AppColors.negroTexto,
+                              custom_input(
+                                label: 'Nombre',
+                                hint: 'Introduce tu nombre',
+                                controller: _nombreController,
+                                validator: (value) => Validadores.validarCampoVacio(value, 'Nombre'),
+                              ),
+                              custom_input(
+                                label: 'Email',
+                                hint: 'Introduce tu email',
+                                controller: _emailController,
+                                keyboardType: TextInputType.emailAddress,
+                                validator: Validadores.validarEmail,
+                              ),
+                              custom_input(
+                                label: 'Contraseña',
+                                hint: 'Introduce tu contraseña',
+                                controller: _passwordController,
+                                isPassword: true,
+                                validator: Validadores.validarPassword,
+                              ),
+
+                              custom_input(
+                                label: 'Confirmar Contraseña',
+                                hint: 'Repite tu contraseña',
+                                controller: _confirmPasswordController,
+                                isPassword: true,
+                                validator: (value) => Validadores.validarCoincidencia(value, _passwordController.text),
+                              ),
+
+                              // CHECKBOX
+                              Transform.translate(
+                                offset: const Offset(-8, 0),
+                                child: Row(
+                                  children: [
+                                    Checkbox(
+                                      value: _aceptaTerminos,
+                                      activeColor: AppColors.verdePrincipal,
+                                      visualDensity: VisualDensity.compact,
+                                      onChanged: (value) {
+                                        setState(() => _aceptaTerminos = value!);
+                                        _validateForm();
+                                      },
                                     ),
+                                    Text(
+                                      "Acepto términos y condiciones",
+                                      style: Theme.of(context).textTheme.labelMedium
+                                          ?.copyWith(
+                                        fontSize: 12,
+                                        color: AppColors.negroTexto,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              const SizedBox(height: 10),
+
+                              CustomButton(
+                                text: _isLoading ? "CARGANDO..." : "Crear cuenta",
+                                onPressed: _isButtonEnabled ? _handleRegister : null,
+                              ),
+
+                              const SizedBox(height: 16),
+
+                              // FOOTER
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text("¿Ya tienes cuenta?  "),
+                                  GestureDetector(
+                                    onTap: () => Navigator.pop(context),
+                                    child: Text(
+                                      "Iniciar sesión",
+                                      style: TextStyle(
+                                        color: AppColors.verdePrincipal,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        CustomButton(
-                          text: _isLoading ? "CARGANDO..." : "Crear cuenta",
-                          onPressed: _isLoading || !_aceptaTerminos ? null : _handleRegister,
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        // FOOTER
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text("¿Ya tienes cuenta?  "),
-                            GestureDetector(
-                              onTap: () => Navigator.pop(context),
-                              child: Text(
-                                "Iniciar sesión",
-                                style: TextStyle(
-                                  color: AppColors.verdePrincipal,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
                         ),
                       ],
                     ),

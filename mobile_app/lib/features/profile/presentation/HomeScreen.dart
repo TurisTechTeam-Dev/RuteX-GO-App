@@ -5,7 +5,6 @@ import 'package:mobile_app/features/profile/data/profile_remote_datasource.dart'
 import 'package:mobile_app/features/profile/data/profile_repository_impl.dart';
 import 'package:mobile_app/features/profile/domain/usecases/ProfileUsesCases.dart';
 
-
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/cards/custom_cards.dart';
 
@@ -41,19 +40,19 @@ class _HomeScreenState extends State<HomeScreen> {
     rangosFuture = _profileUsesCases.getConfigRangos("3CpvEa6pk5fvifbr73jW");
   }
 
-  String _calcularNombreRango(int puntos, List<dynamic> listaRangos){
+  String _calcularNombreRango(int puntos, List<dynamic> listaRangos) {
     String nombre = "Esclavo";
     int puntosMax = -1;
 
-    for (var rango in listaRangos){
-      if(puntos >= rango['puntos_necesarios'] && rango['puntos_necesarios'] > puntosMax){
+    for (var rango in listaRangos) {
+      if (puntos >= rango['puntos_necesarios'] &&
+          rango['puntos_necesarios'] > puntosMax) {
         puntosMax = rango['puntos_necesarios'];
         nombre = rango['nombre'];
       }
     }
     return nombre;
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -62,13 +61,35 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.menu, color: AppColors.negroTexto),
-            onPressed: () {},
-          ),
-        ],
+        // --- CORRECCIÓN: Quitamos el Builder de actions y dejamos que el Drawer gestione el icono ---
+        iconTheme: const IconThemeData(color: AppColors.negroTexto),
+        actions: [],
       ),
+      // --- MENÚ LATERAL ---
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(color: AppColors.verdePrincipal),
+              child: Text(
+                'Menú RutexGo',
+                style: TextStyle(color: Colors.white, fontSize: 24),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.exit_to_app, color: Colors.red),
+              title: const Text('Cerrar sesión'),
+              onTap: () async {
+                // Lógica de logout
+                await FirebaseAuth.instance.signOut();
+                // Al cerrar sesión, el main.dart redirigirá automáticamente a la pantalla de login
+              },
+            ),
+          ],
+        ),
+      ),
+      // --- TU CONTENIDO SIGUE IGUAL ---
       body: FutureBuilder<Map<String, dynamic>>(
         future: userFuture,
         builder: (context, userSnapshot) {
@@ -84,19 +105,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
           return FutureBuilder<Map<String, dynamic>>(
               future: rangosFuture,
-              builder: (context, rangosSnapshot){
-                if(rangosSnapshot.connectionState == ConnectionState.waiting){
+              builder: (context, rangosSnapshot) {
+                if (rangosSnapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                if(rangosSnapshot.hasError || !rangosSnapshot.hasData){
+                if (rangosSnapshot.hasError || !rangosSnapshot.hasData) {
                   return const Center(child: Text("Error al cargar los rangos"));
                 }
                 final rangosData = rangosSnapshot.data!;
 
                 final nombreRango = _calcularNombreRango(
-                    userData ['puntos'] ?? 0,
-                    rangosData['rangos']);
-
+                    userData['puntos'] ?? 0, rangosData['rangos']);
 
                 return Stack(
                   children: [
@@ -211,6 +230,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // --- MÉTODOS DE UI SE MANTIENEN IGUAL ---
   static Widget _userCard(Map<String, dynamic> userData, String nombreRango) {
     return CustomCard(
       padding: const EdgeInsets.all(16),

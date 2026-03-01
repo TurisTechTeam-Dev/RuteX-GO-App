@@ -8,6 +8,7 @@ import '../../../core/routes/app_routes.dart';
 import '../../../core/widgets/auth/auth_card.dart';
 import '../../../core/widgets/inputs/custom_inputs.dart';
 import '../../../core/widgets/buttons/custom_button.dart';
+import '../../../core/utils/validadores.dart';
 import '../data/auth_repository_impl.dart';
 
 
@@ -19,6 +20,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -39,6 +41,9 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
+
+    if(!_formKey.currentState!.validate()) return;
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -57,10 +62,50 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         _errorMessage = e.toString().replaceFirst("Exception: ", "");
       });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_errorMessage!), backgroundColor: AppColors.error),
+        );
+      }
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
       }
+    }
+  }
+
+  Future<void> _recoverPassword() async{
+    final emailerror = Validadores.validarEmail(_emailController.text);
+    if(emailerror != null){
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Introduce un email válido arriba para recuperar tu contraseña"),
+            backgroundColor: Colors.orange),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try{
+      await _authUseCases.recoverPassword(_emailController.text.trim());
+      if (mounted){
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text("Correo de recuperacuión enviado."),
+              backgroundColor: AppColors.exito,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString()), backgroundColor: AppColors.error),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -85,7 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
             decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage('assets/Mapa Fondo Extremadura.jpeg'),
-                opacity: 0.4, // Un poco más visible según la captura 2
+                opacity: 0.4,
                 fit: BoxFit.contain,
               ),
             ),
@@ -94,13 +139,13 @@ class _LoginScreenState extends State<LoginScreen> {
           SingleChildScrollView(
             child: Column(
               children: [
-                const SizedBox(height: 80), // Bajamos un poco menos el logo
+                const SizedBox(height: 80),
                 // LOGO
                 Hero(
                   tag: 'logo',
                   child: Image.asset(
                     'assets/logos finales rutexgo1.2.png',
-                    height: size.height * 0.18, // Un poco más pequeño
+                    height: size.height * 0.18,
                   ),
                 ),
 
@@ -113,7 +158,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     '"Descubre rutas culturales, aprende y juega recorriendo la historia de Extremadura."',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontSize: 18, // Tamaño ajustado según diseño
+                      fontSize: 18,
                       fontWeight: FontWeight.w600,
                       height: 1.2,
                       color: AppColors.negroTexto,
@@ -128,18 +173,27 @@ class _LoginScreenState extends State<LoginScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 35),
                   child: AuthCard(
                     children: [
-                      custom_input(
-                        label: 'Email',
-                        hint: 'Introduce tu email', // Hint ajustado
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                      ),
+                      Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            custom_input(
+                              label: 'Email',
+                              hint: 'Introduce tu email',
+                              controller: _emailController,
+                              keyboardType: TextInputType.emailAddress,
+                              validator: Validadores.validarEmail,
+                            ),
 
-                      custom_input(
-                        label: 'Contraseña',
-                        hint: 'Introduce tu contraseña', // Hint ajustado
-                        isPassword: true,
-                        controller: _passwordController,
+                            custom_input(
+                              label: 'Contraseña',
+                              hint: 'Introduce tu contraseña',
+                              isPassword: true,
+                              controller: _passwordController,
+                              validator: Validadores.validarPassword,
+                            ),
+                          ],
+                        ),
                       ),
 
                       const SizedBox(height: 30),
@@ -154,9 +208,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
-                          onPressed: () {
-                            /* Navegar a recuperar */
-                          },
+                          onPressed: _recoverPassword,
                           style: TextButton.styleFrom(padding: EdgeInsets.zero),
                           child: Text(
                             "¿Has olvidado tu contraseña?",
@@ -189,10 +241,10 @@ class _LoginScreenState extends State<LoginScreen> {
                               "Regístrate",
                               style: TextStyle(
                                 color: AppColors
-                                    .verdePrincipal, // Corregido a Verde
+                                    .verdePrincipal,
                                 fontWeight: FontWeight.bold,
                                 decoration: TextDecoration
-                                    .none, // En la captura no parece subrayado
+                                    .none,
                               ),
                             ),
                           ),
