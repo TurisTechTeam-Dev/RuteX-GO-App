@@ -1,7 +1,7 @@
 // features/auth/domain/usecases/auth_usecases.dart
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../repositories/AuthRepository.dart';
+import '../repository/auth_repository.dart';
 
 
 class AuthUsesCases {

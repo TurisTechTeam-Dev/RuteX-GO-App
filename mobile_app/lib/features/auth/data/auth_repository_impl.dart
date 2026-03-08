@@ -1,8 +1,7 @@
-// features/auth/data/repositories/auth_repository_impl.dart
+// features/auth/data/repository/auth_repository_impl.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-import '../domain/repositories/AuthRepository.dart';
+import '../domain/repository/auth_repository.dart';
 
 
 class AuthRepositoryImpl implements AuthRepository {

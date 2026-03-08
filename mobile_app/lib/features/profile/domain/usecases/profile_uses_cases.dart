@@ -20,8 +20,4 @@ class ProfileUsesCases {
     return repository.getConfigRangos(configId);
   }
 
-// --- Caso de Uso 4: Logout (Asumiendo que existe en tu repo) ---
-  Future<void> logout() {
-    return repository.logout();
-  }
 }

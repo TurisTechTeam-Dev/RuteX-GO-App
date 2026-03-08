@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:mobile_app/features/auth/domain/usescases/AuthUseCases.dart';
+import 'package:mobile_app/features/auth/domain/repository/auth_repository.dart';
+import 'package:mobile_app/features/auth/domain/usescases/auth_use_cases.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/routes/app_routes.dart';
@@ -37,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
       FirebaseAuth.instance,
       FirebaseFirestore.instance,
     );
-    _authUseCases = AuthUsesCases(repository);
+    _authUseCases = AuthUsesCases(repository as AuthRepository);
   }
 
   Future<void> _handleLogin() async {

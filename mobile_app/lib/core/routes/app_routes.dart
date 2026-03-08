@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 
-// Import de la Feature Splash (Asegúrate de que este archivo existe)
-import '../../features/splash/presentation/SplashScreen.dart';
-import '../../features/auth/presentation/LoginScreen.dart';
-import '../../features/auth/presentation/RegisterScreen.dart';
+
+import '../../features/auth/presentation/login_screen.dart';
+import '../../features/auth/presentation/register_screen.dart';
 import '../../features/profile/presentation/HomeScreen.dart';
-import '../../features/mission/presentation/MapNavigationScreen.dart';
-import '../../features/mission/presentation/MonumentInfoScreen.dart';
-import '../../features/mission/presentation/QuizScreen.dart';
-import '../../features/mission/presentation/RouteResultScreen.dart';
-import '../../features/routes/presentation/CitySelectionScreen.dart';
-import '../../features/routes/presentation/RouteSelectionScreen.dart';
+import '../../features/mission/presentation/map_navigation_screen.dart';
+import '../../features/mission/presentation/monument_info_screen.dart';
+import '../../features/mission/presentation/quiz_screen.dart';
+import '../../features/mission/presentation/mission_scanner_screen.dart';
+import '../../features/mission/presentation/route_result_screen.dart';
+import '../../features/routes/presentation/city_selection_screen.dart';
+import '../../features/routes/presentation/route_selection_screen.dart';
 
 class AppRoutes {
   static const String login = '/login';
   static const String register = '/register';
   static const String home = '/home';
   static const String mapNavigation = '/map_navigation';
+  static const String missionQrScanner = '/mission_scanner';
   static const String monumentInfo = '/monument_info';
   static const String quiz = '/quiz';
   static const String routeResult = '/route_result';
@@ -31,6 +32,7 @@ class AppRoutes {
       citySelection: (context) => const CitySelectionScreen(),
       routeSelection: (context) => const RouteSelectionScreen(),
       mapNavigation: (context) => const MapNavigationScreen(),
+      missionQrScanner: (context) => const MisionScannerScreen(),
       monumentInfo: (context) => const MonumentInfoScreen(),
       quiz: (context) => const QuizScreen(),
       routeResult: (context) => const RouteResultScreen(),

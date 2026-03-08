@@ -4,6 +4,5 @@ abstract class ProfileRepository {
   Future<List<Map<String, dynamic>>> getCompletedRoutes(String uid);
 
   Future<Map<String, dynamic>> getConfigRangos(String rangoId);
-
-  Future<void> logout() async {}
+  
 }

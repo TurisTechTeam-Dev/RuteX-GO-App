@@ -21,9 +21,4 @@ class ProfileRepositoryImpl implements ProfileRepository {
     return await remoteDatasource.getConfigRangos(rangoId);
   }
 
-  @override
-  Future<void> logout() {
-    // TODO: implement logout
-    throw UnimplementedError();
-  }
 }

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile_app/features/auth/domain/repository/auth_repository.dart';
 import '../../../core/routes/app_routes.dart';
 import '../../../core/widgets/auth/auth_card.dart';
 import '../../../core/widgets/inputs/custom_inputs.dart';
@@ -8,7 +9,7 @@ import '../../../core/widgets/buttons/custom_button.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/validadores.dart'; // ✅ Import necesario
 import '../data/auth_repository_impl.dart';
-import '../domain/usescases/AuthUseCases.dart';
+import '../domain/usescases/auth_use_cases.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -38,7 +39,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       FirebaseAuth.instance,
       FirebaseFirestore.instance,
     );
-    _authUseCases = AuthUsesCases(repository);
+    _authUseCases = AuthUsesCases(repository as AuthRepository);
 
     // Escuchar cambios para habilitar botón
     _usuarioController.addListener(_validateForm);

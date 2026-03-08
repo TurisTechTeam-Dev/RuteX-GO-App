@@ -1,11 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile_app/core/widgets/Bars/toppAppBarr.dart';
 import 'package:mobile_app/features/profile/data/profile_remote_datasource.dart';
 import 'package:mobile_app/features/profile/data/profile_repository_impl.dart';
-import 'package:mobile_app/features/profile/domain/usecases/ProfileUsesCases.dart';
+import 'package:mobile_app/features/profile/domain/usecases/profile_uses_cases.dart';
 
 import '../../../core/constants/app_colors.dart';
+import '../../../core/routes/app_routes.dart';
 import '../../../core/widgets/cards/custom_cards.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -58,37 +60,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        // --- CORRECCIÓN: Quitamos el Builder de actions y dejamos que el Drawer gestione el icono ---
-        iconTheme: const IconThemeData(color: AppColors.negroTexto),
-        actions: [],
-      ),
-      // --- MENÚ LATERAL ---
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(color: AppColors.verdePrincipal),
-              child: Text(
-                'Menú RutexGo',
-                style: TextStyle(color: Colors.white, fontSize: 24),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.exit_to_app, color: Colors.red),
-              title: const Text('Cerrar sesión'),
-              onTap: () async {
-                // Lógica de logout
-                await FirebaseAuth.instance.signOut();
-                // Al cerrar sesión, el main.dart redirigirá automáticamente a la pantalla de login
-              },
-            ),
-          ],
-        ),
-      ),
+
+      appBar: const TopAppBar(),
+
+      drawer: const CustomDrawer(),
+
       // --- TU CONTENIDO SIGUE IGUAL ---
       body: FutureBuilder<Map<String, dynamic>>(
         future: userFuture,
@@ -207,7 +183,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                   ),
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    Navigator.pushNamed(context, AppRoutes.missionQrScanner);
+                                  },
                                   child: const Text(
                                     "¡Visitar!",
                                     style: TextStyle(
