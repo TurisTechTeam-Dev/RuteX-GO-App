@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
-import '../../features/profile/presentation/HomeScreen.dart';
+import '../../features/profile/presentation/home_screen.dart';
 import '../../features/mission/presentation/map_navigation_screen.dart';
 import '../../features/mission/presentation/monument_info_screen.dart';
 import '../../features/mission/presentation/quiz_screen.dart';

@@ -184,7 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ),
                                   onPressed: () {
-                                    Navigator.pushNamed(context, AppRoutes.monumentInfo);
+                                    Navigator.pushNamed(context, AppRoutes.missionQrScanner);
                                   },
                                   child: const Text(
                                     "¡Visitar!",
