@@ -99,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Container(
                       decoration: const BoxDecoration(
                         image: DecorationImage(
-                          image: AssetImage('assets/Mapa Fondo Extremadura.jpeg'),
+                          image: AssetImage('assets/Mapa_Fondo_Extremadura.jpeg'),
                           opacity: 0.4,
                           fit: BoxFit.contain,
                         ),

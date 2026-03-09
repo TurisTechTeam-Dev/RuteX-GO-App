@@ -31,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen> {
           // 1. Imagen de fondo (Mapa)
           Center(
             child: Image.asset(
-              'assets/Mapa Fondo Extremadura.jpeg',
+              'assets/Mapa_Fondo_Extremadura.jpeg',
               fit: BoxFit.contain,
             ),
           ),

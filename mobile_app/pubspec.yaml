@@ -27,14 +27,30 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  # Icono principal (Verde/Color)
+  image_path: "assets/RutexGO_color.png"
+
+  # Configuración para Android Adaptativo (Iconos modernos)
+  adaptive_icon_background: "#f5f5f5"
+  adaptive_icon_foreground: "assets/RutexGO_color.png"
+
+  monochrome_android_icon: "assets/RutexGO_grises.png"
 
 flutter:
   uses-material-design: true
 
   # Registro de imágenes y logos de RutexGO
   assets:
-    - assets/Mapa Fondo Extremadura.jpeg
-    - assets/logos finales rutexgo1.2.png
+    - assets/Mapa_Fondo_Extremadura.jpeg
+    - assets/Logo_Color_Rutexgo.png
+    - assets/Logo_Negro_Rutexgo.png
+    - assets/RutexGO_color.png
+    - assets/RutexGO_grises.png
 
   # Configuración de la familia de fuente Montserrat
   fonts:

@@ -124,7 +124,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           Center(
             child: Opacity(
               opacity: 0.3,
-              child: Image.asset('assets/Mapa Fondo Extremadura.jpeg'),
+              child: Image.asset('assets/Mapa_Fondo_Extremadura.jpeg'),
             ),
           ),
 
@@ -139,7 +139,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Hero(
                     tag: 'logo',
                     child: Image.asset(
-                      'assets/logos finales rutexgo1.2.png',
+                      'assets/Logo_Color_Rutexgo.png',
                       height: size.height * 0.15,
                     ),
                   ),

@@ -130,7 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/Mapa Fondo Extremadura.jpeg'),
+                image: AssetImage('assets/Mapa_Fondo_Extremadura.jpeg'),
                 opacity: 0.4,
                 fit: BoxFit.contain,
               ),
@@ -145,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Hero(
                   tag: 'logo',
                   child: Image.asset(
-                    'assets/logos finales rutexgo1.2.png',
+                    'assets/Logo_Color_Rutexgo.png',
                     height: size.height * 0.18,
                   ),
                 ),
