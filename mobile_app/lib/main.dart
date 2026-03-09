@@ -1,17 +1,14 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:mobile_app/features/auth/presentation/login_screen.dart';
-import 'package:mobile_app/features/profile/presentation/home_screen.dart';
-import 'package:mobile_app/features/splash/presentation/splash_screen.dart';
-import 'firebase_options.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
 import 'core/routes/app_routes.dart';
+import 'features/splash/presentation/splash_screen.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
   runApp(const RutexApp());
 }
 
@@ -23,25 +20,12 @@ class RutexApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'RutexGo',
-      theme: ThemeData(useMaterial3: true, primarySwatch: Colors.deepPurple),
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      ),
       routes: AppRoutes.getRoutes(),
-      home: StreamBuilder<User?>(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, estadoSesion){
-          if(estadoSesion.connectionState == ConnectionState.waiting){
-            return const SplashScreen();
-          }
-
-          if(estadoSesion.hasData){
-            return const HomeScreen();
-          }
-
-          return const LoginScreen();
-        }
-
-
-
-          ),
+      home: const SplashScreen(),
     );
   }
 }

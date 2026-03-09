@@ -18,7 +18,7 @@ class MonumentInfoScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: const TopAppBar(title: "Monumento Encontrado"),
+      appBar: const TopAppBar(title: "Punto De Interes"),
       drawer: const CustomDrawer(),
       body: SingleChildScrollView(
         child: Column(

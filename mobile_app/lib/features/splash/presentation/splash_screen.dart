@@ -1,6 +1,7 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../../../core/routes/app_routes.dart'; // Importamos tus nuevas rutas
+import '../../../core/routes/app_routes.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -13,10 +14,20 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Temporizador de 3 segundos para ir al Login
+    _checkSession();
+  }
+
+  void _checkSession() {
+    // Timer de 3 segundos para mostrar tu marca
     Timer(const Duration(seconds: 3), () {
-      if (mounted) {
-        // Usamos la ruta nombrada que definimos en AppRoutes
+      if (!mounted) return;
+
+      // Recuperamos el usuario actual (Firebase mantiene el token en local)
+      final User? user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        Navigator.pushReplacementNamed(context, AppRoutes.home);
+      } else {
         Navigator.pushReplacementNamed(context, AppRoutes.login);
       }
     });
@@ -28,28 +39,26 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: const Color(0xFFF7F7F7),
       body: Stack(
         children: [
-          // 1. Imagen de fondo (Mapa)
+          // Imagen de fondo (Mapa)
           Center(
             child: Image.asset(
               'assets/Mapa_Fondo_Extremadura.jpeg',
               fit: BoxFit.contain,
             ),
           ),
-
-          // 2. Logo centrado
+          // Logo centrado
           Center(
             child: Image.asset(
-              'assets/logos finales rutexgo1.2.png',
+              'assets/Logo_Color_Rutexgo.png',
               width: 300,
             ),
           ),
-
-          // 3. Círculo de carga
-          Align(
+          // Círculo de carga
+          const Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 100),
-              child: const CircularProgressIndicator(
+              padding: EdgeInsets.only(bottom: 100),
+              child: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.deepPurple),
                 strokeWidth: 4,
               ),
