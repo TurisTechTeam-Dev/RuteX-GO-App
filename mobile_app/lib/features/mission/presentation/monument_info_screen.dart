@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_app/core/widgets/cards/custom_cards.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/routes/app_routes.dart';
 import '../../../core/widgets/Bars/toppAppBarr.dart';
@@ -10,7 +11,7 @@ class MonumentInfoScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // Extraemos los argumentos que enviamos desde el escáner
     final Map<String, dynamic> data =
-    ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
 
     final punto = data['punto'];
     final mision = data['mision'];
@@ -25,31 +26,40 @@ class MonumentInfoScreen extends StatelessWidget {
             // Imagen del monumento (si tenéis la URL en Firebase)
             // Si no, podemos usar un icono temporal
             const SizedBox(height: 20),
-            const Icon(Icons.account_balance, size: 100, color: AppColors.verdePrincipal),
-
+            CustomCard(
+              child: const Icon(
+                Icons.account_balance,
+                size: 100,
+                color: AppColors.verdePrincipal,
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.all(24.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Nombre del monumento
-                  Text(
-                    punto['nombre'] ?? 'Sin nombre',
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.negroTexto,
+                  //nombre del munmumento
+                  CustomCard(
+                    child: Text(
+                      punto['nombre'] ?? 'Sin nombre',
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.negroTexto,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
 
                   // Descripción del monumento
-                  Text(
-                    punto['descripcion'] ?? 'No hay descripción disponible.',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
-                      height: 1.5,
+                  CustomCard(
+                    child: Text(
+                      punto['descripcion'] ?? 'No hay descripción disponible.',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                        height: 1.5,
+                      ),
                     ),
                   ),
 
@@ -69,9 +79,9 @@ class MonumentInfoScreen extends StatelessWidget {
                       onPressed: () {
                         // Navegamos al Quiz pasando los datos de la misión
                         Navigator.pushNamed(
-                            context,
-                            AppRoutes.quiz,
-                            arguments: mision
+                          context,
+                          AppRoutes.quiz,
+                          arguments: mision,
                         );
                       },
                       child: const Text(

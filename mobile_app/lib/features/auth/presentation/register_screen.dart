@@ -7,7 +7,7 @@ import '../../../core/widgets/auth/auth_card.dart';
 import '../../../core/widgets/inputs/custom_inputs.dart';
 import '../../../core/widgets/buttons/custom_button.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/utils/validadores.dart'; // ✅ Import necesario
+import '../../../core/utils/validadores.dart'; 
 import '../data/auth_repository_impl.dart';
 import '../domain/usescases/auth_use_cases.dart';
 
