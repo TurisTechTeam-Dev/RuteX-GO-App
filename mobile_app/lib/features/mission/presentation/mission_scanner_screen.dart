@@ -18,7 +18,7 @@ class _MisionScannerScreenState extends State<MisionScannerScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final MissionUseCases _useCases = MissionUseCases(MissionRepositoryImpl());
 
-  // Controlador único para manejar Flash y Zoom desde esta pantalla
+  // IMPORTANTE: pinchToZoom para que funcionen los dedos
   final MobileScannerController _scannerController = MobileScannerController(
     detectionSpeed: DetectionSpeed.noDuplicates,
   );
@@ -57,13 +57,10 @@ class _MisionScannerScreenState extends State<MisionScannerScreen> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Capa 1: El Escáner
           RutexScannerWidget(
             controller: _scannerController,
             onCodeDetected: _onQrCodeDetected,
           ),
-
-          // Capa 2: Interfaz de usuario (Flash, Zoom, Botón atrás)
           _buildOverlayUI(),
         ],
       ),
@@ -73,7 +70,7 @@ class _MisionScannerScreenState extends State<MisionScannerScreen> {
   Widget _buildOverlayUI() {
     return Stack(
       children: [
-        // Top Bar con Flash Funcional
+        // Flash
         Positioned(
           top: 0,
           left: 0,
@@ -97,24 +94,17 @@ class _MisionScannerScreenState extends State<MisionScannerScreen> {
           ),
         ),
 
-        // Slider de Zoom debajo del cuadro (260px del cuadro + margen)
-        Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 300), // Empuja el slider debajo del visor
-              _buildZoomSlider(),
-            ],
-          ),
+        // Slider de Zoom - POSICIONADO MÁS ABAJO
+        Positioned(
+          bottom: 125, // Ajuste para que quede justo sobre la barra blanca
+          left: 0,
+          right: 0,
+          child: Center(child: _buildZoomSlider()),
         ),
 
-        // Cargando
         if (_isProcessing)
-          const Center(
-            child: CircularProgressIndicator(color: AppColors.verdePrincipal),
-          ),
+          const Center(child: CircularProgressIndicator(color: AppColors.verdePrincipal)),
 
-        // Botón inferior
         Positioned(
           bottom: 0,
           left: 0,
@@ -127,27 +117,34 @@ class _MisionScannerScreenState extends State<MisionScannerScreen> {
 
   Widget _buildZoomSlider() {
     return Container(
-      width: 220,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      width: 280,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(20),
+        color: Colors.black.withOpacity(0.7),
+        borderRadius: BorderRadius.circular(30),
       ),
       child: ValueListenableBuilder(
         valueListenable: _scannerController,
         builder: (context, state, child) {
+          double currentZoom = state.zoomScale;
           return Row(
             children: [
-              const Icon(Icons.zoom_out, color: Colors.white, size: 18),
+              IconButton(
+                icon: const Icon(Icons.zoom_out, color: Colors.white, size: 20),
+                onPressed: () => _scannerController.setZoomScale((currentZoom - 0.1).clamp(0.0, 1.0)),
+              ),
               Expanded(
                 child: Slider(
                   activeColor: AppColors.verdePrincipal,
                   inactiveColor: Colors.white24,
-                  value: state.zoomScale,
+                  value: currentZoom,
                   onChanged: (value) => _scannerController.setZoomScale(value),
                 ),
               ),
-              const Icon(Icons.zoom_in, color: Colors.white, size: 18),
+              IconButton(
+                icon: const Icon(Icons.zoom_in, color: Colors.white, size: 20),
+                onPressed: () => _scannerController.setZoomScale((currentZoom + 0.1).clamp(0.0, 1.0)),
+              ),
             ],
           );
         },
@@ -161,7 +158,7 @@ class _MisionScannerScreenState extends State<MisionScannerScreen> {
       height: 90,
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(35)),
       ),
       child: Center(
         child: IconButton(
