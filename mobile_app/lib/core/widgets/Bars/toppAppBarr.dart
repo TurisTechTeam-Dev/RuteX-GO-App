@@ -5,13 +5,13 @@ import '../../constants/app_colors.dart';
 
 class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showBack;
-  final bool showMenu;
+  final bool showDrawer;
   final List<Widget>? actions;
 
   const TopAppBar({
     super.key,
     this.showBack = false,
-    this.showMenu = false,
+    this.showDrawer = true,
     this.actions,
   });
 
@@ -19,31 +19,37 @@ class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
-      backgroundColor: AppColors.blancoPuro,
+      backgroundColor: Colors.white,
       elevation: 0,
       centerTitle: true,
 
+      // BACK ARROW
       leading: showBack
           ? IconButton(
               icon: const Icon(Icons.arrow_back, color: AppColors.negroTexto),
               onPressed: () => Navigator.pop(context),
             )
-          : showMenu
-          ? Builder(
-              builder: (context) => IconButton(
-                icon: const Icon(Icons.menu, color: AppColors.negroTexto),
-                onPressed: () => Scaffold.of(context).openDrawer(),
-              ),
-            )
           : null,
 
+      // LOGO
       title: Image.asset("assets/Logo_Negro_Rutexgo.png", height: 28),
 
-      actions: actions,
+      // DRAWER DERECHA
+      actions: [
+        if (showDrawer)
+          Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.menu, color: AppColors.negroTexto),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            ),
+          ),
+
+        if (actions != null) ...actions!,
+      ],
 
       bottom: const PreferredSize(
         preferredSize: Size.fromHeight(2),
-        child: Divider(height: 1, thickness: 1, color: AppColors.negroTexto),
+        child: Divider(height: 2, thickness: 2, color: AppColors.negroTexto),
       ),
     );
   }
