@@ -49,7 +49,7 @@ class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
 
       bottom: const PreferredSize(
         preferredSize: Size.fromHeight(2),
-        child: Divider(height: 2, thickness: 2, color: AppColors.negroTexto),
+        child: Divider(height: 1, thickness: 1, color: AppColors.negroTexto),
       ),
     );
   }
