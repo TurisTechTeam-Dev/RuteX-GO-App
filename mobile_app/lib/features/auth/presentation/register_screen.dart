@@ -2,12 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_app/features/auth/domain/repository/auth_repository.dart';
-import '../../../core/routes/app_routes.dart';
-import '../../../core/widgets/auth/auth_card.dart';
-import '../../../core/widgets/inputs/custom_inputs.dart';
-import '../../../core/widgets/buttons/custom_button.dart';
+
 import '../../../core/constants/app_colors.dart';
-import '../../../core/utils/validadores.dart'; 
+import '../../../core/routes/app_routes.dart';
+import '../../../core/utils/validadores.dart';
+import '../../../core/widgets/auth/auth_card.dart';
+import '../../../core/widgets/buttons/custom_button.dart';
+import '../../../core/widgets/inputs/custom_inputs.dart';
 import '../data/auth_repository_impl.dart';
 import '../domain/usescases/auth_use_cases.dart';
 
@@ -49,9 +50,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _confirmPasswordController.addListener(_validateForm);
   }
 
-  void _validateForm(){
+  void _validateForm() {
     setState(() {
-      _isButtonEnabled = _usuarioController.text.isNotEmpty &&
+      _isButtonEnabled =
+          _usuarioController.text.isNotEmpty &&
           _nombreController.text.isNotEmpty &&
           _emailController.text.isNotEmpty &&
           _passwordController.text.isNotEmpty &&
@@ -72,7 +74,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _handleRegister() async {
     if (_formKey.currentState!.validate() && _aceptaTerminos) {
-
       setState(() => _isLoading = true);
 
       try {
@@ -96,9 +97,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
             errorMessage = e.toString().replaceAll("Exception: ", "");
           }
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(errorMessage)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(errorMessage)));
         }
         debugPrint(e.toString());
       } finally {
@@ -107,7 +108,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     } else if (!_aceptaTerminos) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text("Debes aceptar los términos y condiciones.")),
+          content: Text("Debes aceptar los términos y condiciones."),
+        ),
       );
     }
   }
@@ -159,13 +161,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 label: 'Usuario',
                                 hint: 'Introduce tu nombre de usuario',
                                 controller: _usuarioController,
-                                validator: (value) => Validadores.validarCampoVacio(value, 'Usuario'),
+                                validator: (value) =>
+                                    Validadores.validarCampoVacio(
+                                      value,
+                                      'Usuario',
+                                    ),
                               ),
                               custom_input(
                                 label: 'Nombre',
                                 hint: 'Introduce tu nombre',
                                 controller: _nombreController,
-                                validator: (value) => Validadores.validarCampoVacio(value, 'Nombre'),
+                                validator: Validadores.validarNombre,
                               ),
                               custom_input(
                                 label: 'Email',
@@ -187,7 +193,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 hint: 'Repite tu contraseña',
                                 controller: _confirmPasswordController,
                                 isPassword: true,
-                                validator: (value) => Validadores.validarCoincidencia(value, _passwordController.text),
+                                validator: (value) =>
+                                    Validadores.validarCoincidencia(
+                                      value,
+                                      _passwordController.text,
+                                    ),
                               ),
 
                               // CHECKBOX
@@ -200,17 +210,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       activeColor: AppColors.verdePrincipal,
                                       visualDensity: VisualDensity.compact,
                                       onChanged: (value) {
-                                        setState(() => _aceptaTerminos = value!);
+                                        setState(
+                                          () => _aceptaTerminos = value!,
+                                        );
                                         _validateForm();
                                       },
                                     ),
                                     Text(
                                       "Acepto términos y condiciones",
-                                      style: Theme.of(context).textTheme.labelMedium
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium
                                           ?.copyWith(
-                                        fontSize: 12,
-                                        color: AppColors.negroTexto,
-                                      ),
+                                            fontSize: 12,
+                                            color: AppColors.negroTexto,
+                                          ),
                                     ),
                                   ],
                                 ),
@@ -219,8 +233,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               const SizedBox(height: 10),
 
                               CustomButton(
-                                text: _isLoading ? "CARGANDO..." : "Crear cuenta",
-                                onPressed: _isButtonEnabled ? _handleRegister : null,
+                                text: _isLoading
+                                    ? "CARGANDO..."
+                                    : "Crear cuenta",
+                                onPressed: _isButtonEnabled
+                                    ? _handleRegister
+                                    : null,
                               ),
 
                               const SizedBox(height: 16),

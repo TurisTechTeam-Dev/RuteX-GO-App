@@ -80,135 +80,141 @@ class _HomeScreenState extends State<HomeScreen> {
           final userData = userSnapshot.data!;
 
           return FutureBuilder<Map<String, dynamic>>(
-              future: rangosFuture,
-              builder: (context, rangosSnapshot) {
-                if (rangosSnapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (rangosSnapshot.hasError || !rangosSnapshot.hasData) {
-                  return const Center(child: Text("Error al cargar los rangos"));
-                }
-                final rangosData = rangosSnapshot.data!;
+            future: rangosFuture,
+            builder: (context, rangosSnapshot) {
+              if (rangosSnapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (rangosSnapshot.hasError || !rangosSnapshot.hasData) {
+                return const Center(child: Text("Error al cargar los rangos"));
+              }
+              final rangosData = rangosSnapshot.data!;
 
-                final nombreRango = _calcularNombreRango(
-                    userData['puntos'] ?? 0, rangosData['rangos']);
+              final nombreRango = _calcularNombreRango(
+                userData['puntos'] ?? 0,
+                rangosData['rangos'],
+              );
 
-                return Stack(
-                  children: [
-                    // 🔹 FONDO
-                    Container(
-                      decoration: const BoxDecoration(
-                        image: DecorationImage(
-                          image: AssetImage('assets/Mapa_Fondo_Extremadura.jpeg'),
-                          opacity: 0.4,
-                          fit: BoxFit.contain,
-                        ),
+              return Stack(
+                children: [
+                  // FONDO
+                  Container(
+                    decoration: const BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('assets/Mapa_Fondo_Extremadura.jpeg'),
+                        opacity: 0.4,
+                        fit: BoxFit.contain,
                       ),
                     ),
+                  ),
 
-                    SafeArea(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Línea superior
-                          Container(height: 2, color: AppColors.negroTexto),
+                  SafeArea(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Línea superior
+                        Container(height: 2, color: AppColors.negroTexto),
 
-                          Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Pasamos el nombre calculado
+                              _userCard(userData, nombreRango),
+                              const SizedBox(height: 20),
+
+                              const StrokeTitle(text: "Estadísticas"),
+                              const SizedBox(height: 12),
+
+                              _statsCard(userData),
+                              const SizedBox(height: 20),
+
+                              const StrokeTitle(text: "Rutas Completadas"),
+                            ],
+                          ),
+                        ),
+
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: ListView(
                               children: [
-                                // Pasamos el nombre calculado
-                                _userCard(userData, nombreRango),
-                                const SizedBox(height: 20),
-
-                                const StrokeTitle(text: "Estadísticas"),
+                                _routeCard(
+                                  title: "Ruta Romana (Mérida)",
+                                  missions: "1/3",
+                                  date: "08/10/2025",
+                                  points: "100 pts",
+                                ),
                                 const SizedBox(height: 12),
-
-                                _statsCard(userData),
+                                _routeCard(
+                                  title: "Ruta Cotidiana (Mérida)",
+                                  missions: "2/3",
+                                  date: "15/10/2025",
+                                  points: "100 pts",
+                                ),
+                                const SizedBox(height: 12),
+                                _routeCard(
+                                  title: "Ruta Imperial (Mérida)",
+                                  missions: "3/3",
+                                  date: "22/10/2025",
+                                  points: "150 pts",
+                                ),
                                 const SizedBox(height: 20),
-
-                                const StrokeTitle(text: "Rutas Completadas"),
                               ],
                             ),
                           ),
+                        ),
 
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                              child: ListView(
-                                children: [
-                                  _routeCard(
-                                    title: "Ruta Romana (Mérida)",
-                                    missions: "1/3",
-                                    date: "08/10/2025",
-                                    points: "100 pts",
-                                  ),
-                                  const SizedBox(height: 12),
-                                  _routeCard(
-                                    title: "Ruta Cotidiana (Mérida)",
-                                    missions: "2/3",
-                                    date: "15/10/2025",
-                                    points: "100 pts",
-                                  ),
-                                  const SizedBox(height: 12),
-                                  _routeCard(
-                                    title: "Ruta Imperial (Mérida)",
-                                    missions: "3/3",
-                                    date: "22/10/2025",
-                                    points: "150 pts",
-                                  ),
-                                  const SizedBox(height: 20),
-                                ],
-                              ),
-                            ),
-                          ),
+                        // Línea inferior
+                        Container(height: 2, color: AppColors.negroTexto),
 
-                          // Línea inferior
-                          Container(height: 2, color: AppColors.negroTexto),
-
-                          Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.verdePrincipal,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 24,
-                                      vertical: 12,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.verdePrincipal,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                    vertical: 12,
                                   ),
-                                  onPressed: () {
-                                    Navigator.pushNamed(context, AppRoutes.missionQrScanner);
-                                  },
-                                  child: const Text(
-                                    "¡Visitar!",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.blancoPuro,
-                                    ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
                                 ),
-                              ],
-                            ),
+                                onPressed: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    AppRoutes.citySelection,
+                                  );
+                                },
+                                child: const Text(
+                                  "¡Visitar!",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.blancoPuro,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
-                );
-              });
+                  ),
+                ],
+              );
+            },
+          );
         },
       ),
     );
   }
 
-  // --- MÉTODOS DE UI SE MANTIENEN IGUAL ---
+  // MÉTODOS DE UI SE MANTIENEN IGUAL
   static Widget _userCard(Map<String, dynamic> userData, String nombreRango) {
     return CustomCard(
       padding: const EdgeInsets.all(16),

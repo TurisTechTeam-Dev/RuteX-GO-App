@@ -35,4 +35,14 @@ class Validadores {
     }
     return null;
   }
+
+  static String? validarNombre(String? value) {
+    if (value == null || value.isEmpty) {
+      return "El nombre es obligatorio";
+    }
+    if (value.length > 20) {
+      return "El nombre no puede tener más de 20 caracteres";
+    }
+    return null;
+  }
 }
