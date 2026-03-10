@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_app/core/widgets/cards/custom_cards.dart';
+
 import '../../../core/constants/app_colors.dart';
 import '../../../core/routes/app_routes.dart';
 import '../../../core/widgets/Bars/toppAppBarr.dart';
@@ -18,7 +19,7 @@ class MonumentInfoScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: const TopAppBar(title: "Punto De Interes"),
+      appBar: const TopAppBar(showBack: true),
       drawer: const CustomDrawer(),
       body: SingleChildScrollView(
         child: Column(

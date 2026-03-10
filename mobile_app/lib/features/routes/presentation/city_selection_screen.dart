@@ -12,8 +12,7 @@ class CitySelectionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // TOP BAR
-      appBar: const TopAppBar(title: "Selección de ciudad"),
+      appBar: const TopAppBar(showBack: true),
 
       body: Stack(
         children: [
@@ -51,7 +50,7 @@ class CitySelectionScreen extends StatelessWidget {
 
                 const SizedBox(height: 20),
 
-                // SCROLLABLE
+                // GRID SCROLLABLE
                 Expanded(
                   child: GridView.count(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -70,37 +69,39 @@ class CitySelectionScreen extends StatelessWidget {
                       _cityCard(
                         context,
                         title: "Cáceres",
-                        image: "assets/caceres.jpg",
+                        image: "assets/images_selection/caceres.jpg",
                         available: false,
                       ),
 
                       _cityCard(
                         context,
                         title: "Badajoz",
-                        image: "assets/badajoz.jpg",
+                        image: "assets/images_selection/badajoz.jpg",
                         available: false,
                       ),
 
                       _cityCard(
                         context,
                         title: "Trujillo",
-                        image: "assets/trujillo.jpg",
+                        image: "assets/images_selection/trujillo.jpg",
                         available: false,
                       ),
 
                       _cityCard(
                         context,
                         title: "Coria",
-                        image: "assets/coria.jpg",
+                        image: "assets/images_selection/coria.jpg",
                         available: false,
                       ),
 
                       _cityCard(
                         context,
                         title: "Jaraíz de la Vera",
-                        image: "assets/jarais.jpg",
+                        image: "assets/images_selection/jarais.jpg",
                         available: false,
                       ),
+
+                      const SizedBox(height: 80),
                     ],
                   ),
                 ),
@@ -118,21 +119,21 @@ class CitySelectionScreen extends StatelessWidget {
             top: BorderSide(color: AppColors.negroTexto, width: 2),
           ),
         ),
-        child: Row(
-          children: [
-            const SizedBox(width: 10),
-
-            IconButton(
-              icon: const Icon(
-                Icons.arrow_back,
-                color: AppColors.verdePrincipal,
-                size: 28,
-              ),
-              onPressed: () {
-                Navigator.pop(context);
-              },
+        child: Center(
+          child: IconButton(
+            icon: const Icon(
+              Icons.home,
+              color: AppColors.verdePrincipal,
+              size: 30,
             ),
-          ],
+            onPressed: () {
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                AppRoutes.home,
+                (route) => false,
+              );
+            },
+          ),
         ),
       ),
     );
@@ -184,7 +185,7 @@ class CitySelectionScreen extends StatelessWidget {
                   ),
                 ),
                 onPressed: () {
-                  Navigator.pushNamed(context, AppRoutes.routeSelection);
+                  Navigator.pushNamed(context, AppRoutes.missionQrScanner);
                 },
                 child: const Text("Explorar"),
               ),

@@ -4,46 +4,41 @@ import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 
 class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final String? title;
-  final List<Widget>? actions;
   final bool showBack;
   final bool showMenu;
+  final List<Widget>? actions;
 
   const TopAppBar({
     super.key,
-    this.title,
-    this.actions,
     this.showBack = false,
     this.showMenu = false,
+    this.actions,
   });
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
+      backgroundColor: AppColors.blancoPuro,
+      elevation: 0,
+      centerTitle: true,
 
       leading: showBack
           ? IconButton(
-              icon: const Icon(Icons.arrow_back),
+              icon: const Icon(Icons.arrow_back, color: AppColors.negroTexto),
               onPressed: () => Navigator.pop(context),
             )
           : showMenu
           ? Builder(
               builder: (context) => IconButton(
-                icon: const Icon(Icons.menu),
+                icon: const Icon(Icons.menu, color: AppColors.negroTexto),
                 onPressed: () => Scaffold.of(context).openDrawer(),
               ),
             )
           : null,
 
-      title: title != null
-          ? Text(title!, style: Theme.of(context).textTheme.titleLarge)
-          : null,
+      title: Image.asset("assets/Logo_Negro_Rutexgo.png", height: 28),
 
-      backgroundColor: AppColors.blancoPuro,
-      elevation: 0,
-      centerTitle: true,
-      iconTheme: const IconThemeData(color: AppColors.negroTexto),
       actions: actions,
 
       bottom: const PreferredSize(

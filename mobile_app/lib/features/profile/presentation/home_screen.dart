@@ -61,10 +61,20 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
 
-      appBar: const TopAppBar(title: "Menú principal", showMenu: true),
+      // ----- TOP BAR CON MENU -----
+      appBar: const TopAppBar(showMenu: true),
+
       drawer: const CustomDrawer(),
 
-      // --- TU CONTENIDO SIGUE IGUAL ---
+      // ----- BOTON VISITAR FLOTANTE -----
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.verdePrincipal,
+        child: const Icon(Icons.explore, color: Colors.white),
+        onPressed: () {
+          Navigator.pushNamed(context, AppRoutes.citySelection);
+        },
+      ),
+
       body: FutureBuilder<Map<String, dynamic>>(
         future: userFuture,
         builder: (context, userSnapshot) {
@@ -87,6 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
               if (rangosSnapshot.hasError || !rangosSnapshot.hasData) {
                 return const Center(child: Text("Error al cargar los rangos"));
               }
+
               final rangosData = rangosSnapshot.data!;
 
               final nombreRango = _calcularNombreRango(
@@ -96,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               return Stack(
                 children: [
-                  // FONDO
+                  // ----- FONDO -----
                   Container(
                     decoration: const BoxDecoration(
                       image: DecorationImage(
@@ -111,7 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Línea superior
+                        // ----- LINEA SUPERIOR -----
                         Container(height: 2, color: AppColors.negroTexto),
 
                         Padding(
@@ -119,7 +130,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Pasamos el nombre calculado
                               _userCard(userData, nombreRango),
                               const SizedBox(height: 20),
 
@@ -165,42 +175,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
 
-                        // Línea inferior
+                        // ----- LINEA INFERIOR -----
                         Container(height: 2, color: AppColors.negroTexto),
 
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.verdePrincipal,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 24,
-                                    vertical: 12,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                                onPressed: () {
-                                  Navigator.pushNamed(
-                                    context,
-                                    AppRoutes.citySelection,
-                                  );
-                                },
-                                child: const Text(
-                                  "¡Visitar!",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.blancoPuro,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        const SizedBox(height: 40), // espacio para FAB
                       ],
                     ),
                   ),

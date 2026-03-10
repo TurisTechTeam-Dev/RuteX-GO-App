@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:mobile_app/core/routes/app_routes.dart';
-import '../../../core/widgets/Bars/toppAppBarr.dart';
-import '../../../core/widgets/qr_scanner/scanner_widget.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
+
 import '../../../core/constants/app_colors.dart';
-import '../domain/usescases/mission_uses_cases.dart';
+import '../../../core/widgets/qr_scanner/scanner_widget.dart';
 import '../data/mission_repository_impl.dart';
+import '../domain/usescases/mission_uses_cases.dart';
 
 class MisionScannerScreen extends StatefulWidget {
   const MisionScannerScreen({super.key});
@@ -18,12 +18,13 @@ class _MisionScannerScreenState extends State<MisionScannerScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final MissionUseCases _useCases = MissionUseCases(MissionRepositoryImpl());
 
-  // IMPORTANTE: pinchToZoom para que funcionen los dedos
   final MobileScannerController _scannerController = MobileScannerController(
     detectionSpeed: DetectionSpeed.noDuplicates,
   );
 
   bool _isProcessing = false;
+
+  bool _flashOn = false;
 
   @override
   void dispose() {
@@ -47,6 +48,7 @@ class _MisionScannerScreenState extends State<MisionScannerScreen> {
         ),
       );
     }
+
     if (mounted) setState(() => _isProcessing = false);
   }
 
@@ -57,10 +59,14 @@ class _MisionScannerScreenState extends State<MisionScannerScreen> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          RutexScannerWidget(
-            controller: _scannerController,
-            onCodeDetected: _onQrCodeDetected,
+          IgnorePointer(
+            ignoring: false,
+            child: RutexScannerWidget(
+              controller: _scannerController,
+              onCodeDetected: _onQrCodeDetected,
+            ),
           ),
+
           _buildOverlayUI(),
         ],
       ),
@@ -70,47 +76,50 @@ class _MisionScannerScreenState extends State<MisionScannerScreen> {
   Widget _buildOverlayUI() {
     return Stack(
       children: [
-        // Flash
         Positioned(
           top: 0,
           left: 0,
           right: 0,
-          child: TopAppBar(
-            actions: [
-              ValueListenableBuilder(
-                valueListenable: _scannerController,
-                builder: (context, state, child) {
-                  final bool isFlashOn = state.torchState == TorchState.on;
-                  return IconButton(
+          child: Material(
+            color: Colors.black.withOpacity(0.35),
+            child: SafeArea(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+
+                  IconButton(
                     icon: Icon(
-                      isFlashOn ? Icons.flash_on : Icons.flash_off,
-                      color: isFlashOn ? Colors.yellow : Colors.white,
+                      _flashOn ? Icons.flash_on : Icons.flash_off,
+                      color: _flashOn ? Colors.yellow : Colors.white,
                     ),
-                    onPressed: () => _scannerController.toggleTorch(),
-                  );
-                },
+                    onPressed: () async {
+                      await _scannerController.toggleTorch();
+                      setState(() {
+                        _flashOn = !_flashOn;
+                      });
+                    },
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
 
-        // Slider de Zoom - POSICIONADO MÁS ABAJO
         Positioned(
-          bottom: 125, // Ajuste para que quede justo sobre la barra blanca
+          bottom: 125,
           left: 0,
           right: 0,
           child: Center(child: _buildZoomSlider()),
         ),
 
         if (_isProcessing)
-          const Center(child: CircularProgressIndicator(color: AppColors.verdePrincipal)),
-
-        Positioned(
-          bottom: 0,
-          left: 0,
-          right: 0,
-          child: _buildBottomBar(),
-        ),
+          const Center(
+            child: CircularProgressIndicator(color: AppColors.verdePrincipal),
+          ),
       ],
     );
   }
@@ -127,11 +136,14 @@ class _MisionScannerScreenState extends State<MisionScannerScreen> {
         valueListenable: _scannerController,
         builder: (context, state, child) {
           double currentZoom = state.zoomScale;
+
           return Row(
             children: [
               IconButton(
                 icon: const Icon(Icons.zoom_out, color: Colors.white, size: 20),
-                onPressed: () => _scannerController.setZoomScale((currentZoom - 0.1).clamp(0.0, 1.0)),
+                onPressed: () => _scannerController.setZoomScale(
+                  (currentZoom - 0.1).clamp(0.0, 1.0),
+                ),
               ),
               Expanded(
                 child: Slider(
@@ -143,28 +155,13 @@ class _MisionScannerScreenState extends State<MisionScannerScreen> {
               ),
               IconButton(
                 icon: const Icon(Icons.zoom_in, color: Colors.white, size: 20),
-                onPressed: () => _scannerController.setZoomScale((currentZoom + 0.1).clamp(0.0, 1.0)),
+                onPressed: () => _scannerController.setZoomScale(
+                  (currentZoom + 0.1).clamp(0.0, 1.0),
+                ),
               ),
             ],
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildBottomBar() {
-    return Container(
-      width: double.infinity,
-      height: 90,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(35)),
-      ),
-      child: Center(
-        child: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.verdePrincipal, size: 35),
-          onPressed: () => Navigator.pop(context),
-        ),
       ),
     );
   }
