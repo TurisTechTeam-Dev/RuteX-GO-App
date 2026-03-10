@@ -13,6 +13,7 @@ class CitySelectionScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const TopAppBar(showBack: true),
+      endDrawer: const CustomDrawer(),
 
       body: Stack(
         children: [

@@ -5,15 +5,8 @@ import '../../constants/app_colors.dart';
 
 class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showBack;
-  final bool showDrawer;
-  final List<Widget>? actions;
 
-  const TopAppBar({
-    super.key,
-    this.showBack = false,
-    this.showDrawer = true,
-    this.actions,
-  });
+  const TopAppBar({super.key, this.showBack = false});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +16,7 @@ class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       centerTitle: true,
 
-      // BACK ARROW
+      // Flecha izquierda
       leading: showBack
           ? IconButton(
               icon: const Icon(Icons.arrow_back, color: AppColors.negroTexto),
@@ -31,20 +24,21 @@ class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
             )
           : null,
 
-      // LOGO
+      // Logo centro
       title: Image.asset("assets/Logo_Negro_Rutexgo.png", height: 28),
 
-      // DRAWER DERECHA
+      // Drawer derecha
       actions: [
-        if (showDrawer)
-          Builder(
-            builder: (context) => IconButton(
+        Builder(
+          builder: (context) {
+            return IconButton(
               icon: const Icon(Icons.menu, color: AppColors.negroTexto),
-              onPressed: () => Scaffold.of(context).openDrawer(),
-            ),
-          ),
-
-        if (actions != null) ...actions!,
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer();
+              },
+            );
+          },
+        ),
       ],
 
       bottom: const PreferredSize(

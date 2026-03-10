@@ -62,8 +62,8 @@ class _HomeScreenState extends State<HomeScreen> {
       extendBodyBehindAppBar: true,
 
       // ----- TOP BAR CON MENU -----
-      appBar: const TopAppBar(showBack: false),
-      drawer: const CustomDrawer(),
+      appBar: const TopAppBar(),
+      endDrawer: const CustomDrawer(),
 
       // ----- BOTON VISITAR FLOTANTE -----
       floatingActionButton: FloatingActionButton(
