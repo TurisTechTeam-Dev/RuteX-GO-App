@@ -1,29 +1,55 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../constants/app_colors.dart';
+import 'package:flutter/material.dart';
 
+import '../../constants/app_colors.dart';
 
 class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
   final List<Widget>? actions;
+  final bool showBack;
+  final bool showMenu;
 
   const TopAppBar({
     super.key,
     this.title,
     this.actions,
+    this.showBack = false,
+    this.showMenu = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: title != null
-          ? Text(title!, style: const TextStyle(color: AppColors.negroTexto))
+      automaticallyImplyLeading: false,
+
+      leading: showBack
+          ? IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => Navigator.pop(context),
+            )
+          : showMenu
+          ? Builder(
+              builder: (context) => IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () => Scaffold.of(context).openDrawer(),
+              ),
+            )
           : null,
-      backgroundColor: Colors.transparent,
+
+      title: title != null
+          ? Text(title!, style: Theme.of(context).textTheme.titleLarge)
+          : null,
+
+      backgroundColor: AppColors.blancoPuro,
       elevation: 0,
       centerTitle: true,
       iconTheme: const IconThemeData(color: AppColors.negroTexto),
       actions: actions,
+
+      bottom: const PreferredSize(
+        preferredSize: Size.fromHeight(2),
+        child: Divider(height: 1, thickness: 1, color: AppColors.negroTexto),
+      ),
     );
   }
 
@@ -41,9 +67,7 @@ class CustomDrawer extends StatelessWidget {
         children: [
           // Header del Menú
           const DrawerHeader(
-            decoration: BoxDecoration(
-              color: AppColors.verdePrincipal,
-            ),
+            decoration: BoxDecoration(color: AppColors.verdePrincipal),
             child: SizedBox(
               width: double.infinity,
               child: Column(
@@ -107,7 +131,9 @@ class CustomDrawer extends StatelessWidget {
               onPressed: () async {
                 await FirebaseAuth.instance.signOut();
                 if (context.mounted) {
-                  Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+                  Navigator.of(
+                    context,
+                  ).pushNamedAndRemoveUntil('/login', (route) => false);
                 }
               },
               child: const Text("Salir", style: TextStyle(color: Colors.red)),

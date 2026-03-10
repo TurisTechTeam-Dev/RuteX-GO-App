@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../constants/app_colors.dart';
 
 class AppTheme {
@@ -19,21 +20,28 @@ class AppTheme {
       ),
 
       textTheme: const TextTheme(
-        //H1 Titulos
+        // H1 Títulos grandes
         displayLarge: TextStyle(
           fontSize: 28,
           fontWeight: FontWeight.w700,
           color: AppColors.negroTexto,
         ),
 
-        //H2 Subtitulos
+        // H2 Subtítulos
         displayMedium: TextStyle(
           fontSize: 22,
           fontWeight: FontWeight.w600,
           color: AppColors.negroTexto,
         ),
 
-        // Body / Informacion
+        // Título de pantallas / AppBar
+        titleMedium: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          color: AppColors.negroTexto,
+        ),
+
+        // Body / Información
         bodyLarge: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w400,
@@ -54,7 +62,7 @@ class AppTheme {
           color: AppColors.verdePrincipal,
         ),
 
-        // FootNote
+        // Footnote
         labelMedium: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w400,

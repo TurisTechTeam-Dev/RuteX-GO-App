@@ -61,8 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
 
-      appBar: const TopAppBar(),
-
+      appBar: const TopAppBar(title: "Menú principal", showMenu: true),
       drawer: const CustomDrawer(),
 
       // --- TU CONTENIDO SIGUE IGUAL ---
