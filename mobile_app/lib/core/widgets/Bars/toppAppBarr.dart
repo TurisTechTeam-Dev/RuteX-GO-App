@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../constants/app_colors.dart';
+import '../../routes/app_routes.dart';
 
 class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showBack;
@@ -57,55 +58,67 @@ class CustomDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Drawer(
-      child: Column(
-        children: [
-          // Header del Menú
-          const DrawerHeader(
-            decoration: BoxDecoration(color: AppColors.verdePrincipal),
-            child: SizedBox(
-              width: double.infinity,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Menú RutexGo',
-                    style: TextStyle(
-                      color: AppColors.blancoTarjeta,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+    return SizedBox(
+      width: MediaQuery.of(context).size.width * 0.50,
+      child: Drawer(
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Header
+              const DrawerHeader(
+                decoration: BoxDecoration(color: AppColors.verdePrincipal),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Text(
+                      'Menú',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: AppColors.blancoTarjeta,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
 
-          // Opciones del Menú
-          ListTile(
-            leading: const Icon(Icons.home),
-            title: const Text('Inicio'),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
+              // Inicio
+              ListTile(
+                leading: const Icon(Icons.home),
+                title: const Text('Inicio'),
+                onTap: () {
+                  Navigator.pop(context); // cerrar drawer
 
-          const Spacer(),
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    AppRoutes.home,
+                    (route) => false,
+                  );
+                },
+              ),
 
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.exit_to_app, color: Colors.red),
-            title: const Text(
-              'Cerrar sesión',
-              style: TextStyle(color: Colors.red),
-            ),
-            onTap: () async {
-              _showLogoutDialog(context);
-            },
+              const Spacer(),
+
+              const Divider(),
+
+              // Logout
+              ListTile(
+                leading: const Icon(Icons.exit_to_app, color: Colors.red),
+                title: const Text(
+                  'Cerrar sesión',
+                  style: TextStyle(color: Colors.red),
+                ),
+                onTap: () {
+                  _showLogoutDialog(context);
+                },
+              ),
+
+              const SizedBox(height: 10),
+            ],
           ),
-          const SizedBox(height: 20),
-        ],
+        ),
       ),
     );
   }
@@ -113,15 +126,19 @@ class CustomDrawer extends StatelessWidget {
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (context) {
         return AlertDialog(
           title: const Text("Cerrar sesión"),
           content: const Text("¿Estás seguro de que quieres salir?"),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
               child: const Text("Cancelar"),
             ),
+
             TextButton(
               onPressed: () async {
                 await FirebaseAuth.instance.signOut();

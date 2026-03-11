@@ -61,11 +61,11 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
 
-      // ----- TOP BAR CON MENU -----
+      // TOP BAR CON MENU
       appBar: const TopAppBar(),
       endDrawer: const CustomDrawer(),
 
-      // ----- BOTON VISITAR FLOTANTE -----
+      // BOTON VISITAR FLOTANTE
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.verdePrincipal,
         child: const Icon(Icons.explore, color: Colors.white),
@@ -106,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               return Stack(
                 children: [
-                  // ----- FONDO -----
+                  // FONDO
                   Container(
                     decoration: const BoxDecoration(
                       image: DecorationImage(
@@ -121,7 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // ----- LINEA SUPERIOR -----
+                        // LINEA SUPERIOR
                         Container(height: 2, color: AppColors.negroTexto),
 
                         Padding(
@@ -174,10 +174,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
 
-                        // ----- LINEA INFERIOR -----
+                        // LINEA INFERIOR
                         Container(height: 2, color: AppColors.negroTexto),
 
-                        const SizedBox(height: 40), // espacio para FAB
+                        const SizedBox(height: 10),
                       ],
                     ),
                   ),
@@ -190,7 +190,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // MÉTODOS DE UI SE MANTIENEN IGUAL
   static Widget _userCard(Map<String, dynamic> userData, String nombreRango) {
     return CustomCard(
       padding: const EdgeInsets.all(16),

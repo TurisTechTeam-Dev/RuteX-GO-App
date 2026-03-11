@@ -112,30 +112,15 @@ class CitySelectionScreen extends StatelessWidget {
         ],
       ),
 
-      // BOTTOM BAR
       bottomNavigationBar: Container(
         height: 60,
         decoration: const BoxDecoration(
+          color: Colors.white,
           border: Border(
             top: BorderSide(color: AppColors.negroTexto, width: 2),
           ),
         ),
-        child: Center(
-          child: IconButton(
-            icon: const Icon(
-              Icons.home,
-              color: AppColors.verdePrincipal,
-              size: 30,
-            ),
-            onPressed: () {
-              Navigator.pushNamedAndRemoveUntil(
-                context,
-                AppRoutes.home,
-                (route) => false,
-              );
-            },
-          ),
-        ),
+        child: const SafeArea(child: SizedBox()),
       ),
     );
   }
@@ -152,10 +137,18 @@ class CitySelectionScreen extends StatelessWidget {
       child: Column(
         children: [
           // Imagen
-          SizedBox(
-            height: 90,
-            width: double.infinity,
-            child: Image.asset(image, fit: BoxFit.cover),
+          AspectRatio(
+            aspectRatio: 16 / 9,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.negroTexto, width: 1),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(5),
+                child: Image.asset(image, fit: BoxFit.cover),
+              ),
+            ),
           ),
 
           const SizedBox(height: 8),
@@ -173,24 +166,27 @@ class CitySelectionScreen extends StatelessWidget {
 
           const Spacer(),
 
-          if (available)
-            SizedBox(
-              height: 32,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.verdePrincipal,
-                  foregroundColor: AppColors.blancoPuro,
-                  padding: const EdgeInsets.symmetric(horizontal: 18),
-                  textStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.pushNamed(context, AppRoutes.missionQrScanner);
-                },
-                child: const Text("Explorar"),
+          SizedBox(
+            height: 32,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: available
+                    ? AppColors.verdePrincipal
+                    : AppColors.grisSombra,
+                foregroundColor: AppColors.blancoPuro,
+                padding: const EdgeInsets.symmetric(horizontal: 18),
+                textStyle: Theme.of(
+                  context,
+                ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),
               ),
+              onPressed: available
+                  ? () {
+                      Navigator.pushNamed(context, AppRoutes.routeSelection);
+                    }
+                  : null,
+              child: const Text("Explorar"),
             ),
+          ),
         ],
       ),
     );

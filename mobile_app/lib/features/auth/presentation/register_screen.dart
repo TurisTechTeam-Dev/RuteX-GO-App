@@ -142,7 +142,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     tag: 'logo',
                     child: Image.asset(
                       'assets/Logo_Color_Rutexgo.png',
-                      height: size.height * 0.15,
+                      height: size.height * 0.10,
                     ),
                   ),
 
