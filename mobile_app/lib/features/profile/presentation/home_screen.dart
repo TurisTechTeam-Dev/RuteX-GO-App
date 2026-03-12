@@ -1,14 +1,23 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:mobile_app/core/widgets/Bars/toppAppBarr.dart';
-import 'package:mobile_app/features/profile/data/profile_remote_datasource.dart';
-import 'package:mobile_app/features/profile/data/profile_repository_impl.dart';
-import 'package:mobile_app/features/profile/domain/usecases/profile_uses_cases.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/routes/app_routes.dart';
+import '../../../core/widgets/Bars/toppAppBarr.dart';
 import '../../../core/widgets/cards/custom_cards.dart';
+
+class HomeData {
+  final Map<String, dynamic> user;
+  final List<Map<String, dynamic>> routes;
+  final List<dynamic> rangos;
+
+  HomeData({
+    required this.user,
+    required this.routes,
+    required this.rangos,
+  });
+}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,54 +27,137 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late final ProfileUsesCases _profileUsesCases;
-  late final ProfileRepositoryImpl repository;
 
-  late Future<Map<String, dynamic>> userFuture;
-  late Future<List<Map<String, dynamic>>> routesFuture;
-  late Future<Map<String, dynamic>> rangosFuture;
+  late final Future<HomeData> homeFuture = _loadHomeData();
 
-  @override
-  void initState() {
-    super.initState();
-
-    final firestore = FirebaseFirestore.instance;
-    final remote = ProfileRemoteDatasource(firestore);
-    repository = ProfileRepositoryImpl(remote);
-
-    _profileUsesCases = ProfileUsesCases(repository);
+  Future<HomeData> _loadHomeData() async {
 
     final uid = FirebaseAuth.instance.currentUser!.uid;
 
-    userFuture = _profileUsesCases.getUserProfile(uid);
-    routesFuture = _profileUsesCases.getCompletedRoutes(uid);
-    rangosFuture = _profileUsesCases.getConfigRangos("3CpvEa6pk5fvifbr73jW");
+    final userDoc = await FirebaseFirestore.instance
+        .collection("usuarios")
+        .doc(uid)
+        .get();
+
+    final userData = userDoc.data() ?? {};
+
+    final rangosDoc = await FirebaseFirestore.instance
+        .collection("config_rangos")
+        .doc("3CpvEa6pk5fvifbr73jW")
+        .get();
+
+    final rangos = rangosDoc.data()?["rangos"] ?? [];
+
+    List rutasProgreso =
+    List.from(userData["rutas_completadas"] ?? []);
+
+    List<String> rutasIds = rutasProgreso.map((r) {
+
+      if (r is String) return r;
+
+      if (r is Map) return r["rutaId"];
+
+      return null;
+
+    }).whereType<String>().toList();
+
+    rutasIds = rutasIds.toSet().toList();
+
+    List<Map<String, dynamic>> rutas = [];
+
+    if (rutasIds.isNotEmpty) {
+
+      final rutasQuery = await FirebaseFirestore.instance
+          .collection("rutas")
+          .where(FieldPath.documentId, whereIn: rutasIds)
+          .get();
+
+      for (var doc in rutasQuery.docs) {
+
+        final data = doc.data();
+
+        final progreso = rutasProgreso.firstWhere(
+              (r) => r is Map && r["rutaId"] == doc.id,
+          orElse: () => {},
+        );
+
+        rutas.add({
+          "id": doc.id,
+          "nombre": data["nombre"] ?? "Ruta",
+          "puntos_totales": (data["puntos_totales"] ?? 0) as int,
+          "id_puntos_interes":
+          List.from(data["id_puntos_interes"] ?? []),
+          "puntos_obtenidos":
+          (progreso["puntos_obtenidos"] ?? 0) as int,
+          "misiones_acertadas":
+          (progreso["misiones_acertadas"] ?? 0) as int,
+        });
+      }
+    }
+
+    return HomeData(
+      user: userData,
+      routes: rutas,
+      rangos: rangos,
+    );
   }
 
   String _calcularNombreRango(int puntos, List<dynamic> listaRangos) {
+
     String nombre = "Esclavo";
     int puntosMax = -1;
 
     for (var rango in listaRangos) {
+
       if (puntos >= rango['puntos_necesarios'] &&
           rango['puntos_necesarios'] > puntosMax) {
+
         puntosMax = rango['puntos_necesarios'];
         nombre = rango['nombre'];
       }
     }
+
     return nombre;
+  }
+
+  int _calcularMisiones(List<Map<String, dynamic>> rutas) {
+
+    int total = 0;
+
+    for (var ruta in rutas) {
+
+      final puntos = ruta["id_puntos_interes"] ?? [];
+
+      total += (puntos as List).length;
+    }
+
+    return total;
+  }
+
+  int _calcularPuntos(List<Map<String, dynamic>> rutas) {
+
+    int total = 0;
+
+    for (var ruta in rutas) {
+
+      final puntos = ruta["puntos_obtenidos"];
+
+      if (puntos is int) {
+        total += puntos;
+      }
+    }
+
+    return total;
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       extendBodyBehindAppBar: true,
-
-      // TOP BAR CON MENU
       appBar: const TopAppBar(),
       endDrawer: const CustomDrawer(),
 
-      // BOTON VISITAR FLOTANTE
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.verdePrincipal,
         child: const Icon(Icons.explore, color: Colors.white),
@@ -74,117 +166,139 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       ),
 
-      body: FutureBuilder<Map<String, dynamic>>(
-        future: userFuture,
-        builder: (context, userSnapshot) {
-          if (userSnapshot.connectionState == ConnectionState.waiting) {
+      body: FutureBuilder<HomeData>(
+        future: homeFuture,
+        builder: (context, snapshot) {
+
+          if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (userSnapshot.hasError || !userSnapshot.hasData) {
-            return const Center(child: Text("Error al cargar el usuario"));
-          }
+          final data = snapshot.data!;
 
-          final userData = userSnapshot.data!;
+          final userData = data.user;
+          final rutas = data.routes;
+          final rangos = data.rangos;
 
-          return FutureBuilder<Map<String, dynamic>>(
-            future: rangosFuture,
-            builder: (context, rangosSnapshot) {
-              if (rangosSnapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (rangosSnapshot.hasError || !rangosSnapshot.hasData) {
-                return const Center(child: Text("Error al cargar los rangos"));
-              }
+          final puntosTotales =
+          _calcularPuntos(rutas);
 
-              final rangosData = rangosSnapshot.data!;
+          final nombreRango =
+          _calcularNombreRango(puntosTotales, rangos);
 
-              final nombreRango = _calcularNombreRango(
-                userData['puntos'] ?? 0,
-                rangosData['rangos'],
-              );
+          final misiones = _calcularMisiones(rutas);
 
-              return Stack(
-                children: [
-                  // FONDO
-                  Container(
-                    decoration: const BoxDecoration(
-                      color: AppColors.blancoPuro,
-                      image: DecorationImage(
-                        image: AssetImage('assets/Mapa_Fondo_Extremadura.jpeg'),
-                        opacity: 0.4,
-                        fit: BoxFit.contain,
+          final rutasCompletadas = rutas.length;
+
+          return Stack(
+            children: [
+
+              Container(
+                decoration: const BoxDecoration(
+                  color: AppColors.blancoPuro,
+                  image: DecorationImage(
+                    image: AssetImage(
+                        'assets/Mapa_fondo_Extremadura.png'),
+                    opacity: 0.4,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+
+              SafeArea(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+
+                    Container(height: 2, color: AppColors.negroTexto),
+
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+
+                          _userCard(userData, nombreRango),
+
+                          const SizedBox(height: 20),
+
+                          const StrokeTitle(text: "Estadísticas"),
+
+                          const SizedBox(height: 12),
+
+                          _statsCard(
+                            rutasCompletadas,
+                            misiones,
+                            puntosTotales,
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          const StrokeTitle(text: "Rutas Completadas"),
+                        ],
                       ),
                     ),
-                  ),
 
-                  SafeArea(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // LINEA SUPERIOR
-                        Container(height: 2, color: AppColors.negroTexto),
+                    Expanded(
+                      child: Padding(
+                        padding:
+                        const EdgeInsets.symmetric(horizontal: 16),
 
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _userCard(userData, nombreRango),
-                              const SizedBox(height: 20),
+                        child: ListView.builder(
 
-                              const StrokeTitle(text: "Estadísticas"),
-                              const SizedBox(height: 12),
+                          itemCount: rutas.length,
 
-                              _statsCard(userData),
-                              const SizedBox(height: 20),
+                          itemBuilder: (context, index) {
 
-                              const StrokeTitle(text: "Rutas Completadas"),
-                            ],
-                          ),
-                        ),
+                            final ruta = rutas[index];
 
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: ListView(
+                            final nombre = ruta["nombre"];
+                            final puntosTotales =
+                            ruta["puntos_totales"];
+
+                            final puntosObtenidos =
+                            ruta["puntos_obtenidos"];
+
+                            final puntosInteres =
+                                ruta["id_puntos_interes"] ?? [];
+
+                            final misionesTotales =
+                                puntosInteres.length;
+
+                            final misionesAcertadas =
+                            ruta["misiones_acertadas"];
+
+                            return Column(
                               children: [
+
                                 _routeCard(
-                                  title: "Ruta Romana (Mérida)",
-                                  missions: "1/3",
-                                  date: "08/10/2025",
-                                  points: "100 pts",
+                                  title: nombre,
+                                  missions:
+                                  "$misionesTotales/$misionesTotales",
+                                  date: "Ruta completada",
+                                  puntosObtenidos: puntosObtenidos,
+                                  puntosTotales: puntosTotales,
+                                  misionesAcertadas:
+                                  misionesAcertadas,
+                                  misionesTotales:
+                                  misionesTotales,
                                 ),
+
                                 const SizedBox(height: 12),
-                                _routeCard(
-                                  title: "Ruta Cotidiana (Mérida)",
-                                  missions: "2/3",
-                                  date: "15/10/2025",
-                                  points: "100 pts",
-                                ),
-                                const SizedBox(height: 12),
-                                _routeCard(
-                                  title: "Ruta Imperial (Mérida)",
-                                  missions: "3/3",
-                                  date: "22/10/2025",
-                                  points: "150 pts",
-                                ),
-                                const SizedBox(height: 20),
                               ],
-                            ),
-                          ),
+                            );
+                          },
                         ),
-
-                        // LINEA INFERIOR
-                        Container(height: 2, color: AppColors.negroTexto),
-
-                        const SizedBox(height: 10),
-                      ],
+                      ),
                     ),
-                  ),
-                ],
-              );
-            },
+
+                    Container(height: 2, color: AppColors.negroTexto),
+
+                    const SizedBox(height: 10),
+                  ],
+                ),
+              ),
+            ],
           );
         },
       ),
@@ -192,19 +306,25 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   static Widget _userCard(Map<String, dynamic> userData, String nombreRango) {
+
     return CustomCard(
       padding: const EdgeInsets.all(16),
+
       child: Row(
         children: [
+
           const CircleAvatar(
             radius: 30,
             backgroundColor: AppColors.verdePrincipal,
             child: Icon(Icons.person, color: AppColors.blancoPuro),
           ),
+
           const SizedBox(width: 16),
+
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+
               Text(
                 userData['nombre'] ?? 'Sin nombre',
                 style: const TextStyle(
@@ -212,15 +332,20 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: AppColors.negroTexto,
                 ),
               ),
+
               const SizedBox(height: 4),
+
               const Text(
                 "Explorador novato",
                 style: TextStyle(color: AppColors.grisNeutro),
               ),
+
               const SizedBox(height: 4),
+
               Text(
                 "Rango: $nombreRango",
-                style: const TextStyle(color: AppColors.verdePrincipal),
+                style: const TextStyle(
+                    color: AppColors.verdePrincipal),
               ),
             ],
           ),
@@ -229,52 +354,32 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  static Widget _statsCard(Map<String, dynamic> userData) {
+  static Widget _statsCard(
+      int rutasCompletadas,
+      int misiones,
+      int puntosTotales) {
+
     return CustomCard(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
+
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Rutas completadas: ${(userData['rutas_completadas'] as List?)?.length ?? 0}",
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppColors.negroTexto,
-            ),
-          ),
+
+          Text("Rutas completadas: $rutasCompletadas"),
+
           const SizedBox(height: 6),
-          const Text(
-            "Misiones: 6/6",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppColors.negroTexto,
-            ),
-          ),
+
+          Text("Misiones: $misiones/$misiones"),
+
           const SizedBox(height: 6),
-          const Text(
-            "Puntos totales: 480",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppColors.negroTexto,
-            ),
-          ),
+
+          Text("Puntos totales: $puntosTotales"),
+
           const SizedBox(height: 6),
-          const Text(
-            "Monumentos visitados: 6",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppColors.negroTexto,
-            ),
-          ),
-          const SizedBox(height: 6),
-          const Text(
-            "Medallas: 3",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppColors.negroTexto,
-            ),
-          ),
+
+          const Text("Medallas: 0"),
         ],
       ),
     );
@@ -284,37 +389,43 @@ class _HomeScreenState extends State<HomeScreen> {
     required String title,
     required String missions,
     required String date,
-    required String points,
+    required int puntosObtenidos,
+    required int puntosTotales,
+    required int misionesAcertadas,
+    required int misionesTotales,
   }) {
+
     return CustomCard(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
+
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+
           Text(
-            "$title - $points",
+            "$title - $puntosTotales pts",
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               color: AppColors.negroTexto,
             ),
           ),
+
           const SizedBox(height: 6),
-          Text(
-            "Misiones: $missions",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppColors.negroTexto,
-            ),
-          ),
+
+          Text("Misiones: $missions"),
+
           const SizedBox(height: 6),
+
+          Text(date),
+
+          const SizedBox(height: 6),
+
           Text(
-            "Ruta completada: $date",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppColors.negroTexto,
-            ),
-          ),
+              "Puntos obtenidos: $puntosObtenidos / $puntosTotales"),
+
+          Text(
+              "Misiones acertadas: $misionesAcertadas / $misionesTotales"),
         ],
       ),
     );
@@ -322,16 +433,18 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class StrokeTitle extends StatelessWidget {
+
   final String text;
 
   const StrokeTitle({super.key, required this.text});
 
   @override
   Widget build(BuildContext context) {
+
     return Center(
       child: Stack(
         children: [
-          // Borde verde
+
           Text(
             text,
             style: TextStyle(
@@ -344,7 +457,6 @@ class StrokeTitle extends StatelessWidget {
             ),
           ),
 
-          // Texto negro
           Text(
             text,
             style: const TextStyle(

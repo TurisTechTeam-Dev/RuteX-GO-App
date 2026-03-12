@@ -126,7 +126,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           Center(
             child: Opacity(
               opacity: 0.3,
-              child: Image.asset('assets/Mapa_Fondo_Extremadura.jpeg'),
+              child: Image.asset('assets/Mapa_fondo_Extremadura.png'),
             ),
           ),
 

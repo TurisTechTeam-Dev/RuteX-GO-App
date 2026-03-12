@@ -21,7 +21,7 @@ class RouteSelectionScreen extends StatelessWidget {
             decoration: const BoxDecoration(
               color: AppColors.blancoPuro,
               image: DecorationImage(
-                image: AssetImage('assets/Mapa_Fondo_Extremadura.jpeg'),
+                image: AssetImage('assets/Mapa_fondo_Extremadura.png'),
                 opacity: 0.4,
                 fit: BoxFit.contain,
               ),
@@ -74,6 +74,9 @@ class RouteSelectionScreen extends StatelessWidget {
                         time: "2 h",
                         distance: "1,5 km",
                       ),
+
+                      const SizedBox(height: 60)
+
                     ],
                   ),
                 ),
@@ -98,52 +101,62 @@ class RouteSelectionScreen extends StatelessWidget {
 }
 
 Widget _routeCard(
-  BuildContext context, {
-  required String image,
-  required String title,
-  required String description,
-  required String difficulty,
-  required String time,
-  required String distance,
-}) {
+    BuildContext context, {
+      required String image,
+      required String title,
+      required String description,
+      required String difficulty,
+      required String time,
+      required String distance,
+    }) {
   return Padding(
     padding: const EdgeInsets.only(bottom: 20),
-
     child: CustomCard(
       padding: const EdgeInsets.all(12),
 
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+
           // IMAGEN
           AspectRatio(
             aspectRatio: 16 / 9,
             child: Container(
               decoration: BoxDecoration(
-                border: Border.all(color: AppColors.negroTexto, width: 1),
+                border: Border.all(
+                  color: AppColors.negroTexto,
+                  width: 1,
+                ),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(5),
-                child: Image.asset(image, fit: BoxFit.cover),
+                child: Image.asset(
+                  image,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),
 
           const SizedBox(height: 10),
 
+          // TITULO CON ICONO
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Icon(
                 Icons.account_balance,
                 color: AppColors.verdePrincipal,
+                size: 20,
               ),
+
               const SizedBox(width: 6),
+
               Flexible(
                 child: Text(
-                  textAlign: TextAlign.center,
                   title,
+                  textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     color: AppColors.negroTexto,
@@ -155,23 +168,26 @@ Widget _routeCard(
 
           const SizedBox(height: 6),
 
-          Text(description, style: Theme.of(context).textTheme.labelMedium),
+          // DESCRIPCION
+          Text(
+            description,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.labelMedium,
+          ),
 
           const SizedBox(height: 10),
 
+          // INFO RUTA
           Wrap(
-            spacing: 10,
+            alignment: WrapAlignment.center,
+            spacing: 12,
             runSpacing: 6,
             children: [
+
               Row(
                 mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
-                    Icons.extension,
-                    size: 18,
-                    color: AppColors.verdePrincipal,
-                  ),
+                  const Icon(Icons.extension, size: 18, color: AppColors.verdePrincipal),
                   const SizedBox(width: 4),
                   Text("Dificultad: $difficulty"),
                 ],
@@ -179,27 +195,17 @@ Widget _routeCard(
 
               Row(
                 mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
-                    Icons.access_time,
-                    size: 18,
-                    color: AppColors.verdePrincipal,
-                  ),
+                  const Icon(Icons.access_time, size: 18, color: AppColors.verdePrincipal),
                   const SizedBox(width: 4),
                   Text("Tiempo: $time"),
                 ],
               ),
 
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.route,
-                    size: 18,
-                    color: AppColors.verdePrincipal,
-                  ),
+                  const Icon(Icons.route, size: 18, color: AppColors.verdePrincipal),
                   const SizedBox(width: 4),
                   Text("Distancia: $distance"),
                 ],
@@ -209,13 +215,14 @@ Widget _routeCard(
 
           const SizedBox(height: 12),
 
+          // BOTON PEQUEÑO CENTRADO
           SizedBox(
-            width: double.infinity,
             height: 36,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.verdePrincipal,
                 foregroundColor: AppColors.blancoPuro,
+                padding: const EdgeInsets.symmetric(horizontal: 24),
               ),
               onPressed: () {
                 Navigator.pushNamed(context, AppRoutes.missionQrScanner);

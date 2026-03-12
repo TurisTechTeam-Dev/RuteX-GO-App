@@ -56,6 +56,7 @@ flutter:
     - assets/merida_cotidiana.png
     - assets/merida_monumental.png
     - assets/merida_vidafe.jpg
+    - assets/Mapa_fondo_Extremadura.png
 
   # Configuración de la familia de fuente Montserrat
   fonts:
