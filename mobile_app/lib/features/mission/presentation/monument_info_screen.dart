@@ -15,7 +15,7 @@ class MonumentInfoScreen extends StatelessWidget {
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
 
     final punto = data['punto'];
-    final mision = data['mision'];
+    final mision = data['misiones'];
 
     return Scaffold(
       backgroundColor: Colors.white,

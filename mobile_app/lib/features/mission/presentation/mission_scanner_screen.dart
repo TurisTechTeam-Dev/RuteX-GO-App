@@ -81,7 +81,7 @@ class _MisionScannerScreenState extends State<MisionScannerScreen> {
           left: 0,
           right: 0,
           child: Material(
-            color: Colors.black.withOpacity(0.35),
+            color: Colors.black.withValues(alpha: 0.35),
             child: SafeArea(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -129,7 +129,7 @@ class _MisionScannerScreenState extends State<MisionScannerScreen> {
       width: 280,
       padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.7),
+        color: Colors.black.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(30),
       ),
       child: ValueListenableBuilder(

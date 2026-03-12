@@ -1,31 +1,54 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../repository/mission_repository.dart';
 
-import '../domain/repository/mission_repository.dart';
-
-class MissionRepositoryImpl implements MissionRepository {
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
+class MissionRepositoryImpl implements Mission_Repository {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   Future<Map<String, dynamic>?> getPuntoByQr(String qrCode) async {
-    final snapshot = await _db.collection('puntos_interes')
+    final snapshot = await _firestore
+        .collection('puntos_interes')
         .where('qr_code', isEqualTo: qrCode)
-        .limit(1).get();
+        .get();
 
-    if(snapshot.docs.isEmpty) return null;
+    if (snapshot.docs.isEmpty) return null;
 
-    final doc = snapshot.docs.first;
-    final data = doc.data();
-    data['id'] = doc.id;
+    var data = snapshot.docs.first.data();
+    data['id'] = snapshot.docs.first.id;
     return data;
   }
 
   @override
   Future<Map<String, dynamic>?> getMisionByPuntoId(String puntoId) async {
-    final snapshot = await _db.collection('misiones')
-        .where('puntos_interes_id', isEqualTo: puntoId)
-        .limit(1).get();
-    return snapshot.docs.isNotEmpty ? snapshot.docs.first.data() : null;
+    try {
+      DocumentSnapshot doc = await _firestore.collection('misiones').doc(puntoId).get();
+      if (doc.exists) {
+        final data = doc.data() as Map<String, dynamic>;
+        data['id'] = doc.id;
+        return data;
+      }
+    } catch (e) {
+      print("Error: $e");
+    }
+    return null;
   }
 
-
+  @override
+  Future<void> saveMissionResult({
+    required String userId,
+    required String misionId,
+    required int puntosObtenidos,
+  }) async {
+    try {
+      // Guardamos en una colección nueva llamada 'resultados'
+      await _firestore.collection('resultado').add({
+        'usuario_id': userId,
+        'mision_id': misionId,
+        'puntos': puntosObtenidos,
+        'fecha': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print("Error al guardar: $e");
+    }
+  }
 }
