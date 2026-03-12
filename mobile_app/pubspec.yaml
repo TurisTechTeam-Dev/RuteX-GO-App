@@ -52,6 +52,10 @@ flutter:
     - assets/RutexGO_color.png
     - assets/RutexGO_grises.png
     - assets/images_selection/
+    - assets/anfiteatro_romano.jpg
+    - assets/merida_cotidiana.png
+    - assets/merida_monumental.png
+    - assets/merida_vidafe.jpg
 
   # Configuración de la familia de fuente Montserrat
   fonts:

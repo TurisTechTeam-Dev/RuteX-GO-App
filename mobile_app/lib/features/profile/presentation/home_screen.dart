@@ -109,6 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   // FONDO
                   Container(
                     decoration: const BoxDecoration(
+                      color: AppColors.blancoPuro,
                       image: DecorationImage(
                         image: AssetImage('assets/Mapa_Fondo_Extremadura.jpeg'),
                         opacity: 0.4,

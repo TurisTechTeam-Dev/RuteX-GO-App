@@ -13,7 +13,7 @@ class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.blancoPuro,
       elevation: 0,
       centerTitle: true,
 
@@ -89,7 +89,7 @@ class CustomDrawer extends StatelessWidget {
                 leading: const Icon(Icons.home),
                 title: const Text('Inicio'),
                 onTap: () {
-                  Navigator.pop(context); // cerrar drawer
+                  Navigator.pop(context);
 
                   Navigator.pushNamedAndRemoveUntil(
                     context,

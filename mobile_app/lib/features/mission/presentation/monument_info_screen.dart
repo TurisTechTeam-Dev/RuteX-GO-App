@@ -39,7 +39,7 @@ class MonumentInfoScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  //nombre del munmumento
+                  //nombre del monumento
                   CustomCard(
                     child: Text(
                       punto['nombre'] ?? 'Sin nombre',

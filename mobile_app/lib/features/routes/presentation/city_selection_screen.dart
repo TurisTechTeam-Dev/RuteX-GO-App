@@ -102,7 +102,7 @@ class CitySelectionScreen extends StatelessWidget {
                         available: false,
                       ),
 
-                      const SizedBox(height: 80),
+                      const SizedBox(height: 60),
                     ],
                   ),
                 ),
@@ -113,7 +113,7 @@ class CitySelectionScreen extends StatelessWidget {
       ),
 
       bottomNavigationBar: Container(
-        height: 60,
+        height: 10,
         decoration: const BoxDecoration(
           color: Colors.white,
           border: Border(

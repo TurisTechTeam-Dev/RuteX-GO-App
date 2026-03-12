@@ -1,6 +1,9 @@
 import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile_app/core/constants/app_colors.dart';
+
 import '../../../core/routes/app_routes.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -36,7 +39,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F7F7),
+      backgroundColor: AppColors.blancoPuro,
       body: Stack(
         children: [
           // Imagen de fondo (Mapa)
@@ -48,10 +51,7 @@ class _SplashScreenState extends State<SplashScreen> {
           ),
           // Logo centrado
           Center(
-            child: Image.asset(
-              'assets/Logo_Color_Rutexgo.png',
-              width: 300,
-            ),
+            child: Image.asset('assets/Logo_Color_Rutexgo.png', width: 300),
           ),
           // Círculo de carga
           const Align(
