@@ -1,41 +1,84 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_joystick/flutter_joystick.dart';
 import '../../../../core/widgets/Bars/toppAppBarr.dart';
 import '../provider/trip_provider.dart';
-import '../../../../core/map/map_view.dart'; // Ajusta la ruta a tu widget
+import '../../../../core/map/map_view.dart';
 
-class MapNavigationScreen extends StatelessWidget {
+class MapNavigationScreen extends StatefulWidget {
   const MapNavigationScreen({super.key});
+
+  @override
+  State<MapNavigationScreen> createState() => _MapNavigationScreenState();
+}
+
+class _MapNavigationScreenState extends State<MapNavigationScreen> {
+  // 1. Controlador para que el mapa se mueva siguiendo a la flecha
+  final MapController _mapController = MapController();
 
   @override
   Widget build(BuildContext context) {
     final tripProvider = context.watch<TripSimulationProvider>();
 
-    return Scaffold(
-      // 1. Usamos tu Widget personalizado
-      appBar: const TopAppBar(showBack: true),
+    // 2. Escuchar cambios de posición para centrar la cámara automáticamente
+    if (tripProvider.currentPosition != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _mapController.move(
+          tripProvider.currentPosition!,
+          _mapController.camera.zoom, // Mantenemos el zoom que elija el usuario
+        );
+      });
+    }
 
-      // 2. Añadimos tu Drawer para que el botón de menú de la derecha funcione
-      endDrawer: const CustomDrawer(),
+    return Scaffold(
+      appBar: const TopAppBar(showBack: true),
+      // endDrawer: const CustomDrawer(), // Actívalo si lo tienes listo
 
       body: Stack(
         children: [
-          // EL MAPA
+          // Capa 1: EL MAPA
           MapView(
+            mapController: _mapController,
             routePoints: tripProvider.routePoints,
             markers: _buildMarkers(tripProvider),
+            currentLocation: tripProvider.currentPosition,
           ),
 
-          // BOTÓN DE INICIO (Flotante abajo)
+          // Capa 2: EL JOYSTICK
+          // Solo aparece si ya hemos pulsado "Empezar Aventura" (hay ruta o está simulando)
+          if (tripProvider.routePoints.isNotEmpty || tripProvider.isSimulating)
+            Positioned(
+              bottom: 120, // Situado encima del botón verde
+              left: 20,
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.7),
+                  shape: BoxShape.circle,
+                  boxShadow: const [
+                    BoxShadow(color: Colors.black26, blurRadius: 8)
+                  ],
+                ),
+                child: Joystick(
+                  mode: JoystickMode.all,
+                  listener: (details) {
+                    // Enviamos el movimiento al Provider
+                    tripProvider.movePositionManual(details.x, details.y);
+                  },
+                ),
+              ),
+            ),
+
+          // Capa 3: BOTÓN DE ACCIÓN (EMPEZAR / DETENER)
           Positioned(
             bottom: 30,
             left: 50,
             right: 50,
-            child: _buildStartButton(tripProvider),
+            child: _buildActionButton(tripProvider),
           ),
 
-          // Feedback visual si no hay datos
+          // Capa 4: CARGANDO (Si no hay puntos de Firebase aún)
           if (tripProvider.pointsOfInterest.isEmpty)
             const Center(child: CircularProgressIndicator(color: Colors.green)),
         ],
@@ -43,24 +86,35 @@ class MapNavigationScreen extends StatelessWidget {
     );
   }
 
-  // Botón con el estilo verde de tu app
-  Widget _buildStartButton(TripSimulationProvider provider) {
+  // Widget del botón que cambia según el estado de la ruta
+  Widget _buildActionButton(TripSimulationProvider provider) {
+    bool hasRoute = provider.routePoints.isNotEmpty;
+
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.green, // O usa AppColors.verdePrincipal
+        backgroundColor: hasRoute ? Colors.redAccent : Colors.green,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(vertical: 15),
         elevation: 5,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       ),
-      onPressed: provider.isSimulating ? null : () => provider.startSimulation(),
+      onPressed: () {
+        if (!hasRoute) {
+          provider.startSimulation();
+        } else {
+          provider.clearRoute();
+        }
+      },
       child: Text(
-        provider.isSimulating ? "SIGUIENDO RUTA..." : "EMPEZAR AVENTURA",
+        provider.isSimulating
+            ? "SIMULANDO..."
+            : (hasRoute ? "DETENER Y LIMPIAR" : "EMPEZAR AVENTURA"),
         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
       ),
     );
   }
 
+  // Generador de marcadores (Monumentos + Flecha de usuario)
   List<Marker> _buildMarkers(TripSimulationProvider provider) {
     final markers = provider.pointsOfInterest.map((poi) {
       return Marker(
