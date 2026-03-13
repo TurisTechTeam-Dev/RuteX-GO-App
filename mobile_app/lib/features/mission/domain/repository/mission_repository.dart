@@ -6,5 +6,7 @@ abstract class MissionRepository {
 
   Future<Map<String, dynamic>?> getMisionByPuntoId(String puntoId);
 
-  Future<List<PointOfInterest>> getMissionPoints();
+  Future<List<String>> getRoutePointIds(String routeId);
+
+  Future<List<PointOfInterest>> getPointsByIds(List<String> ids);
 }

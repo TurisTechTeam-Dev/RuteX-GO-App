@@ -8,6 +8,7 @@ import '../../domain/usescases/mission_uses_cases.dart';
 
 class TripSimulationProvider extends ChangeNotifier {
   final MissionUseCases missionUseCases;
+  final String routeId;
   final RoutingService _routingService = RoutingService();
 
   List<PointOfInterest> _pointsOfInterest = [];
@@ -19,139 +20,109 @@ class TripSimulationProvider extends ChangeNotifier {
   LatLng? _currentPosition;
   LatLng? get currentPosition => _currentPosition;
 
+  int _currentPoiIndex = 0;
+  int get currentPoiIndex => _currentPoiIndex;
+
   bool _isSimulating = false;
   bool get isSimulating => _isSimulating;
 
-  // --- NUEVO: Gestión de Paradas ---
-  PointOfInterest? _activePOI;
-  PointOfInterest? get activePOI => _activePOI;
+  bool _hasReachedDestination = false;
+  bool get hasReachedDestination => _hasReachedDestination;
 
-  bool _isNearPOI = false;
-  bool get isNearPOI => _isNearPOI;
+  StreamSubscription<Position>? _positionStream;
 
-  int _currentIndex = 0; // Índice del monumento actual
-
-  StreamSubscription<Position>? _positionStreamSubscription;
-
-  TripSimulationProvider({required this.missionUseCases}) {
+  // El constructor ahora obliga a pasar el routeId
+  TripSimulationProvider({
+    required this.missionUseCases,
+    required this.routeId,
+  }) {
     _initData();
   }
 
   Future<void> _initData() async {
     try {
-      _pointsOfInterest = await missionUseCases.execute();
-      await updateToRealLocation();
-      startRealTimeTracking();
+      // Pasamos el routeId que viene de Firebase
+      _pointsOfInterest = await missionUseCases.executeGetOrderedPoints(routeId);
+      await _startTracking();
       notifyListeners();
     } catch (e) {
-      debugPrint("Error en carga inicial: $e");
+      debugPrint("Error cargando puntos: $e");
     }
   }
 
-  Future<void> updateToRealLocation() async {
-    Position position = await Geolocator.getCurrentPosition();
-    _currentPosition = LatLng(position.latitude, position.longitude);
-    notifyListeners();
-  }
+  Future<void> _startTracking() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) return;
+    }
 
-  void startRealTimeTracking() {
-    _positionStreamSubscription?.cancel();
-    _positionStreamSubscription = Geolocator.getPositionStream(
+    _positionStream = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(accuracy: LocationAccuracy.high, distanceFilter: 2),
     ).listen((Position position) {
-      if (!_isSimulating) {
-        _currentPosition = LatLng(position.latitude, position.longitude);
-        _checkProximity(_currentPosition!);
-        notifyListeners();
-      }
+      _currentPosition = LatLng(position.latitude, position.longitude);
+      if (!_isSimulating) _checkProximity(_currentPosition!);
+      notifyListeners();
     });
   }
 
-  void movePositionManual(double dx, double dy) {
-    if (_currentPosition == null) return;
-    const double step = 0.00018;
-    _currentPosition = LatLng(_currentPosition!.latitude - (dy * step), _currentPosition!.longitude + (dx * step));
-    _checkProximity(_currentPosition!);
+  double get distanceToNextPoi {
+    if (_currentPosition == null || _pointsOfInterest.isEmpty) return 0.0;
+    if (_currentPoiIndex >= _pointsOfInterest.length) return 0.0;
+
+    final target = _pointsOfInterest[_currentPoiIndex].localizacion;
+    return const Distance().as(LengthUnit.Meter, _currentPosition!, target);
+  }
+
+  void skipToNext() {
+    if (_currentPoiIndex < _pointsOfInterest.length - 1) {
+      _currentPoiIndex++;
+      _hasReachedDestination = false;
+      if (_currentPosition != null) {
+        _calculateNewRoute();
+      }
+      notifyListeners();
+    }
+  }
+
+  Future<void> _calculateNewRoute() async {
+    _routePoints = await _routingService.getRoute(
+        _currentPosition!,
+        _pointsOfInterest[_currentPoiIndex].localizacion
+    );
     notifyListeners();
   }
 
-  Future<void> startSimulation() async {
-    if (_pointsOfInterest.isEmpty || _currentIndex >= _pointsOfInterest.length) return;
-    if (_currentPosition == null) await updateToRealLocation();
+  void _checkProximity(LatLng pos) {
+    if (_hasReachedDestination || _pointsOfInterest.isEmpty) return;
 
-    _isSimulating = true;
-    _isNearPOI = false; // Reset al empezar
-
-    try {
-      // Calculamos ruta hasta el siguiente punto pendiente
-      List<LatLng> points = await _routingService.getRoute(
-          _currentPosition!,
-          _pointsOfInterest[_currentIndex].localizacion
-      );
-
-      if (points.isNotEmpty) {
-        _routePoints = points;
-        notifyListeners();
-
-        for (int i = 0; i < _routePoints.length; i++) {
-          if (!_isSimulating || _isNearPOI) break; // Si detecta proximidad, para el coche
-          _currentPosition = _routePoints[i];
-          _checkProximity(_currentPosition!);
-          notifyListeners();
-          await Future.delayed(const Duration(milliseconds: 50));
-        }
-      }
-    } finally {
+    final currentPoi = _pointsOfInterest[_currentPoiIndex];
+    if (distanceToNextPoi <= currentPoi.radioActivacion) {
+      _hasReachedDestination = true;
       _isSimulating = false;
       notifyListeners();
     }
   }
 
-  void _checkProximity(LatLng pos) {
-    if (_currentIndex >= _pointsOfInterest.length) return;
+  Future<void> startSimulation() async {
+    if (_pointsOfInterest.isEmpty || _currentPosition == null) return;
+    _isSimulating = true;
+    _hasReachedDestination = false;
+    await _calculateNewRoute();
 
-    final target = _pointsOfInterest[_currentIndex];
-    final distance = const Distance().as(LengthUnit.Meter, pos, target.localizacion);
-
-    // Si estamos a menos de su radio de activación
-    if (distance <= target.radioActivacion && !_isNearPOI) {
-      _isNearPOI = true;
-      _activePOI = target;
-      _isSimulating = false; // Paramos el coche para que el usuario elija
+    for (var point in _routePoints) {
+      if (!_isSimulating) break;
+      _currentPosition = point;
+      _checkProximity(_currentPosition!);
       notifyListeners();
+      await Future.delayed(const Duration(milliseconds: 50));
     }
-  }
-
-  // Lógica para saltar al siguiente punto y arrancar automáticamente
-  void nextMission() {
-    _currentIndex++; // Pasamos al siguiente monumento
-    _isNearPOI = false; // Cerramos el panel de información
-    _activePOI = null;
-    _routePoints = []; // Limpiamos la ruta vieja
-
-    notifyListeners();
-
-    // Si aún quedan monumentos en la lista, arrancamos la siguiente ruta solo
-    if (_currentIndex < _pointsOfInterest.length) {
-      debugPrint("Calculando automáticamente siguiente parada...");
-      startSimulation();
-    } else {
-      debugPrint("¡Gymkhana finalizada!");
-      _currentIndex = 0; // Opcional: resetear para poder empezar de nuevo
-    }
-  }
-
-  void clearRoute() {
-    _routePoints = [];
     _isSimulating = false;
-    _isNearPOI = false;
-    _currentIndex = 0;
-    notifyListeners();
   }
 
   @override
   void dispose() {
-    _positionStreamSubscription?.cancel();
+    _positionStream?.cancel();
     super.dispose();
   }
 }
