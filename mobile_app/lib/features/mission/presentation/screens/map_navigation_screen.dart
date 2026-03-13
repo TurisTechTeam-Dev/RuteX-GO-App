@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_app/core/routes/app_routes.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_joystick/flutter_joystick.dart';
@@ -14,30 +15,27 @@ class MapNavigationScreen extends StatefulWidget {
 }
 
 class _MapNavigationScreenState extends State<MapNavigationScreen> {
-  // 1. Controlador para que el mapa se mueva siguiendo a la flecha
   final MapController _mapController = MapController();
 
   @override
   Widget build(BuildContext context) {
     final tripProvider = context.watch<TripSimulationProvider>();
 
-    // 2. Escuchar cambios de posición para centrar la cámara automáticamente
+    // Centrar cámara automáticamente
     if (tripProvider.currentPosition != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _mapController.move(
           tripProvider.currentPosition!,
-          _mapController.camera.zoom, // Mantenemos el zoom que elija el usuario
+          _mapController.camera.zoom,
         );
       });
     }
 
     return Scaffold(
       appBar: const TopAppBar(showBack: true),
-      // endDrawer: const CustomDrawer(), // Actívalo si lo tienes listo
-
       body: Stack(
         children: [
-          // Capa 1: EL MAPA
+          // 1. EL MAPA
           MapView(
             mapController: _mapController,
             routePoints: tripProvider.routePoints,
@@ -45,40 +43,32 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
             currentLocation: tripProvider.currentPosition,
           ),
 
-          // Capa 2: EL JOYSTICK
-          // Solo aparece si ya hemos pulsado "Empezar Aventura" (hay ruta o está simulando)
-          if (tripProvider.routePoints.isNotEmpty || tripProvider.isSimulating)
+          // 2. EL JOYSTICK (Solo si no estamos en una parada)
+          if ((tripProvider.routePoints.isNotEmpty || tripProvider.isSimulating) && !tripProvider.isNearPOI)
             Positioned(
-              bottom: 120, // Situado encima del botón verde
+              bottom: 120,
               left: 20,
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.7),
-                  shape: BoxShape.circle,
-                  boxShadow: const [
-                    BoxShadow(color: Colors.black26, blurRadius: 8)
-                  ],
-                ),
-                child: Joystick(
-                  mode: JoystickMode.all,
-                  listener: (details) {
-                    // Enviamos el movimiento al Provider
-                    tripProvider.movePositionManual(details.x, details.y);
-                  },
-                ),
-              ),
+              child: _buildJoystick(tripProvider),
             ),
 
-          // Capa 3: BOTÓN DE ACCIÓN (EMPEZAR / DETENER)
-          Positioned(
-            bottom: 30,
-            left: 50,
-            right: 50,
-            child: _buildActionButton(tripProvider),
-          ),
+          // 3. BOTÓN PRINCIPAL (Solo se muestra si no hemos llegado a un punto)
+          if (!tripProvider.isNearPOI)
+            Positioned(
+              bottom: 30,
+              left: 50,
+              right: 50,
+              child: _buildStartButton(tripProvider),
+            ),
 
-          // Capa 4: CARGANDO (Si no hay puntos de Firebase aún)
+          // 4. PANEL DE MISIÓN (El panel blanco de tu imagen)
+          if (tripProvider.isNearPOI && tripProvider.activePOI != null)
+            Positioned(
+              bottom: 20,
+              left: 20,
+              right: 20,
+              child: _buildMissionPanel(context, tripProvider),
+            ),
+
           if (tripProvider.pointsOfInterest.isEmpty)
             const Center(child: CircularProgressIndicator(color: Colors.green)),
         ],
@@ -86,35 +76,95 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
     );
   }
 
-  // Widget del botón que cambia según el estado de la ruta
-  Widget _buildActionButton(TripSimulationProvider provider) {
-    bool hasRoute = provider.routePoints.isNotEmpty;
+  // Panel con el diseño de tu imagen
+  Widget _buildMissionPanel(BuildContext context, TripSimulationProvider provider) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.black, width: 2),
+        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10)],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "Siguiente Parada: ${provider.activePOI!.nombre}",
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 5),
+          const Text(
+            "¡Has llegado al destino! Elige cómo continuar:",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.grey),
+          ),
+          const SizedBox(height: 20),
+          // Botón Leer QR
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF007D3A), // Verde oscuro
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              onPressed: () {
+                // Navegar a tu pantalla de scanner
+                Navigator.pushNamed(context, AppRoutes.missionQrScanner);
+                debugPrint("Ir a Scanner");
+              },
+              child: const Text("Leer QR", style: TextStyle(color: Colors.white)),
+            ),
+          ),
+          const SizedBox(height: 10),
+          // Botón Saltar Juego
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF007D3A),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              onPressed: () {
+                provider.nextMission(); // Salta al siguiente y limpia ruta
+              },
+              child: const Text("Saltar juego", style: TextStyle(color: Colors.white)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
+  Widget _buildJoystick(TripSimulationProvider provider) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.8),
+        shape: BoxShape.circle,
+      ),
+      child: Joystick(
+        mode: JoystickMode.all,
+        listener: (details) => provider.movePositionManual(details.x, details.y),
+      ),
+    );
+  }
+
+  Widget _buildStartButton(TripSimulationProvider provider) {
+    bool hasRoute = provider.routePoints.isNotEmpty;
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: hasRoute ? Colors.redAccent : Colors.green,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(vertical: 15),
-        elevation: 5,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       ),
-      onPressed: () {
-        if (!hasRoute) {
-          provider.startSimulation();
-        } else {
-          provider.clearRoute();
-        }
-      },
-      child: Text(
-        provider.isSimulating
-            ? "SIMULANDO..."
-            : (hasRoute ? "DETENER Y LIMPIAR" : "EMPEZAR AVENTURA"),
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-      ),
+      onPressed: () => hasRoute ? provider.clearRoute() : provider.startSimulation(),
+      child: Text(provider.isSimulating ? "SIMULANDO..." : (hasRoute ? "LIMPIAR" : "EMPEZAR AVENTURA")),
     );
   }
 
-  // Generador de marcadores (Monumentos + Flecha de usuario)
   List<Marker> _buildMarkers(TripSimulationProvider provider) {
     final markers = provider.pointsOfInterest.map((poi) {
       return Marker(
