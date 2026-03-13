@@ -75,8 +75,7 @@ class RouteSelectionScreen extends StatelessWidget {
                         distance: "1,5 km",
                       ),
 
-                      const SizedBox(height: 60)
-
+                      const SizedBox(height: 60),
                     ],
                   ),
                 ),
@@ -87,7 +86,7 @@ class RouteSelectionScreen extends StatelessWidget {
       ),
 
       bottomNavigationBar: Container(
-        height: 10,
+        height: 60,
         decoration: const BoxDecoration(
           color: Colors.white,
           border: Border(
@@ -101,14 +100,14 @@ class RouteSelectionScreen extends StatelessWidget {
 }
 
 Widget _routeCard(
-    BuildContext context, {
-      required String image,
-      required String title,
-      required String description,
-      required String difficulty,
-      required String time,
-      required String distance,
-    }) {
+  BuildContext context, {
+  required String image,
+  required String title,
+  required String description,
+  required String difficulty,
+  required String time,
+  required String distance,
+}) {
   return Padding(
     padding: const EdgeInsets.only(bottom: 20),
     child: CustomCard(
@@ -117,24 +116,17 @@ Widget _routeCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-
           // IMAGEN
           AspectRatio(
             aspectRatio: 16 / 9,
             child: Container(
               decoration: BoxDecoration(
-                border: Border.all(
-                  color: AppColors.negroTexto,
-                  width: 1,
-                ),
+                border: Border.all(color: AppColors.negroTexto, width: 1),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(5),
-                child: Image.asset(
-                  image,
-                  fit: BoxFit.cover,
-                ),
+                child: Image.asset(image, fit: BoxFit.cover),
               ),
             ),
           ),
@@ -183,11 +175,14 @@ Widget _routeCard(
             spacing: 12,
             runSpacing: 6,
             children: [
-
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.extension, size: 18, color: AppColors.verdePrincipal),
+                  const Icon(
+                    Icons.extension,
+                    size: 18,
+                    color: AppColors.verdePrincipal,
+                  ),
                   const SizedBox(width: 4),
                   Text("Dificultad: $difficulty"),
                 ],
@@ -196,7 +191,11 @@ Widget _routeCard(
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.access_time, size: 18, color: AppColors.verdePrincipal),
+                  const Icon(
+                    Icons.access_time,
+                    size: 18,
+                    color: AppColors.verdePrincipal,
+                  ),
                   const SizedBox(width: 4),
                   Text("Tiempo: $time"),
                 ],
@@ -205,7 +204,11 @@ Widget _routeCard(
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.route, size: 18, color: AppColors.verdePrincipal),
+                  const Icon(
+                    Icons.route,
+                    size: 18,
+                    color: AppColors.verdePrincipal,
+                  ),
                   const SizedBox(width: 4),
                   Text("Distancia: $distance"),
                 ],

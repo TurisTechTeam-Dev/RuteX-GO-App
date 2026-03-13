@@ -12,11 +12,7 @@ class HomeData {
   final List<Map<String, dynamic>> routes;
   final List<dynamic> rangos;
 
-  HomeData({
-    required this.user,
-    required this.routes,
-    required this.rangos,
-  });
+  HomeData({required this.user, required this.routes, required this.rangos});
 }
 
 class HomeScreen extends StatefulWidget {
@@ -27,11 +23,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
   late final Future<HomeData> homeFuture = _loadHomeData();
 
   Future<HomeData> _loadHomeData() async {
-
     final uid = FirebaseAuth.instance.currentUser!.uid;
 
     final userDoc = await FirebaseFirestore.instance
@@ -48,36 +42,34 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final rangos = rangosDoc.data()?["rangos"] ?? [];
 
-    List rutasProgreso =
-    List.from(userData["rutas_completadas"] ?? []);
+    List rutasProgreso = List.from(userData["rutas_completadas"] ?? []);
 
-    List<String> rutasIds = rutasProgreso.map((r) {
+    List<String> rutasIds = rutasProgreso
+        .map((r) {
+          if (r is String) return r;
 
-      if (r is String) return r;
+          if (r is Map) return r["rutaId"];
 
-      if (r is Map) return r["rutaId"];
-
-      return null;
-
-    }).whereType<String>().toList();
+          return null;
+        })
+        .whereType<String>()
+        .toList();
 
     rutasIds = rutasIds.toSet().toList();
 
     List<Map<String, dynamic>> rutas = [];
 
     if (rutasIds.isNotEmpty) {
-
       final rutasQuery = await FirebaseFirestore.instance
           .collection("rutas")
           .where(FieldPath.documentId, whereIn: rutasIds)
           .get();
 
       for (var doc in rutasQuery.docs) {
-
         final data = doc.data();
 
         final progreso = rutasProgreso.firstWhere(
-              (r) => r is Map && r["rutaId"] == doc.id,
+          (r) => r is Map && r["rutaId"] == doc.id,
           orElse: () => {},
         );
 
@@ -85,33 +77,23 @@ class _HomeScreenState extends State<HomeScreen> {
           "id": doc.id,
           "nombre": data["nombre"] ?? "Ruta",
           "puntos_totales": (data["puntos_totales"] ?? 0) as int,
-          "id_puntos_interes":
-          List.from(data["id_puntos_interes"] ?? []),
-          "puntos_obtenidos":
-          (progreso["puntos_obtenidos"] ?? 0) as int,
-          "misiones_acertadas":
-          (progreso["misiones_acertadas"] ?? 0) as int,
+          "id_puntos_interes": List.from(data["id_puntos_interes"] ?? []),
+          "puntos_obtenidos": (progreso["puntos_obtenidos"] ?? 0) as int,
+          "misiones_acertadas": (progreso["misiones_acertadas"] ?? 0) as int,
         });
       }
     }
 
-    return HomeData(
-      user: userData,
-      routes: rutas,
-      rangos: rangos,
-    );
+    return HomeData(user: userData, routes: rutas, rangos: rangos);
   }
 
   String _calcularNombreRango(int puntos, List<dynamic> listaRangos) {
-
     String nombre = "Esclavo";
     int puntosMax = -1;
 
     for (var rango in listaRangos) {
-
       if (puntos >= rango['puntos_necesarios'] &&
           rango['puntos_necesarios'] > puntosMax) {
-
         puntosMax = rango['puntos_necesarios'];
         nombre = rango['nombre'];
       }
@@ -121,11 +103,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   int _calcularMisiones(List<Map<String, dynamic>> rutas) {
-
     int total = 0;
 
     for (var ruta in rutas) {
-
       final puntos = ruta["id_puntos_interes"] ?? [];
 
       total += (puntos as List).length;
@@ -135,11 +115,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   int _calcularPuntos(List<Map<String, dynamic>> rutas) {
-
     int total = 0;
 
     for (var ruta in rutas) {
-
       final puntos = ruta["puntos_obtenidos"];
 
       if (puntos is int) {
@@ -152,7 +130,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: const TopAppBar(),
@@ -169,7 +146,6 @@ class _HomeScreenState extends State<HomeScreen> {
       body: FutureBuilder<HomeData>(
         future: homeFuture,
         builder: (context, snapshot) {
-
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -180,11 +156,9 @@ class _HomeScreenState extends State<HomeScreen> {
           final rutas = data.routes;
           final rangos = data.rangos;
 
-          final puntosTotales =
-          _calcularPuntos(rutas);
+          final puntosTotales = _calcularPuntos(rutas);
 
-          final nombreRango =
-          _calcularNombreRango(puntosTotales, rangos);
+          final nombreRango = _calcularNombreRango(puntosTotales, rangos);
 
           final misiones = _calcularMisiones(rutas);
 
@@ -192,13 +166,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
           return Stack(
             children: [
-
               Container(
                 decoration: const BoxDecoration(
                   color: AppColors.blancoPuro,
                   image: DecorationImage(
-                    image: AssetImage(
-                        'assets/Mapa_fondo_Extremadura.png'),
+                    image: AssetImage('assets/Mapa_fondo_Extremadura.png'),
                     opacity: 0.4,
                     fit: BoxFit.contain,
                   ),
@@ -209,7 +181,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-
                     Container(height: 2, color: AppColors.negroTexto),
 
                     Padding(
@@ -217,7 +188,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-
                           _userCard(userData, nombreRango),
 
                           const SizedBox(height: 20),
@@ -226,11 +196,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           const SizedBox(height: 12),
 
-                          _statsCard(
-                            rutasCompletadas,
-                            misiones,
-                            puntosTotales,
-                          ),
+                          _statsCard(rutasCompletadas, misiones, puntosTotales),
 
                           const SizedBox(height: 20),
 
@@ -241,47 +207,34 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     Expanded(
                       child: Padding(
-                        padding:
-                        const EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
 
                         child: ListView.builder(
-
+                          padding: const EdgeInsets.only(bottom: 40),
                           itemCount: rutas.length,
 
                           itemBuilder: (context, index) {
-
                             final ruta = rutas[index];
 
                             final nombre = ruta["nombre"];
-                            final puntosTotales =
-                            ruta["puntos_totales"];
+                            final puntosTotales = ruta["puntos_totales"];
 
-                            final puntosObtenidos =
-                            ruta["puntos_obtenidos"];
+                            final puntosObtenidos = ruta["puntos_obtenidos"];
 
                             final puntosInteres =
                                 ruta["id_puntos_interes"] ?? [];
 
-                            final misionesTotales =
-                                puntosInteres.length;
-
-                            final misionesAcertadas =
-                            ruta["misiones_acertadas"];
+                            final misionesTotales = puntosInteres.length;
 
                             return Column(
                               children: [
-
                                 _routeCard(
                                   title: nombre,
-                                  missions:
-                                  "$misionesTotales/$misionesTotales",
+                                  missions: "$misionesTotales/$misionesTotales",
                                   date: "Ruta completada",
                                   puntosObtenidos: puntosObtenidos,
                                   puntosTotales: puntosTotales,
-                                  misionesAcertadas:
-                                  misionesAcertadas,
-                                  misionesTotales:
-                                  misionesTotales,
+                                  misionesTotales: misionesTotales,
                                 ),
 
                                 const SizedBox(height: 12),
@@ -306,13 +259,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   static Widget _userCard(Map<String, dynamic> userData, String nombreRango) {
-
     return CustomCard(
       padding: const EdgeInsets.all(16),
 
       child: Row(
         children: [
-
           const CircleAvatar(
             radius: 30,
             backgroundColor: AppColors.verdePrincipal,
@@ -324,7 +275,6 @@ class _HomeScreenState extends State<HomeScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               Text(
                 userData['nombre'] ?? 'Sin nombre',
                 style: const TextStyle(
@@ -344,8 +294,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               Text(
                 "Rango: $nombreRango",
-                style: const TextStyle(
-                    color: AppColors.verdePrincipal),
+                style: const TextStyle(color: AppColors.verdePrincipal),
               ),
             ],
           ),
@@ -355,10 +304,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   static Widget _statsCard(
-      int rutasCompletadas,
-      int misiones,
-      int puntosTotales) {
-
+    int rutasCompletadas,
+    int misiones,
+    int puntosTotales,
+  ) {
     return CustomCard(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -366,7 +315,6 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           Text("Rutas completadas: $rutasCompletadas"),
 
           const SizedBox(height: 6),
@@ -391,10 +339,8 @@ class _HomeScreenState extends State<HomeScreen> {
     required String date,
     required int puntosObtenidos,
     required int puntosTotales,
-    required int misionesAcertadas,
     required int misionesTotales,
   }) {
-
     return CustomCard(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -402,9 +348,8 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           Text(
-            "$title - $puntosTotales pts",
+            title,
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               color: AppColors.negroTexto,
@@ -421,11 +366,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           const SizedBox(height: 6),
 
-          Text(
-              "Puntos obtenidos: $puntosObtenidos / $puntosTotales"),
-
-          Text(
-              "Misiones acertadas: $misionesAcertadas / $misionesTotales"),
+          Text("Puntos obtenidos: $puntosObtenidos / $puntosTotales"),
         ],
       ),
     );
@@ -433,18 +374,15 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class StrokeTitle extends StatelessWidget {
-
   final String text;
 
   const StrokeTitle({super.key, required this.text});
 
   @override
   Widget build(BuildContext context) {
-
     return Center(
       child: Stack(
         children: [
-
           Text(
             text,
             style: TextStyle(

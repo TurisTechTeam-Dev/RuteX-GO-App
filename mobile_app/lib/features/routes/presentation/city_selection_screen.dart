@@ -20,6 +20,7 @@ class CitySelectionScreen extends StatelessWidget {
           // FONDO
           Container(
             decoration: const BoxDecoration(
+              color: AppColors.blancoPuro,
               image: DecorationImage(
                 image: AssetImage('assets/Mapa_fondo_Extremadura.png'),
                 opacity: 0.4,
@@ -113,7 +114,7 @@ class CitySelectionScreen extends StatelessWidget {
       ),
 
       bottomNavigationBar: Container(
-        height: 10,
+        height: 60,
         decoration: const BoxDecoration(
           color: Colors.white,
           border: Border(

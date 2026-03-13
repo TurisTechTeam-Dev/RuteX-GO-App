@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../repository/mission_repository.dart';
 
-class MissionRepositoryImpl implements Mission_Repository {
+import '../domain/repository/mission_repository.dart';
+
+class MissionRepositoryImpl implements MissionRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
@@ -21,15 +22,21 @@ class MissionRepositoryImpl implements Mission_Repository {
   @override
   Future<Map<String, dynamic>?> getMisionByPuntoId(String puntoId) async {
     try {
-      DocumentSnapshot doc = await _firestore.collection('misiones').doc(puntoId).get();
-      if (doc.exists) {
-        final data = doc.data() as Map<String, dynamic>;
-        data['id'] = doc.id;
+      final snapshot = await _firestore
+          .collection('misiones')
+          .where('puntos_interes_id', isEqualTo: puntoId)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        final data = snapshot.docs.first.data();
+        data['id'] = snapshot.docs.first.id;
         return data;
       }
     } catch (e) {
       print("Error: $e");
     }
+
     return null;
   }
 
@@ -40,7 +47,6 @@ class MissionRepositoryImpl implements Mission_Repository {
     required int puntosObtenidos,
   }) async {
     try {
-      // Guardamos en una colección nueva llamada 'resultados'
       await _firestore.collection('resultado').add({
         'usuario_id': userId,
         'mision_id': misionId,

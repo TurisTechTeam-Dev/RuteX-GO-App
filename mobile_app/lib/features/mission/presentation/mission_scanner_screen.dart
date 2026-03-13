@@ -34,22 +34,37 @@ class _MisionScannerScreenState extends State<MisionScannerScreen> {
 
   void _onQrCodeDetected(String code) async {
     if (_isProcessing) return;
+
     setState(() => _isProcessing = true);
+
+    await _scannerController.stop();
 
     final result = await _useCases.executeScan(code);
 
     if (result != null && mounted) {
-      Navigator.pushNamed(context, AppRoutes.monumentInfo, arguments: result);
-    } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Código QR no reconocido"),
-          backgroundColor: AppColors.error,
-        ),
-      );
-    }
+      Navigator.pushNamed(
+        context,
+        AppRoutes.monumentInfo,
+        arguments: result,
+      ).then((_) async {
+        await _scannerController.start();
+        if (mounted) {
+          setState(() => _isProcessing = false);
+        }
+      });
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Código QR no reconocido"),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
 
-    if (mounted) setState(() => _isProcessing = false);
+      await _scannerController.start();
+      setState(() => _isProcessing = false);
+    }
   }
 
   @override
