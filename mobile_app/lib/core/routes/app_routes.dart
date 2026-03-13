@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
-import '../../features/mission/presentation/map_navigation_screen.dart';
-import '../../features/mission/presentation/mission_scanner_screen.dart';
-import '../../features/mission/presentation/monument_info_screen.dart';
-import '../../features/mission/presentation/quiz_screen.dart';
-import '../../features/mission/presentation/route_result_screen.dart';
+import '../../features/mission/presentation/screens/map_navigation_screen.dart';
+import '../../features/mission/presentation/screens/mission_scanner_screen.dart';
+import '../../features/mission/presentation/screens/monument_info_screen.dart';
+import '../../features/mission/presentation/screens/quiz_screen.dart';
+import '../../features/mission/presentation/screens/route_result_screen.dart';
 import '../../features/profile/presentation/home_screen.dart';
 import '../../features/routes/presentation/city_selection_screen.dart';
 import '../../features/routes/presentation/route_selection_screen.dart';

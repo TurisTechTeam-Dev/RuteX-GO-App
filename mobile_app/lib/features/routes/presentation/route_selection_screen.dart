@@ -225,7 +225,7 @@ Widget _routeCard(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
               ),
               onPressed: () {
-                Navigator.pushNamed(context, AppRoutes.missionQrScanner);
+                Navigator.pushNamed(context, AppRoutes.mapNavigation);
               },
               child: const Text("Comenzar ruta"),
             ),

@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mobile_app/features/mission/domain/entity/poi_entity.dart';
 
-import '../domain/repository/mission_repository.dart';
+import '../../domain/repository/mission_repository.dart';
+import '../model/poi_model.dart';
 
 class MissionRepositoryImpl implements MissionRepository {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -27,5 +29,17 @@ class MissionRepositoryImpl implements MissionRepository {
     return snapshot.docs.isNotEmpty ? snapshot.docs.first.data() : null;
   }
 
+  @override
+  Future<List<PointOfInterest>> getMissionPoints() async {
+    try{
+      final snapshot =  await _db.collection('puntos_interes').get();
 
+      return snapshot.docs.map((doc) {
+        return POIModel.fromFirestore(doc.data(), doc.id);
+      }).toList();
+    } catch (e) {
+      print("Error en MissionRepositoryImpl: $e");
+      throw Exception("No se pudieron cargar los puntos de la misión");
+    }
+  }
 }

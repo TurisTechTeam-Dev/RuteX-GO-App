@@ -1,3 +1,4 @@
+import '../entity/poi_entity.dart';
 import '../repository/mission_repository.dart';
 
 class MissionUseCases {
@@ -17,5 +18,9 @@ class MissionUseCases {
       'punto': punto,
       'mision': mision,
     };
+  }
+
+  Future<List<PointOfInterest>> execute() async {
+    return await repository.getMissionPoints();
   }
 }

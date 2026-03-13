@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_app/core/widgets/cards/custom_cards.dart';
 
-import '../../../core/constants/app_colors.dart';
-import '../../../core/routes/app_routes.dart';
-import '../../../core/widgets/Bars/toppAppBarr.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/routes/app_routes.dart';
+import '../../../../core/widgets/Bars/toppAppBarr.dart';
 
 class MonumentInfoScreen extends StatelessWidget {
   const MonumentInfoScreen({super.key});
