@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-
+import '../../../core/routes/app_routes.dart';
 import '../../../core/widgets/buttons/custom_button.dart';
-
-// Asegúrate de importar tu repositorio o caso de uso según tu estructura de carpetas
-// import '../../domain/usecases/mission_usecases.dart';
 
 class QuizScreen extends StatefulWidget {
   const QuizScreen({super.key});
@@ -20,15 +17,12 @@ class _QuizScreenState extends State<QuizScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Obtener argumentos de la navegación
+
     final dynamic args = ModalRoute.of(context)?.settings.arguments;
 
-    // Extraemos la misión directamente (MonumentInfo envía la misión completa)
-    final Map<String, dynamic>? data = (args is Map<String, dynamic>)
-        ? args
-        : null;
+    final Map<String, dynamic>? data =
+    (args is Map<String, dynamic>) ? args : null;
 
-    // Pantalla de carga si los datos no han llegado
     if (data == null || data['preguntas'] == null) {
       return const Scaffold(
         body: Center(
@@ -40,17 +34,14 @@ class _QuizScreenState extends State<QuizScreen> {
     final List<dynamic> preguntas = data['preguntas'];
     final Map<String, dynamic> preguntaData = preguntas[_currentIndex];
 
-    // --- BLOQUE DE EXTRACCIÓN DINÁMICA (SOLUCIÓN AL FALLO) ---
     String textoPregunta = "Cargando...";
     Map<int, String> opciones = {};
-    // Obtenemos el índice correcto desde Firestore (ej: 1, 2 o 3)
     final int correctIndex = preguntaData['indice_correcto'] ?? 0;
 
     preguntaData.forEach((key, value) {
       if (key.toString().startsWith('pregunta_')) {
         textoPregunta = value.toString();
       } else if (key.toString().startsWith('respuesta_')) {
-        // Extraemos el número del nombre del campo (ej: 'respuesta_1' -> 1)
         int? id = int.tryParse(key.toString().split('_').last);
         if (id != null) {
           opciones[id] = value.toString();
@@ -58,7 +49,6 @@ class _QuizScreenState extends State<QuizScreen> {
       }
     });
 
-    // Ordenamos las respuestas para que siempre aparezcan 1, 2, 3...
     final sortedKeys = opciones.keys.toList()..sort();
 
     return Scaffold(
@@ -76,157 +66,182 @@ class _QuizScreenState extends State<QuizScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
+
       body: isSaving
           ? const Center(
-              child: CircularProgressIndicator(color: Color(0xFF1B6A41)),
-            )
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Barra de progreso visual
-                  LinearProgressIndicator(
-                    value: (_currentIndex + 1) / preguntas.length,
-                    backgroundColor: Colors.grey[200],
-                    color: const Color(0xFF1B6A41),
-                  ),
-                  const SizedBox(height: 25),
+        child: CircularProgressIndicator(color: Color(0xFF1B6A41)),
+      )
+          : Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
 
-                  Text(
-                    "Pregunta ${_currentIndex + 1} de ${preguntas.length}",
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-
-                  // Pregunta dinámica
-                  Text(
-                    textoPregunta,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      height: 1.4,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 40),
-
-                  // Listado de respuestas dinámicas
-                  ...sortedKeys.map((id) {
-                    bool isSelected = selectedOption == id;
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: InkWell(
-                        onTap: () => setState(() => selectedOption = id),
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          padding: const EdgeInsets.all(18),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? const Color(0xFFE8F5E9)
-                                : Colors.white,
-                            border: Border.all(
-                              color: isSelected
-                                  ? const Color(0xFF1B6A41)
-                                  : Colors.grey[300]!,
-                              width: isSelected ? 2 : 1,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 15,
-                                backgroundColor: isSelected
-                                    ? const Color(0xFF1B6A41)
-                                    : Colors.grey[200],
-                                child: Text(
-                                  String.fromCharCode(64 + id),
-                                  // Convierte 1 en A, 2 en B...
-                                  style: TextStyle(
-                                    color: isSelected
-                                        ? Colors.white
-                                        : Colors.black,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 15),
-                              Expanded(
-                                child: Text(
-                                  opciones[id]!,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: isSelected
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-
-                  const SizedBox(height: 30),
-
-                  // Botón Siguiente / Finalizar
-                  CustomButton(
-                    text: _currentIndex < preguntas.length - 1
-                        ? "SIGUIENTE"
-                        : "FINALIZAR",
-                    onPressed: selectedOption != null
-                        ? () async {
-                            // Validar respuesta y sumar puntos
-                            if (selectedOption == correctIndex) {
-                              puntosTotales += 10;
-                            }
-
-                            if (_currentIndex < preguntas.length - 1) {
-                              // Pasar a la siguiente pregunta
-                              setState(() {
-                                _currentIndex++;
-                                selectedOption = null;
-                              });
-                            } else {
-                              // Acción al terminar el Quiz
-                              _finalizarQuiz(data['id'] ?? "mision_generica");
-                            }
-                          }
-                        : null, // Desactivado si no hay selección
-                  ),
-                ],
+            // BARRA DE PROGRESO MEJORADA
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: LinearProgressIndicator(
+                minHeight: 10,
+                value: (_currentIndex + 1) / preguntas.length,
+                backgroundColor: Colors.grey[200],
+                color: const Color(0xFF1B6A41),
               ),
             ),
+
+            const SizedBox(height: 20),
+
+            Text(
+              "Pregunta ${_currentIndex + 1} de ${preguntas.length}",
+              style: const TextStyle(
+                color: Colors.grey,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+            const SizedBox(height: 40),
+
+            // PREGUNTA
+            Text(
+              textoPregunta,
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                height: 1.4,
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+            const SizedBox(height: 40),
+
+            // RESPUESTAS
+            ...sortedKeys.map((id) {
+              bool isSelected = selectedOption == id;
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 18),
+                child: InkWell(
+                  onTap: () => setState(() => selectedOption = id),
+                  borderRadius: BorderRadius.circular(14),
+
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? const Color(0xFFE8F5E9)
+                          : Colors.white,
+                      border: Border.all(
+                        color: isSelected
+                            ? const Color(0xFF1B6A41)
+                            : Colors.grey[300]!,
+                        width: isSelected ? 2 : 1,
+                      ),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+
+                    child: Row(
+                      children: [
+
+                        CircleAvatar(
+                          radius: 16,
+                          backgroundColor: isSelected
+                              ? const Color(0xFF1B6A41)
+                              : Colors.grey[200],
+                          child: Text(
+                            String.fromCharCode(64 + id),
+                            style: TextStyle(
+                              color: isSelected
+                                  ? Colors.white
+                                  : Colors.black,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(width: 16),
+
+                        Expanded(
+                          child: Text(
+                            opciones[id]!,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+
+            const SizedBox(height: 10),
+
+            // BOTÓN
+            CustomButton(
+              text: _currentIndex < preguntas.length - 1
+                  ? "SIGUIENTE"
+                  : "FINALIZAR",
+              onPressed: selectedOption != null
+                  ? () async {
+
+                if (selectedOption == correctIndex) {
+                  puntosTotales += 10;
+                }
+
+                if (_currentIndex < preguntas.length - 1) {
+                  setState(() {
+                    _currentIndex++;
+                    selectedOption = null;
+                  });
+                } else {
+                  _finalizarQuiz(data['id'] ?? "mision_generica");
+                }
+              }
+                  : null,
+            ),
+
+            const SizedBox(height: 10),
+          ],
+        ),
+      ),
+
+      bottomNavigationBar: Container(
+        height: 60,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            top: BorderSide(
+              color: Colors.black,
+              width: 2,
+            ),
+          ),
+        ),
+      ),
     );
   }
 
-  // Función para guardar resultados y salir
   Future<void> _finalizarQuiz(String misionId) async {
+
     setState(() => isSaving = true);
 
     try {
-      // Aquí Joel, debes llamar a tu función de guardado:
-      // await missionUseCases.saveMissionResult(
-      //   userId: "ID_DE_JOEL",
-      //   misionId: misionId,
-      //   puntosObtenidos: puntosTotales
-      // );
 
-      // Simulación de pequeña espera para feedback visual
       await Future.delayed(const Duration(seconds: 1));
 
       if (mounted) {
-        Navigator.pop(context, puntosTotales);
+        Navigator.pushNamed(context, AppRoutes.routeResult);
       }
+
     } catch (e) {
+
       debugPrint("Error al guardar: $e");
       setState(() => isSaving = false);
+
     }
   }
 }
