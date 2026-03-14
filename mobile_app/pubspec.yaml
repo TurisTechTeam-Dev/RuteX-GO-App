@@ -17,11 +17,12 @@ dependencies:
   cloud_firestore: ^6.1.2
   intl: ^0.20.2
   mobile_scanner: ^7.2.0
-  google_maps_flutter: ^2.15.0
   flutter_joystick: ^0.2.2
   provider: ^6.1.5
   latlong2: ^0.9.1
   http: ^1.6.0
+  flutter_map: ^7.0.2
+  geolocator: ^14.0.2
 
 dev_dependencies:
   flutter_test:

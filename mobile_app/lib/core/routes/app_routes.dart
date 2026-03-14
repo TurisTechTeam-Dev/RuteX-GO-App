@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+// Pantallas
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
-import '../../features/mission/presentation/map_navigation_screen.dart';
-import '../../features/mission/presentation/mission_scanner_screen.dart';
-import '../../features/mission/presentation/monument_info_screen.dart';
-import '../../features/mission/presentation/quiz_screen.dart';
-import '../../features/mission/presentation/route_result_screen.dart';
+import '../../features/mission/domain/usescases/mission_uses_cases.dart';
+import '../../features/mission/presentation/provider/trip_provider.dart';
+import '../../features/mission/presentation/screens/map_navigation_screen.dart';
+import '../../features/mission/presentation/screens/mission_scanner_screen.dart';
+import '../../features/mission/presentation/screens/monument_info_screen.dart';
+import '../../features/mission/presentation/screens/quiz_screen.dart';
+import '../../features/mission/presentation/screens/route_result_screen.dart';
 import '../../features/profile/presentation/home_screen.dart';
+import '../../features/routes/data/routes_repository_impl.dart';
+import '../../features/routes/domain/usescases/routes_uses_cases.dart';
 import '../../features/routes/presentation/city_selection_screen.dart';
 import '../../features/routes/presentation/route_selection_screen.dart';
 
@@ -23,18 +29,61 @@ class AppRoutes {
   static const String citySelection = '/city_selection';
   static const String routeSelection = '/route_selection';
 
-  static Map<String, WidgetBuilder> getRoutes() {
-    return {
-      login: (context) => const LoginScreen(),
-      register: (context) => const RegisterScreen(),
-      home: (context) => const HomeScreen(),
-      citySelection: (context) => const CitySelectionScreen(),
-      routeSelection: (context) => const RouteSelectionScreen(),
-      mapNavigation: (context) => const MapNavigationScreen(),
-      missionQrScanner: (context) => const MisionScannerScreen(),
-      monumentInfo: (context) => const MonumentInfoScreen(),
-      quiz: (context) => const QuizScreen(),
-      routeResult: (context) => const RouteResultScreen(),
-    };
+  static Route<dynamic> onGenerateRoute(RouteSettings settings) {
+    final routesUseCase = RoutesUsesCases(RoutesRepositoryImpl());
+
+    switch (settings.name) {
+      case citySelection:
+        return MaterialPageRoute(
+          builder: (_) => CitySelectionScreen(routesUsesCases: routesUseCase),
+        );
+
+      case routeSelection:
+        final String idCiudad = settings.arguments as String? ?? '';
+        return MaterialPageRoute(
+          builder: (_) => RouteSelectionScreen(
+            routesUsesCases: routesUseCase,
+            idCiudad: idCiudad,
+          ),
+        );
+
+      case mapNavigation:
+        final String routeId = settings.arguments as String? ?? 'default_route';
+        return MaterialPageRoute(
+          builder: (context) => ChangeNotifierProvider(
+            create: (context) => TripSimulationProvider(
+              missionUseCases: context.read<MissionUseCases>(),
+              routeId: routeId,
+            ),
+            child: MapNavigationScreen(routeId: routeId),
+          ),
+        );
+
+      case login:
+        return MaterialPageRoute(builder: (_) => const LoginScreen());
+      case register:
+        return MaterialPageRoute(builder: (_) => const RegisterScreen());
+      case home:
+        return MaterialPageRoute(builder: (_) => const HomeScreen());
+      case missionQrScanner:
+        return MaterialPageRoute(builder: (_) => const MisionScannerScreen());
+      case monumentInfo:
+        final data = settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(
+          builder: (_) => MonumentInfoScreen(data: data),
+        );
+      case quiz:
+        final data = settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(builder: (_) => QuizScreen(data: data));
+      case routeResult:
+        return MaterialPageRoute(builder: (_) => const RouteResultScreen());
+
+      default:
+        return MaterialPageRoute(
+          builder: (_) => Scaffold(
+            body: Center(child: Text('Ruta no definida: ${settings.name}')),
+          ),
+        );
+    }
   }
 }
