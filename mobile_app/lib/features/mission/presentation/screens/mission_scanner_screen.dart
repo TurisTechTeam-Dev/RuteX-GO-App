@@ -33,23 +33,39 @@ class _MisionScannerScreenState extends State<MisionScannerScreen> {
   }
 
   void _onQrCodeDetected(String code) async {
+    print("QR detectado: $code");
     if (_isProcessing) return;
+
     setState(() => _isProcessing = true);
+
+    await _scannerController.stop();
 
     final result = await _useCases.executeScan(code);
 
     if (result != null && mounted) {
-      Navigator.pushNamed(context, AppRoutes.monumentInfo, arguments: result);
-    } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Código QR no reconocido"),
-          backgroundColor: AppColors.error,
-        ),
-      );
-    }
+      Navigator.pushNamed(
+        context,
+        AppRoutes.monumentInfo,
+        arguments: result,
+      ).then((_) async {
+        await _scannerController.start();
+        if (mounted) {
+          setState(() => _isProcessing = false);
+        }
+      });
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Código QR no reconocido"),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
 
-    if (mounted) setState(() => _isProcessing = false);
+      await _scannerController.start();
+      setState(() => _isProcessing = false);
+    }
   }
 
   @override
@@ -81,7 +97,7 @@ class _MisionScannerScreenState extends State<MisionScannerScreen> {
           left: 0,
           right: 0,
           child: Material(
-            color: Colors.black.withOpacity(0.35),
+            color: Colors.black.withValues(alpha: 0.35),
             child: SafeArea(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -129,7 +145,7 @@ class _MisionScannerScreenState extends State<MisionScannerScreen> {
       width: 280,
       padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.7),
+        color: Colors.black.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(30),
       ),
       child: ValueListenableBuilder(

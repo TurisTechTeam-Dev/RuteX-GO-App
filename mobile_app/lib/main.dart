@@ -1,9 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart'; // MaterialApp y Widgets ya están aquí
 import 'package:provider/provider.dart';
+
+import 'core/routes/app_routes.dart';
 import 'features/mission/data/repository/mission_repository_impl.dart';
 import 'features/mission/domain/usescases/mission_uses_cases.dart';
-import 'core/routes/app_routes.dart';
 import 'features/splash/presentation/splash_screen.dart';
 import 'firebase_options.dart';
 

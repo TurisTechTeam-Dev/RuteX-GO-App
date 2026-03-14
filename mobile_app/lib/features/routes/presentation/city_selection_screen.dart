@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_colors.dart';
@@ -5,9 +6,12 @@ import '../../../core/routes/app_routes.dart';
 import '../../../core/widgets/Bars/toppAppBarr.dart';
 import '../../../core/widgets/cards/custom_cards.dart';
 import '../../profile/presentation/home_screen.dart';
+import '../domain/usescases/routes_uses_cases.dart';
 
 class CitySelectionScreen extends StatelessWidget {
-  const CitySelectionScreen({super.key});
+  final RoutesUsesCases routesUsesCases;
+
+  const CitySelectionScreen({super.key, required this.routesUsesCases});
 
   @override
   Widget build(BuildContext context) {
@@ -51,59 +55,63 @@ class CitySelectionScreen extends StatelessWidget {
 
                 const SizedBox(height: 20),
 
-                // GRID SCROLLABLE
+                // GRID DINÁMICO
                 Expanded(
-                  child: GridView.count(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 0.72,
-                    children: [
-                      _cityCard(
-                        context,
-                        title: "Mérida",
-                        image: "assets/images_selection/merida.jpg",
-                        available: true,
-                      ),
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: routesUsesCases.executeGetCiudades(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
 
-                      _cityCard(
-                        context,
-                        title: "Cáceres",
-                        image: "assets/images_selection/caceres.jpg",
-                        available: false,
-                      ),
+                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                        return const Center(
+                          child: Text("No hay ciudades disponibles"),
+                        );
+                      }
 
-                      _cityCard(
-                        context,
-                        title: "Badajoz",
-                        image: "assets/images_selection/badajoz.jpg",
-                        available: false,
-                      ),
+                      final docs = snapshot.data!.docs;
 
-                      _cityCard(
-                        context,
-                        title: "Trujillo",
-                        image: "assets/images_selection/trujillo.jpg",
-                        available: false,
-                      ),
+                      docs.sort((a, b) {
+                        final aActive =
+                            (a.data() as Map<String, dynamic>)['isActive'] ??
+                            false;
+                        final bActive =
+                            (b.data() as Map<String, dynamic>)['isActive'] ??
+                            false;
 
-                      _cityCard(
-                        context,
-                        title: "Coria",
-                        image: "assets/images_selection/coria.jpg",
-                        available: false,
-                      ),
+                        if (aActive == bActive) return 0;
+                        return aActive ? -1 : 1;
+                      });
 
-                      _cityCard(
-                        context,
-                        title: "Jaraíz de la Vera",
-                        image: "assets/images_selection/jarais.jpg",
-                        available: false,
-                      ),
-
-                      const SizedBox(height: 60),
-                    ],
+                      return GridView.builder(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 30),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 16,
+                              mainAxisSpacing: 16,
+                              childAspectRatio: 0.72,
+                            ),
+                        itemCount: docs.length,
+                        itemBuilder: (context, index) {
+                          final data =
+                              docs[index].data() as Map<String, dynamic>;
+                          return _cityCard(
+                            context,
+                            title: data['nombre'] ?? '',
+                            image:
+                                data['imagen'] ??
+                                "assets/images_selection/${docs[index].id}.jpg",
+                            available: data['isActive'] ?? false,
+                            idCiudad: docs[index].id,
+                            routesCount:
+                                data['rutas_count'] ??
+                                0, // Cogemos el ID real de Firestore
+                          );
+                        },
+                      );
+                    },
                   ),
                 ),
               ],
@@ -113,7 +121,7 @@ class CitySelectionScreen extends StatelessWidget {
       ),
 
       bottomNavigationBar: Container(
-        height: 10,
+        height: 60,
         decoration: const BoxDecoration(
           color: Colors.white,
           border: Border(
@@ -125,12 +133,13 @@ class CitySelectionScreen extends StatelessWidget {
     );
   }
 
-  // CITY CARD
   Widget _cityCard(
     BuildContext context, {
     required String title,
     required String image,
     required bool available,
+    required String idCiudad,
+    required int routesCount,
   }) {
     return CustomCard(
       padding: const EdgeInsets.all(12),
@@ -146,7 +155,9 @@ class CitySelectionScreen extends StatelessWidget {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(5),
-                child: Image.asset(image, fit: BoxFit.cover),
+                child: image.startsWith('http')
+                    ? Image.network(image, fit: BoxFit.cover)
+                    : Image.asset(image, fit: BoxFit.cover),
               ),
             ),
           ),
@@ -158,11 +169,33 @@ class CitySelectionScreen extends StatelessWidget {
 
           const SizedBox(height: 6),
 
-          // Estado
-          Text(
-            available ? "Rutas disponibles: 3" : "Próximamente",
-            style: Theme.of(context).textTheme.labelMedium,
-          ),
+          // Contador de rutas REAL desde Firestore
+          available
+              ? StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection("rutas")
+                      .where("id_ciudad", isEqualTo: idCiudad)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return Text(
+                        "...",
+                        style: Theme.of(context).textTheme.labelMedium,
+                      );
+                    }
+
+                    final rutasCount = snapshot.data!.docs.length;
+
+                    return Text(
+                      "$rutasCount rutas disponibles",
+                      style: Theme.of(context).textTheme.labelMedium,
+                    );
+                  },
+                )
+              : Text(
+                  "Próximamente",
+                  style: Theme.of(context).textTheme.labelMedium,
+                ),
 
           const Spacer(),
 
@@ -181,7 +214,11 @@ class CitySelectionScreen extends StatelessWidget {
               ),
               onPressed: available
                   ? () {
-                      Navigator.pushNamed(context, AppRoutes.routeSelection);
+                      Navigator.pushNamed(
+                        context,
+                        AppRoutes.routeSelection,
+                        arguments: idCiudad,
+                      );
                     }
                   : null,
               child: const Text("Explorar"),
@@ -193,8 +230,7 @@ class CitySelectionScreen extends StatelessWidget {
   }
 }
 
-// TITULO CON BORDE (CIUDADES)
-
+// Mantengo tu widget StrokeCityTitle tal cual lo pasaste
 class StrokeCityTitle extends StatelessWidget {
   final String text;
 

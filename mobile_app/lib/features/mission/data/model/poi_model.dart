@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:latlong2/latlong.dart';
 import '../../domain/entity/poi_entity.dart';
 
@@ -12,22 +13,50 @@ class POIModel extends PointOfInterest {
     required super.radioActivacion,
   });
 
-  // En tus capturas, la localización es una lista: [latitud, longitud]
   factory POIModel.fromFirestore(Map<String, dynamic> json, String id) {
-    // 1. Extraemos el GeoPoint directamente (así es como viene de Firebase)
-    final GeoPoint loc = json['localizacion'];
+    final dynamic locData = json['localizacion'];
+
+    double lat = 0.0;
+    double lng = 0.0;
+
+    try {
+      if (locData != null) {
+        if (locData is GeoPoint) {
+          lat = locData.latitude;
+          lng = locData.longitude;
+        } else if (locData is Map) {
+          // A veces Firebase devuelve mapas en lugar de GeoPoints en modo offline
+          lat = (locData['latitude'] ?? locData['lat'] ?? 0.0).toDouble();
+          lng = (locData['longitude'] ?? locData['lng'] ?? 0.0).toDouble();
+        }
+      }
+
+      // Si después de intentar mapear sigue siendo 0.0, lanzamos un aviso al log
+      if (lat == 0.0 && lng == 0.0) {
+        debugPrint("⚠️ [MODELO] El punto con ID $id se cargó como (0,0). Revisa el campo 'localizacion' en Firebase.");
+      }
+    } catch (e) {
+      debugPrint("❌ [MODELO] Error parseando coordenadas en ID $id: $e");
+    }
 
     return POIModel(
       id: id,
-      nombre: json['nombre'] ?? 'Monumento sin nombre',
-      descripcion: json['descripcion'] ?? '',
-      // 2. Usamos .latitude y .longitude del objeto GeoPoint
-      localizacion: LatLng(
-          loc.latitude,
-          loc.longitude
-      ),
+      nombre: json['nombre'] ?? 'Sin nombre',
+      descripcion: json['descripción'] ?? json['descripcion'] ?? 'Sin descripción',
+      localizacion: LatLng(lat, lng),
       qrCode: json['qr_code'] ?? '',
       radioActivacion: (json['radio_activacion'] as num?)?.toInt() ?? 50,
     );
+  }
+
+  // Método opcional para convertir el objeto de vuelta a un formato que Firebase entienda
+  Map<String, dynamic> toFirestore() {
+    return {
+      'nombre': nombre,
+      'descripción': descripcion,
+      'localizacion': GeoPoint(localizacion.latitude, localizacion.longitude),
+      'qr_code': qrCode,
+      'radio_activacion': radioActivacion,
+    };
   }
 }

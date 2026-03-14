@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_app/core/constants/app_colors.dart';
 import 'package:mobile_app/core/widgets/Bars/toppAppBarr.dart';
@@ -5,9 +6,17 @@ import 'package:mobile_app/core/widgets/Bars/toppAppBarr.dart';
 import '../../../core/routes/app_routes.dart';
 import '../../../core/widgets/cards/custom_cards.dart';
 import '../../profile/presentation/home_screen.dart';
+import '../domain/usescases/routes_uses_cases.dart';
 
 class RouteSelectionScreen extends StatelessWidget {
-  const RouteSelectionScreen({super.key});
+  final RoutesUsesCases routesUsesCases;
+  final String idCiudad;
+
+  const RouteSelectionScreen({
+    super.key,
+    required this.routesUsesCases,
+    required this.idCiudad,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -31,49 +40,55 @@ class RouteSelectionScreen extends StatelessWidget {
               children: [
                 Container(height: 2, color: AppColors.negroTexto),
                 const SizedBox(height: 20),
-                const StrokeTitle(text: "Rutas en Mérida"),
+
+                // Mantenemos el const StrokeTitle
+                const StrokeTitle(text: "Rutas Disponibles"),
+
                 const SizedBox(height: 20),
+
                 Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    children: [
-                      // RUTA 1: ID corregido para Firebase
-                      _routeCard(
-                        context,
-                        routeId: "ruta_merida_1",
-                        image: "assets/merida_monumental.png",
-                        title: "Ruta Monumental Romana",
-                        description: "Teatro, Anfiteatro, Circo Romano",
-                        difficulty: "Fácil",
-                        time: "2 h",
-                        distance: "3 km",
-                      ),
+                  child: StreamBuilder<QuerySnapshot>(
+                    // Usamos el caso de uso filtrando por la ciudad que recibimos
+                    stream: routesUsesCases.executeGetRutasByCiudad(idCiudad),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
 
-                      // RUTA 2: ID corregido para Firebase
-                      _routeCard(
-                        context,
-                        routeId: "ruta_merida_2",
-                        image: "assets/merida_cotidiana.png",
-                        title: "Ruta Roma Cotidiana",
-                        description: "Templo de Diana, Foro Romano, Casa Mitreo",
-                        difficulty: "Fácil",
-                        time: "1.5 h",
-                        distance: "1 km",
-                      ),
+                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            "No hay rutas disponibles para esta ciudad",
+                          ),
+                        );
+                      }
 
-                      // RUTA 3: ID corregido para Firebase
-                      _routeCard(
-                        context,
-                        routeId: "ruta_merida_3",
-                        image: "assets/merida_vidafe.jpg",
-                        title: "Ruta Vida y Fe",
-                        description: "Basílica de Santa Eulalia, Cripta de Santa Eulalia, Alcazaba Árabe",
-                        difficulty: "Fácil",
-                        time: "2 h",
-                        distance: "1,5 km",
-                      ),
-                      const SizedBox(height: 60)
-                    ],
+                      final rutasDocs = snapshot.data!.docs;
+
+                      return ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        itemCount: rutasDocs.length,
+                        itemBuilder: (context, index) {
+                          final doc = rutasDocs[index];
+                          final data = doc.data() as Map<String, dynamic>;
+
+                          return _routeCard(
+                            context,
+                            routeId: doc.id,
+                            // ID real de Firestore
+                            title: data['nombre'] ?? 'Ruta',
+                            description: data['descripcion'] ?? '',
+                            difficulty: data['dificultad'] ?? 'Media',
+                            time: data['duracion'] ?? '--',
+                            distance:
+                                "${data['id_puntos_interes']?.length ?? 0} puntos",
+                            image:
+                                data['imagen_asset'] ??
+                                "assets/merida_monumental.png",
+                          );
+                        },
+                      );
+                    },
                   ),
                 ),
               ],
@@ -82,7 +97,7 @@ class RouteSelectionScreen extends StatelessWidget {
         ],
       ),
       bottomNavigationBar: Container(
-        height: 10,
+        height: 60,
         decoration: const BoxDecoration(
           color: Colors.white,
           border: Border(
@@ -93,110 +108,115 @@ class RouteSelectionScreen extends StatelessWidget {
       ),
     );
   }
-}
 
-// WIDGET DE TARJETA CORREGIDO
-Widget _routeCard(
+  // WIDGET DE TARJETA REFACTORIZADO
+  Widget _routeCard(
     BuildContext context, {
-      required String routeId, // Recibimos el ID de la ruta
-      required String image,
-      required String title,
-      required String description,
-      required String difficulty,
-      required String time,
-      required String distance,
-    }) {
-  return Padding(
-    padding: const EdgeInsets.only(bottom: 20),
-    child: CustomCard(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // IMAGEN
-          AspectRatio(
-            aspectRatio: 16 / 9,
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: AppColors.negroTexto, width: 1),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(5),
-                child: Image.asset(image, fit: BoxFit.cover),
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          // TITULO
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.account_balance, color: AppColors.verdePrincipal, size: 20),
-              const SizedBox(width: 6),
-              Flexible(
-                child: Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.negroTexto),
+    required String routeId,
+    required String image,
+    required String title,
+    required String description,
+    required String difficulty,
+    required String time,
+    required String distance,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: CustomCard(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.negroTexto, width: 1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(5),
+                  child: image.startsWith('http')
+                      ? Image.network(image, fit: BoxFit.cover)
+                      : Image.asset(image, fit: BoxFit.cover),
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          // DESCRIPCION
-          Text(
-            description,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.labelMedium,
-          ),
-          const SizedBox(height: 10),
-          // INFO RUTA
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 12,
-            runSpacing: 6,
-            children: [
-              _infoRow(Icons.extension, "Dificultad: $difficulty"),
-              _infoRow(Icons.access_time, "Tiempo: $time"),
-              _infoRow(Icons.route, "Distancia: $distance"),
-            ],
-          ),
-          const SizedBox(height: 12),
-          // BOTON - AHORA PASA EL ID
-          SizedBox(
-            height: 36,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.verdePrincipal,
-                foregroundColor: AppColors.blancoPuro,
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-              ),
-              onPressed: () {
-                // ENVIAMOS EL ID COMO ARGUMENTO
-                Navigator.pushNamed(
-                  context,
-                  AppRoutes.mapNavigation,
-                  arguments: routeId,
-                );
-              },
-              child: const Text("Comenzar ruta"),
             ),
-          ),
-        ],
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.account_balance,
+                  color: AppColors.verdePrincipal,
+                  size: 20,
+                ),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.negroTexto,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              description,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 12,
+              runSpacing: 6,
+              children: [
+                _infoRow(Icons.extension, "Dificultad: $difficulty"),
+                _infoRow(Icons.access_time, "Tiempo: $time"),
+                _infoRow(Icons.route, "Puntos: $distance"),
+              ],
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 36,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.verdePrincipal,
+                  foregroundColor: AppColors.blancoPuro,
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                ),
+                onPressed: () {
+                  Navigator.pushNamed(context, AppRoutes.missionQrScanner);
+                },
+                /*onPressed: () {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.mapNavigation,
+                    arguments: routeId, // Pasamos el ID real de la ruta para el mapa
+                  );
+                }*/
+                child: const Text("Comenzar ruta"),
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-// Widget auxiliar para no repetir código de los iconos de info
-Widget _infoRow(IconData icon, String text) {
-  return Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Icon(icon, size: 18, color: AppColors.verdePrincipal),
-      const SizedBox(width: 4),
-      Text(text, style: const TextStyle(fontSize: 12)),
-    ],
-  );
+  Widget _infoRow(IconData icon, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 18, color: AppColors.verdePrincipal),
+        const SizedBox(width: 4),
+        Text(text, style: const TextStyle(fontSize: 12)),
+      ],
+    );
+  }
 }
