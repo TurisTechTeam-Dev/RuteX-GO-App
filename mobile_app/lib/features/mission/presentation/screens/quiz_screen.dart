@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/routes/app_routes.dart';
 import '../../../../core/widgets/buttons/custom_button.dart';
 
 class QuizScreen extends StatefulWidget {
@@ -215,10 +216,14 @@ class _QuizScreenState extends State<QuizScreen> {
   Future<void> _finalizarQuiz(String misionId) async {
     setState(() => isSaving = true);
 
-    await Future.delayed(const Duration(seconds: 1));
+    await Future.delayed(const Duration(milliseconds: 600));
 
     if (mounted) {
-      Navigator.pop(context, puntosTotales);
+      Navigator.pushNamed(
+        context,
+        AppRoutes.routeResult,
+        arguments: {"puntos": puntosTotales, "misionId": misionId},
+      );
     }
   }
 }
