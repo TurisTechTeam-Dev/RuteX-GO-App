@@ -106,9 +106,9 @@ class _HomeScreenState extends State<HomeScreen> {
     int total = 0;
 
     for (var ruta in rutas) {
-      final puntos = ruta["id_puntos_interes"] ?? [];
+      final puntos = (ruta["puntos_obtenidos"] ?? 0) as int;
 
-      total += (puntos as List).length;
+      total += (puntos ~/ 30);
     }
 
     return total;
@@ -225,12 +225,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ruta["id_puntos_interes"] ?? [];
 
                             final misionesTotales = puntosInteres.length;
+                            final misionesCompletadas = (puntosObtenidos ~/ 30);
 
                             return Column(
                               children: [
                                 _routeCard(
                                   title: nombre,
-                                  missions: "$misionesTotales/$misionesTotales",
+                                  missions:
+                                      "$misionesCompletadas/$misionesTotales",
                                   date: "Ruta completada",
                                   puntosObtenidos: puntosObtenidos,
                                   puntosTotales: puntosTotales,
@@ -327,7 +329,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           const SizedBox(height: 6),
 
-          const Text("Medallas: 0"),
+          const Text("Monumentos visitados: 0"),
         ],
       ),
     );
@@ -348,25 +350,64 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppColors.negroTexto,
-            ),
+          /// TITULO
+          Row(
+            children: [
+              const Icon(Icons.check_circle, color: AppColors.verdePrincipal),
+
+              const SizedBox(width: 8),
+
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: AppColors.negroTexto,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 8),
+
+          /// MISIONES
+          Row(
+            children: [
+              const Icon(Icons.track_changes, size: 18),
+
+              const SizedBox(width: 6),
+
+              Text("Misiones: $missions"),
+            ],
           ),
 
           const SizedBox(height: 6),
 
-          Text("Misiones: $missions"),
+          /// FECHA
+          Row(
+            children: [
+              const Icon(Icons.calendar_today, size: 18),
+
+              const SizedBox(width: 6),
+
+              Text(date),
+            ],
+          ),
 
           const SizedBox(height: 6),
 
-          Text(date),
+          /// PUNTOS
+          Row(
+            children: [
+              const Icon(Icons.emoji_events, size: 18),
 
-          const SizedBox(height: 6),
+              const SizedBox(width: 6),
 
-          Text("Puntos obtenidos: $puntosObtenidos / $puntosTotales"),
+              Text("Puntos: $puntosObtenidos / $puntosTotales"),
+            ],
+          ),
         ],
       ),
     );

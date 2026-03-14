@@ -18,6 +18,7 @@ class _QuizScreenState extends State<QuizScreen> {
   int? selectedOption;
   int puntosTotales = 0;
   bool isSaving = false;
+  static int _monumentosVisitados = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -214,16 +215,15 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   Future<void> _finalizarQuiz(String misionId) async {
+    _monumentosVisitados++;
     setState(() => isSaving = true);
 
     await Future.delayed(const Duration(milliseconds: 600));
 
-    if (mounted) {
-      Navigator.pushNamed(
-        context,
-        AppRoutes.routeResult,
-        arguments: {"puntos": puntosTotales, "misionId": misionId},
-      );
+    if (_monumentosVisitados < 3) {
+      Navigator.pushNamed(context, AppRoutes.missionQrScanner);
+    } else {
+      Navigator.pushNamed(context, AppRoutes.home);
     }
   }
 }
