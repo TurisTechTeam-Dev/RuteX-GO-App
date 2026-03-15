@@ -305,8 +305,6 @@ RuteX Go está construida con una arquitectura moderna, modular y escalable. El 
 
 ### 📌 Decisiones Técnicas Clave (ADRs)
 
-### 📌 Decisiones Técnicas Clave (ADRs)
-
 - **ADR-001 — Firebase como BaaS**
 - Se elige Firebase para simplificar el backend, aumentar la seguridad y acelerar el desarrollo del ecosistema en tiempo real.
 
