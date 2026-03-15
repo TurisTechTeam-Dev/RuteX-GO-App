@@ -232,6 +232,7 @@ flutter run
 - 🩺 **Diagnóstico:** Si encuentras errores al compilar, ejecuta el siguiente comando para verificar que tu entorno esté correctamente configurado:
 ```bash
   flutter doctor
+```
 
 ---
 
@@ -390,7 +391,14 @@ RuteX Go utiliza un ecosistema de herramientas avanzadas para garantizar una exp
 ### 🔥 Firebase (Ecosistema Backend)
 
 * **Firebase Authentication:** Gestión de acceso mediante email y contraseña, garantizando sesiones persistentes y seguridad en los perfiles de usuario.
-* **Cloud Firestore:** Base de datos NoSQL para la gestión en tiempo real de las colecciones clave: `/usuarios`, `/config_rangos`, `/ciudades`, `/rutas`, `/puntos_interes`, `/misiones` y `/resultado`.
+* **Cloud Firestore:** Base de datos NoSQL para la gestión en tiempo real de las colecciones clave:
+> * `/usuarios`
+> * `/config_rangos`
+> * `/ciudades`
+> * `/rutas`
+> * `/puntos_interes`
+> * `/misiones`
+> * `/resultado`
 * **Firebase Storage:** Almacenamiento optimizado de recursos multimedia e imágenes de los monumentos.
 
 ---
