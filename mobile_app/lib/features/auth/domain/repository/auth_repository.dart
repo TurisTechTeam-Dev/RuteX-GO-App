@@ -15,4 +15,6 @@ abstract class AuthRepository {
   Future<void> recoverPassword(String email);
 
   Future<void> logout();
+
+  Future<bool> isAdmin(String uid);
 }

@@ -80,6 +80,20 @@ class AuthRepositoryImpl implements AuthRepository {
     await firebaseAuth.signOut();
   }
 
+
+  @override
+  Future<bool> isAdmin(String uid) async {
+    try{
+      final doc = await firestore.collection('usuarios').doc(uid).get();
+      if(doc.exists){
+        return doc.data()?['isAdmin'] ?? false;
+      }
+      return false;
+    } catch (e){
+      throw Exception("Error al verificar rol de administrador");
+    }
+  }
+
   String _mapError(String code) {
     switch (code) {
       case 'user-not-found':
@@ -98,4 +112,6 @@ class AuthRepositoryImpl implements AuthRepository {
         return "Error de autenticación. Inténtalo de nuevo.";
     }
   }
+
+
 }

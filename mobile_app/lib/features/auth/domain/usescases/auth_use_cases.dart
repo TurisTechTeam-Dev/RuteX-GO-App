@@ -36,4 +36,8 @@ class AuthUsesCases {
   Future<void> logout() {
     return repository.logout();
   }
+
+  Future<bool> checkAdminStatus(String uid){
+    return repository.isAdmin(uid);
+  }
 }

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:mobile_app/features/auth/domain/repository/auth_repository.dart';
 import 'package:mobile_app/features/auth/domain/usescases/auth_use_cases.dart';
 
@@ -57,7 +58,17 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (mounted) {
-        Navigator.pushReplacementNamed(context, AppRoutes.home);
+        final user = FirebaseAuth.instance.currentUser;
+
+        if (user != null){
+          final bool isAdmin = await _authUseCases.checkAdminStatus(user.uid);
+
+          if (kIsWeb && isAdmin){
+            Navigator.pushReplacementNamed(context, AppRoutes.adminPanel);
+          } else {
+            Navigator.pushReplacementNamed(context, AppRoutes.home);
+          }
+        }
       }
     } catch (e) {
       setState(() {
