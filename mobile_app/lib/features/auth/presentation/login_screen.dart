@@ -43,8 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
-
-    if(!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) return;
 
     setState(() {
       _isLoading = true;
@@ -52,38 +51,38 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
+      // 1. Logueamos
       await _authUseCases.login(
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
 
-      if (mounted) {
-        final user = FirebaseAuth.instance.currentUser;
+      // 2. Esperamos un instante a que el estado se asiente y pillamos el user
+      final user = FirebaseAuth.instance.currentUser;
 
-        if (user != null){
-          final bool isAdmin = await _authUseCases.checkAdminStatus(user.uid);
+      if (user != null) {
+        // 3. Comprobamos admin
+        final bool isAdmin = await _authUseCases.checkAdminStatus(user.uid);
 
-          if (kIsWeb && isAdmin){
-            Navigator.pushReplacementNamed(context, AppRoutes.adminPanel);
-          } else {
-            Navigator.pushReplacementNamed(context, AppRoutes.home);
-          }
+        // DEBUG: Esto os dirá la verdad en la consola de VS Code
+        print("VERIFICACIÓN: Web=$kIsWeb | Admin=$isAdmin | Email=${user.email}");
+
+        if (!mounted) return;
+
+        // 4. EL SEMÁFORO
+        if (kIsWeb && isAdmin) {
+          Navigator.pushReplacementNamed(context, AppRoutes.adminPanel);
+        } else {
+          Navigator.pushReplacementNamed(context, AppRoutes.home);
         }
+      } else {
+        throw Exception("No se pudo recuperar el usuario tras el login");
       }
-    } catch (e) {
-      setState(() {
-        _errorMessage = e.toString().replaceFirst("Exception: ", "");
-      });
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_errorMessage!), backgroundColor: AppColors.error),
-        );
-      }
+    } catch (e) {
+      setState(() => _errorMessage = e.toString());
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 

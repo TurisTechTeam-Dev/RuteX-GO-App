@@ -16,8 +16,6 @@ import '../../features/routes/data/routes_repository_impl.dart';
 import '../../features/routes/domain/usescases/routes_uses_cases.dart';
 import '../../features/routes/presentation/city_selection_screen.dart';
 import '../../features/routes/presentation/route_selection_screen.dart';
-
-// IMPORTACIÓN DE LA NUEVA PANTALLA
 import '../../features/admin_panel/presentation/admin_panel_screen.dart';
 
 class AppRoutes {
