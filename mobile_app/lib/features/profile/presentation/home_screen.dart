@@ -42,16 +42,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final rangos = rangosDoc.data()?["rangos"] ?? [];
 
-    List rutasProgreso = List.from(userData["rutas_completadas"] ?? []);
+    final List<dynamic> rutasProgreso = List.from(
+      userData["rutas_completadas"] ?? [],
+    );
 
     List<String> rutasIds = rutasProgreso
-        .map((r) {
-          if (r is String) return r;
-
-          if (r is Map) return r["rutaId"];
-
-          return null;
-        })
+        .map(_routeIdFromProgress)
         .whereType<String>()
         .toList();
 
@@ -67,24 +63,70 @@ class _HomeScreenState extends State<HomeScreen> {
 
       for (var doc in rutasQuery.docs) {
         final data = doc.data();
+        final puntosInteres = List.from(data["id_puntos_interes"] ?? []);
+        final misionesTotales = puntosInteres.length;
+        final puntosTotales = _asInt(
+          data["puntos_totales"],
+          defaultValue: misionesTotales * 30,
+        );
 
-        final progreso = rutasProgreso.firstWhere(
-          (r) => r is Map && r["rutaId"] == doc.id,
-          orElse: () => {},
+        final progreso = _progressMapForRoute(rutasProgreso, doc.id);
+        final hasDetailedProgress = progreso.isNotEmpty;
+
+        final puntosObtenidos = _asInt(
+          progreso["puntos_obtenidos"] ?? progreso["puntos"],
+          defaultValue: hasDetailedProgress ? 0 : puntosTotales,
+        );
+        final misionesAcertadas = _asInt(
+          progreso["misiones_acertadas"] ?? progreso["misiones_completadas"],
+          defaultValue: hasDetailedProgress ? 0 : misionesTotales,
         );
 
         rutas.add({
           "id": doc.id,
           "nombre": data["nombre"] ?? "Ruta",
-          "puntos_totales": (data["puntos_totales"] ?? 0) as int,
-          "id_puntos_interes": List.from(data["id_puntos_interes"] ?? []),
-          "puntos_obtenidos": (progreso["puntos_obtenidos"] ?? 0) as int,
-          "misiones_acertadas": (progreso["misiones_acertadas"] ?? 0) as int,
+          "puntos_totales": puntosTotales,
+          "id_puntos_interes": puntosInteres,
+          "misiones_totales": misionesTotales,
+          "puntos_obtenidos": puntosObtenidos,
+          "misiones_acertadas": misionesAcertadas,
         });
       }
     }
 
     return HomeData(user: userData, routes: rutas, rangos: rangos);
+  }
+
+  static String? _routeIdFromProgress(dynamic progress) {
+    if (progress is String) return progress;
+
+    if (progress is Map) {
+      final routeId = progress["rutaId"] ?? progress["id_ruta"] ?? progress["routeId"];
+      return routeId?.toString();
+    }
+
+    return null;
+  }
+
+  static Map<String, dynamic> _progressMapForRoute(
+    List<dynamic> routesProgress,
+    String routeId,
+  ) {
+    for (final progress in routesProgress) {
+      if (progress is Map && _routeIdFromProgress(progress) == routeId) {
+        return Map<String, dynamic>.from(progress);
+      }
+    }
+
+    return {};
+  }
+
+  static int _asInt(dynamic value, {int defaultValue = 0}) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? defaultValue;
+
+    return defaultValue;
   }
 
   String _calcularNombreRango(int puntos, List<dynamic> listaRangos) {
@@ -106,9 +148,25 @@ class _HomeScreenState extends State<HomeScreen> {
     int total = 0;
 
     for (var ruta in rutas) {
-      final puntos = (ruta["puntos_obtenidos"] ?? 0) as int;
+      final misiones = ruta["misiones_acertadas"];
 
-      total += (puntos ~/ 30);
+      if (misiones is int) {
+        total += misiones;
+      }
+    }
+
+    return total;
+  }
+
+  int _calcularMisionesTotales(List<Map<String, dynamic>> rutas) {
+    int total = 0;
+
+    for (var ruta in rutas) {
+      final misiones = ruta["misiones_totales"];
+
+      if (misiones is int) {
+        total += misiones;
+      }
     }
 
     return total;
@@ -161,6 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
           final nombreRango = _calcularNombreRango(puntosTotales, rangos);
 
           final misiones = _calcularMisiones(rutas);
+          final misionesTotales = _calcularMisionesTotales(rutas);
 
           final rutasCompletadas = rutas.length;
 
@@ -196,7 +255,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           const SizedBox(height: 12),
 
-                          _statsCard(rutasCompletadas, misiones, puntosTotales),
+                          _statsCard(
+                            rutasCompletadas,
+                            misiones,
+                            misionesTotales,
+                            puntosTotales,
+                          ),
 
                           const SizedBox(height: 20),
 
@@ -221,11 +285,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
                             final puntosObtenidos = ruta["puntos_obtenidos"];
 
-                            final puntosInteres =
-                                ruta["id_puntos_interes"] ?? [];
-
-                            final misionesTotales = puntosInteres.length;
-                            final misionesCompletadas = (puntosObtenidos ~/ 30);
+                            final misionesTotales =
+                                ruta["misiones_totales"] ?? 0;
+                            final misionesCompletadas =
+                                ruta["misiones_acertadas"] ?? 0;
 
                             return Column(
                               children: [
@@ -307,7 +370,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   static Widget _statsCard(
     int rutasCompletadas,
-    int misiones,
+    int misionesCompletadas,
+    int misionesTotales,
     int puntosTotales,
   ) {
     return CustomCard(
@@ -321,7 +385,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           const SizedBox(height: 6),
 
-          Text("Misiones: $misiones/$misiones"),
+          Text("Misiones: $misionesCompletadas/$misionesTotales"),
 
           const SizedBox(height: 6),
 
@@ -329,7 +393,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           const SizedBox(height: 6),
 
-          const Text("Monumentos visitados: 0"),
+          Text("Monumentos visitados: $misionesCompletadas"),
         ],
       ),
     );

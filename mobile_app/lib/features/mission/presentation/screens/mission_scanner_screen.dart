@@ -8,7 +8,10 @@ import '../../data/repository/mission_repository_impl.dart';
 import '../../domain/usescases/mission_uses_cases.dart';
 
 class MisionScannerScreen extends StatefulWidget {
-  const MisionScannerScreen({super.key});
+  final String? routeId;
+  final int? totalPois;
+
+  const MisionScannerScreen({super.key, this.routeId, this.totalPois});
 
   @override
   State<MisionScannerScreen> createState() => _MisionScannerScreenState();
@@ -46,7 +49,11 @@ class _MisionScannerScreenState extends State<MisionScannerScreen> {
       Navigator.pushNamed(
         context,
         AppRoutes.monumentInfo,
-        arguments: result,
+        arguments: {
+          ...result,
+          if (widget.routeId != null) 'routeId': widget.routeId,
+          if (widget.totalPois != null) 'totalPois': widget.totalPois,
+        },
       ).then((_) async {
         await _scannerController.start();
         if (mounted) {

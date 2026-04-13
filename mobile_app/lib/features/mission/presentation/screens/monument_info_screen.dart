@@ -21,6 +21,8 @@ class _MonumentInfoScreenState extends State<MonumentInfoScreen> {
   Widget build(BuildContext context) {
     final punto = widget.data['punto'] ?? {};
     final mision = widget.data['mision'] ?? {};
+    final routeId = widget.data['routeId']?.toString();
+    final totalPois = widget.data['totalPois'];
 
     final nombre = punto['nombre'] ?? "Monumento";
     final descripcion = punto['descripcion'] ?? "";
@@ -146,7 +148,11 @@ class _MonumentInfoScreenState extends State<MonumentInfoScreen> {
                         Navigator.pushNamed(
                           context,
                           AppRoutes.quiz,
-                          arguments: mision,
+                          arguments: {
+                            'mision': mision,
+                            if (routeId != null) 'routeId': routeId,
+                            if (totalPois != null) 'totalPois': totalPois,
+                          },
                         );
                       },
                       child: const Text(

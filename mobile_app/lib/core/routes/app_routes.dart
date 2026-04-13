@@ -38,20 +38,17 @@ class AppRoutes {
     final routesUseCase = RoutesUsesCases(RoutesRepositoryImpl());
 
     switch (settings.name) {
-
-    // 1. RUTA DEL PANEL DE ADMINISTRACIÓN (WEB)
+      // 1. RUTA DEL PANEL DE ADMINISTRACIÓN (WEB)
       case adminPanel:
-        return MaterialPageRoute(
-          builder: (_) => const AdminPanelScreen(),
-        );
+        return MaterialPageRoute(builder: (_) => const AdminPanelScreen());
 
-    // 2. SELECCIÓN DE CIUDAD
+      // 2. SELECCIÓN DE CIUDAD
       case citySelection:
         return MaterialPageRoute(
           builder: (_) => CitySelectionScreen(routesUsesCases: routesUseCase),
         );
 
-    // 3. SELECCIÓN DE RUTA
+      // 3. SELECCIÓN DE RUTA
       case routeSelection:
         final String idCiudad = settings.arguments as String? ?? '';
         return MaterialPageRoute(
@@ -61,7 +58,7 @@ class AppRoutes {
           ),
         );
 
-    // 4. NAVEGACIÓN POR MAPA (CON PROVIDER ESPECÍFICO)
+      // 4. NAVEGACIÓN POR MAPA (CON PROVIDER ESPECÍFICO)
       case mapNavigation:
         final String routeId = settings.arguments as String? ?? 'default_route';
         return MaterialPageRoute(
@@ -74,18 +71,18 @@ class AppRoutes {
           ),
         );
 
-    // 5. RUTAS DE AUTENTICACIÓN
+      // 5. RUTAS DE AUTENTICACIÓN
       case login:
         return MaterialPageRoute(builder: (_) => const LoginScreen());
 
       case register:
         return MaterialPageRoute(builder: (_) => const RegisterScreen());
 
-    // 6. PERFIL Y HOME
+      // 6. PERFIL Y HOME
       case home:
         return MaterialPageRoute(builder: (_) => const HomeScreen());
 
-    // 7. MISIONES Y GAMIFICACIÓN
+      // 7. MISIONES Y GAMIFICACIÓN
       case missionQrScanner:
         return MaterialPageRoute(builder: (_) => const MisionScannerScreen());
 
@@ -102,14 +99,17 @@ class AppRoutes {
       case routeResult:
         return MaterialPageRoute(builder: (_) => const RouteResultScreen());
 
-    // RUTA POR DEFECTO (ERROR)
+      // RUTA POR DEFECTO (ERROR)
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(
             body: Center(
               child: Text(
                 'Ruta no definida: ${settings.name}',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
