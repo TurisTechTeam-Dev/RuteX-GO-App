@@ -77,9 +77,10 @@ class _HomeScreenState extends State<HomeScreen> {
           progreso["puntos_obtenidos"] ?? progreso["puntos"],
           defaultValue: hasDetailedProgress ? 0 : puntosTotales,
         );
-        final misionesAcertadas = _asInt(
-          progreso["misiones_acertadas"] ?? progreso["misiones_completadas"],
-          defaultValue: hasDetailedProgress ? 0 : misionesTotales,
+        final misionesCompletadas = _asInt(
+          progreso["monumentos_visitados"] ??
+              progreso["misiones_completadas"],
+          defaultValue: misionesTotales,
         );
 
         rutas.add({
@@ -89,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
           "id_puntos_interes": puntosInteres,
           "misiones_totales": misionesTotales,
           "puntos_obtenidos": puntosObtenidos,
-          "misiones_acertadas": misionesAcertadas,
+          "misiones_completadas": misionesCompletadas,
         });
       }
     }
@@ -144,11 +145,11 @@ class _HomeScreenState extends State<HomeScreen> {
     return nombre;
   }
 
-  int _calcularMisiones(List<Map<String, dynamic>> rutas) {
+  int _calcularMisionesCompletadas(List<Map<String, dynamic>> rutas) {
     int total = 0;
 
     for (var ruta in rutas) {
-      final misiones = ruta["misiones_acertadas"];
+      final misiones = ruta["misiones_completadas"];
 
       if (misiones is int) {
         total += misiones;
@@ -218,7 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           final nombreRango = _calcularNombreRango(puntosTotales, rangos);
 
-          final misiones = _calcularMisiones(rutas);
+          final misionesCompletadas = _calcularMisionesCompletadas(rutas);
           final misionesTotales = _calcularMisionesTotales(rutas);
 
           final rutasCompletadas = rutas.length;
@@ -257,7 +258,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           _statsCard(
                             rutasCompletadas,
-                            misiones,
+                            misionesCompletadas,
                             misionesTotales,
                             puntosTotales,
                           ),
@@ -288,7 +289,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             final misionesTotales =
                                 ruta["misiones_totales"] ?? 0;
                             final misionesCompletadas =
-                                ruta["misiones_acertadas"] ?? 0;
+                                ruta["misiones_completadas"] ?? 0;
 
                             return Column(
                               children: [
@@ -299,7 +300,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                   date: "Ruta completada",
                                   puntosObtenidos: puntosObtenidos,
                                   puntosTotales: puntosTotales,
-                                  misionesTotales: misionesTotales,
                                 ),
 
                                 const SizedBox(height: 12),
@@ -385,15 +385,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
           const SizedBox(height: 6),
 
-          Text("Misiones: $misionesCompletadas/$misionesTotales"),
+          Text("Misiones completadas: $misionesCompletadas/$misionesTotales"),
 
           const SizedBox(height: 6),
 
           Text("Puntos totales: $puntosTotales"),
-
-          const SizedBox(height: 6),
-
-          Text("Monumentos visitados: $misionesCompletadas"),
         ],
       ),
     );
@@ -405,7 +401,6 @@ class _HomeScreenState extends State<HomeScreen> {
     required String date,
     required int puntosObtenidos,
     required int puntosTotales,
-    required int misionesTotales,
   }) {
     return CustomCard(
       width: double.infinity,
@@ -443,7 +438,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(width: 6),
 
-              Text("Misiones: $missions"),
+              Text("Misiones completadas: $missions"),
             ],
           ),
 
@@ -469,7 +464,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(width: 6),
 
-              Text("Puntos: $puntosObtenidos / $puntosTotales"),
+              Text("Puntos obtenidos: $puntosObtenidos / $puntosTotales"),
             ],
           ),
         ],

@@ -272,7 +272,9 @@ class _QuizScreenState extends State<QuizScreen> {
 
     await Future.delayed(const Duration(milliseconds: 600));
 
-    if (_monumentosVisitados < _monumentosObjetivo) {
+    final monumentosObjetivo = await _resolveMonumentosObjetivo();
+
+    if (_monumentosVisitados < monumentosObjetivo) {
       if (!mounted) return;
 
       Navigator.pushNamed(
@@ -280,14 +282,14 @@ class _QuizScreenState extends State<QuizScreen> {
         AppRoutes.missionQrScanner,
         arguments: {
           'routeId': _routeId,
-          'totalPois': _monumentosObjetivo,
+          'totalPois': monumentosObjetivo,
         },
       );
     } else {
       final routeId = _routeId;
       if (routeId != null && routeId.isNotEmpty) {
         try {
-          await _markRouteAsCompleted(routeId);
+          await _markRouteAsCompleted(routeId, monumentosObjetivo);
         } catch (e) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -314,7 +316,28 @@ class _QuizScreenState extends State<QuizScreen> {
     }
   }
 
-  Future<void> _markRouteAsCompleted(String routeId) async {
+  Future<int> _resolveMonumentosObjetivo() async {
+    final routeId = _routeId;
+    if (routeId == null || routeId.isEmpty) return _monumentosObjetivo;
+
+    final routeDoc = await FirebaseFirestore.instance
+        .collection('rutas')
+        .doc(routeId)
+        .get();
+    final data = routeDoc.data();
+    final puntosInteres = data?['id_puntos_interes'];
+
+    if (puntosInteres is List && puntosInteres.isNotEmpty) {
+      return puntosInteres.length;
+    }
+
+    return _monumentosObjetivo;
+  }
+
+  Future<void> _markRouteAsCompleted(
+    String routeId,
+    int monumentosVisitados,
+  ) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
@@ -350,7 +373,8 @@ class _QuizScreenState extends State<QuizScreen> {
           {
             'rutaId': routeId,
             'puntos_obtenidos': _puntosRuta,
-            'misiones_acertadas': _monumentosVisitados,
+            'monumentos_visitados': monumentosVisitados,
+            'misiones_completadas': monumentosVisitados,
           },
         ]),
       };
