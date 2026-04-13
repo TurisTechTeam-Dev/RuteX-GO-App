@@ -118,7 +118,11 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
                 onPressed: () {
                   setState(() => _dialogOpen = false);
                   Navigator.pop(context);
-                  Navigator.pushNamed(context, AppRoutes.missionQrScanner);
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.missionQrScanner,
+                    arguments: widget.routeId,
+                  );
                 },
                 icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
                 label: const Text("ESCANEAR QR", style: TextStyle(color: Colors.white)),

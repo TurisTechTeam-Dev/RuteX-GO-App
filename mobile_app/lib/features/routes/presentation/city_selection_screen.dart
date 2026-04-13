@@ -63,6 +63,11 @@ class CitySelectionScreen extends StatelessWidget {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       }
+                      if (snapshot.hasError) {
+                        return const Center(
+                          child: Text("Error al cargar las ciudades"),
+                        );
+                      }
 
                       if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                         return const Center(
@@ -70,15 +75,17 @@ class CitySelectionScreen extends StatelessWidget {
                         );
                       }
 
-                      final docs = snapshot.data!.docs;
+                      final docs = snapshot.data!.docs.toList();
 
                       docs.sort((a, b) {
                         final aActive =
-                            (a.data() as Map<String, dynamic>)['isActive'] ??
-                            false;
+                            ((a.data() as Map<String, dynamic>)['isActive'] ??
+                                    false) ==
+                                true;
                         final bActive =
-                            (b.data() as Map<String, dynamic>)['isActive'] ??
-                            false;
+                            ((b.data() as Map<String, dynamic>)['isActive'] ??
+                                    false) ==
+                                true;
 
                         if (aActive == bActive) return 0;
                         return aActive ? -1 : 1;
@@ -97,17 +104,18 @@ class CitySelectionScreen extends StatelessWidget {
                         itemBuilder: (context, index) {
                           final data =
                               docs[index].data() as Map<String, dynamic>;
+                          final fallbackImage =
+                              "assets/images_selection/${docs[index].id}.jpg";
+                          final image = data['imagen']?.toString() ??
+                              fallbackImage;
+
                           return _cityCard(
                             context,
-                            title: data['nombre'] ?? '',
-                            image:
-                                data['imagen'] ??
-                                "assets/images_selection/${docs[index].id}.jpg",
-                            available: data['isActive'] ?? false,
+                            title: data['nombre']?.toString() ?? '',
+                            image: image,
+                            available: data['isActive'] == true,
                             idCiudad: docs[index].id,
-                            routesCount:
-                                data['rutas_count'] ??
-                                0, // Cogemos el ID real de Firestore
+                            routesCount: 0, // Cogemos el ID real de Firestore
                           );
                         },
                       );
@@ -156,8 +164,24 @@ class CitySelectionScreen extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(5),
                 child: image.startsWith('http')
-                    ? Image.network(image, fit: BoxFit.cover)
-                    : Image.asset(image, fit: BoxFit.cover),
+                    ? Image.network(
+                        image,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => const Icon(
+                          Icons.location_city,
+                          color: AppColors.verdePrincipal,
+                          size: 48,
+                        ),
+                      )
+                    : Image.asset(
+                        image,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => const Icon(
+                          Icons.location_city,
+                          color: AppColors.verdePrincipal,
+                          size: 48,
+                        ),
+                      ),
               ),
             ),
           ),

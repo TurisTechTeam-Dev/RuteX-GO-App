@@ -71,6 +71,9 @@ class RouteSelectionScreen extends StatelessWidget {
                         itemBuilder: (context, index) {
                           final doc = rutasDocs[index];
                           final data = doc.data() as Map<String, dynamic>;
+                          final puntosInteres =
+                              data['id_puntos_interes'] as List?;
+                          final totalPois = puntosInteres?.length ?? 0;
 
                           return _routeCard(
                             context,
@@ -80,8 +83,8 @@ class RouteSelectionScreen extends StatelessWidget {
                             description: data['descripcion'] ?? '',
                             difficulty: data['dificultad'] ?? 'Media',
                             time: data['duracion'] ?? '--',
-                            distance:
-                                "${data['id_puntos_interes']?.length ?? 0} puntos",
+                            distance: "$totalPois puntos",
+                            totalPois: totalPois,
                             image:
                                 data['imagen_asset'] ??
                                 "assets/merida_monumental.png",
@@ -119,6 +122,7 @@ class RouteSelectionScreen extends StatelessWidget {
     required String difficulty,
     required String time,
     required String distance,
+    required int totalPois,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
@@ -191,7 +195,14 @@ class RouteSelectionScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                 ),
                 onPressed: () {
-                  Navigator.pushNamed(context, AppRoutes.missionQrScanner);
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.missionQrScanner,
+                    arguments: {
+                      'routeId': routeId,
+                      'totalPois': totalPois,
+                    },
+                  );
                 },
                 /*onPressed: () {
                   Navigator.pushNamed(

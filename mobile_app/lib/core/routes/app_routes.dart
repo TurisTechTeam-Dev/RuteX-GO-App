@@ -66,7 +66,14 @@ class AppRoutes {
       case home:
         return MaterialPageRoute(builder: (_) => const HomeScreen());
       case missionQrScanner:
-        return MaterialPageRoute(builder: (_) => const MisionScannerScreen());
+        final routeId = _routeIdFromArguments(settings.arguments);
+        final totalPois = _intFromArguments(settings.arguments, 'totalPois');
+        return MaterialPageRoute(
+          builder: (_) => MisionScannerScreen(
+            routeId: routeId,
+            totalPois: totalPois,
+          ),
+        );
       case monumentInfo:
         final data = settings.arguments as Map<String, dynamic>;
         return MaterialPageRoute(
@@ -85,5 +92,28 @@ class AppRoutes {
           ),
         );
     }
+  }
+
+  static String? _routeIdFromArguments(Object? arguments) {
+    if (arguments is String) return arguments;
+
+    if (arguments is Map) {
+      final routeId = arguments['routeId'] ?? arguments['rutaId'];
+      return routeId?.toString();
+    }
+
+    return null;
+  }
+
+  static int? _intFromArguments(Object? arguments, String key) {
+    if (arguments is Map) {
+      final value = arguments[key];
+
+      if (value is int) return value;
+      if (value is num) return value.toInt();
+      if (value is String) return int.tryParse(value);
+    }
+
+    return null;
   }
 }
