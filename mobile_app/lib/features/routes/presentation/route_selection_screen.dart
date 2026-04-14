@@ -40,15 +40,10 @@ class RouteSelectionScreen extends StatelessWidget {
               children: [
                 Container(height: 2, color: AppColors.negroTexto),
                 const SizedBox(height: 20),
-
-                // Mantenemos el const StrokeTitle
                 const StrokeTitle(text: "Rutas Disponibles"),
-
                 const SizedBox(height: 20),
-
                 Expanded(
                   child: StreamBuilder<QuerySnapshot>(
-                    // Usamos el caso de uso filtrando por la ciudad que recibimos
                     stream: routesUsesCases.executeGetRutasByCiudad(idCiudad),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
@@ -57,9 +52,7 @@ class RouteSelectionScreen extends StatelessWidget {
 
                       if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                         return const Center(
-                          child: Text(
-                            "No hay rutas disponibles para esta ciudad",
-                          ),
+                          child: Text("No hay rutas disponibles para esta ciudad"),
                         );
                       }
 
@@ -71,23 +64,19 @@ class RouteSelectionScreen extends StatelessWidget {
                         itemBuilder: (context, index) {
                           final doc = rutasDocs[index];
                           final data = doc.data() as Map<String, dynamic>;
-                          final puntosInteres =
-                              data['id_puntos_interes'] as List?;
+                          final puntosInteres = data['id_puntos_interes'] as List?;
                           final totalPois = puntosInteres?.length ?? 0;
 
                           return _routeCard(
                             context,
                             routeId: doc.id,
-                            // ID real de Firestore
                             title: data['nombre'] ?? 'Ruta',
                             description: data['descripcion'] ?? '',
                             difficulty: data['dificultad'] ?? 'Media',
                             time: data['duracion'] ?? '--',
                             distance: "$totalPois puntos",
                             totalPois: totalPois,
-                            image:
-                                data['imagen_asset'] ??
-                                "assets/merida_monumental.png",
+                            image: data['imagen_asset'] ?? "assets/merida_monumental.png",
                           );
                         },
                       );
@@ -103,27 +92,24 @@ class RouteSelectionScreen extends StatelessWidget {
         height: 60,
         decoration: const BoxDecoration(
           color: Colors.white,
-          border: Border(
-            top: BorderSide(color: AppColors.negroTexto, width: 2),
-          ),
+          border: Border(top: BorderSide(color: AppColors.negroTexto, width: 2)),
         ),
         child: const SafeArea(child: SizedBox()),
       ),
     );
   }
 
-  // WIDGET DE TARJETA REFACTORIZADO
   Widget _routeCard(
-    BuildContext context, {
-    required String routeId,
-    required String image,
-    required String title,
-    required String description,
-    required String difficulty,
-    required String time,
-    required String distance,
-    required int totalPois,
-  }) {
+      BuildContext context, {
+        required String routeId,
+        required String image,
+        required String title,
+        required String description,
+        required String difficulty,
+        required String time,
+        required String distance,
+        required int totalPois,
+      }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: CustomCard(
@@ -150,30 +136,19 @@ class RouteSelectionScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.account_balance,
-                  color: AppColors.verdePrincipal,
-                  size: 20,
-                ),
+                const Icon(Icons.account_balance, color: AppColors.verdePrincipal, size: 20),
                 const SizedBox(width: 6),
                 Flexible(
                   child: Text(
                     title,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.negroTexto,
-                    ),
+                    style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.negroTexto),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 6),
-            Text(
-              description,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.labelMedium,
-            ),
+            Text(description, textAlign: TextAlign.center, style: Theme.of(context).textTheme.labelMedium),
             const SizedBox(height: 10),
             Wrap(
               alignment: WrapAlignment.center,
@@ -195,22 +170,14 @@ class RouteSelectionScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                 ),
                 onPressed: () {
-                  Navigator.pushNamed(
-                    context,
-                    AppRoutes.missionQrScanner,
-                    arguments: {
-                      'routeId': routeId,
-                      'totalPois': totalPois,
-                    },
-                  );
-                },
-                /*onPressed: () {
+                  // NAVEGACIÓN DIRECTA AL MAPA
+                  // Se envía el routeId para que el TripSimulationProvider cargue los POIs
                   Navigator.pushNamed(
                     context,
                     AppRoutes.mapNavigation,
-                    arguments: routeId, // Pasamos el ID real de la ruta para el mapa
+                    arguments: routeId,
                   );
-                }*/
+                },
                 child: const Text("Comenzar ruta"),
               ),
             ),

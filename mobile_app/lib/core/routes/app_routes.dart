@@ -32,21 +32,34 @@ class AppRoutes {
   static const String adminPanel = '/admin_panel';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
-    // Instancia del caso de uso de rutas para las pantallas que lo requieren
     final routesUseCase = RoutesUsesCases(RoutesRepositoryImpl());
 
     switch (settings.name) {
-      // 1. RUTA DEL PANEL DE ADMINISTRACIÓN (WEB)
+
+    // 1. NAVEGACIÓN POR MAPA (CON LÓGICA DINÁMICA)
+      case mapNavigation:
+      // Recibimos el ID de la ruta desde la pantalla de selección
+        final String routeId = settings.arguments as String? ?? '';
+
+        return MaterialPageRoute(
+          builder: (context) => ChangeNotifierProvider(
+            // Creamos el Provider aquí para que nazca y muera con la pantalla del mapa
+            create: (context) => TripSimulationProvider(
+              missionUseCases: context.read<MissionUseCases>(),
+              routeId: routeId,
+            ),
+            child: MapNavigationScreen(routeId: routeId),
+          ),
+        );
+
       case adminPanel:
         return MaterialPageRoute(builder: (_) => const AdminPanelScreen());
 
-      // 2. SELECCIÓN DE CIUDAD
       case citySelection:
         return MaterialPageRoute(
           builder: (_) => CitySelectionScreen(routesUsesCases: routesUseCase),
         );
 
-      // 3. SELECCIÓN DE RUTA
       case routeSelection:
         final String idCiudad = settings.arguments as String? ?? '';
         return MaterialPageRoute(
@@ -56,31 +69,15 @@ class AppRoutes {
           ),
         );
 
-      // 4. NAVEGACIÓN POR MAPA (CON PROVIDER ESPECÍFICO)
-      case mapNavigation:
-        final String routeId = settings.arguments as String? ?? 'default_route';
-        return MaterialPageRoute(
-          builder: (context) => ChangeNotifierProvider(
-            create: (context) => TripSimulationProvider(
-              missionUseCases: context.read<MissionUseCases>(),
-              routeId: routeId,
-            ),
-            child: MapNavigationScreen(routeId: routeId),
-          ),
-        );
-
-      // 5. RUTAS DE AUTENTICACIÓN
       case login:
         return MaterialPageRoute(builder: (_) => const LoginScreen());
 
       case register:
         return MaterialPageRoute(builder: (_) => const RegisterScreen());
 
-      // 6. PERFIL Y HOME
       case home:
         return MaterialPageRoute(builder: (_) => const HomeScreen());
 
-      // 7. MISIONES Y GAMIFICACIÓN
       case missionQrScanner:
         return MaterialPageRoute(builder: (_) => const MisionScannerScreen());
 
@@ -97,18 +94,11 @@ class AppRoutes {
       case routeResult:
         return MaterialPageRoute(builder: (_) => const RouteResultScreen());
 
-      // RUTA POR DEFECTO (ERROR)
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(
             body: Center(
-              child: Text(
-                'Ruta no definida: ${settings.name}',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              child: Text('Ruta no definida: ${settings.name}'),
             ),
           ),
         );
