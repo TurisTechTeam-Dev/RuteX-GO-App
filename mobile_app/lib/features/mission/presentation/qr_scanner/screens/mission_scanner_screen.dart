@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:mobile_app/core/routes/app_routes.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/widgets/qr_scanner/scanner_widget.dart';
-import '../../data/repository/mission_repository_impl.dart';
-import '../../domain/usescases/mission_uses_cases.dart';
+import '../../../../../core/constants/app_colors.dart';
+import '../../../../../core/widgets/qr_scanner/scanner_widget.dart';
+import '../../../data/repository/mission_repository_impl.dart';
+import '../../../domain/usescases/mission_uses_cases.dart';
 
 class MisionScannerScreen extends StatefulWidget {
   final String? routeId;

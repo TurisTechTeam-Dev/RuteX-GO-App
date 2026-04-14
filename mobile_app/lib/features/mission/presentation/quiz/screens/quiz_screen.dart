@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/routes/app_routes.dart';
-import '../../../../core/widgets/buttons/custom_button.dart';
+import '../../../../../core/constants/app_colors.dart';
+import '../../../../../core/routes/app_routes.dart';
+import '../../../../../core/widgets/buttons/custom_button.dart';
 
 class QuizScreen extends StatefulWidget {
   final Map<String, dynamic> data;

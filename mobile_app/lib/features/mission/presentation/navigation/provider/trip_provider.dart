@@ -2,9 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
-import '../../../../core/map/routing_service.dart';
-import '../../domain/entity/poi_entity.dart';
-import '../../domain/usescases/mission_uses_cases.dart';
+import '../../../../../core/map/routing_service.dart';
+import '../../../domain/entity/poi_entity.dart';
+import '../../../domain/usescases/mission_uses_cases.dart';
 
 class TripSimulationProvider extends ChangeNotifier {
   final MissionUseCases missionUseCases;
