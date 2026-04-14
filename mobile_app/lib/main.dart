@@ -1,28 +1,37 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart'; // MaterialApp y Widgets ya están aquí
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'core/routes/app_routes.dart';
+import 'features/auth/data/auth_repository_impl.dart';
+import 'features/auth/domain/usescases/auth_use_cases.dart';
+import 'features/auth/presentation/auht_wrapper.dart';
 import 'features/mission/data/repository/mission_repository_impl.dart';
 import 'features/mission/domain/usescases/mission_uses_cases.dart';
-import 'features/splash/presentation/splash_screen.dart';
 import 'firebase_options.dart';
 
 void main() async {
-  // 1. PRIMERO inicializamos el binding (Obligatorio para Firebase y servicios)
   WidgetsFlutterBinding.ensureInitialized();
-
-  // 2. DESPUÉS inicializamos Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // 3. Inicializamos dependencias
+  // 1. Inicializamos Repositorios
   final missionRepo = MissionRepositoryImpl();
+  final authRepo = AuthRepositoryImpl(
+      FirebaseAuth.instance,
+      FirebaseFirestore.instance
+  );
+
+  // 2. Inicializamos UseCases
   final missionUseCases = MissionUseCases(missionRepo);
+  final authUseCases = AuthUsesCases(authRepo);
 
   runApp(
-    // Inyectamos el UseCase de forma global para que AppRoutes pueda usarlo
-    Provider<MissionUseCases>.value(
-      value: missionUseCases,
+    MultiProvider(
+      providers: [
+        Provider<MissionUseCases>.value(value: missionUseCases),
+        Provider<AuthUsesCases>.value(value: authUseCases),
+      ],
       child: const RutexApp(),
     ),
   );
@@ -40,9 +49,8 @@ class RutexApp extends StatelessWidget {
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      // Usamos onGenerateRoute para que el ID de la ruta sea dinámico
       onGenerateRoute: AppRoutes.onGenerateRoute,
-      home: const SplashScreen(),
+      home: const AuthWrapper(),
     );
   }
 }

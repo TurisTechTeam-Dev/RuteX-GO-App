@@ -42,16 +42,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final rangos = rangosDoc.data()?["rangos"] ?? [];
 
-    List rutasProgreso = List.from(userData["rutas_completadas"] ?? []);
+    final List<dynamic> rutasProgreso = List.from(
+      userData["rutas_completadas"] ?? [],
+    );
 
     List<String> rutasIds = rutasProgreso
-        .map((r) {
-          if (r is String) return r;
-
-          if (r is Map) return r["rutaId"];
-
-          return null;
-        })
+        .map(_routeIdFromProgress)
         .whereType<String>()
         .toList();
 
@@ -67,24 +63,71 @@ class _HomeScreenState extends State<HomeScreen> {
 
       for (var doc in rutasQuery.docs) {
         final data = doc.data();
+        final puntosInteres = List.from(data["id_puntos_interes"] ?? []);
+        final misionesTotales = puntosInteres.length;
+        final puntosTotales = _asInt(
+          data["puntos_totales"],
+          defaultValue: misionesTotales * 30,
+        );
 
-        final progreso = rutasProgreso.firstWhere(
-          (r) => r is Map && r["rutaId"] == doc.id,
-          orElse: () => {},
+        final progreso = _progressMapForRoute(rutasProgreso, doc.id);
+        final hasDetailedProgress = progreso.isNotEmpty;
+
+        final puntosObtenidos = _asInt(
+          progreso["puntos_obtenidos"] ?? progreso["puntos"],
+          defaultValue: hasDetailedProgress ? 0 : puntosTotales,
+        );
+        final misionesCompletadas = _asInt(
+          progreso["monumentos_visitados"] ??
+              progreso["misiones_completadas"],
+          defaultValue: misionesTotales,
         );
 
         rutas.add({
           "id": doc.id,
           "nombre": data["nombre"] ?? "Ruta",
-          "puntos_totales": (data["puntos_totales"] ?? 0) as int,
-          "id_puntos_interes": List.from(data["id_puntos_interes"] ?? []),
-          "puntos_obtenidos": (progreso["puntos_obtenidos"] ?? 0) as int,
-          "misiones_acertadas": (progreso["misiones_acertadas"] ?? 0) as int,
+          "puntos_totales": puntosTotales,
+          "id_puntos_interes": puntosInteres,
+          "misiones_totales": misionesTotales,
+          "puntos_obtenidos": puntosObtenidos,
+          "misiones_completadas": misionesCompletadas,
         });
       }
     }
 
     return HomeData(user: userData, routes: rutas, rangos: rangos);
+  }
+
+  static String? _routeIdFromProgress(dynamic progress) {
+    if (progress is String) return progress;
+
+    if (progress is Map) {
+      final routeId = progress["rutaId"] ?? progress["id_ruta"] ?? progress["routeId"];
+      return routeId?.toString();
+    }
+
+    return null;
+  }
+
+  static Map<String, dynamic> _progressMapForRoute(
+    List<dynamic> routesProgress,
+    String routeId,
+  ) {
+    for (final progress in routesProgress) {
+      if (progress is Map && _routeIdFromProgress(progress) == routeId) {
+        return Map<String, dynamic>.from(progress);
+      }
+    }
+
+    return {};
+  }
+
+  static int _asInt(dynamic value, {int defaultValue = 0}) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? defaultValue;
+
+    return defaultValue;
   }
 
   String _calcularNombreRango(int puntos, List<dynamic> listaRangos) {
@@ -102,13 +145,29 @@ class _HomeScreenState extends State<HomeScreen> {
     return nombre;
   }
 
-  int _calcularMisiones(List<Map<String, dynamic>> rutas) {
+  int _calcularMisionesCompletadas(List<Map<String, dynamic>> rutas) {
     int total = 0;
 
     for (var ruta in rutas) {
-      final puntos = ruta["id_puntos_interes"] ?? [];
+      final misiones = ruta["misiones_completadas"];
 
-      total += (puntos as List).length;
+      if (misiones is int) {
+        total += misiones;
+      }
+    }
+
+    return total;
+  }
+
+  int _calcularMisionesTotales(List<Map<String, dynamic>> rutas) {
+    int total = 0;
+
+    for (var ruta in rutas) {
+      final misiones = ruta["misiones_totales"];
+
+      if (misiones is int) {
+        total += misiones;
+      }
     }
 
     return total;
@@ -160,7 +219,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
           final nombreRango = _calcularNombreRango(puntosTotales, rangos);
 
-          final misiones = _calcularMisiones(rutas);
+          final misionesCompletadas = _calcularMisionesCompletadas(rutas);
+          final misionesTotales = _calcularMisionesTotales(rutas);
 
           final rutasCompletadas = rutas.length;
 
@@ -196,7 +256,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           const SizedBox(height: 12),
 
-                          _statsCard(rutasCompletadas, misiones, puntosTotales),
+                          _statsCard(
+                            rutasCompletadas,
+                            misionesCompletadas,
+                            misionesTotales,
+                            puntosTotales,
+                          ),
 
                           const SizedBox(height: 20),
 
@@ -221,20 +286,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
                             final puntosObtenidos = ruta["puntos_obtenidos"];
 
-                            final puntosInteres =
-                                ruta["id_puntos_interes"] ?? [];
-
-                            final misionesTotales = puntosInteres.length;
+                            final misionesTotales =
+                                ruta["misiones_totales"] ?? 0;
+                            final misionesCompletadas =
+                                ruta["misiones_completadas"] ?? 0;
 
                             return Column(
                               children: [
                                 _routeCard(
                                   title: nombre,
-                                  missions: "$misionesTotales/$misionesTotales",
+                                  missions:
+                                      "$misionesCompletadas/$misionesTotales",
                                   date: "Ruta completada",
                                   puntosObtenidos: puntosObtenidos,
                                   puntosTotales: puntosTotales,
-                                  misionesTotales: misionesTotales,
                                 ),
 
                                 const SizedBox(height: 12),
@@ -305,7 +370,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   static Widget _statsCard(
     int rutasCompletadas,
-    int misiones,
+    int misionesCompletadas,
+    int misionesTotales,
     int puntosTotales,
   ) {
     return CustomCard(
@@ -319,15 +385,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
           const SizedBox(height: 6),
 
-          Text("Misiones: $misiones/$misiones"),
+          Text("Misiones completadas: $misionesCompletadas/$misionesTotales"),
 
           const SizedBox(height: 6),
 
           Text("Puntos totales: $puntosTotales"),
-
-          const SizedBox(height: 6),
-
-          const Text("Medallas: 0"),
         ],
       ),
     );
@@ -339,7 +401,6 @@ class _HomeScreenState extends State<HomeScreen> {
     required String date,
     required int puntosObtenidos,
     required int puntosTotales,
-    required int misionesTotales,
   }) {
     return CustomCard(
       width: double.infinity,
@@ -348,25 +409,64 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppColors.negroTexto,
-            ),
+          /// TITULO
+          Row(
+            children: [
+              const Icon(Icons.check_circle, color: AppColors.verdePrincipal),
+
+              const SizedBox(width: 8),
+
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: AppColors.negroTexto,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 8),
+
+          /// MISIONES
+          Row(
+            children: [
+              const Icon(Icons.track_changes, size: 18),
+
+              const SizedBox(width: 6),
+
+              Text("Misiones completadas: $missions"),
+            ],
           ),
 
           const SizedBox(height: 6),
 
-          Text("Misiones: $missions"),
+          /// FECHA
+          Row(
+            children: [
+              const Icon(Icons.calendar_today, size: 18),
+
+              const SizedBox(width: 6),
+
+              Text(date),
+            ],
+          ),
 
           const SizedBox(height: 6),
 
-          Text(date),
+          /// PUNTOS
+          Row(
+            children: [
+              const Icon(Icons.emoji_events, size: 18),
 
-          const SizedBox(height: 6),
+              const SizedBox(width: 6),
 
-          Text("Puntos obtenidos: $puntosObtenidos / $puntosTotales"),
+              Text("Puntos obtenidos: $puntosObtenidos / $puntosTotales"),
+            ],
+          ),
         ],
       ),
     );
