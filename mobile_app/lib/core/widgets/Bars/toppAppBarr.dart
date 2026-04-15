@@ -21,7 +21,13 @@ class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
       leading: showBack
           ? IconButton(
               icon: const Icon(Icons.arrow_back, color: AppColors.negroTexto),
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                if (Navigator.of(context).canPop()) {
+                  Navigator.of(context).pop();
+                } else {
+                  Navigator.of(context).pushNamedAndRemoveUntil(AppRoutes.home, (route) => false);
+                }
+              },
             )
           : null,
 
@@ -106,7 +112,7 @@ class CustomDrawer extends StatelessWidget {
 
                   Navigator.pushNamedAndRemoveUntil(
                     context,
-                    AppRoutes.home,
+                    AppRoutes.profile,
                         (route) => false,
                   );
                 },

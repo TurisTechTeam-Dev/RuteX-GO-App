@@ -159,7 +159,7 @@ class TripSimulationProvider extends ChangeNotifier {
     _positionStream = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.high,
-          distanceFilter: 3 // Actualiza cada 3 metros para suavidad
+          distanceFilter: 10 // Actualiza cada 3 metros para suavidad
       ),
     ).listen((Position pos) {
       if (!_isSimulating) {
@@ -199,7 +199,7 @@ class TripSimulationProvider extends ChangeNotifier {
       _currentPosition = point;
       _checkArrivalProximity(_currentPosition);
       notifyListeners();
-      await Future.delayed(const Duration(milliseconds: 50));
+      await Future.delayed(const Duration(milliseconds: 300));
     }
     // Si terminó la simulación y NO saltó el popup por pocos metros, lo forzamos
     if (_isSimulating && !_hasReachedDestination) {
@@ -209,7 +209,7 @@ class TripSimulationProvider extends ChangeNotifier {
       debugPrint("🏁 [SIM] Fin de puntos. Distancia final al monumento: ${finalDist.toInt()}m");
 
       // Si al terminar estamos a menos de 100 metros, asumimos llegada para que el usuario no se quede bloqueado
-      if (finalDist < 100) {
+      if (finalDist < 200) {
         debugPrint("🎯 [SIM] Forzando llegada por proximidad final.");
         _hasReachedDestination = true;
       }

@@ -12,6 +12,7 @@ import '../../features/mission/presentation/monument_detail/screens/monument_inf
 import '../../features/mission/presentation/quiz/screens/quiz_screen.dart';
 import '../../features/mission/presentation/quiz/screens/route_result_screen.dart';
 import '../../features/profile/presentation/home_screen.dart';
+import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/routes/data/routes_repository_impl.dart';
 import '../../features/routes/domain/usescases/routes_uses_cases.dart';
 import '../../features/routes/presentation/city_selection_screen.dart';
@@ -22,6 +23,7 @@ class AppRoutes {
   static const String login = '/login';
   static const String register = '/register';
   static const String home = '/home';
+  static const String profile = '/profile';
   static const String mapNavigation = '/map_navigation';
   static const String missionQrScanner = '/mission_scanner';
   static const String monumentInfo = '/monument_info';
@@ -74,6 +76,9 @@ class AppRoutes {
 
       case home:
         return MaterialPageRoute(builder: (_) => const HomeScreen());
+
+      case profile:
+        return MaterialPageRoute(builder: (_) => const ProfileScreen());
 
       case missionQrScanner:
         return MaterialPageRoute(builder: (_) => const MisionScannerScreen());

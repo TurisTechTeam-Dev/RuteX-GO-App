@@ -4,7 +4,7 @@ import 'package:latlong2/latlong.dart'; // Import que te funciona
 
 import '../../features/mission/domain/entity/poi_entity.dart';
 
-class MapView extends StatelessWidget {
+class MapView extends StatefulWidget {
   final MapController? mapController;
   final List<LatLng> routePoints;
   final List<PointOfInterest> pointsOfInterest;
@@ -19,18 +19,42 @@ class MapView extends StatelessWidget {
   });
 
   @override
+  State<MapView> createState() => _MapViewState();
+}
+
+class _MapViewState extends State<MapView> {
+  @override
+  void didUpdateWidget(covariant MapView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Si cambia la posición del usuario, movemos la cámara para que siga al icono azul
+    if (widget.mapController != null &&
+        widget.currentPosition != null &&
+        widget.currentPosition != oldWidget.currentPosition) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+
+        widget.mapController!.move(
+          widget.currentPosition!,
+          widget.mapController!.camera.zoom,
+        );
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     // Definimos el centro de Mérida como constante de seguridad
     const LatLng meridaCentro = LatLng(38.9161, -6.3437);
 
     // Lógica de validación: si la posición es nula o es (0,0), usamos Mérida
     final LatLng centerToUse =
-        (currentPosition == null || currentPosition!.latitude == 0)
+    (widget.currentPosition == null || widget.currentPosition!.latitude == 0)
         ? meridaCentro
-        : currentPosition!;
+        : widget.currentPosition!;
 
     return FlutterMap(
-      mapController: mapController,
+      mapController: widget.mapController,
       options: MapOptions(
         initialCenter: centerToUse,
         initialZoom: 16.0,
@@ -47,11 +71,11 @@ class MapView extends StatelessWidget {
         ),
 
         // Capa de la ruta calculada por OSRM
-        if (routePoints.isNotEmpty)
+        if (widget.routePoints.isNotEmpty)
           PolylineLayer(
             polylines: [
               Polyline(
-                points: routePoints,
+                points: widget.routePoints,
                 color: Colors.blue.withOpacity(0.8),
                 strokeWidth: 5.0,
               ),
@@ -62,8 +86,8 @@ class MapView extends StatelessWidget {
         MarkerLayer(
           markers: [
             // 1. Puntos de Interés (Monumentos)
-            ...pointsOfInterest.map(
-              (poi) => Marker(
+            ...widget.pointsOfInterest.map(
+                  (poi) => Marker(
                 point: poi.localizacion,
                 width: 50,
                 height: 50,
