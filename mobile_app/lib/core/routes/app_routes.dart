@@ -36,14 +36,11 @@ class AppRoutes {
 
     switch (settings.name) {
 
-    // 1. NAVEGACIÓN POR MAPA (CON LÓGICA DINÁMICA)
       case mapNavigation:
-      // Recibimos el ID de la ruta desde la pantalla de selección
         final String routeId = settings.arguments as String? ?? '';
 
         return MaterialPageRoute(
           builder: (context) => ChangeNotifierProvider(
-            // Creamos el Provider aquí para que nazca y muera con la pantalla del mapa
             create: (context) => TripSimulationProvider(
               missionUseCases: context.read<MissionUseCases>(),
               routeId: routeId,

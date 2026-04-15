@@ -98,6 +98,19 @@ class CustomDrawer extends StatelessWidget {
                   );
                 },
               ),
+              ListTile(
+                leading: const Icon(Icons.person),
+                title: const Text('Perfil'),
+                onTap: () {
+                  Navigator.pop(context);
+
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    AppRoutes.home,
+                        (route) => false,
+                  );
+                },
+              ),
 
               const Spacer(),
 
