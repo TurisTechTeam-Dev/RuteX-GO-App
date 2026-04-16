@@ -36,7 +36,7 @@ class _MisionScannerScreenState extends State<MisionScannerScreen> {
   }
 
   void _onQrCodeDetected(String code) async {
-    print("QR detectado: $code");
+    debugPrint("QR detectado: $code");
     if (_isProcessing) return;
 
     setState(() => _isProcessing = true);
@@ -71,6 +71,7 @@ class _MisionScannerScreenState extends State<MisionScannerScreen> {
       }
 
       await _scannerController.start();
+      if (!mounted) return;
       setState(() => _isProcessing = false);
     }
   }
@@ -121,6 +122,7 @@ class _MisionScannerScreenState extends State<MisionScannerScreen> {
                     ),
                     onPressed: () async {
                       await _scannerController.toggleTorch();
+                      if (!mounted) return;
                       setState(() {
                         _flashOn = !_flashOn;
                       });

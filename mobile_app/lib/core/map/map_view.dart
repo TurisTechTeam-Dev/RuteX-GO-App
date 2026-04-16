@@ -76,7 +76,7 @@ class _MapViewState extends State<MapView> {
             polylines: [
               Polyline(
                 points: widget.routePoints,
-                color: Colors.blue.withOpacity(0.8),
+                color: Colors.blue.withValues(alpha: 0.8),
                 strokeWidth: 5.0,
               ),
             ],
@@ -113,7 +113,7 @@ class _MapViewState extends State<MapView> {
                     width: 25,
                     height: 25,
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.2),
+                      color: Colors.blue.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
                   ),

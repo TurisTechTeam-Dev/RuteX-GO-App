@@ -36,6 +36,8 @@ class _SplashScreenState extends State<SplashScreen> {
         // Comprobamos si es admin
         final bool isAdmin = await authUseCases.checkAdminStatus(user.uid);
 
+        if (!mounted) return;
+
         if (kIsWeb && isAdmin) {
           // Si es Web + Admin, el AuthWrapper ya se encarga de ir al panel de administracion
           Navigator.pushReplacementNamed(context, AppRoutes.adminPanel);

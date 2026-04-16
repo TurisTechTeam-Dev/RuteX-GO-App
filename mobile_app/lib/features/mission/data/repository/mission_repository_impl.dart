@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../domain/entity/poi_entity.dart';
 import '../../domain/repository/mission_repository.dart';
@@ -18,8 +19,6 @@ class MissionRepositoryImpl implements MissionRepository {
 
     final data = snapshot.docs.first.data();
 
-    if (data == null) return null;
-
     data['id'] = snapshot.docs.first.id;
 
     return data;
@@ -38,13 +37,11 @@ class MissionRepositoryImpl implements MissionRepository {
 
       final data = snapshot.docs.first.data();
 
-      if (data == null) return null;
-
       data['id'] = snapshot.docs.first.id;
 
       return data;
     } catch (e) {
-      print("Error: $e");
+      debugPrint("Error: $e");
     }
 
     return null;
@@ -64,7 +61,7 @@ class MissionRepositoryImpl implements MissionRepository {
         'fecha': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      print("Error al guardar: $e");
+      debugPrint("Error al guardar: $e");
     }
   }
 
@@ -73,7 +70,7 @@ class MissionRepositoryImpl implements MissionRepository {
     final doc = await _db.collection('rutas').doc(routeId.trim()).get();
 
     if (!doc.exists) {
-      print("ERROR: No existe la ruta con ID: '$routeId'");
+      debugPrint("ERROR: No existe la ruta con ID: '$routeId'");
       return [];
     }
 
@@ -91,14 +88,14 @@ class MissionRepositoryImpl implements MissionRepository {
   Future<List<PointOfInterest>> getPointsByIds(List<String> ids) async {
     if (ids.isEmpty) return [];
 
-    print("Buscando en puntos_interes estos IDs: $ids");
+    debugPrint("Buscando en puntos_interes estos IDs: $ids");
 
     final snapshot = await _db
         .collection('puntos_interes')
         .where(FieldPath.documentId, whereIn: ids)
         .get();
 
-    print("Encontrados en Firebase: ${snapshot.docs.length} puntos");
+    debugPrint("Encontrados en Firebase: ${snapshot.docs.length} puntos");
 
     return snapshot.docs.map((doc) {
       return PointOfInterest.fromFirestore(doc.data(), doc.id);

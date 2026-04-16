@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_app/features/auth/domain/usescases/auth_use_cases.dart';
@@ -20,7 +19,9 @@ class AuthWrapper extends StatelessWidget {
       builder: (context, snapshot) {
         // Mientras se establece la conexión con Firebase
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
 
         // Si hay un usuario logueado
@@ -29,7 +30,9 @@ class AuthWrapper extends StatelessWidget {
             future: authUseCases.checkAdminStatus(snapshot.data!.uid),
             builder: (context, adminSnapshot) {
               if (adminSnapshot.connectionState == ConnectionState.waiting) {
-                return const Scaffold(body: Center(child: CircularProgressIndicator()));
+                return const Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                );
               }
 
               final bool isAdmin = adminSnapshot.data ?? false;
@@ -59,11 +62,12 @@ class AdminRedirector extends StatefulWidget {
   State<AdminRedirector> createState() => _AdminRedirectorState();
 }
 
-class _AdminRedirectorState extends State<AdminRedirector>{
+class _AdminRedirectorState extends State<AdminRedirector> {
   @override
-  void initState(){
+  void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       Navigator.pushReplacementNamed(context, AppRoutes.adminPanel);
     });
   }

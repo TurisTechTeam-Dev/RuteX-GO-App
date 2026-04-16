@@ -1,7 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../../core/widgets/Bars/toppAppBarr.dart';
+import '../../../../../core/widgets/bars/top_app_bar.dart';
 
 class ResultViewScreen extends StatelessWidget {
   const ResultViewScreen({super.key});
@@ -33,7 +32,7 @@ class ResultViewScreen extends StatelessWidget {
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
-                  Text(
+                  const Text(
                     "Nombre de Usuario",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                   ),

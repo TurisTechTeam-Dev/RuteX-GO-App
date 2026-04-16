@@ -3,7 +3,7 @@ import 'package:mobile_app/core/widgets/cards/custom_cards.dart';
 
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/routes/app_routes.dart';
-import '../../../../../core/widgets/Bars/toppAppBarr.dart';
+import '../../../../../core/widgets/bars/top_app_bar.dart';
 
 class MonumentInfoScreen extends StatefulWidget {
   final Map<String, dynamic> data;
@@ -150,8 +150,8 @@ class _MonumentInfoScreenState extends State<MonumentInfoScreen> {
                           AppRoutes.quiz,
                           arguments: {
                             'mision': mision,
-                            if (routeId != null) 'routeId': routeId,
-                            if (totalPois != null) 'totalPois': totalPois,
+                            'routeId': ?routeId,
+                            'totalPois': ?totalPois,
                           },
                         );
                       },

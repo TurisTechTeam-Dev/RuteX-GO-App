@@ -56,7 +56,7 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
           // Pantalla de carga inicial
           if (tripProvider.isLoading)
             Container(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               child: const Center(
                 child: CircularProgressIndicator(color: Colors.green),
               ),

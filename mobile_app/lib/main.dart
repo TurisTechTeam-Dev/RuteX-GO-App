@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'core/routes/app_routes.dart';
 import 'features/auth/data/auth_repository_impl.dart';
 import 'features/auth/domain/usescases/auth_use_cases.dart';
-import 'features/auth/presentation/auht_wrapper.dart';
+import 'features/auth/presentation/auth_wrapper.dart';
 import 'features/mission/data/repository/mission_repository_impl.dart';
 import 'features/mission/domain/usescases/mission_uses_cases.dart';
 import 'firebase_options.dart';

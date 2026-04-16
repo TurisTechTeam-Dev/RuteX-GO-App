@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:mobile_app/features/auth/domain/repository/auth_repository.dart';
 import 'package:mobile_app/features/auth/domain/usescases/auth_use_cases.dart';
 
 import '../../../core/constants/app_colors.dart';
@@ -12,7 +11,6 @@ import '../../../core/widgets/inputs/custom_inputs.dart';
 import '../../../core/widgets/buttons/custom_button.dart';
 import '../../../core/utils/validadores.dart';
 import '../data/auth_repository_impl.dart';
-
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -29,7 +27,6 @@ class _LoginScreenState extends State<LoginScreen> {
   late final AuthUsesCases _authUseCases;
 
   bool _isLoading = false;
-  String? _errorMessage;
 
   @override
   void initState() {
@@ -39,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
       FirebaseAuth.instance,
       FirebaseFirestore.instance,
     );
-    _authUseCases = AuthUsesCases(repository as AuthRepository);
+    _authUseCases = AuthUsesCases(repository);
   }
 
   Future<void> _handleLogin() async {
@@ -47,7 +44,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() {
       _isLoading = true;
-      _errorMessage = null;
     });
 
     try {
@@ -65,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
         final bool isAdmin = await _authUseCases.checkAdminStatus(user.uid);
 
         // DEBUG: Esto os dirá la verdad en la consola de VS Code
-        print("VERIFICACIÓN: Web=$kIsWeb | Admin=$isAdmin | Email=${user.email}");
+        debugPrint("VERIFICACIÓN: Web=$kIsWeb | Admin=$isAdmin | Email=${user.email}");
 
         if (!mounted) return;
 
@@ -80,32 +76,39 @@ class _LoginScreenState extends State<LoginScreen> {
       }
 
     } catch (e) {
-      setState(() => _errorMessage = e.toString());
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: AppColors.error,
+        ),
+      );
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  Future<void> _recoverPassword() async{
+  Future<void> _recoverPassword() async {
     final emailerror = Validadores.validarEmail(_emailController.text);
-    if(emailerror != null){
+    if (emailerror != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+        const SnackBar(
             content: Text("Introduce un email válido arriba para recuperar tu contraseña"),
-            backgroundColor: Colors.orange),
+            backgroundColor: Colors.orange,
+          ),
       );
       return;
     }
 
     setState(() => _isLoading = true);
 
-    try{
+    try {
       await _authUseCases.recoverPassword(_emailController.text.trim());
-      if (mounted){
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
               content: Text("Correo de recuperacuión enviado."),
-              backgroundColor: AppColors.exito,
+            backgroundColor: AppColors.exito,
           ),
         );
       }
@@ -188,7 +191,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         key: _formKey,
                         child: Column(
                           children: [
-                            custom_input(
+                            CustomInput(
                               label: 'Email',
                               hint: 'Introduce tu email',
                               controller: _emailController,
@@ -196,7 +199,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               validator: Validadores.validarEmail,
                             ),
 
-                            custom_input(
+                            CustomInput(
                               label: 'Contraseña',
                               hint: 'Introduce tu contraseña',
                               isPassword: true,

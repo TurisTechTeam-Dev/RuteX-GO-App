@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:mobile_app/features/auth/domain/repository/auth_repository.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/routes/app_routes.dart';
@@ -40,7 +39,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       FirebaseAuth.instance,
       FirebaseFirestore.instance,
     );
-    _authUseCases = AuthUsesCases(repository as AuthRepository);
+    _authUseCases = AuthUsesCases(repository);
 
     // Escuchar cambios para habilitar botón
     _usuarioController.addListener(_validateForm);
@@ -157,7 +156,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           key: _formKey,
                           child: Column(
                             children: [
-                              custom_input(
+                              CustomInput(
                                 label: 'Usuario',
                                 hint: 'Introduce tu nombre de usuario',
                                 controller: _usuarioController,
@@ -167,20 +166,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       'Usuario',
                                     ),
                               ),
-                              custom_input(
+                              CustomInput(
                                 label: 'Nombre',
                                 hint: 'Introduce tu nombre',
                                 controller: _nombreController,
                                 validator: Validadores.validarNombre,
                               ),
-                              custom_input(
+                              CustomInput(
                                 label: 'Email',
                                 hint: 'Introduce tu email',
                                 controller: _emailController,
                                 keyboardType: TextInputType.emailAddress,
                                 validator: Validadores.validarEmail,
                               ),
-                              custom_input(
+                              CustomInput(
                                 label: 'Contraseña',
                                 hint: 'Introduce tu contraseña',
                                 controller: _passwordController,
@@ -188,7 +187,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 validator: Validadores.validarPassword,
                               ),
 
-                              custom_input(
+                              CustomInput(
                                 label: 'Confirmar Contraseña',
                                 hint: 'Repite tu contraseña',
                                 controller: _confirmPasswordController,

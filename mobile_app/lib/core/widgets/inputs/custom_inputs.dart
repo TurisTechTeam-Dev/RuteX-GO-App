@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 
-class custom_input extends StatelessWidget {
+class CustomInput extends StatelessWidget {
   final String label;
   final String hint;
   final bool isPassword;
@@ -9,7 +9,7 @@ class custom_input extends StatelessWidget {
   final TextEditingController? controller;
   final String? Function(String?)? validator;
 
-  const custom_input({
+  const CustomInput({
     super.key,
     required this.label,
     required this.hint,

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/routes/app_routes.dart';
-import '../../../core/widgets/Bars/toppAppBarr.dart';
+import '../../../core/widgets/bars/top_app_bar.dart';
 import '../../../core/widgets/cards/custom_cards.dart';
 import '../../profile/presentation/home_screen.dart';
 import '../domain/usescases/routes_uses_cases.dart';
@@ -167,7 +167,7 @@ class CitySelectionScreen extends StatelessWidget {
                     ? Image.network(
                         image,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Icon(
+                        errorBuilder: (context, error, stackTrace) => const Icon(
                           Icons.location_city,
                           color: AppColors.verdePrincipal,
                           size: 48,
@@ -176,7 +176,7 @@ class CitySelectionScreen extends StatelessWidget {
                     : Image.asset(
                         image,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Icon(
+                        errorBuilder: (context, error, stackTrace) => const Icon(
                           Icons.location_city,
                           color: AppColors.verdePrincipal,
                           size: 48,

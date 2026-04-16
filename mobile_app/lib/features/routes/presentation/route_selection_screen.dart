@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_app/core/constants/app_colors.dart';
-import 'package:mobile_app/core/widgets/Bars/toppAppBarr.dart';
+import 'package:mobile_app/core/widgets/bars/top_app_bar.dart';
 
 import '../../../core/routes/app_routes.dart';
 import '../../../core/widgets/cards/custom_cards.dart';

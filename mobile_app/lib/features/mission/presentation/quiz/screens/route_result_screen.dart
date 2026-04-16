@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_app/core/widgets/Bars/toppAppBarr.dart';
+import 'package:mobile_app/core/widgets/bars/top_app_bar.dart';
 
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/routes/app_routes.dart';
@@ -28,13 +28,13 @@ class RouteResultScreen extends StatelessWidget {
           children: [
             Text(
               '¡Resultados de tu Ruta!',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Text('Puntuación: $puntuacion'),
             Text('Monumentos Visitados: $monumentos'),
             Text('Tiempo Total: $tiempo'),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             ElevatedButton(
               onPressed: () {
                 Navigator.pushNamedAndRemoveUntil(
@@ -43,7 +43,7 @@ class RouteResultScreen extends StatelessWidget {
                       (route) => false,
                 );
               },
-              child: Text('Volver al Inicio'),
+              child: const Text('Volver al Inicio'),
             ),
           ],
         ),

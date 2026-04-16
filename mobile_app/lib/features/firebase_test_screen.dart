@@ -27,13 +27,16 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
             password: _passwordController.text.trim(),
           );
 
+      if (!mounted) return;
+
       setState(
         () => _status = "✅ Login exitoso: ${userCredential.user?.email}",
       );
 
       // Si el login funciona, intentamos traer los datos de Firestore automáticamente
-      _fetchUserData(userCredential.user!.uid);
+      await _fetchUserData(userCredential.user!.uid);
     } catch (e) {
+      if (!mounted) return;
       setState(() => _status = "❌ Error Auth: $e");
     }
   }
@@ -42,14 +45,16 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
   Future<void> _fetchUserData(String uid) async {
     try {
       // IMPORTANTE: Asegúrate de que tu colección se llame 'usuarios' en la consola
-      DocumentSnapshot doc = await FirebaseFirestore.instance
+      final doc = await FirebaseFirestore.instance
           .collection('usuarios')
           .doc(uid)
           .get();
 
+      if (!mounted) return;
+
       if (doc.exists) {
         setState(() {
-          _userData = doc.data() as Map<String, dynamic>;
+          _userData = doc.data();
           _status += "\n✅ Datos de Firestore cargados.";
         });
       } else {
@@ -59,8 +64,16 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
         );
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() => _status += "\n❌ Error Firestore: $e");
     }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   @override
