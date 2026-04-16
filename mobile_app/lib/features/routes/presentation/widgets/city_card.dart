@@ -4,20 +4,13 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../../core/widgets/cards/custom_cards.dart';
+import '../models/city_item.dart';
 
 class CityCard extends StatelessWidget {
-  final String title;
-  final String image;
-  final bool available;
-  final String cityId;
+  final CityItem city;
+  final Stream<QuerySnapshot> routesStream;
 
-  const CityCard({
-    super.key,
-    required this.title,
-    required this.image,
-    required this.available,
-    required this.cityId,
-  });
+  const CityCard({super.key, required this.city, required this.routesStream});
 
   @override
   Widget build(BuildContext context) {
@@ -25,13 +18,13 @@ class CityCard extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       child: Column(
         children: [
-          _CityImage(image: image),
+          _CityImage(image: city.image),
           const SizedBox(height: 8),
-          _StrokeCityTitle(text: title),
+          _StrokeCityTitle(text: city.title),
           const SizedBox(height: 6),
-          _RouteCounter(available: available, cityId: cityId),
+          _RouteCounter(available: city.available, routesStream: routesStream),
           const Spacer(),
-          _ExploreButton(available: available, cityId: cityId),
+          _ExploreButton(available: city.available, cityId: city.id),
         ],
       ),
     );
@@ -88,30 +81,24 @@ class _CityFallbackIcon extends StatelessWidget {
 
 class _RouteCounter extends StatelessWidget {
   final bool available;
-  final String cityId;
+  final Stream<QuerySnapshot> routesStream;
 
-  const _RouteCounter({required this.available, required this.cityId});
+  const _RouteCounter({required this.available, required this.routesStream});
 
   @override
   Widget build(BuildContext context) {
     if (!available) {
       return Text(
-        "PrÃ³ximamente",
+        "Proximamente",
         style: Theme.of(context).textTheme.labelMedium,
       );
     }
 
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection("rutas")
-          .where("id_ciudad", isEqualTo: cityId)
-          .snapshots(),
+      stream: routesStream,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return Text(
-            "...",
-            style: Theme.of(context).textTheme.labelMedium,
-          );
+          return Text("...", style: Theme.of(context).textTheme.labelMedium);
         }
 
         final routesCount = snapshot.data!.docs.length;
@@ -137,8 +124,9 @@ class _ExploreButton extends StatelessWidget {
       height: 32,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor:
-              available ? AppColors.verdePrincipal : AppColors.grisSombra,
+          backgroundColor: available
+              ? AppColors.verdePrincipal
+              : AppColors.grisSombra,
           foregroundColor: AppColors.blancoPuro,
           padding: const EdgeInsets.symmetric(horizontal: 18),
           textStyle: Theme.of(

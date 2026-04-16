@@ -8,6 +8,7 @@ import '../../../core/routes/app_routes.dart';
 import '../../../core/widgets/auth/auth_card.dart';
 import '../../../core/widgets/auth/auth_logo.dart';
 import '../../../core/widgets/auth/auth_snack_bar.dart';
+import '../../../core/widgets/backgrounds/extremadura_map_background.dart';
 import '../../../core/widgets/buttons/custom_button.dart';
 import '../../../core/widgets/inputs/custom_inputs.dart';
 import '../../../core/utils/validadores.dart';
@@ -57,7 +58,9 @@ class _LoginScreenState extends State<LoginScreen> {
         final bool isAdmin = await _authUseCases.checkAdminStatus(user.uid);
 
         // DEBUG: Esto os dirá la verdad en la consola de VS Code
-        debugPrint("VERIFICACIÓN: Web=$kIsWeb | Admin=$isAdmin | Email=${user.email}");
+        debugPrint(
+          "VERIFICACIÓN: Web=$kIsWeb | Admin=$isAdmin | Email=${user.email}",
+        );
 
         if (!mounted) return;
 
@@ -70,14 +73,9 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         throw Exception("No se pudo recuperar el usuario tras el login");
       }
-
     } catch (e) {
       if (!mounted) return;
-      showAuthSnackBar(
-        context,
-        e.toString(),
-        backgroundColor: AppColors.error,
-      );
+      showAuthSnackBar(context, e.toString(), backgroundColor: AppColors.error);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -88,9 +86,11 @@ class _LoginScreenState extends State<LoginScreen> {
     if (emailerror != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text("Introduce un email válido arriba para recuperar tu contraseña"),
-            backgroundColor: Colors.orange,
+          content: Text(
+            "Introduce un email válido arriba para recuperar tu contraseña",
           ),
+          backgroundColor: Colors.orange,
+        ),
       );
       return;
     }
@@ -102,7 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text("Correo de recuperacuión enviado."),
+            content: Text("Correo de recuperacuión enviado."),
             backgroundColor: AppColors.exito,
           ),
         );
@@ -110,7 +110,10 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString()), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     } finally {
@@ -134,16 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          // FONDO (Mapa)
-          Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/Mapa_fondo_Extremadura.png'),
-                opacity: 0.4,
-                fit: BoxFit.contain,
-              ),
-            ),
-          ),
+          const ExtremaduraMapBackground(),
 
           SingleChildScrollView(
             child: Column(
@@ -243,11 +237,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: Text(
                               "Regístrate",
                               style: TextStyle(
-                                color: AppColors
-                                    .verdePrincipal,
+                                color: AppColors.verdePrincipal,
                                 fontWeight: FontWeight.bold,
-                                decoration: TextDecoration
-                                    .none,
+                                decoration: TextDecoration.none,
                               ),
                             ),
                           ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/backgrounds/extremadura_map_background.dart';
 import '../../../../core/widgets/titles/stroke_title.dart';
 import '../../data/home_data.dart';
 import '../../data/home_summary.dart';
@@ -18,7 +19,7 @@ class HomeContent extends StatelessWidget {
 
     return Stack(
       children: [
-        const _HomeBackground(),
+        const ExtremaduraMapBackground(),
         SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,33 +48,13 @@ class HomeContent extends StatelessWidget {
                   ],
                 ),
               ),
-              Expanded(
-                child: HomeRouteList(routes: data.routes),
-              ),
+              Expanded(child: HomeRouteList(routes: data.routes)),
               Container(height: 2, color: AppColors.negroTexto),
               const SizedBox(height: 10),
             ],
           ),
         ),
       ],
-    );
-  }
-}
-
-class _HomeBackground extends StatelessWidget {
-  const _HomeBackground();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.blancoPuro,
-        image: DecorationImage(
-          image: AssetImage('assets/Mapa_fondo_Extremadura.png'),
-          opacity: 0.4,
-          fit: BoxFit.contain,
-        ),
-      ),
     );
   }
 }

@@ -6,6 +6,7 @@ import '../../../core/utils/validadores.dart';
 import '../../../core/widgets/auth/auth_card.dart';
 import '../../../core/widgets/auth/auth_logo.dart';
 import '../../../core/widgets/auth/auth_snack_bar.dart';
+import '../../../core/widgets/backgrounds/extremadura_map_background.dart';
 import '../../../core/widgets/buttons/custom_button.dart';
 import '../../../core/widgets/inputs/custom_inputs.dart';
 import '../domain/usescases/auth_use_cases.dart';
@@ -115,13 +116,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
-          // 1. FONDO
-          Center(
-            child: Opacity(
-              opacity: 0.3,
-              child: Image.asset('assets/Mapa_fondo_Extremadura.png'),
-            ),
-          ),
+          const ExtremaduraMapBackground(opacity: 0.3),
 
           SafeArea(
             child: SingleChildScrollView(

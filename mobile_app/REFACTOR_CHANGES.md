@@ -9,6 +9,7 @@ Este documento resume los cambios realizados en la rama `codex` para que otro wo
 - Cambios posteriores al commit: refactor de `home`, refactor parcial de `auth` y refactor de seleccion de ciudad.
 - Validacion disponible: `git diff --check`.
 - No se pudo ejecutar `flutter analyze` ni `dart analyze` porque los comandos no estan disponibles en esta terminal.
+- En el refactor de rutas, `dart format lib\features\routes\presentation` se quedo colgado y se detuvo el proceso reciente de `dart`.
 
 ## Cambios ya incluidos en el commit `d14badd`
 
@@ -121,17 +122,93 @@ Este documento resume los cambios realizados en la rama `codex` para que otro wo
 
 ### Archivos creados
 
+- `lib/core/widgets/backgrounds/extremadura_map_background.dart`
+  - Extrae el fondo de mapa de Extremadura compartido por login, registro, home, perfil, seleccion de ciudad, seleccion de ruta y resultados.
+- `lib/features/routes/presentation/models/city_item.dart`
+  - Extrae el mapeo de documento Firestore a datos de presentacion de ciudad.
+- `lib/features/routes/presentation/widgets/city_selection_content.dart`
+  - Extrae cabecera, descripcion, estado de carga/error/vacio y grid de ciudades.
 - `lib/features/routes/presentation/widgets/city_card.dart`
   - Extrae la card de ciudad desde `city_selection_screen.dart`.
   - Contiene imagen, fallback icon, contador de rutas, boton explorar y titulo con stroke local.
+### Archivos modificados
+
+- `lib/features/auth/presentation/login_screen.dart`
+  - Usa `ExtremaduraMapBackground`.
+- `lib/features/auth/presentation/register_screen.dart`
+  - Usa `ExtremaduraMapBackground(opacity: 0.3)` para conservar su opacidad previa.
+- `lib/features/profile/presentation/widgets/home_content.dart`
+  - Usa `ExtremaduraMapBackground` y elimina el fondo privado de home.
+- `lib/features/profile/presentation/profile_screen.dart`
+  - Usa `ExtremaduraMapBackground`.
+- `lib/features/routes/presentation/city_selection_screen.dart`
+  - Queda como contenedor de `Scaffold`, app bar, drawer, contenido y bottom bar.
+  - Usa `CitySelectionContent`.
+  - Mueve el `StreamBuilder` y la ordenacion de ciudades a `CitySelectionContent`.
+  - El fondo ahora incluye `color: AppColors.blancoPuro`, igual que home y seleccion de ruta.
+  - Se eliminaron imports y codigo de card que ya no pertenecen a la pantalla.
+- `lib/features/routes/presentation/widgets/city_card.dart`
+  - Ahora recibe `CityItem`.
+  - Ya no consulta `FirebaseFirestore.instance` directamente; recibe el stream de rutas desde `RoutesUsesCases`.
+
+## Refactor actual: Seleccion de ruta
+
+### Archivos creados
+
+- `lib/features/routes/presentation/models/route_item.dart`
+  - Extrae el mapeo de documento Firestore a datos de presentacion de ruta.
+  - Centraliza defaults de nombre, descripcion, dificultad, duracion, POIs e imagen.
+- `lib/features/routes/presentation/widgets/route_selection_content.dart`
+  - Extrae cabecera, estados de carga/error/vacio y lista de rutas.
+- `lib/features/routes/presentation/widgets/route_card.dart`
+  - Extrae la card visual de ruta, detalles e inicio de navegacion.
 
 ### Archivos modificados
 
-- `lib/features/routes/presentation/city_selection_screen.dart`
-  - Usa `CityCard`.
-  - Mantiene el `StreamBuilder` y ordenacion de ciudades.
-  - El fondo ahora incluye `color: AppColors.blancoPuro`, igual que home y seleccion de ruta.
-  - Se eliminaron imports y codigo de card que ya no pertenecen a la pantalla.
+- `lib/features/routes/presentation/route_selection_screen.dart`
+  - Queda como contenedor de `Scaffold`, app bar, drawer, contenido y bottom bar.
+  - Usa `RouteSelectionContent`.
+  - Elimina helpers privados `_routeCard` e `_infoRow` de la pantalla.
+
+## Refactor actual: Quiz
+
+### Archivos creados
+
+- `lib/features/mission/presentation/quiz/models/quiz_question.dart`
+  - Extrae el parseo de pregunta, respuestas e indice correcto.
+- `lib/features/mission/presentation/quiz/models/quiz_mission.dart`
+  - Extrae el parseo de argumentos de quiz y datos de mision.
+- `lib/features/mission/presentation/quiz/quiz_route_progress.dart`
+  - Centraliza el progreso temporal de ruta: monumentos visitados, puntos y ruta activa.
+- `lib/features/mission/presentation/quiz/widgets/quiz_answer_option.dart`
+  - Extrae la opcion visual de respuesta.
+- `lib/features/mission/presentation/quiz/widgets/quiz_content.dart`
+  - Extrae progreso, pregunta, respuestas y boton de continuar.
+
+### Archivos modificados
+
+- `lib/features/mission/presentation/quiz/screens/quiz_screen.dart`
+  - Queda centrado en estado, navegacion y guardado de finalizacion.
+  - Usa `QuizMission`, `QuizRouteProgress` y `QuizContent`.
+- `lib/features/mission/presentation/quiz/screens/result_view_screen.dart`
+  - Usa `ExtremaduraMapBackground`.
+- `lib/features/mission/presentation/quiz/screens/route_result_screen.dart`
+  - Usa `ExtremaduraMapBackground`.
+  - Normaliza imports relativos y textos sin caracteres corruptos.
+
+## Refactor actual: QR
+
+### Archivos creados
+
+- `lib/features/mission/presentation/qr_scanner/widgets/mission_scanner_overlay.dart`
+  - Extrae barra superior, linterna, slider de zoom y loader de procesamiento.
+
+### Archivos modificados
+
+- `lib/features/mission/presentation/qr_scanner/screens/mission_scanner_screen.dart`
+  - Queda centrado en controlador, scan, navegacion y estado de linterna/procesamiento.
+  - Usa `MissionScannerOverlay`.
+  - Normaliza el import de rutas a relativo.
 
 ## Notas para el siguiente workspace
 
@@ -141,6 +218,9 @@ Este documento resume los cambios realizados en la rama `codex` para que otro wo
   2. Crear loaders/modelos de home (`HomeDataLoader`, `HomeSummary`, `HomeRouteData`).
   3. Extraer widgets de home (`HomeContent`, `HomeRouteList`, `home_cards`).
   4. Actualizar imports de rutas para usar `StrokeTitle`.
-  5. Extraer `CityCard` y actualizar el fondo de `CitySelectionScreen`.
-  6. Actualizar login/registro para usar `createAuthUseCases` y `AuthLogo`.
-- Antes de mergear, ejecutar `flutter analyze` y una prueba visual de login, registro, home, seleccion de ciudad y seleccion de ruta cuando el entorno lo permita.
+  5. Extraer fondo comun `ExtremaduraMapBackground` y actualizar pantallas que usan el mapa.
+  6. Extraer `CityCard`, `CitySelectionContent`, `CityItem` y actualizar `CitySelectionScreen`.
+  7. Extraer `RouteCard`, `RouteSelectionContent` y `RouteItem`.
+  8. Extraer modelos/widgets de quiz y overlay de QR.
+  9. Actualizar login/registro para usar `createAuthUseCases` y `AuthLogo`.
+- Antes de mergear, ejecutar `flutter analyze` y una prueba visual de login, registro, home, perfil, seleccion de ciudad, seleccion de ruta, quiz, resultados y QR cuando el entorno lo permita.
