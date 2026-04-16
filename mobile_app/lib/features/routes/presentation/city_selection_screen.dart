@@ -2,11 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_colors.dart';
-import '../../../core/routes/app_routes.dart';
 import '../../../core/widgets/bars/top_app_bar.dart';
-import '../../../core/widgets/cards/custom_cards.dart';
-import '../../profile/presentation/home_screen.dart';
+import '../../../core/widgets/titles/stroke_title.dart';
 import '../domain/usescases/routes_uses_cases.dart';
+import 'widgets/city_card.dart';
 
 class CitySelectionScreen extends StatelessWidget {
   final RoutesUsesCases routesUsesCases;
@@ -24,6 +23,7 @@ class CitySelectionScreen extends StatelessWidget {
           // FONDO
           Container(
             decoration: const BoxDecoration(
+              color: AppColors.blancoPuro,
               image: DecorationImage(
                 image: AssetImage('assets/Mapa_fondo_Extremadura.png'),
                 opacity: 0.4,
@@ -109,13 +109,11 @@ class CitySelectionScreen extends StatelessWidget {
                           final image = data['imagen']?.toString() ??
                               fallbackImage;
 
-                          return _cityCard(
-                            context,
+                          return CityCard(
                             title: data['nombre']?.toString() ?? '',
                             image: image,
                             available: data['isActive'] == true,
-                            idCiudad: docs[index].id,
-                            routesCount: 0, // Cogemos el ID real de Firestore
+                            cityId: docs[index].id,
                           );
                         },
                       );
@@ -138,152 +136,6 @@ class CitySelectionScreen extends StatelessWidget {
         ),
         child: const SafeArea(child: SizedBox()),
       ),
-    );
-  }
-
-  Widget _cityCard(
-    BuildContext context, {
-    required String title,
-    required String image,
-    required bool available,
-    required String idCiudad,
-    required int routesCount,
-  }) {
-    return CustomCard(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        children: [
-          // Imagen
-          AspectRatio(
-            aspectRatio: 16 / 9,
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: AppColors.negroTexto, width: 1),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(5),
-                child: image.startsWith('http')
-                    ? Image.network(
-                        image,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => const Icon(
-                          Icons.location_city,
-                          color: AppColors.verdePrincipal,
-                          size: 48,
-                        ),
-                      )
-                    : Image.asset(
-                        image,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => const Icon(
-                          Icons.location_city,
-                          color: AppColors.verdePrincipal,
-                          size: 48,
-                        ),
-                      ),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          // Título
-          StrokeCityTitle(text: title),
-
-          const SizedBox(height: 6),
-
-          // Contador de rutas REAL desde Firestore
-          available
-              ? StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection("rutas")
-                      .where("id_ciudad", isEqualTo: idCiudad)
-                      .snapshots(),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return Text(
-                        "...",
-                        style: Theme.of(context).textTheme.labelMedium,
-                      );
-                    }
-
-                    final rutasCount = snapshot.data!.docs.length;
-
-                    return Text(
-                      "$rutasCount rutas disponibles",
-                      style: Theme.of(context).textTheme.labelMedium,
-                    );
-                  },
-                )
-              : Text(
-                  "Próximamente",
-                  style: Theme.of(context).textTheme.labelMedium,
-                ),
-
-          const Spacer(),
-
-          SizedBox(
-            height: 32,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: available
-                    ? AppColors.verdePrincipal
-                    : AppColors.grisSombra,
-                foregroundColor: AppColors.blancoPuro,
-                padding: const EdgeInsets.symmetric(horizontal: 18),
-                textStyle: Theme.of(
-                  context,
-                ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),
-              ),
-              onPressed: available
-                  ? () {
-                      Navigator.pushNamed(
-                        context,
-                        AppRoutes.routeSelection,
-                        arguments: idCiudad,
-                      );
-                    }
-                  : null,
-              child: const Text("Explorar"),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// Mantengo tu widget StrokeCityTitle tal cual lo pasaste
-class StrokeCityTitle extends StatelessWidget {
-  final String text;
-
-  const StrokeCityTitle({super.key, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Text(
-          text,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            foreground: Paint()
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = 0.8
-              ..color = AppColors.verdePrincipal,
-          ),
-        ),
-        Text(
-          text,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: AppColors.negroTexto,
-          ),
-        ),
-      ],
     );
   }
 }

@@ -1,15 +1,15 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/routes/app_routes.dart';
 import '../../../core/utils/validadores.dart';
 import '../../../core/widgets/auth/auth_card.dart';
+import '../../../core/widgets/auth/auth_logo.dart';
+import '../../../core/widgets/auth/auth_snack_bar.dart';
 import '../../../core/widgets/buttons/custom_button.dart';
 import '../../../core/widgets/inputs/custom_inputs.dart';
-import '../data/auth_repository_impl.dart';
 import '../domain/usescases/auth_use_cases.dart';
+import 'auth_use_cases_factory.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -35,11 +35,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   void initState() {
     super.initState();
-    final repository = AuthRepositoryImpl(
-      FirebaseAuth.instance,
-      FirebaseFirestore.instance,
-    );
-    _authUseCases = AuthUsesCases(repository);
+    _authUseCases = createAuthUseCases();
 
     // Escuchar cambios para habilitar botón
     _usuarioController.addListener(_validateForm);
@@ -96,9 +92,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             errorMessage = e.toString().replaceAll("Exception: ", "");
           }
 
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(errorMessage)));
+          showAuthSnackBar(context, errorMessage);
         }
         debugPrint(e.toString());
       } finally {
@@ -137,13 +131,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 20),
 
                   // 2. LOGO
-                  Hero(
-                    tag: 'logo',
-                    child: Image.asset(
-                      'assets/Logo_Color_Rutexgo.png',
-                      height: size.height * 0.10,
-                    ),
-                  ),
+                  AuthLogo(height: size.height * 0.10),
 
                   const SizedBox(height: 10),
 

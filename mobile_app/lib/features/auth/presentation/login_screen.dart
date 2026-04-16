@@ -1,16 +1,17 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:mobile_app/features/auth/domain/usescases/auth_use_cases.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/routes/app_routes.dart';
 import '../../../core/widgets/auth/auth_card.dart';
-import '../../../core/widgets/inputs/custom_inputs.dart';
+import '../../../core/widgets/auth/auth_logo.dart';
+import '../../../core/widgets/auth/auth_snack_bar.dart';
 import '../../../core/widgets/buttons/custom_button.dart';
+import '../../../core/widgets/inputs/custom_inputs.dart';
 import '../../../core/utils/validadores.dart';
-import '../data/auth_repository_impl.dart';
+import 'auth_use_cases_factory.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -31,12 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-
-    final repository = AuthRepositoryImpl(
-      FirebaseAuth.instance,
-      FirebaseFirestore.instance,
-    );
-    _authUseCases = AuthUsesCases(repository);
+    _authUseCases = createAuthUseCases();
   }
 
   Future<void> _handleLogin() async {
@@ -77,11 +73,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: AppColors.error,
-        ),
+      showAuthSnackBar(
+        context,
+        e.toString(),
+        backgroundColor: AppColors.error,
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -155,13 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 const SizedBox(height: 80),
                 // LOGO
-                Hero(
-                  tag: 'logo',
-                  child: Image.asset(
-                    'assets/Logo_Color_Rutexgo.png',
-                    height: size.height * 0.18,
-                  ),
-                ),
+                AuthLogo(height: size.height * 0.18),
 
                 const SizedBox(height: 20),
 

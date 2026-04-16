@@ -1,0 +1,37 @@
+import 'package:flutter/material.dart';
+
+import '../../data/home_data.dart';
+import 'home_cards.dart';
+
+class HomeRouteList extends StatelessWidget {
+  final List<HomeRouteData> routes;
+
+  const HomeRouteList({super.key, required this.routes});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: ListView.builder(
+        padding: const EdgeInsets.only(bottom: 40),
+        itemCount: routes.length,
+        itemBuilder: (context, index) {
+          final route = routes[index];
+
+          return Column(
+            children: [
+              HomeRouteCard(
+                title: route.name,
+                missions: "${route.completedMissions}/${route.totalMissions}",
+                date: "Ruta completada",
+                obtainedPoints: route.obtainedPoints,
+                totalPoints: route.totalPoints,
+              ),
+              const SizedBox(height: 12),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}

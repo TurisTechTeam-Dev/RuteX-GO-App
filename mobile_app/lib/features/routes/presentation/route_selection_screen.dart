@@ -2,10 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_app/core/constants/app_colors.dart';
 import 'package:mobile_app/core/widgets/bars/top_app_bar.dart';
+import 'package:mobile_app/core/widgets/titles/stroke_title.dart';
 
 import '../../../core/routes/app_routes.dart';
 import '../../../core/widgets/cards/custom_cards.dart';
-import '../../profile/presentation/home_screen.dart';
 import '../domain/usescases/routes_uses_cases.dart';
 
 class RouteSelectionScreen extends StatelessWidget {
