@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:latlong2/latlong.dart';
+
+import '../../../../core/constants/firestore_contract.dart';
 import '../../domain/entity/poi_entity.dart';
 
 class POIModel extends PointOfInterest {
@@ -14,49 +16,53 @@ class POIModel extends PointOfInterest {
   });
 
   factory POIModel.fromFirestore(Map<String, dynamic> json, String id) {
-    final dynamic locData = json['localizacion'];
+    final locData = json[PointInterestFields.localizacion];
 
-    double lat = 0.0;
-    double lng = 0.0;
+    double lat = 0;
+    double lng = 0;
 
     try {
-      if (locData != null) {
-        if (locData is GeoPoint) {
-          lat = locData.latitude;
-          lng = locData.longitude;
-        } else if (locData is Map) {
-          // A veces Firebase devuelve mapas en lugar de GeoPoints en modo offline
-          lat = (locData['latitude'] ?? locData['lat'] ?? 0.0).toDouble();
-          lng = (locData['longitude'] ?? locData['lng'] ?? 0.0).toDouble();
-        }
+      if (locData is GeoPoint) {
+        lat = locData.latitude;
+        lng = locData.longitude;
+      } else if (locData is Map) {
+        lat = (locData['latitude'] ?? locData['lat'] ?? 0).toDouble();
+        lng = (locData['longitude'] ?? locData['lng'] ?? 0).toDouble();
       }
 
-      // Si después de intentar mapear sigue siendo 0.0, lanzamos un aviso al log
-      if (lat == 0.0 && lng == 0.0) {
-        debugPrint("⚠️ [MODELO] El punto con ID $id se cargó como (0,0). Revisa el campo 'localizacion' en Firebase.");
+      if (lat == 0 && lng == 0) {
+        debugPrint(
+          "Alerta: el punto con ID $id se cargo como (0,0). Revisa localizacion en Firebase.",
+        );
       }
     } catch (e) {
-      debugPrint("❌ [MODELO] Error parseando coordenadas en ID $id: $e");
+      debugPrint("Error parseando coordenadas en ID $id: $e");
     }
 
     return POIModel(
       id: id,
-      nombre: json['nombre'] ?? 'Sin nombre',
-      descripcion: json['descripción'] ?? json['descripcion'] ?? 'Sin descripción',
+      nombre: json[PointInterestFields.nombre]?.toString() ?? 'Sin nombre',
+      descripcion:
+          json[PointInterestFields.descripcion]?.toString() ??
+          json['descripci\u00F3n']?.toString() ??
+          'Sin descripcion',
       localizacion: LatLng(lat, lng),
-      qrCode: json['qr_code'] ?? '',
-      radioActivacion: (json['radio_activacion'] as num?)?.toInt() ?? 50,
+      qrCode: json[PointInterestFields.qrCode]?.toString() ?? '',
+      radioActivacion:
+          (json[PointInterestFields.radioActivacion] as num?)?.toInt() ?? 50,
     );
   }
 
-  // Método opcional para convertir el objeto de vuelta a un formato que Firebase entienda
   Map<String, dynamic> toFirestore() {
     return {
-      'nombre': nombre,
-      'descripción': descripcion,
-      'localizacion': GeoPoint(localizacion.latitude, localizacion.longitude),
-      'qr_code': qrCode,
-      'radio_activacion': radioActivacion,
+      PointInterestFields.nombre: nombre,
+      PointInterestFields.descripcion: descripcion,
+      PointInterestFields.localizacion: GeoPoint(
+        localizacion.latitude,
+        localizacion.longitude,
+      ),
+      PointInterestFields.qrCode: qrCode,
+      PointInterestFields.radioActivacion: radioActivacion,
     };
   }
 }

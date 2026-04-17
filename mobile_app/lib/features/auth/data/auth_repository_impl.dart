@@ -1,8 +1,8 @@
-// features/auth/data/repository/auth_repository_impl.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../domain/repository/auth_repository.dart';
 
+import '../../../core/constants/firestore_contract.dart';
+import '../domain/repository/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final FirebaseAuth firebaseAuth;
@@ -16,18 +16,16 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> login({required String email, required String password}) async {
     try {
-      UserCredential userCredential = await firebaseAuth.signInWithEmailAndPassword(
+      final userCredential = await firebaseAuth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
       if (userCredential.user != null) {
         await firestore
-            .collection('usuarios')
+            .collection(FirestoreCollections.usuarios)
             .doc(userCredential.user!.uid)
-            .update({
-          'ultimo_acceso': FieldValue.serverTimestamp(),
-        });
+            .update({UserFields.ultimoAcceso: FieldValue.serverTimestamp()});
       }
     } on FirebaseAuthException catch (e) {
       throw Exception(_mapError(e.code));
@@ -42,35 +40,37 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     try {
-      UserCredential userCredential = await firebaseAuth
-          .createUserWithEmailAndPassword(email: email, password: password);
+      final userCredential = await firebaseAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-      final String uid = userCredential.user!.uid;
+      final uid = userCredential.user!.uid;
 
-      await firestore.collection('usuarios').doc(uid).set({
-        'uid': uid,
-        'nombre': nombre,
-        'usuario': usuario,
-        'email': email,
-        'fecha_creacion': FieldValue.serverTimestamp(),
-        'ultimo_acceso': FieldValue.serverTimestamp(),
-        'puntos': 0,
-        'rutas_completadas': [],
-        'isAdmin': false,
+      await firestore.collection(FirestoreCollections.usuarios).doc(uid).set({
+        UserFields.uid: uid,
+        UserFields.nombre: nombre,
+        UserFields.usuario: usuario,
+        UserFields.email: email,
+        UserFields.fechaCreacion: FieldValue.serverTimestamp(),
+        UserFields.ultimoAcceso: FieldValue.serverTimestamp(),
+        UserFields.puntos: 0,
+        UserFields.rutasCompletadas: [],
+        UserFields.isAdmin: false,
       });
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
-        throw Exception("El correo electrónico ya está registrado.");
+        throw Exception("El correo electronico ya esta registrado.");
       }
       throw Exception(_mapError(e.code));
     }
   }
 
   @override
-  Future<void> recoverPassword(String email) async{
-    try{
+  Future<void> recoverPassword(String email) async {
+    try {
       await firebaseAuth.sendPasswordResetEmail(email: email);
-    } on FirebaseAuthException catch (e){
+    } on FirebaseAuthException catch (e) {
       throw Exception(_mapError(e.code));
     }
   }
@@ -80,16 +80,18 @@ class AuthRepositoryImpl implements AuthRepository {
     await firebaseAuth.signOut();
   }
 
-
   @override
   Future<bool> isAdmin(String uid) async {
-    try{
-      final doc = await firestore.collection('usuarios').doc(uid).get();
-      if(doc.exists){
-        return doc.data()?['isAdmin'] ?? false;
+    try {
+      final doc = await firestore
+          .collection(FirestoreCollections.usuarios)
+          .doc(uid)
+          .get();
+      if (doc.exists) {
+        return doc.data()?[UserFields.isAdmin] == true;
       }
       return false;
-    } catch (e){
+    } catch (e) {
       throw Exception("Error al verificar rol de administrador");
     }
   }
@@ -97,21 +99,19 @@ class AuthRepositoryImpl implements AuthRepository {
   String _mapError(String code) {
     switch (code) {
       case 'user-not-found':
-        return "El correo no está registrado.";
+        return "El correo no esta registrado.";
       case 'wrong-password':
-        return "La contraseña es incorrecta.";
+        return "La contrasena es incorrecta.";
       case 'invalid-email':
-        return "El formato del email no es válido.";
+        return "El formato del email no es valido.";
       case 'user-disabled':
         return "Este usuario ha sido deshabilitado.";
       case 'email-already-in-use':
-        return "Este correo ya está registrado.";
+        return "Este correo ya esta registrado.";
       case 'weak-password':
-        return "La contraseña es muy corta.";
+        return "La contrasena es muy corta.";
       default:
-        return "Error de autenticación. Inténtalo de nuevo.";
+        return "Error de autenticacion. Intentalo de nuevo.";
     }
   }
-
-
 }

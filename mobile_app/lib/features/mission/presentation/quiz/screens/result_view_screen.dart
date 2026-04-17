@@ -30,7 +30,7 @@ class ResultViewScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  "Correo Electronico",
+                  "Correo Electrónico",
                   style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                 ),
               ],

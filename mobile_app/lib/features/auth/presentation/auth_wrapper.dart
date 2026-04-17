@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:mobile_app/features/auth/domain/usescases/auth_use_cases.dart';
+import 'package:mobile_app/features/auth/domain/usecases/auth_use_cases.dart';
 import 'package:mobile_app/features/splash/presentation/splash_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -12,7 +12,7 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authUseCases = Provider.of<AuthUsesCases>(context, listen: false);
+    final authUseCases = Provider.of<AuthUseCases>(context, listen: false);
 
     return StreamBuilder<User?>(
       stream: authUseCases.authStateChanges,

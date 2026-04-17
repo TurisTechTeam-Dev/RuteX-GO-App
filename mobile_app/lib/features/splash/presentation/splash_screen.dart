@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb; // Necesario para kIsWeb
 import 'package:provider/provider.dart'; // Necesario para leer el UseCase
 import 'package:mobile_app/core/constants/app_colors.dart';
-import '../../auth/domain/usescases/auth_use_cases.dart'; // Ajusta la ruta si es necesario
+import '../../auth/domain/usecases/auth_use_cases.dart'; // Ajusta la ruta si es necesario
 import '../../../core/routes/app_routes.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -23,7 +23,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   // Convertimos a async para poder usar await con checkAdminStatus
   Future<void> _checkSession() async {
-    final authUseCases = Provider.of<AuthUsesCases>(context, listen: false);
+    final authUseCases = Provider.of<AuthUseCases>(context, listen: false);
 
     // Timer de 3 segundos para mostrar la marca
     Timer(const Duration(seconds: 3), () async {

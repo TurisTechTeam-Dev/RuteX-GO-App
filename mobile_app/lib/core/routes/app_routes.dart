@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 // Pantallas
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
-import '../../features/mission/domain/usescases/mission_uses_cases.dart';
+import '../../features/mission/domain/usecases/mission_use_cases.dart';
 import '../../features/mission/presentation/navigation/provider/trip_provider.dart';
 import '../../features/mission/presentation/navigation/screens/map_navigation_screen.dart';
 import '../../features/mission/presentation/qr_scanner/screens/mission_scanner_screen.dart';
@@ -14,7 +14,7 @@ import '../../features/mission/presentation/quiz/screens/route_result_screen.dar
 import '../../features/profile/presentation/home_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/routes/data/routes_repository_impl.dart';
-import '../../features/routes/domain/usescases/routes_uses_cases.dart';
+import '../../features/routes/domain/usecases/routes_use_cases.dart';
 import '../../features/routes/presentation/city_selection_screen.dart';
 import '../../features/routes/presentation/route_selection_screen.dart';
 import '../../features/admin_panel/presentation/admin_panel_screen.dart';
@@ -34,10 +34,9 @@ class AppRoutes {
   static const String adminPanel = '/admin_panel';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
-    final routesUseCase = RoutesUsesCases(RoutesRepositoryImpl());
+    final routesUseCases = RoutesUseCases(RoutesRepositoryImpl());
 
     switch (settings.name) {
-
       case mapNavigation:
         final String routeId = settings.arguments as String? ?? '';
 
@@ -56,14 +55,14 @@ class AppRoutes {
 
       case citySelection:
         return MaterialPageRoute(
-          builder: (_) => CitySelectionScreen(routesUsesCases: routesUseCase),
+          builder: (_) => CitySelectionScreen(routesUseCases: routesUseCases),
         );
 
       case routeSelection:
         final String idCiudad = settings.arguments as String? ?? '';
         return MaterialPageRoute(
           builder: (_) => RouteSelectionScreen(
-            routesUsesCases: routesUseCase,
+            routesUseCases: routesUseCases,
             idCiudad: idCiudad,
           ),
         );
@@ -81,7 +80,15 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const ProfileScreen());
 
       case missionQrScanner:
-        return MaterialPageRoute(builder: (_) => const MisionScannerScreen());
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => MissionScannerScreen(
+            routeId: args?['routeId']?.toString(),
+            totalPois: _asInt(args?['totalPois']),
+            expectedPointId: args?['expectedPointId']?.toString(),
+            expectedPointName: args?['expectedPointName']?.toString(),
+          ),
+        );
 
       case monumentInfo:
         final data = settings.arguments as Map<String, dynamic>;
@@ -99,11 +106,17 @@ class AppRoutes {
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(
-            body: Center(
-              child: Text('Ruta no definida: ${settings.name}'),
-            ),
+            body: Center(child: Text('Ruta no definida: ${settings.name}')),
           ),
         );
     }
+  }
+
+  static int? _asInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value);
+
+    return null;
   }
 }

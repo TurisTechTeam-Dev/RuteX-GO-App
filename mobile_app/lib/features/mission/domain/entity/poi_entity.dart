@@ -1,6 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart'; // 👈 IMPORTANTE: Necesitas esto para el GeoPoint
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:latlong2/latlong.dart';
+
+import '../../../../core/constants/firestore_contract.dart';
 
 class PointOfInterest {
   final String id;
@@ -20,29 +22,31 @@ class PointOfInterest {
   });
 
   factory PointOfInterest.fromFirestore(Map<String, dynamic> data, String id) {
-    // 1. Extraer el GeoPoint de Firebase (el campo se llama 'localizacion' en tu captura)
-    final dynamic locData = data['localizacion'];
+    final locData = data[PointInterestFields.localizacion];
 
-    double lat = 0.0;
-    double lng = 0.0;
+    double lat = 0;
+    double lng = 0;
 
-    // 2. Traducción correcta del GeoPoint a LatLng
     if (locData is GeoPoint) {
       lat = locData.latitude;
       lng = locData.longitude;
     } else {
-      // Log de aviso por si algún punto en Firebase está mal creado
-      debugPrint("⚠️ Alerta: El POI con ID $id no tiene un GeoPoint válido en Firebase.");
+      debugPrint(
+        "Alerta: el POI con ID $id no tiene un GeoPoint valido en Firebase.",
+      );
     }
 
     return PointOfInterest(
       id: id,
-      // Usamos los nombres exactos que vimos en tu captura de imagen
-      nombre: data['nombre'] ?? 'Sin nombre',
-      descripcion: data['descripción'] ?? data['descripcion'] ?? '', // Con y sin tilde por seguridad
-      qrCode: data['qr_code'] ?? '', // En Firebase es qr_code, no codigoQR
+      nombre: data[PointInterestFields.nombre]?.toString() ?? 'Sin nombre',
+      descripcion:
+          data[PointInterestFields.descripcion]?.toString() ??
+          data['descripci\u00F3n']?.toString() ??
+          '',
+      qrCode: data[PointInterestFields.qrCode]?.toString() ?? '',
       localizacion: LatLng(lat, lng),
-      radioActivacion: (data['radio_activacion'] ?? 40).toInt(),
+      radioActivacion:
+          (data[PointInterestFields.radioActivacion] as num?)?.toInt() ?? 40,
     );
   }
 }

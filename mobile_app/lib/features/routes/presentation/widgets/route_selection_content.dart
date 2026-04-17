@@ -4,17 +4,17 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/backgrounds/extremadura_map_background.dart';
 import '../../../../core/widgets/titles/stroke_title.dart';
-import '../../domain/usescases/routes_uses_cases.dart';
+import '../../domain/usecases/routes_use_cases.dart';
 import '../models/route_item.dart';
 import 'route_card.dart';
 
 class RouteSelectionContent extends StatelessWidget {
-  final RoutesUsesCases routesUsesCases;
+  final RoutesUseCases routesUseCases;
   final String cityId;
 
   const RouteSelectionContent({
     super.key,
-    required this.routesUsesCases,
+    required this.routesUseCases,
     required this.cityId,
   });
 
@@ -32,7 +32,7 @@ class RouteSelectionContent extends StatelessWidget {
               const SizedBox(height: 20),
               Expanded(
                 child: _RouteList(
-                  routesUsesCases: routesUsesCases,
+                  routesUseCases: routesUseCases,
                   cityId: cityId,
                 ),
               ),
@@ -45,15 +45,15 @@ class RouteSelectionContent extends StatelessWidget {
 }
 
 class _RouteList extends StatelessWidget {
-  final RoutesUsesCases routesUsesCases;
+  final RoutesUseCases routesUseCases;
   final String cityId;
 
-  const _RouteList({required this.routesUsesCases, required this.cityId});
+  const _RouteList({required this.routesUseCases, required this.cityId});
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: routesUsesCases.executeGetRutasByCiudad(cityId),
+      stream: routesUseCases.executeGetRutasByCiudad(cityId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());

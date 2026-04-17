@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'core/routes/app_routes.dart';
 import 'features/auth/data/auth_repository_impl.dart';
-import 'features/auth/domain/usescases/auth_use_cases.dart';
+import 'features/auth/domain/usecases/auth_use_cases.dart';
 import 'features/auth/presentation/auth_wrapper.dart';
 import 'features/mission/data/repository/mission_repository_impl.dart';
-import 'features/mission/domain/usescases/mission_uses_cases.dart';
+import 'features/mission/domain/usecases/mission_use_cases.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -18,19 +18,19 @@ void main() async {
   // 1. Inicializamos Repositorios
   final missionRepo = MissionRepositoryImpl();
   final authRepo = AuthRepositoryImpl(
-      FirebaseAuth.instance,
-      FirebaseFirestore.instance
+    FirebaseAuth.instance,
+    FirebaseFirestore.instance,
   );
 
   // 2. Inicializamos UseCases
   final missionUseCases = MissionUseCases(missionRepo);
-  final authUseCases = AuthUsesCases(authRepo);
+  final authUseCases = AuthUseCases(authRepo);
 
   runApp(
     MultiProvider(
       providers: [
         Provider<MissionUseCases>.value(value: missionUseCases),
-        Provider<AuthUsesCases>.value(value: authUseCases),
+        Provider<AuthUseCases>.value(value: authUseCases),
       ],
       child: const RutexApp(),
     ),

@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+import '../../../core/constants/firestore_contract.dart';
 import '../domain/repository/routes_repository.dart';
 
 class RoutesRepositoryImpl implements RoutesRepository {
@@ -6,15 +8,14 @@ class RoutesRepositoryImpl implements RoutesRepository {
 
   @override
   Stream<QuerySnapshot> getCiudades() {
-    // Escucha la colección ciudades
-    return _db.collection('ciudades').snapshots();
+    return _db.collection(FirestoreCollections.ciudades).snapshots();
   }
 
   @override
   Stream<QuerySnapshot> getRutasByCiudad(String idCiudad) {
-    // Filtra las rutas cuyo campo 'id_ciudad' coincida con la seleccionada
-    return _db.collection('rutas')
-        .where('id_ciudad', isEqualTo: idCiudad)
+    return _db
+        .collection(FirestoreCollections.rutas)
+        .where(RouteFields.idCiudad, isEqualTo: idCiudad)
         .snapshots();
   }
 }

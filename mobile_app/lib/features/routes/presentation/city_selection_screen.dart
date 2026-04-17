@@ -2,20 +2,20 @@ import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/bars/top_app_bar.dart';
-import '../domain/usescases/routes_uses_cases.dart';
+import '../domain/usecases/routes_use_cases.dart';
 import 'widgets/city_selection_content.dart';
 
 class CitySelectionScreen extends StatelessWidget {
-  final RoutesUsesCases routesUsesCases;
+  final RoutesUseCases routesUseCases;
 
-  const CitySelectionScreen({super.key, required this.routesUsesCases});
+  const CitySelectionScreen({super.key, required this.routesUseCases});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const TopAppBar(showBack: true),
       endDrawer: const CustomDrawer(),
-      body: CitySelectionContent(routesUsesCases: routesUsesCases),
+      body: CitySelectionContent(routesUseCases: routesUseCases),
       bottomNavigationBar: Container(
         height: 60,
         decoration: const BoxDecoration(

@@ -9,7 +9,7 @@ import '../../../core/widgets/auth/auth_snack_bar.dart';
 import '../../../core/widgets/backgrounds/extremadura_map_background.dart';
 import '../../../core/widgets/buttons/custom_button.dart';
 import '../../../core/widgets/inputs/custom_inputs.dart';
-import '../domain/usescases/auth_use_cases.dart';
+import '../domain/usecases/auth_use_cases.dart';
 import 'auth_use_cases_factory.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -31,7 +31,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isLoading = false;
   bool _isButtonEnabled = false;
 
-  late final AuthUsesCases _authUseCases;
+  late final AuthUseCases _authUseCases;
 
   @override
   void initState() {

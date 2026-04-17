@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../../../core/constants/firestore_contract.dart';
+
 class CityItem {
   final String id;
   final String title;
@@ -19,9 +21,9 @@ class CityItem {
 
     return CityItem(
       id: doc.id,
-      title: data['nombre']?.toString() ?? '',
-      image: data['imagen']?.toString() ?? fallbackImage,
-      available: data['isActive'] == true,
+      title: data[CityFields.nombre]?.toString() ?? '',
+      image: data[CityFields.imagen]?.toString() ?? fallbackImage,
+      available: data[CityFields.isActive] == true,
     );
   }
 }

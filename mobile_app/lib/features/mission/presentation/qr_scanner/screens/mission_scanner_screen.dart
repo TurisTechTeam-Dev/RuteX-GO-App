@@ -5,20 +5,30 @@ import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/routes/app_routes.dart';
 import '../../../../../core/widgets/qr_scanner/scanner_widget.dart';
 import '../../../data/repository/mission_repository_impl.dart';
-import '../../../domain/usescases/mission_uses_cases.dart';
+import '../../../domain/usecases/mission_use_cases.dart';
+import '../../mission_flow_result.dart';
+import '../../quiz/quiz_route_progress.dart';
 import '../widgets/mission_scanner_overlay.dart';
 
-class MisionScannerScreen extends StatefulWidget {
+class MissionScannerScreen extends StatefulWidget {
   final String? routeId;
   final int? totalPois;
+  final String? expectedPointId;
+  final String? expectedPointName;
 
-  const MisionScannerScreen({super.key, this.routeId, this.totalPois});
+  const MissionScannerScreen({
+    super.key,
+    this.routeId,
+    this.totalPois,
+    this.expectedPointId,
+    this.expectedPointName,
+  });
 
   @override
-  State<MisionScannerScreen> createState() => _MisionScannerScreenState();
+  State<MissionScannerScreen> createState() => _MissionScannerScreenState();
 }
 
-class _MisionScannerScreenState extends State<MisionScannerScreen> {
+class _MissionScannerScreenState extends State<MissionScannerScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final MissionUseCases _useCases = MissionUseCases(MissionRepositoryImpl());
 
@@ -46,7 +56,40 @@ class _MisionScannerScreenState extends State<MisionScannerScreen> {
     final result = await _useCases.executeScan(code);
 
     if (result != null && mounted) {
-      Navigator.pushNamed(
+      final point = result['punto'];
+      final pointId = point is Map ? point['id']?.toString() : null;
+
+      if (widget.expectedPointId != null && pointId != widget.expectedPointId) {
+        final expectedName = widget.expectedPointName ?? 'este punto';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Este QR no pertenece a $expectedName"),
+            backgroundColor: AppColors.error,
+          ),
+        );
+
+        await _scannerController.start();
+        if (!mounted) return;
+        setState(() => _isProcessing = false);
+        return;
+      }
+
+      if (widget.routeId != null &&
+          QuizRouteProgress.hasVisitedPoint(pointId)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Este punto de interes ya esta completado"),
+            backgroundColor: AppColors.error,
+          ),
+        );
+
+        await _scannerController.start();
+        if (!mounted) return;
+        setState(() => _isProcessing = false);
+        return;
+      }
+
+      final resultFromMission = await Navigator.pushNamed(
         context,
         AppRoutes.monumentInfo,
         arguments: {
@@ -54,12 +97,19 @@ class _MisionScannerScreenState extends State<MisionScannerScreen> {
           if (widget.routeId != null) 'routeId': widget.routeId,
           if (widget.totalPois != null) 'totalPois': widget.totalPois,
         },
-      ).then((_) async {
-        await _scannerController.start();
-        if (mounted) {
-          setState(() => _isProcessing = false);
-        }
-      });
+      );
+
+      if (!mounted) return;
+
+      if (resultFromMission == MissionFlowResult.pointCompleted) {
+        Navigator.pop(context, MissionFlowResult.pointCompleted);
+        return;
+      }
+
+      await _scannerController.start();
+      if (mounted) {
+        setState(() => _isProcessing = false);
+      }
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

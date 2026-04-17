@@ -1,42 +1,43 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../../../core/constants/firestore_contract.dart';
 import '../../domain/entity/poi_entity.dart';
 import '../../domain/repository/mission_repository.dart';
 
 class MissionRepositoryImpl implements MissionRepository {
+  static const int _firestoreWhereInLimit = 10;
+
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   @override
   Future<Map<String, dynamic>?> getPuntoByQr(String qrCode) async {
     final snapshot = await _db
-        .collection('puntos_interes')
-        .where('qr_code', isEqualTo: qrCode)
+        .collection(FirestoreCollections.puntosInteres)
+        .where(PointInterestFields.qrCode, isEqualTo: qrCode)
         .limit(1)
         .get();
 
     if (snapshot.docs.isEmpty) return null;
 
     final data = snapshot.docs.first.data();
-
     data['id'] = snapshot.docs.first.id;
 
     return data;
   }
 
   @override
-  Future<Map<String, dynamic>?> getMisionByPuntoId(String puntoId) async {
+  Future<Map<String, dynamic>?> getMissionByPointId(String pointId) async {
     try {
       final snapshot = await _db
-          .collection('misiones')
-          .where('puntos_interes_id', isEqualTo: puntoId)
+          .collection(FirestoreCollections.misiones)
+          .where(MissionFields.puntosInteresId, isEqualTo: pointId)
           .limit(1)
           .get();
 
       if (snapshot.docs.isEmpty) return null;
 
       final data = snapshot.docs.first.data();
-
       data['id'] = snapshot.docs.first.id;
 
       return data;
@@ -48,39 +49,23 @@ class MissionRepositoryImpl implements MissionRepository {
   }
 
   @override
-  Future<void> saveMissionResult({
-    required String userId,
-    required String misionId,
-    required int puntosObtenidos,
-  }) async {
-    try {
-      await _db.collection('resultado').add({
-        'usuario_id': userId,
-        'mision_id': misionId,
-        'puntos': puntosObtenidos,
-        'fecha': FieldValue.serverTimestamp(),
-      });
-    } catch (e) {
-      debugPrint("Error al guardar: $e");
-    }
-  }
-
-  @override
   Future<List<String>> getRoutePointIds(String routeId) async {
-    final doc = await _db.collection('rutas').doc(routeId.trim()).get();
+    final doc = await _db
+        .collection(FirestoreCollections.rutas)
+        .doc(routeId.trim())
+        .get();
 
     if (!doc.exists) {
       debugPrint("ERROR: No existe la ruta con ID: '$routeId'");
       return [];
     }
 
-    final data = doc.data();
-    // Verificamos el nombre exacto del campo: id_puntos_interes
-    final dinamico = data?['id_puntos_interes'];
+    final routePointIds = doc.data()?[RouteFields.idPuntosInteres];
 
-    if (dinamico is List) {
-      return dinamico.map((e) => e.toString()).toList();
+    if (routePointIds is List) {
+      return routePointIds.map((e) => e.toString()).toList();
     }
+
     return [];
   }
 
@@ -90,15 +75,25 @@ class MissionRepositoryImpl implements MissionRepository {
 
     debugPrint("Buscando en puntos_interes estos IDs: $ids");
 
-    final snapshot = await _db
-        .collection('puntos_interes')
-        .where(FieldPath.documentId, whereIn: ids)
-        .get();
+    final pointsById = <String, PointOfInterest>{};
 
-    debugPrint("Encontrados en Firebase: ${snapshot.docs.length} puntos");
+    for (var i = 0; i < ids.length; i += _firestoreWhereInLimit) {
+      final chunk = ids.skip(i).take(_firestoreWhereInLimit).toList();
+      final snapshot = await _db
+          .collection(FirestoreCollections.puntosInteres)
+          .where(FieldPath.documentId, whereIn: chunk)
+          .get();
 
-    return snapshot.docs.map((doc) {
-      return PointOfInterest.fromFirestore(doc.data(), doc.id);
-    }).toList();
+      for (final doc in snapshot.docs) {
+        pointsById[doc.id] = PointOfInterest.fromFirestore(doc.data(), doc.id);
+      }
+    }
+
+    debugPrint("Encontrados en Firebase: ${pointsById.length} puntos");
+
+    return ids
+        .map((id) => pointsById[id])
+        .whereType<PointOfInterest>()
+        .toList();
   }
 }

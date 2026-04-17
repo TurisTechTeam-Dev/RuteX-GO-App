@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/constants/app_colors.dart';
-import '../../../../../core/routes/app_routes.dart';
+import '../../../../../core/constants/firestore_contract.dart';
+import '../../mission_flow_result.dart';
 import '../models/quiz_mission.dart';
 import '../quiz_route_progress.dart';
 import '../widgets/quiz_content.dart';
@@ -95,49 +95,40 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   Future<void> _finishQuiz() async {
-    QuizRouteProgress.addMissionPoints(_points);
+    final wasAdded = QuizRouteProgress.addMonumentResult(
+      pointId: _mission.pointId,
+      points: _points,
+    );
     setState(() => _isSaving = true);
 
     await Future.delayed(const Duration(milliseconds: 600));
 
     final targetMonuments = await _resolveTargetMonuments();
 
-    if (QuizRouteProgress.visitedMonuments < targetMonuments) {
+    if (!wasAdded) {
       if (!mounted) return;
 
-      Navigator.pushNamed(
-        context,
-        AppRoutes.missionQrScanner,
-        arguments: {'routeId': _routeId, 'totalPois': targetMonuments},
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Este punto de interes ya estaba completado"),
+          backgroundColor: AppColors.error,
+        ),
       );
+
+      Navigator.pop(context);
       return;
     }
 
-    final routeId = _routeId;
-    if (routeId != null && routeId.isNotEmpty) {
-      try {
-        await _markRouteAsCompleted(routeId, targetMonuments);
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("No se pudo guardar la ruta: $e"),
-              backgroundColor: AppColors.error,
-            ),
-          );
-        }
-      }
-    }
+    if (QuizRouteProgress.visitedMonuments < targetMonuments) {
+      if (!mounted) return;
 
-    QuizRouteProgress.reset();
+      Navigator.pop(context, MissionFlowResult.pointCompleted);
+      return;
+    }
 
     if (!mounted) return;
 
-    Navigator.pushNamedAndRemoveUntil(
-      context,
-      AppRoutes.home,
-      (route) => false,
-    );
+    Navigator.pop(context, MissionFlowResult.pointCompleted);
   }
 
   Future<int> _resolveTargetMonuments() async {
@@ -145,69 +136,16 @@ class _QuizScreenState extends State<QuizScreen> {
     if (routeId == null || routeId.isEmpty) return _mission.totalPois;
 
     final routeDoc = await FirebaseFirestore.instance
-        .collection('rutas')
+        .collection(FirestoreCollections.rutas)
         .doc(routeId)
         .get();
     final data = routeDoc.data();
-    final pointsOfInterest = data?['id_puntos_interes'];
+    final pointsOfInterest = data?[RouteFields.idPuntosInteres];
 
     if (pointsOfInterest is List && pointsOfInterest.isNotEmpty) {
       return pointsOfInterest.length;
     }
 
     return _mission.totalPois;
-  }
-
-  Future<void> _markRouteAsCompleted(
-    String routeId,
-    int visitedMonuments,
-  ) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    final userRef = FirebaseFirestore.instance
-        .collection('usuarios')
-        .doc(user.uid);
-
-    await FirebaseFirestore.instance.runTransaction((transaction) async {
-      final snapshot = await transaction.get(userRef);
-      final data = snapshot.data() ?? {};
-      final completedRoutes = List<dynamic>.from(
-        data['rutas_completadas'] ?? [],
-      );
-
-      final hasDetailedCompletion = completedRoutes.any((route) {
-        if (route is Map) {
-          final savedRouteId =
-              route['rutaId'] ?? route['id_ruta'] ?? route['routeId'];
-          return savedRouteId?.toString() == routeId;
-        }
-
-        return false;
-      });
-
-      if (hasDetailedCompletion) return;
-
-      final hasLegacyCompletion = completedRoutes.any(
-        (route) => route is String && route == routeId,
-      );
-
-      final updates = <String, dynamic>{
-        'rutas_completadas': FieldValue.arrayUnion([
-          {
-            'rutaId': routeId,
-            'puntos_obtenidos': QuizRouteProgress.routePoints,
-            'monumentos_visitados': visitedMonuments,
-            'misiones_completadas': visitedMonuments,
-          },
-        ]),
-      };
-
-      if (!hasLegacyCompletion) {
-        updates['puntos'] = FieldValue.increment(QuizRouteProgress.routePoints);
-      }
-
-      transaction.update(userRef, updates);
-    });
   }
 }

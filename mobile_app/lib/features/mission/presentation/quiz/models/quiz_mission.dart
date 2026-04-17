@@ -1,24 +1,27 @@
+import '../../../../../core/constants/firestore_contract.dart';
 import 'quiz_question.dart';
 
 class QuizMission {
   final String title;
   final List<QuizQuestion> questions;
   final String? routeId;
+  final String? pointId;
   final int totalPois;
 
   const QuizMission({
     required this.title,
     required this.questions,
     required this.routeId,
+    required this.pointId,
     required this.totalPois,
   });
 
   factory QuizMission.fromArgs(Map<String, dynamic> args) {
     final data = _extractMissionData(args);
-    final questions = data['preguntas'];
+    final questions = data[MissionFields.preguntas];
 
     return QuizMission(
-      title: data['titulo']?.toString() ?? "Mision",
+      title: data[MissionFields.titulo]?.toString() ?? "Mision",
       questions: questions is List
           ? questions
                 .whereType<Map>()
@@ -29,6 +32,7 @@ class QuizMission {
                 .toList()
           : const [],
       routeId: args['routeId']?.toString(),
+      pointId: args['pointId']?.toString(),
       totalPois: _resolveTotalPois(args['totalPois']),
     );
   }

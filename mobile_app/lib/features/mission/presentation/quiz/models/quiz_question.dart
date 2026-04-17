@@ -1,3 +1,5 @@
+import '../../../../../core/constants/firestore_contract.dart';
+
 class QuizQuestion {
   final String text;
   final List<String> answers;
@@ -17,15 +19,15 @@ class QuizQuestion {
         )
         .value
         .toString();
-    final answers = data['respuestas'];
+    final answers = data[MissionFields.respuestas];
 
     return QuizQuestion(
       text: questionText,
       answers: answers is List
           ? answers.map((answer) => answer.toString()).toList()
           : const [],
-      correctIndex: data['indice_correcto'] is int
-          ? data['indice_correcto'] as int
+      correctIndex: data[MissionFields.indiceCorrecto] is int
+          ? data[MissionFields.indiceCorrecto] as int
           : 0,
     );
   }

@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/bars/top_app_bar.dart';
-import '../domain/usescases/routes_uses_cases.dart';
+import '../domain/usecases/routes_use_cases.dart';
 import 'widgets/route_selection_content.dart';
 
 class RouteSelectionScreen extends StatelessWidget {
-  final RoutesUsesCases routesUsesCases;
+  final RoutesUseCases routesUseCases;
   final String idCiudad;
 
   const RouteSelectionScreen({
     super.key,
-    required this.routesUsesCases,
+    required this.routesUseCases,
     required this.idCiudad,
   });
 
@@ -21,7 +21,7 @@ class RouteSelectionScreen extends StatelessWidget {
       appBar: const TopAppBar(showBack: true),
       endDrawer: const CustomDrawer(),
       body: RouteSelectionContent(
-        routesUsesCases: routesUsesCases,
+        routesUseCases: routesUseCases,
         cityId: idCiudad,
       ),
       bottomNavigationBar: Container(

@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../repository/routes_repository.dart';
 
-class RoutesUsesCases {
+class RoutesUseCases {
   final RoutesRepository repository;
 
-  RoutesUsesCases(this.repository);
+  RoutesUseCases(this.repository);
 
   Stream<QuerySnapshot> executeGetCiudades() {
     return repository.getCiudades();

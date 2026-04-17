@@ -1,3 +1,4 @@
+import '../../../core/constants/firestore_contract.dart';
 import 'home_data.dart';
 
 class HomeSummary {
@@ -16,14 +17,17 @@ class HomeSummary {
   });
 
   factory HomeSummary.fromHomeData(HomeData data) {
-    final totalPoints = _sumRouteValue(data.routes, "puntos_obtenidos");
+    final totalPoints = _sumRouteValue(
+      data.routes,
+      CompletedRouteFields.puntosObtenidos,
+    );
 
     return HomeSummary(
       rankName: _rankName(totalPoints, data.rangos),
       completedRoutes: data.routes.length,
       completedMissions: _sumRouteValue(
         data.routes,
-        "misiones_completadas",
+        CompletedRouteFields.misionesCompletadas,
       ),
       totalMissions: _sumRouteValue(data.routes, "misiones_totales"),
       totalPoints: totalPoints,
@@ -37,10 +41,10 @@ class HomeSummary {
     for (final rank in ranks) {
       if (rank is! Map) continue;
 
-      final neededPoints = _asInt(rank['puntos_necesarios']);
+      final neededPoints = _asInt(rank[RankFields.puntosNecesarios]);
       if (points >= neededPoints && neededPoints > maxPoints) {
         maxPoints = neededPoints;
-        name = rank['nombre']?.toString() ?? name;
+        name = rank[RankFields.nombre]?.toString() ?? name;
       }
     }
 
@@ -52,8 +56,8 @@ class HomeSummary {
 
     for (final route in routes) {
       total += switch (key) {
-        "puntos_obtenidos" => route.obtainedPoints,
-        "misiones_completadas" => route.completedMissions,
+        CompletedRouteFields.puntosObtenidos => route.obtainedPoints,
+        CompletedRouteFields.misionesCompletadas => route.completedMissions,
         "misiones_totales" => route.totalMissions,
         _ => 0,
       };
@@ -62,11 +66,11 @@ class HomeSummary {
     return total;
   }
 
-  static int _asInt(dynamic value) {
+  static int _asInt(dynamic value, [int defaultValue = 0]) {
     if (value is int) return value;
     if (value is num) return value.toInt();
-    if (value is String) return int.tryParse(value) ?? 0;
+    if (value is String) return int.tryParse(value) ?? defaultValue;
 
-    return 0;
+    return defaultValue;
   }
 }

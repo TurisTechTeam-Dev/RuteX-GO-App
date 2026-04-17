@@ -4,6 +4,7 @@ import 'package:mobile_app/core/widgets/cards/custom_cards.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/routes/app_routes.dart';
 import '../../../../../core/widgets/bars/top_app_bar.dart';
+import '../../mission_flow_result.dart';
 
 class MonumentInfoScreen extends StatefulWidget {
   final Map<String, dynamic> data;
@@ -20,7 +21,7 @@ class _MonumentInfoScreenState extends State<MonumentInfoScreen> {
   @override
   Widget build(BuildContext context) {
     final punto = widget.data['punto'] ?? {};
-    final mision = widget.data['mision'] ?? {};
+    final mission = widget.data['mision'] ?? {};
     final routeId = widget.data['routeId']?.toString();
     final totalPois = widget.data['totalPois'];
 
@@ -144,16 +145,26 @@ class _MonumentInfoScreenState extends State<MonumentInfoScreen> {
                           borderRadius: BorderRadius.circular(15),
                         ),
                       ),
-                      onPressed: () {
-                        Navigator.pushNamed(
+                      onPressed: () async {
+                        final result = await Navigator.pushNamed(
                           context,
                           AppRoutes.quiz,
                           arguments: {
-                            'mision': mision,
+                            'mision': mission,
                             'routeId': ?routeId,
+                            'pointId': ?punto['id']?.toString(),
                             'totalPois': ?totalPois,
                           },
                         );
+
+                        if (!context.mounted) return;
+
+                        if (result == MissionFlowResult.pointCompleted) {
+                          Navigator.pop(
+                            context,
+                            MissionFlowResult.pointCompleted,
+                          );
+                        }
                       },
                       child: const Text(
                         "EMPEZAR MISIÓN",

@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:mobile_app/features/auth/domain/usescases/auth_use_cases.dart';
+import 'package:mobile_app/features/auth/domain/usecases/auth_use_cases.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/routes/app_routes.dart';
@@ -26,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  late final AuthUsesCases _authUseCases;
+  late final AuthUseCases _authUseCases;
 
   bool _isLoading = false;
 
@@ -102,7 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Correo de recuperacuión enviado."),
+            content: Text("Correo de recuperacion enviado."),
             backgroundColor: AppColors.exito,
           ),
         );
@@ -121,6 +121,14 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _openRegister() async {
+    await Navigator.pushNamed(context, AppRoutes.register);
+    if (!mounted) return;
+
+    _emailController.clear();
+    _passwordController.clear();
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -131,15 +139,18 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
 
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
           const ExtremaduraMapBackground(),
 
           SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            padding: EdgeInsets.only(bottom: keyboardInset + 24),
             child: Column(
               children: [
                 const SizedBox(height: 80),
@@ -230,10 +241,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ?.copyWith(fontWeight: FontWeight.w700),
                           ),
                           GestureDetector(
-                            onTap: () => Navigator.pushNamed(
-                              context,
-                              AppRoutes.register,
-                            ),
+                            onTap: _openRegister,
                             child: Text(
                               "Regístrate",
                               style: TextStyle(

@@ -1,13 +1,11 @@
-// features/auth/domain/usecases/auth_usecases.dart
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../repository/auth_repository.dart';
 
-
-class AuthUsesCases {
+class AuthUseCases {
   final AuthRepository repository;
 
-  AuthUsesCases(this.repository);
+  AuthUseCases(this.repository);
 
   Stream<User?> get authStateChanges => repository.authStateChanges;
 
@@ -37,7 +35,7 @@ class AuthUsesCases {
     return repository.logout();
   }
 
-  Future<bool> checkAdminStatus(String uid){
+  Future<bool> checkAdminStatus(String uid) {
     return repository.isAdmin(uid);
   }
 }

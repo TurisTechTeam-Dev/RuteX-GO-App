@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../../core/routes/app_routes.dart';
 import '../../../../../core/map/map_view.dart';
+import '../../../../../core/routes/app_routes.dart';
+import '../../mission_flow_result.dart';
+import '../../quiz/quiz_route_progress.dart';
 import '../provider/trip_provider.dart';
 
 class MapNavigationScreen extends StatefulWidget {
   final String routeId;
+
   const MapNavigationScreen({super.key, required this.routeId});
 
   @override
@@ -21,8 +24,8 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     final tripProvider = context.watch<TripSimulationProvider>();
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
 
-    // Control de apertura del diálogo de llegada
     if (tripProvider.hasReachedDestination &&
         !_isDialogOpen &&
         !tripProvider.allPoisCompleted) {
@@ -32,84 +35,91 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
       });
     }
 
-    return Scaffold(
-      backgroundColor: Colors.grey[100],
-      appBar: AppBar(
-        title: const Text(
-          "Ruta RutexGo",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+
+        final shouldLeave = await _confirmRouteExit(context);
+        if (!context.mounted || !shouldLeave) return;
+
+        QuizRouteProgress.reset();
+        Navigator.pop(context);
+      },
+      child: Scaffold(
+        backgroundColor: Colors.grey[100],
+        appBar: AppBar(
+          title: const Text(
+            "Ruta RutexGo",
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.white,
+          elevation: 1,
+          centerTitle: true,
         ),
-        backgroundColor: Colors.white,
-        elevation: 1,
-        centerTitle: true,
-      ),
-      body: Stack(
-        children: [
-          // Vista del mapa con datos dinámicos
-          MapView(
-            mapController: _mapController,
-            currentPosition: tripProvider.currentPosition,
-            routePoints: tripProvider.routePoints,
-            pointsOfInterest: tripProvider.pointsOfInterest,
-          ),
-
-          // Pantalla de carga inicial
-          if (tripProvider.isLoading)
-            Container(
-              color: Colors.white.withValues(alpha: 0.8),
-              child: const Center(
-                child: CircularProgressIndicator(color: Colors.green),
-              ),
+        body: Stack(
+          children: [
+            MapView(
+              mapController: _mapController,
+              currentPosition: tripProvider.currentPosition,
+              routePoints: tripProvider.routePoints,
+              pointsOfInterest: tripProvider.pointsOfInterest,
             ),
-
-          // Panel de información del próximo destino (por proximidad)
-          if (!tripProvider.isLoading && tripProvider.currentPoiIndex != -1)
+            if (tripProvider.isLoading)
+              Container(
+                color: Colors.white.withValues(alpha: 0.8),
+                child: const Center(
+                  child: CircularProgressIndicator(color: Colors.green),
+                ),
+              ),
+            if (!tripProvider.isLoading && tripProvider.currentPoiIndex != -1)
+              Positioned(
+                top: 15,
+                left: 15,
+                right: 15,
+                child: _buildDynamicInfoPanel(tripProvider),
+              ),
             Positioned(
-              top: 15,
-              left: 15,
-              right: 15,
-              child: _buildDynamicInfoPanel(tripProvider),
-            ),
-
-          // Botón de Simulación / Acción
-          Positioned(
-            bottom: 30,
-            left: 30,
-            right: 30,
-            child: ElevatedButton(
-              onPressed: tripProvider.isSimulating
-                  ? null
-                  : () => tripProvider.startSimulation(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor:
-                tripProvider.isSimulating ? Colors.grey : Colors.green,
-                padding: const EdgeInsets.symmetric(vertical: 18),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+              bottom: bottomPadding + 48,
+              left: 30,
+              right: 30,
+              child: ElevatedButton(
+                onPressed: tripProvider.isSimulating
+                    ? null
+                    : () => tripProvider.startSimulation(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: tripProvider.isSimulating
+                      ? Colors.grey
+                      : Colors.green,
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                 ),
-              ),
-              child: Text(
-                tripProvider.isSimulating
-                    ? "SIMULANDO RECORRIDO..."
-                    : "COMENZAR RUTA",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+                child: Text(
+                  tripProvider.isSimulating
+                      ? "SIMULANDO RECORRIDO..."
+                      : tripProvider.completedPoiIndices.isEmpty
+                      ? "COMENZAR RUTA"
+                      : "CONTINUAR RUTA",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildDynamicInfoPanel(TripSimulationProvider provider) {
-    // Si ya completamos todo, no mostramos el panel
     if (provider.allPoisCompleted) return const SizedBox.shrink();
 
     final nextPoi = provider.pointsOfInterest[provider.currentPoiIndex];
-    final double distance = provider.distanceToNextPoi;
+    final distance = provider.distanceToNextPoi;
 
     return Container(
       padding: const EdgeInsets.all(15),
@@ -153,56 +163,69 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
   }
 
   void _showArrivalBottomSheet(
-      BuildContext context,
-      TripSimulationProvider provider,
-      ) {
-    // Verificamos si, tras este punto, ya no quedan más en la bolsa de la DB
-    final bool isFinalTarget =
+    BuildContext context,
+    TripSimulationProvider provider,
+  ) {
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
+    final isFinalTarget =
         provider.completedPoiIndices.length + 1 >=
-            provider.pointsOfInterest.length;
+        provider.pointsOfInterest.length;
     final poi = provider.pointsOfInterest[provider.currentPoiIndex];
 
     showModalBottomSheet(
       context: context,
       isDismissible: false,
       enableDrag: false,
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * 0.72,
+      ),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
       ),
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(30),
+      builder: (sheetContext) => Container(
+        padding: EdgeInsets.fromLTRB(30, 30, 30, bottomPadding + 30),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              isFinalTarget ? "¡META ALCANZADA!" : "¡HAS LLEGADO!",
+              isFinalTarget ? "META ALCANZADA" : "HAS LLEGADO",
               style: const TextStyle(color: Colors.grey, letterSpacing: 1.2),
             ),
             const SizedBox(height: 8),
             Text(
               poi.nombre,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 25),
-
-            // BOTÓN: ESCANEAR QR (Ir al juego)
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () {
-                  setState(() => _isDialogOpen = false);
-                  Navigator.pop(context);
-                  Navigator.pushNamed(
+                onPressed: () async {
+                  Navigator.pop(sheetContext);
+
+                  final result = await Navigator.pushNamed(
                     context,
                     AppRoutes.missionQrScanner,
                     arguments: {
                       'routeId': widget.routeId,
+                      'totalPois': provider.pointsOfInterest.length,
+                      'expectedPointId': poi.id,
+                      'expectedPointName': poi.nombre,
                     },
                   );
+
+                  if (!context.mounted) return;
+
+                  if (result == MissionFlowResult.pointCompleted) {
+                    final completedRoute = provider.markCurrentPoiAsCompleted();
+                    if (completedRoute) {
+                      await _finishRoute(context, provider);
+                      return;
+                    }
+                  }
+
+                  setState(() => _isDialogOpen = false);
                 },
                 icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
                 label: const Text(
@@ -219,30 +242,19 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
               ),
             ),
             const SizedBox(height: 12),
-
-            // BOTÓN: SALTAR/FINALIZAR (Navegación Dinámica)
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(
-                onPressed: () {
-                  setState(() => _isDialogOpen = false);
-                  Navigator.pop(context);
+                onPressed: () async {
+                  Navigator.pop(sheetContext);
 
                   if (isFinalTarget) {
-                    debugPrint("🏁 [UI] Finalizando última parada de la ruta.");
                     provider.markCurrentPoiAsCompleted();
-                    Navigator.pushReplacementNamed(
-                      context,
-                      AppRoutes.routeResult,
-                      arguments: {
-                        'routeId': widget.routeId,
-                      },
-                    );
+                    setState(() => _isDialogOpen = false);
+                    await _finishRoute(context, provider);
                   } else {
-                    debugPrint(
-                      "⏭️ [UI] Saltando punto. Buscando siguiente por proximidad...",
-                    );
                     provider.markCurrentPoiAsCompleted();
+                    setState(() => _isDialogOpen = false);
                   }
                 },
                 style: OutlinedButton.styleFrom(
@@ -255,9 +267,7 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
                   ),
                 ),
                 child: Text(
-                  isFinalTarget
-                      ? "FINALIZAR RUTA"
-                      : "SALTAR E IR AL SIGUIENTE",
+                  isFinalTarget ? "FINALIZAR RUTA" : "SALTAR E IR AL SIGUIENTE",
                   style: TextStyle(
                     color: isFinalTarget ? Colors.red : Colors.black54,
                     fontWeight: FontWeight.bold,
@@ -269,5 +279,63 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _finishRoute(
+    BuildContext context,
+    TripSimulationProvider provider,
+  ) async {
+    late final RouteCompletionSummary summary;
+    try {
+      summary = await provider.finishRoute();
+    } catch (e) {
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("No se pudo guardar la ruta: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      setState(() => _isDialogOpen = false);
+      return;
+    }
+
+    if (!context.mounted) return;
+
+    Navigator.pushReplacementNamed(
+      context,
+      AppRoutes.routeResult,
+      arguments: {
+        'routeId': widget.routeId,
+        'puntuacion': summary.savedBestPoints,
+        'puntuacionIntento': summary.currentAttemptPoints,
+        'monumentos': summary.visitedPois,
+      },
+    );
+  }
+
+  Future<bool> _confirmRouteExit(BuildContext context) async {
+    final shouldLeave = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Salir de la ruta"),
+        content: const Text(
+          "Si sales ahora, el progreso de esta ruta se perdera.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Continuar ruta"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Salir"),
+          ),
+        ],
+      ),
+    );
+
+    return shouldLeave ?? false;
   }
 }

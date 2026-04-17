@@ -11,8 +11,10 @@ class RouteResultScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)?.settings.arguments as Map?;
     final score = args?['puntuacion']?.toString() ?? '--';
+    final attemptScore = args?['puntuacionIntento']?.toString();
     final monuments = args?['monumentos']?.toString() ?? '--';
     final time = args?['tiempo']?.toString() ?? '--';
+    final showAttemptScore = attemptScore != null && attemptScore != score;
 
     return Scaffold(
       appBar: const TopAppBar(showBack: false),
@@ -29,7 +31,9 @@ class RouteResultScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 20),
-                Text('Puntuacion: $score'),
+                Text('Puntuacion guardada: $score'),
+                if (showAttemptScore)
+                  Text('Puntuacion del intento: $attemptScore'),
                 Text('Monumentos Visitados: $monuments'),
                 Text('Tiempo Total: $time'),
                 const SizedBox(height: 30),

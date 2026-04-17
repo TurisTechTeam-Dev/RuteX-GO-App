@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/backgrounds/extremadura_map_background.dart';
 import '../../../../core/widgets/titles/stroke_title.dart';
-import '../../domain/usescases/routes_uses_cases.dart';
+import '../../domain/usecases/routes_use_cases.dart';
 import '../models/city_item.dart';
 import 'city_card.dart';
 
 class CitySelectionContent extends StatelessWidget {
-  final RoutesUsesCases routesUsesCases;
+  final RoutesUseCases routesUseCases;
 
-  const CitySelectionContent({super.key, required this.routesUsesCases});
+  const CitySelectionContent({super.key, required this.routesUseCases});
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +34,7 @@ class CitySelectionContent extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              Expanded(child: _CityGrid(routesUsesCases: routesUsesCases)),
+              Expanded(child: _CityGrid(routesUseCases: routesUseCases)),
             ],
           ),
         ),
@@ -44,14 +44,14 @@ class CitySelectionContent extends StatelessWidget {
 }
 
 class _CityGrid extends StatelessWidget {
-  final RoutesUsesCases routesUsesCases;
+  final RoutesUseCases routesUseCases;
 
-  const _CityGrid({required this.routesUsesCases});
+  const _CityGrid({required this.routesUseCases});
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: routesUsesCases.executeGetCiudades(),
+      stream: routesUseCases.executeGetCiudades(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -87,7 +87,7 @@ class _CityGrid extends StatelessWidget {
 
             return CityCard(
               city: city,
-              routesStream: routesUsesCases.executeGetRutasByCiudad(city.id),
+              routesStream: routesUseCases.executeGetRutasByCiudad(city.id),
             );
           },
         );
