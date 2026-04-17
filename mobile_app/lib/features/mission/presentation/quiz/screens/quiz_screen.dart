@@ -5,6 +5,7 @@ import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/firestore_contract.dart';
 import '../../mission_flow_result.dart';
 import '../models/quiz_mission.dart';
+import '../models/quiz_question.dart';
 import '../quiz_route_progress.dart';
 import '../widgets/quiz_content.dart';
 
@@ -24,6 +25,7 @@ class _QuizScreenState extends State<QuizScreen> {
   int? _selectedOption;
   int _points = 0;
   bool _isSaving = false;
+  final List<QuizAnswerResult> _answerResults = <QuizAnswerResult>[];
 
   String? get _routeId => _mission.routeId ?? QuizRouteProgress.activeRouteId;
 
@@ -78,8 +80,21 @@ class _QuizScreenState extends State<QuizScreen> {
 
   Future<void> _continueQuiz() async {
     final question = _mission.questions[_currentIndex];
+    final selectedIndex = _selectedOption!;
+    final correctIndex = question.correctIndex;
+    final isCorrect = selectedIndex == correctIndex;
 
-    if (_selectedOption == question.correctIndex) {
+    _answerResults.add(
+      QuizAnswerResult(
+        monumentName: _mission.pointName,
+        question: question.text,
+        selectedAnswer: _answerAt(question, selectedIndex),
+        correctAnswer: _answerAt(question, correctIndex),
+        isCorrect: isCorrect,
+      ),
+    );
+
+    if (isCorrect) {
       _points += 10;
     }
 
@@ -98,6 +113,7 @@ class _QuizScreenState extends State<QuizScreen> {
     final wasAdded = QuizRouteProgress.addMonumentResult(
       pointId: _mission.pointId,
       points: _points,
+      answers: _answerResults,
     );
     setState(() => _isSaving = true);
 
@@ -129,6 +145,12 @@ class _QuizScreenState extends State<QuizScreen> {
     if (!mounted) return;
 
     Navigator.pop(context, MissionFlowResult.pointCompleted);
+  }
+
+  String _answerAt(QuizQuestion question, int index) {
+    if (index < 0 || index >= question.answers.length) return 'Sin respuesta';
+
+    return question.answers[index];
   }
 
   Future<int> _resolveTargetMonuments() async {

@@ -68,6 +68,7 @@ class CompletedRouteFields {
   static const puntos = 'puntos';
   static const monumentosVisitados = 'monumentos_visitados';
   static const misionesCompletadas = 'misiones_completadas';
+  static const puntosInteresSaltados = 'puntos_interes_saltados';
 }
 
 class ResultFields {

@@ -6,6 +6,7 @@ class QuizMission {
   final List<QuizQuestion> questions;
   final String? routeId;
   final String? pointId;
+  final String pointName;
   final int totalPois;
 
   const QuizMission({
@@ -13,6 +14,7 @@ class QuizMission {
     required this.questions,
     required this.routeId,
     required this.pointId,
+    required this.pointName,
     required this.totalPois,
   });
 
@@ -33,6 +35,7 @@ class QuizMission {
           : const [],
       routeId: args['routeId']?.toString(),
       pointId: args['pointId']?.toString(),
+      pointName: args['pointName']?.toString() ?? 'Punto de interes',
       totalPois: _resolveTotalPois(args['totalPois']),
     );
   }

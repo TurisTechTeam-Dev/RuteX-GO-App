@@ -311,8 +311,30 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
         'puntuacion': summary.savedBestPoints,
         'puntuacionIntento': summary.currentAttemptPoints,
         'monumentos': summary.visitedPois,
+        'misiones': summary.completedMissions,
+        'totalPois': summary.totalPois,
+        'puntosTotales': summary.totalPossiblePoints,
+        'routeName': summary.routeName,
+        'tiempo': _formatDuration(summary.elapsedTime),
+        'correctAnswers': summary.correctAnswers,
+        'totalAnswers': summary.totalAnswers,
+        'answerResults': summary.answerResults
+            .map((answer) => answer.toMap())
+            .toList(),
+        'skippedPois': summary.skippedPoiNames,
       },
     );
+  }
+
+  String _formatDuration(Duration duration) {
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    final seconds = duration.inSeconds.remainder(60);
+
+    if (hours > 0) return '${hours}h ${minutes}min';
+    if (minutes > 0) return '${minutes}min ${seconds}s';
+
+    return '${seconds}s';
   }
 
   Future<bool> _confirmRouteExit(BuildContext context) async {

@@ -206,6 +206,7 @@ misiones_completadas: number
 monumentos_visitados: number
 puntos_obtenidos: number
 rutaId: string
+puntos_interes_saltados: array<map>
 ```
 
 Uso en app:
@@ -227,6 +228,7 @@ Uso en app:
   - `misiones_completadas`
 - `TripSimulationProvider.finishRoute()` guarda el progreso final en `rutas_completadas`, tambien cuando algunos puntos se han saltado.
 - El bonus de 10 puntos solo se aplica si `misiones_completadas` coincide con el numero total de puntos de la ruta.
+- Si el usuario salta puntos de interes, se guardan en `puntos_interes_saltados` cuando ese intento queda como mejor resultado de la ruta.
 - Al finalizar ruta se incrementa `usuarios.puntos` solo por la diferencia positiva frente a la mejor puntuacion anterior.
 - Si la ruta ya estaba completada, se conserva la mejor puntuacion: una repeticion peor no sobrescribe el resultado anterior; una mejor si lo actualiza.
 
@@ -273,6 +275,22 @@ Riesgo detectado:
 9. Al completar cada punto de interes, el mapa marca ese punto como completado y recalcula el siguiente mas cercano.
 10. Al completar todos los puntos de la ruta, aunque algunos se hayan saltado, el mapa guarda en `usuarios.rutas_completadas` y actualiza `usuarios.puntos` como dato auxiliar.
 11. El bonus final se suma solo si se han completado los quiz de todos los puntos de interes.
+
+## Resultado de ruta en app
+
+Al finalizar una ruta, la pantalla de resultados recibe datos calculados en memoria durante el flujo:
+
+- nombre de ruta
+- puntuacion guardada
+- puntuacion del intento
+- puntos totales posibles
+- puntos de interes visitados
+- misiones completadas
+- tiempo empleado en la sesion actual
+- respuestas del quiz agrupables por punto de interes
+- puntos de interes saltados
+
+El tiempo se mide desde que se abre el mapa hasta que se finaliza la ruta. Cuando se integre Google Maps, esta medicion puede mantenerse como tiempo real de sesion o sustituirse por una estimacion de navegacion si se decide otro criterio.
 
 ## Checklist para nuevos workspaces
 

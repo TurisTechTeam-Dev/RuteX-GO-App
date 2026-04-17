@@ -153,6 +153,7 @@ class _MonumentInfoScreenState extends State<MonumentInfoScreen> {
                             'mision': mission,
                             'routeId': ?routeId,
                             'pointId': ?punto['id']?.toString(),
+                            'pointName': nombre.toString(),
                             'totalPois': ?totalPois,
                           },
                         );

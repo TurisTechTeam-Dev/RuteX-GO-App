@@ -14,11 +14,29 @@ class RouteCompletionSummary {
   final int currentAttemptPoints;
   final int savedBestPoints;
   final int visitedPois;
+  final int completedMissions;
+  final int totalPois;
+  final int totalPossiblePoints;
+  final int correctAnswers;
+  final int totalAnswers;
+  final String routeName;
+  final Duration elapsedTime;
+  final List<QuizAnswerResult> answerResults;
+  final List<String> skippedPoiNames;
 
   const RouteCompletionSummary({
     required this.currentAttemptPoints,
     required this.savedBestPoints,
     required this.visitedPois,
+    required this.completedMissions,
+    required this.totalPois,
+    required this.totalPossiblePoints,
+    required this.correctAnswers,
+    required this.totalAnswers,
+    required this.routeName,
+    required this.elapsedTime,
+    required this.answerResults,
+    required this.skippedPoiNames,
   });
 }
 
@@ -28,6 +46,7 @@ class TripSimulationProvider extends ChangeNotifier {
   final MissionUseCases missionUseCases;
   final String routeId;
   final RoutingService _routingService = RoutingService();
+  final DateTime _startedAt = DateTime.now();
 
   // --- ESTADO ---
   List<PointOfInterest> _pointsOfInterest = [];
@@ -305,10 +324,19 @@ class TripSimulationProvider extends ChangeNotifier {
         ? QuizRouteProgress.pointsWithCompletionBonus(_routeCompletionBonus)
         : QuizRouteProgress.routePoints;
     final visitedPois = _completedPoiIndices.length;
+    final skippedPois = _skippedPois();
     final savedBestPoints = await _saveBestRouteProgress(
       currentAttemptPoints: currentAttemptPoints,
       visitedPois: visitedPois,
+      skippedPois: skippedPois,
     );
+    final routeName = await _loadRouteName();
+    final answers = List<QuizAnswerResult>.from(
+      QuizRouteProgress.answerResults,
+    );
+    final correctAnswers = answers.where((answer) => answer.isCorrect).length;
+    final totalAnswers = answers.length;
+    final completedMissions = QuizRouteProgress.visitedMonuments;
 
     QuizRouteProgress.reset();
 
@@ -316,12 +344,38 @@ class TripSimulationProvider extends ChangeNotifier {
       currentAttemptPoints: currentAttemptPoints,
       savedBestPoints: savedBestPoints,
       visitedPois: visitedPois,
+      completedMissions: completedMissions,
+      totalPois: _pointsOfInterest.length,
+      totalPossiblePoints: (_pointsOfInterest.length * 30) + 10,
+      correctAnswers: correctAnswers,
+      totalAnswers: totalAnswers,
+      routeName: routeName,
+      elapsedTime: DateTime.now().difference(_startedAt),
+      answerResults: answers,
+      skippedPoiNames: skippedPois.map((poi) => poi.nombre).toList(),
     );
+  }
+
+  List<PointOfInterest> _skippedPois() {
+    return _completedPoiIndices
+        .map((index) => _pointsOfInterest[index])
+        .where((poi) => !QuizRouteProgress.visitedPointIds.contains(poi.id))
+        .toList();
+  }
+
+  Future<String> _loadRouteName() async {
+    final doc = await FirebaseFirestore.instance
+        .collection(FirestoreCollections.rutas)
+        .doc(routeId)
+        .get();
+
+    return doc.data()?[RouteFields.nombre]?.toString() ?? 'Ruta completada';
   }
 
   Future<int> _saveBestRouteProgress({
     required int currentAttemptPoints,
     required int visitedPois,
+    required List<PointOfInterest> skippedPois,
   }) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return currentAttemptPoints;
@@ -376,6 +430,9 @@ class TripSimulationProvider extends ChangeNotifier {
         CompletedRouteFields.monumentosVisitados: visitedPois,
         CompletedRouteFields.misionesCompletadas:
             QuizRouteProgress.visitedMonuments,
+        CompletedRouteFields.puntosInteresSaltados: skippedPois
+            .map((poi) => {'id': poi.id, 'nombre': poi.nombre})
+            .toList(),
       };
 
       if (existingIndex == -1) {

@@ -101,7 +101,10 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => QuizScreen(data: data));
 
       case routeResult:
-        return MaterialPageRoute(builder: (_) => const RouteResultScreen());
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const RouteResultScreen(),
+        );
 
       default:
         return MaterialPageRoute(
