@@ -23,7 +23,7 @@ class QuizMission {
     final questions = data[MissionFields.preguntas];
 
     return QuizMission(
-      title: data[MissionFields.titulo]?.toString() ?? "Mision",
+      title: data[MissionFields.titulo]?.toString() ?? "Misión",
       questions: questions is List
           ? questions
                 .whereType<Map>()
@@ -35,7 +35,7 @@ class QuizMission {
           : const [],
       routeId: args['routeId']?.toString(),
       pointId: args['pointId']?.toString(),
-      pointName: args['pointName']?.toString() ?? 'Punto de interes',
+      pointName: args['pointName']?.toString() ?? 'Punto de interés',
       totalPois: _resolveTotalPois(args['totalPois']),
     );
   }

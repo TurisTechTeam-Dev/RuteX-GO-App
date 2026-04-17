@@ -16,40 +16,32 @@ class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: AppColors.blancoPuro,
       elevation: 0,
       centerTitle: true,
-
-      // Flecha izquierda
       leading: showBack
           ? IconButton(
               icon: const Icon(Icons.arrow_back, color: AppColors.negroTexto),
               onPressed: () {
                 if (Navigator.of(context).canPop()) {
                   Navigator.of(context).pop();
-                } else {
-                  Navigator.of(
-                    context,
-                  ).pushNamedAndRemoveUntil(AppRoutes.home, (route) => false);
+                  return;
                 }
+
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil(AppRoutes.home, (route) => false);
               },
             )
           : null,
-
-      // Logo centro
       title: Image.asset("assets/Logo_Negro_Rutexgo.png", height: 28),
-
-      // Drawer derecha
       actions: [
         Builder(
           builder: (context) {
             return IconButton(
               icon: const Icon(Icons.menu, color: AppColors.negroTexto),
-              onPressed: () {
-                Scaffold.of(context).openEndDrawer();
-              },
+              onPressed: () => Scaffold.of(context).openEndDrawer(),
             );
           },
         ),
       ],
-
       bottom: const PreferredSize(
         preferredSize: Size.fromHeight(2),
         child: Divider(height: 1, thickness: 1, color: AppColors.negroTexto),
@@ -72,7 +64,6 @@ class CustomDrawer extends StatelessWidget {
         child: SafeArea(
           child: Column(
             children: [
-              // Header
               const DrawerHeader(
                 decoration: BoxDecoration(color: AppColors.verdePrincipal),
                 child: SizedBox(
@@ -91,14 +82,11 @@ class CustomDrawer extends StatelessWidget {
                   ),
                 ),
               ),
-
-              // Inicio
               ListTile(
                 leading: const Icon(Icons.home),
                 title: const Text('Inicio'),
                 onTap: () {
                   Navigator.pop(context);
-
                   Navigator.pushNamedAndRemoveUntil(
                     context,
                     AppRoutes.home,
@@ -111,7 +99,6 @@ class CustomDrawer extends StatelessWidget {
                 title: const Text('Perfil'),
                 onTap: () {
                   Navigator.pop(context);
-
                   Navigator.pushNamedAndRemoveUntil(
                     context,
                     AppRoutes.profile,
@@ -127,23 +114,16 @@ class CustomDrawer extends StatelessWidget {
                   _showInfoDialog(context);
                 },
               ),
-
               const Spacer(),
-
               const Divider(),
-
-              // Logout
               ListTile(
                 leading: const Icon(Icons.exit_to_app, color: Colors.red),
                 title: const Text(
                   'Cerrar sesión',
                   style: TextStyle(color: Colors.red),
                 ),
-                onTap: () {
-                  _showLogoutDialog(context);
-                },
+                onTap: () => _showLogoutDialog(context),
               ),
-
               const SizedBox(height: 10),
             ],
           ),
@@ -167,7 +147,6 @@ class CustomDrawer extends StatelessWidget {
               },
               child: const Text("Cancelar"),
             ),
-
             TextButton(
               onPressed: () async {
                 await FirebaseAuth.instance.signOut();
@@ -190,36 +169,51 @@ class CustomDrawer extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text("Como funciona RuteXGo"),
+          title: const Text("Cómo funciona RuteXGo"),
           content: const SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  "Elige una ciudad, selecciona una ruta y sigue el mapa hasta cada punto de interes.",
+                _InfoParagraph(
+                  bold: "Ruta: ",
+                  text:
+                      "elige una ciudad, selecciona una ruta y sigue el mapa hasta cada punto de interés.",
                 ),
                 SizedBox(height: 10),
-                Text(
-                  "Al llegar, escanea el QR del punto correcto. Se abrira una descripcion y despues la mision.",
+                _InfoParagraph(
+                  bold: "QR y misión: ",
+                  text:
+                      "al llegar, escanea el QR del punto correcto. Verás una descripción del monumento y después una misión con preguntas.",
                 ),
                 SizedBox(height: 10),
-                Text(
-                  "Cada pregunta acertada suma 10 puntos. Cada punto puede dar hasta 30 puntos.",
+                _InfoParagraph(
+                  bold: "Puntos: ",
+                  text:
+                      "cada pregunta acertada suma 10 puntos. Cada punto de interés puede dar hasta 30 puntos.",
                 ),
                 SizedBox(height: 10),
-                Text(
-                  "Si completas las misiones de todos los puntos de la ruta, recibes 10 puntos extra.",
+                _InfoParagraph(
+                  bold: "Bonificación: ",
+                  text:
+                      "si completas las misiones de todos los puntos de la ruta, recibes 10 puntos extra.",
                 ),
                 SizedBox(height: 10),
-                Text(
-                  "Puedes saltar un punto, pero esa mision quedara como no realizada y no contara para la bonificacion.",
+                _InfoParagraph(
+                  bold: "Saltos: ",
+                  text:
+                      "puedes saltar un punto, pero esa misión quedará como no realizada y no contará para la bonificación.",
                 ),
                 SizedBox(height: 10),
-                Text("Si repites una ruta, se conserva tu mejor puntuacion."),
+                _InfoParagraph(
+                  bold: "Mejor marca: ",
+                  text: "si repites una ruta, se conserva tu mejor puntuación.",
+                ),
                 SizedBox(height: 10),
-                Text(
-                  "Tu rango se calcula con los puntos reales obtenidos en tus rutas completadas.",
+                _InfoParagraph(
+                  bold: "Rango: ",
+                  text:
+                      "tu rango se calcula con los puntos reales obtenidos en tus rutas completadas.",
                 ),
               ],
             ),
@@ -232,6 +226,32 @@ class CustomDrawer extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+class _InfoParagraph extends StatelessWidget {
+  final String bold;
+  final String text;
+
+  const _InfoParagraph({required this.bold, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return RichText(
+      text: TextSpan(
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: AppColors.negroTexto,
+          height: 1.25,
+        ),
+        children: [
+          TextSpan(
+            text: bold,
+            style: const TextStyle(fontWeight: FontWeight.w800),
+          ),
+          TextSpan(text: text),
+        ],
+      ),
     );
   }
 }

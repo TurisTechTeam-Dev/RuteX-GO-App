@@ -64,10 +64,10 @@ class _ResultPanel extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 28),
-          _InfoRow(label: 'Puntuacion', value: result.scoreLabel),
+          _InfoRow(label: 'Puntuación', value: result.scoreLabel),
           if (result.hasDifferentAttemptScore)
             _InfoRow(
-              label: 'Puntuacion del intento',
+              label: 'Puntuación del intento',
               value: '${result.attemptScore}/${result.totalPossiblePoints}',
             ),
           _InfoRow(label: 'Monumentos visitados', value: result.monumentsLabel),
@@ -203,7 +203,7 @@ class _QuestionResultsSheet extends StatelessWidget {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Puntuacion total: ${result.correctAnswers}/${result.totalAnswers} respuestas',
+                    'Puntuación total: ${result.correctAnswers}/${result.totalAnswers} respuestas',
                     style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
                 ),
@@ -282,7 +282,7 @@ class _SkippedPoisGroup extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    '$poi: mision no realizada',
+                    '$poi: misión no realizada',
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
@@ -470,7 +470,7 @@ class _AnswerResultData {
 
   factory _AnswerResultData.fromMap(Map data) {
     return _AnswerResultData(
-      monumentName: data['monumentName']?.toString() ?? 'Punto de interes',
+      monumentName: data['monumentName']?.toString() ?? 'Punto de interés',
       question: data['question']?.toString() ?? '',
       selectedAnswer: data['selectedAnswer']?.toString() ?? '',
       correctAnswer: data['correctAnswer']?.toString() ?? '',

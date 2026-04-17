@@ -8,7 +8,7 @@ class AdminPanelScreen extends StatelessWidget {
     return const Scaffold(
       body: Center(
         child: Text(
-          "¡Bienvenido al Panel de RuteX-Go, Admin!",
+          "¡Bienvenido al panel de RuteX-Go, Admin!",
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),

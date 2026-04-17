@@ -62,7 +62,7 @@ class HomeUserCard extends StatelessWidget {
     final days = DateTime.now().difference(createdDate).inDays;
     if (days <= 0) return "Explorador desde hoy";
     if (days == 1) return "Explorador desde hace 1 dia";
-    if (days < 30) return "Explorador desde hace $days dias";
+    if (days < 30) return "Explorador desde hace $days días";
 
     final months = days ~/ 30;
     if (months == 1) return "Explorador desde hace 1 mes";

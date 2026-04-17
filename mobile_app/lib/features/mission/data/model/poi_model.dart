@@ -32,7 +32,7 @@ class POIModel extends PointOfInterest {
 
       if (lat == 0 && lng == 0) {
         debugPrint(
-          "Alerta: el punto con ID $id se cargo como (0,0). Revisa localizacion en Firebase.",
+          "Alerta: el punto con ID $id se cargó como (0,0). Revisa localización en Firebase.",
         );
       }
     } catch (e) {
@@ -45,7 +45,7 @@ class POIModel extends PointOfInterest {
       descripcion:
           json[PointInterestFields.descripcion]?.toString() ??
           json['descripci\u00F3n']?.toString() ??
-          'Sin descripcion',
+          'Sin descripción',
       localizacion: LatLng(lat, lng),
       qrCode: json[PointInterestFields.qrCode]?.toString() ?? '',
       radioActivacion:

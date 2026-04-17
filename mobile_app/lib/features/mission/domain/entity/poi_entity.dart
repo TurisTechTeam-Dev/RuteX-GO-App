@@ -32,7 +32,7 @@ class PointOfInterest {
       lng = locData.longitude;
     } else {
       debugPrint(
-        "Alerta: el POI con ID $id no tiene un GeoPoint valido en Firebase.",
+        "Alerta: el POI con ID $id no tiene un GeoPoint válido en Firebase.",
       );
     }
 

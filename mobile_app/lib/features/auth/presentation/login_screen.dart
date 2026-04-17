@@ -1,17 +1,17 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobile_app/features/auth/domain/usecases/auth_use_cases.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/routes/app_routes.dart';
+import '../../../core/utils/validadores.dart';
 import '../../../core/widgets/auth/auth_card.dart';
 import '../../../core/widgets/auth/auth_logo.dart';
 import '../../../core/widgets/auth/auth_snack_bar.dart';
 import '../../../core/widgets/backgrounds/extremadura_map_background.dart';
 import '../../../core/widgets/buttons/custom_button.dart';
 import '../../../core/widgets/inputs/custom_inputs.dart';
-import '../../../core/utils/validadores.dart';
 import 'auth_use_cases_factory.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -39,32 +39,25 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     try {
-      // 1. Logueamos
       await _authUseCases.login(
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
 
-      // 2. Esperamos un instante a que el estado se asiente y pillamos el user
       final user = FirebaseAuth.instance.currentUser;
 
       if (user != null) {
-        // 3. Comprobamos admin
-        final bool isAdmin = await _authUseCases.checkAdminStatus(user.uid);
+        final isAdmin = await _authUseCases.checkAdminStatus(user.uid);
 
-        // DEBUG: Esto os dirá la verdad en la consola de VS Code
         debugPrint(
           "VERIFICACIÓN: Web=$kIsWeb | Admin=$isAdmin | Email=${user.email}",
         );
 
         if (!mounted) return;
 
-        // 4. EL SEMÁFORO
         if (kIsWeb && isAdmin) {
           Navigator.pushReplacementNamed(context, AppRoutes.adminPanel);
         } else {
@@ -82,8 +75,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _recoverPassword() async {
-    final emailerror = Validadores.validarEmail(_emailController.text);
-    if (emailerror != null) {
+    final emailError = Validadores.validarEmail(_emailController.text);
+    if (emailError != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -102,7 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Correo de recuperacion enviado."),
+            content: Text("Correo de recuperación enviado."),
             backgroundColor: AppColors.exito,
           ),
         );
@@ -147,19 +140,14 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Stack(
         children: [
           const ExtremaduraMapBackground(),
-
           SingleChildScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: EdgeInsets.only(bottom: keyboardInset + 24),
             child: Column(
               children: [
                 const SizedBox(height: 80),
-                // LOGO
                 AuthLogo(height: size.height * 0.18),
-
                 const SizedBox(height: 20),
-
-                // TEXTO DESCRIPTIVO
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 40),
                   child: Text(
@@ -173,10 +161,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 20),
-
-                // CARD
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 35),
                   child: AuthCard(
@@ -192,7 +177,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               keyboardType: TextInputType.emailAddress,
                               validator: Validadores.validarEmail,
                             ),
-
                             CustomInput(
                               label: 'Contraseña',
                               hint: 'Introduce tu contraseña',
@@ -203,16 +187,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           ],
                         ),
                       ),
-
                       const SizedBox(height: 30),
-
-                      // BOTÓN INICIAR SESIÓN
                       CustomButton(
-                        text: _isLoading ? "CARGANDO..." : "Iniciar Sesión",
+                        text: _isLoading ? "CARGANDO..." : "Iniciar sesión",
                         onPressed: _isLoading ? null : _handleLogin,
                       ),
-
-                      // ENLACE CONTRASEÑA OLVIDADA
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
@@ -228,10 +207,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 14),
-
-                      // FOOTER REGISTRO
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -242,7 +218,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           GestureDetector(
                             onTap: _openRegister,
-                            child: Text(
+                            child: const Text(
                               "Regístrate",
                               style: TextStyle(
                                 color: AppColors.verdePrincipal,

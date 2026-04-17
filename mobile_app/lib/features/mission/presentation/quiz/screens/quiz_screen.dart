@@ -126,7 +126,7 @@ class _QuizScreenState extends State<QuizScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Este punto de interes ya estaba completado"),
+          content: Text("Este punto de interés ya estaba completado"),
           backgroundColor: AppColors.error,
         ),
       );

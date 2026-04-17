@@ -25,12 +25,12 @@ class ResultViewScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 const Text(
-                  "Nombre de Usuario",
+                  "Nombre de usuario",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  "Correo Electrónico",
+                  "Correo electrónico",
                   style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                 ),
               ],

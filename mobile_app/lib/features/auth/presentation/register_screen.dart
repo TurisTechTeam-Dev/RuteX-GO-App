@@ -38,7 +38,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.initState();
     _authUseCases = createAuthUseCases();
 
-    // Escuchar cambios para habilitar botón
     _usuarioController.addListener(_validateForm);
     _nombreController.addListener(_validateForm);
     _emailController.addListener(_validateForm);
@@ -117,20 +116,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
       body: Stack(
         children: [
           const ExtremaduraMapBackground(opacity: 0.3),
-
           SafeArea(
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
               child: Column(
                 children: [
                   const SizedBox(height: 20),
-
-                  // 2. LOGO
                   AuthLogo(height: size.height * 0.10),
-
                   const SizedBox(height: 10),
-
-                  // 3. CARD DE REGISTRO
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 30),
                     child: AuthCard(
@@ -169,9 +162,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 isPassword: true,
                                 validator: Validadores.validarPassword,
                               ),
-
                               CustomInput(
-                                label: 'Confirmar Contraseña',
+                                label: 'Confirmar contraseña',
                                 hint: 'Repite tu contraseña',
                                 controller: _confirmPasswordController,
                                 isPassword: true,
@@ -181,8 +173,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       _passwordController.text,
                                     ),
                               ),
-
-                              // CHECKBOX
                               Transform.translate(
                                 offset: const Offset(-8, 0),
                                 child: Row(
@@ -211,9 +201,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   ],
                                 ),
                               ),
-
                               const SizedBox(height: 10),
-
                               CustomButton(
                                 text: _isLoading
                                     ? "CARGANDO..."
@@ -222,17 +210,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     ? _handleRegister
                                     : null,
                               ),
-
                               const SizedBox(height: 16),
-
-                              // FOOTER
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   const Text("¿Ya tienes cuenta?  "),
                                   GestureDetector(
                                     onTap: () => Navigator.pop(context),
-                                    child: Text(
+                                    child: const Text(
                                       "Iniciar sesión",
                                       style: TextStyle(
                                         color: AppColors.verdePrincipal,

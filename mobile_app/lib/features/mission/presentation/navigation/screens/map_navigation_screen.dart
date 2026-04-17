@@ -343,7 +343,7 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
       builder: (context) => AlertDialog(
         title: const Text("Salir de la ruta"),
         content: const Text(
-          "Si sales ahora, el progreso de esta ruta se perdera.",
+          "Si sales ahora, el progreso de esta ruta se perderá.",
         ),
         actions: [
           TextButton(

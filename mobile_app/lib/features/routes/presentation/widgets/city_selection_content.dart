@@ -28,7 +28,7 @@ class CitySelectionContent extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 30),
                 child: Text(
-                  "Explora el patrimonio historico de Extremadura",
+                  "Explora el patrimonio histórico de Extremadura",
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),

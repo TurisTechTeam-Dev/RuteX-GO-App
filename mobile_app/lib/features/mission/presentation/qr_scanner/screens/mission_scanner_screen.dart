@@ -78,7 +78,7 @@ class _MissionScannerScreenState extends State<MissionScannerScreen> {
           QuizRouteProgress.hasVisitedPoint(pointId)) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Este punto de interes ya esta completado"),
+            content: Text("Este punto de interés ya está completado"),
             backgroundColor: AppColors.error,
           ),
         );

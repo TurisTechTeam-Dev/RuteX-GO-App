@@ -11,7 +11,7 @@ class Validadores {
       return 'El email es obligatorio';
     }
 
-    // Expresión regular para validar formato de email
+    // Expresión regular para validar formato de email.
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (!emailRegex.hasMatch(value)) {
       return 'El formato del email no es válido';

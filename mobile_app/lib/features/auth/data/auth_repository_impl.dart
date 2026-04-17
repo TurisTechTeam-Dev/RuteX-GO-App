@@ -60,7 +60,7 @@ class AuthRepositoryImpl implements AuthRepository {
       });
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
-        throw Exception("El correo electronico ya esta registrado.");
+        throw Exception("El correo electrónico ya está registrado.");
       }
       throw Exception(_mapError(e.code));
     }
@@ -99,19 +99,19 @@ class AuthRepositoryImpl implements AuthRepository {
   String _mapError(String code) {
     switch (code) {
       case 'user-not-found':
-        return "El correo no esta registrado.";
+        return "El correo no está registrado.";
       case 'wrong-password':
-        return "La contrasena es incorrecta.";
+        return "La contraseña es incorrecta.";
       case 'invalid-email':
-        return "El formato del email no es valido.";
+        return "El formato del email no es válido.";
       case 'user-disabled':
         return "Este usuario ha sido deshabilitado.";
       case 'email-already-in-use':
-        return "Este correo ya esta registrado.";
+        return "Este correo ya está registrado.";
       case 'weak-password':
-        return "La contrasena es muy corta.";
+        return "La contraseña es muy corta.";
       default:
-        return "Error de autenticacion. Intentalo de nuevo.";
+        return "Error de autenticación. Inténtalo de nuevo.";
     }
   }
 }
