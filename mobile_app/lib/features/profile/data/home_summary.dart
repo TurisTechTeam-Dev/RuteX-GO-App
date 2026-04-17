@@ -3,6 +3,7 @@ import 'home_data.dart';
 
 class HomeSummary {
   final String rankName;
+  final String rankLogo;
   final int completedRoutes;
   final int completedMissions;
   final int totalMissions;
@@ -10,6 +11,7 @@ class HomeSummary {
 
   const HomeSummary({
     required this.rankName,
+    required this.rankLogo,
     required this.completedRoutes,
     required this.completedMissions,
     required this.totalMissions,
@@ -21,9 +23,11 @@ class HomeSummary {
       data.routes,
       CompletedRouteFields.puntosObtenidos,
     );
+    final rank = _rankForPoints(totalPoints, data.rangos);
 
     return HomeSummary(
-      rankName: _rankName(totalPoints, data.rangos),
+      rankName: rank.name,
+      rankLogo: rank.logo,
       completedRoutes: data.routes.length,
       completedMissions: _sumRouteValue(
         data.routes,
@@ -34,8 +38,9 @@ class HomeSummary {
     );
   }
 
-  static String _rankName(int points, List<dynamic> ranks) {
+  static _RankSummary _rankForPoints(int points, List<dynamic> ranks) {
     String name = "Esclavo";
+    String logo = "";
     int maxPoints = -1;
 
     for (final rank in ranks) {
@@ -45,10 +50,11 @@ class HomeSummary {
       if (points >= neededPoints && neededPoints > maxPoints) {
         maxPoints = neededPoints;
         name = rank[RankFields.nombre]?.toString() ?? name;
+        logo = rank[RankFields.logo]?.toString() ?? logo;
       }
     }
 
-    return name;
+    return _RankSummary(name: name, logo: logo);
   }
 
   static int _sumRouteValue(List<HomeRouteData> routes, String key) {
@@ -73,4 +79,11 @@ class HomeSummary {
 
     return defaultValue;
   }
+}
+
+class _RankSummary {
+  final String name;
+  final String logo;
+
+  const _RankSummary({required this.name, required this.logo});
 }

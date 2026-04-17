@@ -1,20 +1,26 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/firestore_contract.dart';
 import '../../../../core/widgets/cards/custom_cards.dart';
 
 class HomeUserCard extends StatelessWidget {
   final Map<String, dynamic> userData;
   final String rankName;
+  final String rankLogo;
 
   const HomeUserCard({
     super.key,
     required this.userData,
     required this.rankName,
+    required this.rankLogo,
   });
 
   @override
   Widget build(BuildContext context) {
+    final explorerLabel = _explorerLabel(userData[UserFields.fechaCreacion]);
+
     return CustomCard(
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -36,19 +42,81 @@ class HomeUserCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 4),
-              const Text(
-                "Explorador novato",
-                style: TextStyle(color: AppColors.grisNeutro),
+              Text(
+                explorerLabel,
+                style: const TextStyle(color: AppColors.grisNeutro),
               ),
               const SizedBox(height: 4),
-              Text(
-                "Rango: $rankName",
-                style: const TextStyle(color: AppColors.verdePrincipal),
-              ),
+              _RankLine(rankName: rankName, rankLogo: rankLogo),
             ],
           ),
         ],
       ),
+    );
+  }
+
+  String _explorerLabel(dynamic createdAt) {
+    final createdDate = _dateFromFirestoreValue(createdAt);
+    if (createdDate == null) return "Explorador";
+
+    final days = DateTime.now().difference(createdDate).inDays;
+    if (days <= 0) return "Explorador desde hoy";
+    if (days == 1) return "Explorador desde hace 1 dia";
+    if (days < 30) return "Explorador desde hace $days dias";
+
+    final months = days ~/ 30;
+    if (months == 1) return "Explorador desde hace 1 mes";
+    return "Explorador desde hace $months meses";
+  }
+
+  DateTime? _dateFromFirestoreValue(dynamic value) {
+    if (value is Timestamp) return value.toDate();
+    if (value is DateTime) return value;
+
+    return null;
+  }
+}
+
+class _RankLine extends StatelessWidget {
+  final String rankName;
+  final String rankLogo;
+
+  const _RankLine({required this.rankName, required this.rankLogo});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Text(
+          "Rango: ",
+          style: TextStyle(color: AppColors.verdePrincipal),
+        ),
+        Text(
+          rankName,
+          style: const TextStyle(
+            color: AppColors.verdePrincipal,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        if (rankLogo.isNotEmpty) ...[
+          const SizedBox(width: 6),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: Image.network(
+              rankLogo,
+              width: 22,
+              height: 22,
+              fit: BoxFit.contain,
+              errorBuilder: (_, _, _) => const Icon(
+                Icons.emoji_events,
+                size: 20,
+                color: AppColors.verdePrincipal,
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

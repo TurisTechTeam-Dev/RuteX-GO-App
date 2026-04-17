@@ -33,6 +33,7 @@ class HomeContent extends StatelessWidget {
                     HomeUserCard(
                       userData: data.user,
                       rankName: summary.rankName,
+                      rankLogo: summary.rankLogo,
                     ),
                     const SizedBox(height: 20),
                     const StrokeTitle(text: "Estadísticas"),

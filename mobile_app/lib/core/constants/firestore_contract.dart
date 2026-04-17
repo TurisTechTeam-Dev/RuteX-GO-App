@@ -78,6 +78,7 @@ class ResultFields {
 
 class RankFields {
   static const rangos = 'rangos';
+  static const logo = 'logo';
   static const nombre = 'nombre';
   static const puntosNecesarios = 'puntos_necesarios';
 }

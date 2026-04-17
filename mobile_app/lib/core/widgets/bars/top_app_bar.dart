@@ -25,7 +25,9 @@ class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
                 if (Navigator.of(context).canPop()) {
                   Navigator.of(context).pop();
                 } else {
-                  Navigator.of(context).pushNamedAndRemoveUntil(AppRoutes.home, (route) => false);
+                  Navigator.of(
+                    context,
+                  ).pushNamedAndRemoveUntil(AppRoutes.home, (route) => false);
                 }
               },
             )
@@ -113,8 +115,16 @@ class CustomDrawer extends StatelessWidget {
                   Navigator.pushNamedAndRemoveUntil(
                     context,
                     AppRoutes.profile,
-                        (route) => false,
+                    (route) => false,
                   );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.info_outline),
+                title: const Text('Info'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showInfoDialog(context);
                 },
               ),
 
@@ -168,6 +178,56 @@ class CustomDrawer extends StatelessWidget {
                 }
               },
               child: const Text("Salir", style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showInfoDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Como funciona RuteXGo"),
+          content: const SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Elige una ciudad, selecciona una ruta y sigue el mapa hasta cada punto de interes.",
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "Al llegar, escanea el QR del punto correcto. Se abrira una descripcion y despues la mision.",
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "Cada pregunta acertada suma 10 puntos. Cada punto puede dar hasta 30 puntos.",
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "Si completas las misiones de todos los puntos de la ruta, recibes 10 puntos extra.",
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "Puedes saltar un punto, pero esa mision quedara como no realizada y no contara para la bonificacion.",
+                ),
+                SizedBox(height: 10),
+                Text("Si repites una ruta, se conserva tu mejor puntuacion."),
+                SizedBox(height: 10),
+                Text(
+                  "Tu rango se calcula con los puntos reales obtenidos en tus rutas completadas.",
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Entendido"),
             ),
           ],
         );

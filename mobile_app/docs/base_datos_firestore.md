@@ -235,8 +235,8 @@ Uso en app:
 Notas:
 
 - El codigo soporta variantes legacy para el ID de ruta: `rutaId`, `id_ruta` y `routeId`.
-- El Home muestra puntos globales calculados desde `rutas_completadas`, no desde `usuarios.puntos`.
-- `usuarios.puntos` puede quedar desincronizado si se editan rutas completadas a mano. Para la UI movil, la fuente fiable es `rutas_completadas`.
+- El Home muestra estadisticas de rutas calculadas desde `rutas_completadas`.
+- El rango del usuario tambien se calcula desde `rutas_completadas`, para que no pueda quedar desalineado si `usuarios.puntos` se modifica manualmente.
 
 ## `resultado`
 
@@ -299,6 +299,6 @@ El tiempo se mide desde que se abre el mapa hasta que se finaliza la ruta. Cuand
 - Mantener `qr_code` unico por punto de interes.
 - Mantener `puntos_interes_id` en `misiones`.
 - Revisar si `resultado` se va a usar o queda legacy.
-- Home usa la suma de `rutas_completadas[].puntos_obtenidos`; si se borra una ruta completada, sus puntos desaparecen del Home.
+- Home usa la suma de `rutas_completadas[].puntos_obtenidos` para estadisticas de rutas y rango visible.
 - El listado de rutas depende de `id_ciudad`, no de `isActive`.
 - El documento de rangos usado por Home esta hardcodeado: `3CpvEa6pk5fvifbr73jW`.
