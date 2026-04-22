@@ -12,11 +12,11 @@ class HomeDataLoader {
   Future<HomeData> load() async {
     final uid = FirebaseAuth.instance.currentUser!.uid;
     final firestore = FirebaseFirestore.instance;
-
-    final userDoc = await firestore
+    final userRef = firestore
         .collection(FirestoreCollections.usuarios)
-        .doc(uid)
-        .get();
+        .doc(uid);
+
+    final userDoc = await userRef.get();
 
     final userData = userDoc.data() ?? {};
 
@@ -40,6 +40,15 @@ class HomeDataLoader {
 
     final rutas = <HomeRouteData>[];
     final rutasDocs = await _loadRoutesByIds(firestore, rutasIds);
+    final validRouteIds = rutasDocs.map((doc) => doc.id).toSet();
+    final normalizedRoutesProgress = _filterValidRoutesProgress(
+      rutasProgreso,
+      validRouteIds,
+    );
+    final orphanedPoints = _sumRemovedRoutePoints(
+      rutasProgreso,
+      validRouteIds,
+    );
 
     for (final doc in rutasDocs) {
       final data = doc.data();
@@ -79,7 +88,25 @@ class HomeDataLoader {
       );
     }
 
-    return HomeData(user: userData, routes: rutas, rangos: rangos);
+    final normalizedUserData = Map<String, dynamic>.from(userData);
+    normalizedUserData[UserFields.rutasCompletadas] = normalizedRoutesProgress;
+
+    final hasOrphanedRoutes =
+        normalizedRoutesProgress.length != rutasProgreso.length;
+
+    if (orphanedPoints > 0 || hasOrphanedRoutes) {
+      final currentPoints = _asInt(userData[UserFields.puntos]);
+      final updatedPoints = (currentPoints - orphanedPoints).clamp(0, 1 << 31)
+          as int;
+      normalizedUserData[UserFields.puntos] = updatedPoints;
+
+      await userRef.update({
+        UserFields.rutasCompletadas: normalizedRoutesProgress,
+        UserFields.puntos: updatedPoints,
+      });
+    }
+
+    return HomeData(user: normalizedUserData, routes: rutas, rangos: rangos);
   }
 
   static Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>>
@@ -118,6 +145,39 @@ class HomeDataLoader {
     }
 
     return null;
+  }
+
+  static List<dynamic> _filterValidRoutesProgress(
+    List<dynamic> routesProgress,
+    Set<String> validRouteIds,
+  ) {
+    return routesProgress.where((progress) {
+      final routeId = _routeIdFromProgress(progress);
+      if (routeId == null || routeId.isEmpty) return false;
+      return validRouteIds.contains(routeId);
+    }).toList();
+  }
+
+  static int _sumRemovedRoutePoints(
+    List<dynamic> routesProgress,
+    Set<String> validRouteIds,
+  ) {
+    var total = 0;
+
+    for (final progress in routesProgress) {
+      final routeId = _routeIdFromProgress(progress);
+      if (routeId == null || routeId.isEmpty) continue;
+      if (validRouteIds.contains(routeId)) continue;
+
+      if (progress is Map) {
+        total += _asInt(
+          progress[CompletedRouteFields.puntosObtenidos] ??
+              progress[CompletedRouteFields.puntos],
+        );
+      }
+    }
+
+    return total;
   }
 
   static Map<String, dynamic> _progressMapForRoute(

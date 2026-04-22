@@ -1,226 +1,164 @@
-# Registro de cambios de refactor
+# REFACTOR Y CAMBIOS APLICADOS
 
-Este documento resume los cambios realizados en la rama `codex` para que otro workspace pueda revisar o replicar la misma reorganizacion.
+Este archivo resume solo lo que ya esta hecho en la app movil.
+La idea es que cualquier companero pueda abrirlo, entender el estado actual y saber donde tocar sin revisar todo el proyecto desde cero.
 
-## Estado de referencia
+## Validacion usada
 
-- Rama de trabajo: `codex`.
-- Commit ya creado: `d14badd Corrige problems en lib`.
-- Cambios posteriores al commit: refactor de `home`, refactor parcial de `auth` y refactor de seleccion de ciudad.
-- Validacion disponible: `git diff --check`.
-- No se pudo ejecutar `flutter analyze` ni `dart analyze` porque los comandos no estan disponibles en esta terminal.
-- En el refactor de rutas, `dart format lib\features\routes\presentation` se quedo colgado y se detuvo el proceso reciente de `dart`.
+- En este workspace no se esta usando `dart format` ni `flutter analyze` porque ambos comandos se quedan colgados.
+- La comprobacion ligera que se esta usando es `git diff --check` y revision manual de los archivos tocados.
 
-## Cambios ya incluidos en el commit `d14badd`
+## Estructura refactorizada
 
-### Archivos renombrados
+### Home / Perfil
 
-- `lib/core/widgets/Bars/toppAppBarr.dart` -> `lib/core/widgets/bars/top_app_bar.dart`
-  - Motivo: normalizar nombre de carpeta/archivo y eliminar el typo del nombre.
-- `lib/features/auth/presentation/auht_wrapper.dart` -> `lib/features/auth/presentation/auth_wrapper.dart`
-  - Motivo: corregir typo en `auth`.
-- `lib/features/FirebaseTestScreen.dart` -> `lib/features/firebase_test_screen.dart`
-  - Motivo: cumplir convencion `snake_case` en nombres de archivos Dart.
-- `lib/features/mission/presentation/quiz/screens/result_view_ screen.dart` -> `lib/features/mission/presentation/quiz/screens/result_view_screen.dart`
-  - Motivo: quitar espacio y formato incorrecto del nombre.
-
-### Archivos modificados
-
-- `lib/main.dart`
-  - Actualizado el import de `auth_wrapper.dart`.
-- `lib/core/map/map_view.dart`
-  - Migrado `withOpacity` a `withValues(alpha: ...)`.
-- `lib/features/mission/presentation/navigation/screens/map_navigation_screen.dart`
-  - Migrado `withOpacity` a `withValues(alpha: ...)`.
-- `lib/features/mission/data/repository/mission_repository_impl.dart`
-  - Reemplazado `print` por `debugPrint`.
-  - Eliminadas comprobaciones nulas innecesarias tras `doc.data()`.
-- `lib/features/mission/domain/entity/poi_entity.dart`
-  - Reemplazado `print` por `debugPrint`.
-- `lib/features/mission/data/model/poi_model.dart`
-  - Reemplazado import de `cupertino.dart` por `foundation.dart`.
-- `lib/features/mission/presentation/qr_scanner/screens/mission_scanner_screen.dart`
-  - Reemplazado `print` por `debugPrint`.
-  - Anadidos guards de `mounted` en callbacks async.
-- `lib/features/mission/presentation/quiz/screens/quiz_screen.dart`
-  - Quitado `.toList()` innecesario en un spread.
-- `lib/features/mission/presentation/monument_detail/screens/monument_info_screen.dart`
-  - Aplicados elementos null-aware en el map de argumentos: `'routeId': ?routeId`, `'totalPois': ?totalPois`.
-- `lib/features/routes/presentation/city_selection_screen.dart`
-  - Sustituidos parametros `_`, `__`, `___` en `errorBuilder`.
-- `lib/features/splash/presentation/splash_screen.dart`
-  - Anadido guard `mounted` tras `await` antes de navegar.
-- `lib/core/widgets/inputs/custom_inputs.dart`
-  - Renombrado `custom_input` a `CustomInput`.
-- `lib/features/auth/presentation/login_screen.dart`
-  - Actualizado uso de `CustomInput`.
-  - Eliminado campo `_errorMessage` no usado.
-  - Reemplazado `print` por `debugPrint`.
-- `lib/features/auth/presentation/register_screen.dart`
-  - Actualizado uso de `CustomInput`.
-  - Eliminado cast innecesario a `AuthRepository`.
-- `lib/features/admin_panel/presentation/admin_panel_screen.dart`
-  - Eliminados imports no usados.
-- `lib/features/profile/presentation/profile_screen.dart`
-  - Eliminados imports no usados y aplicado `const` donde procedia.
-
-## Refactor actual: Home
-
-### Archivos creados
-
-- `lib/features/profile/data/home_data_loader.dart`
-  - Extrae la carga de datos de Firestore/Auth que antes vivia en `home_screen.dart`.
-- `lib/features/profile/data/home_summary.dart`
-  - Extrae los calculos de rango, puntos y misiones.
-- `lib/features/profile/presentation/widgets/home_cards.dart`
-  - Extrae las cards visuales del home: usuario, estadisticas y ruta.
-- `lib/features/profile/presentation/widgets/home_content.dart`
-  - Extrae la composicion principal del cuerpo del home.
-- `lib/features/profile/presentation/widgets/home_route_list.dart`
-  - Extrae la lista de rutas completadas.
-- `lib/core/widgets/titles/stroke_title.dart`
-  - Mueve `StrokeTitle` a un widget compartido, usado por home y pantallas de rutas.
-
-### Archivos modificados
+Archivos principales:
 
 - `lib/features/profile/presentation/home_screen.dart`
-  - Queda como contenedor de estado: `Scaffold`, FAB, `FutureBuilder` y `HomeContent`.
-  - Baja de unas 500 lineas a unas 47 lineas.
+- `lib/features/profile/data/home_data_loader.dart`
 - `lib/features/profile/data/home_data.dart`
-  - Mantiene `HomeData`.
-  - Anade `HomeRouteData` para que la UI no consuma mapas crudos de rutas.
-- `lib/features/routes/presentation/city_selection_screen.dart`
-  - Importa `StrokeTitle` desde el nuevo widget compartido.
-- `lib/features/routes/presentation/route_selection_screen.dart`
-  - Importa `StrokeTitle` desde el nuevo widget compartido.
-
-## Refactor actual: Login y Registro
-
-### Archivos creados
-
-- `lib/features/auth/presentation/auth_use_cases_factory.dart`
-  - Centraliza la creacion de `AuthUsesCases` con `FirebaseAuth`, `FirebaseFirestore` y `AuthRepositoryImpl`.
-- `lib/core/widgets/auth/auth_logo.dart`
-  - Extrae el logo con `Hero(tag: 'logo')`; cada pantalla sigue pasando su misma altura.
-- `lib/core/widgets/auth/auth_snack_bar.dart`
-  - Helper simple para mostrar SnackBars de auth.
-
-### Archivos modificados
-
-- `lib/features/auth/presentation/login_screen.dart`
-  - Usa `createAuthUseCases()`.
-  - Usa `AuthLogo`.
-  - Usa `showAuthSnackBar` para el error de login.
-  - No se cambiaron rutas, validaciones, textos visibles ni layout.
-- `lib/features/auth/presentation/register_screen.dart`
-  - Usa `createAuthUseCases()`.
-  - Usa `AuthLogo`.
-  - Usa `showAuthSnackBar` para el error de registro.
-  - No se cambiaron rutas, validaciones, textos visibles ni layout.
-
-## Refactor actual: Seleccion de ciudad
-
-### Archivos creados
-
-- `lib/core/widgets/backgrounds/extremadura_map_background.dart`
-  - Extrae el fondo de mapa de Extremadura compartido por login, registro, home, perfil, seleccion de ciudad, seleccion de ruta y resultados.
-- `lib/features/routes/presentation/models/city_item.dart`
-  - Extrae el mapeo de documento Firestore a datos de presentacion de ciudad.
-- `lib/features/routes/presentation/widgets/city_selection_content.dart`
-  - Extrae cabecera, descripcion, estado de carga/error/vacio y grid de ciudades.
-- `lib/features/routes/presentation/widgets/city_card.dart`
-  - Extrae la card de ciudad desde `city_selection_screen.dart`.
-  - Contiene imagen, fallback icon, contador de rutas, boton explorar y titulo con stroke local.
-### Archivos modificados
-
-- `lib/features/auth/presentation/login_screen.dart`
-  - Usa `ExtremaduraMapBackground`.
-- `lib/features/auth/presentation/register_screen.dart`
-  - Usa `ExtremaduraMapBackground(opacity: 0.3)` para conservar su opacidad previa.
+- `lib/features/profile/data/home_summary.dart`
 - `lib/features/profile/presentation/widgets/home_content.dart`
-  - Usa `ExtremaduraMapBackground` y elimina el fondo privado de home.
-- `lib/features/profile/presentation/profile_screen.dart`
-  - Usa `ExtremaduraMapBackground`.
+- `lib/features/profile/presentation/widgets/home_cards.dart`
+- `lib/features/profile/presentation/widgets/home_route_list.dart`
+
+Que hace ahora:
+
+- `home_screen.dart` actua como contenedor simple.
+- `home_data_loader.dart` carga usuario, rangos y rutas completadas.
+- `home_summary.dart` calcula el resumen visible del home.
+- `home_cards.dart` contiene las cards de usuario, estadisticas y rutas.
+- `home_route_list.dart` pinta la lista de rutas completadas.
+
+Comportamiento actual:
+
+- El rango visible y `Puntos totales` salen de `usuarios.puntos`.
+- Las rutas completadas siguen leyendo sus datos resumidos desde `usuarios.rutas_completadas`.
+- Al pulsar una ruta completada en Home se abre un bottom sheet con el ultimo intento persistido, si existe.
+
+### Auth
+
+Archivos principales:
+
+- `lib/features/auth/presentation/login_screen.dart`
+- `lib/features/auth/presentation/register_screen.dart`
+- `lib/core/widgets/auth/auth_logo.dart`
+- `lib/core/widgets/auth/auth_snack_bar.dart`
+- `lib/core/widgets/inputs/custom_inputs.dart`
+
+Que hace ahora:
+
+- Login y registro usan fondo comun con mapa de Extremadura.
+- Se ajusto el comportamiento del teclado para evitar saltos raros del layout.
+- `CustomInput` tiene `scrollPadding` para mejorar el enfoque de campos.
+
+### Seleccion de ciudad y ruta
+
+Archivos principales:
+
 - `lib/features/routes/presentation/city_selection_screen.dart`
-  - Queda como contenedor de `Scaffold`, app bar, drawer, contenido y bottom bar.
-  - Usa `CitySelectionContent`.
-  - Mueve el `StreamBuilder` y la ordenacion de ciudades a `CitySelectionContent`.
-  - El fondo ahora incluye `color: AppColors.blancoPuro`, igual que home y seleccion de ruta.
-  - Se eliminaron imports y codigo de card que ya no pertenecen a la pantalla.
+- `lib/features/routes/presentation/widgets/city_selection_content.dart`
 - `lib/features/routes/presentation/widgets/city_card.dart`
-  - Ahora recibe `CityItem`.
-  - Ya no consulta `FirebaseFirestore.instance` directamente; recibe el stream de rutas desde `RoutesUsesCases`.
-
-## Refactor actual: Seleccion de ruta
-
-### Archivos creados
-
-- `lib/features/routes/presentation/models/route_item.dart`
-  - Extrae el mapeo de documento Firestore a datos de presentacion de ruta.
-  - Centraliza defaults de nombre, descripcion, dificultad, duracion, POIs e imagen.
-- `lib/features/routes/presentation/widgets/route_selection_content.dart`
-  - Extrae cabecera, estados de carga/error/vacio y lista de rutas.
-- `lib/features/routes/presentation/widgets/route_card.dart`
-  - Extrae la card visual de ruta, detalles e inicio de navegacion.
-
-### Archivos modificados
-
+- `lib/features/routes/presentation/models/city_item.dart`
 - `lib/features/routes/presentation/route_selection_screen.dart`
-  - Queda como contenedor de `Scaffold`, app bar, drawer, contenido y bottom bar.
-  - Usa `RouteSelectionContent`.
-  - Elimina helpers privados `_routeCard` e `_infoRow` de la pantalla.
+- `lib/features/routes/presentation/widgets/route_selection_content.dart`
+- `lib/features/routes/presentation/widgets/route_card.dart`
+- `lib/features/routes/presentation/models/route_item.dart`
 
-## Refactor actual: Quiz
+Que hace ahora:
 
-### Archivos creados
+- Las ciudades se ordenan primero por disponibilidad real de rutas y luego alfabeticamente.
+- Una ciudad puede mostrar `Explorar` si tiene rutas, aunque `isActive` no gobierne ese flujo.
+- Las rutas muestran `Tiempo estimado` y `Puntos totales`.
+- `Comenzar ruta` solo se habilita si todos los puntos de interes de esa ruta tienen mision asociada.
+- Si faltan misiones, la card lo explica visualmente y el boton queda como `Ruta no disponible`.
 
-- `lib/features/mission/presentation/quiz/models/quiz_question.dart`
-  - Extrae el parseo de pregunta, respuestas e indice correcto.
-- `lib/features/mission/presentation/quiz/models/quiz_mission.dart`
-  - Extrae el parseo de argumentos de quiz y datos de mision.
-- `lib/features/mission/presentation/quiz/quiz_route_progress.dart`
-  - Centraliza el progreso temporal de ruta: monumentos visitados, puntos y ruta activa.
-- `lib/features/mission/presentation/quiz/widgets/quiz_answer_option.dart`
-  - Extrae la opcion visual de respuesta.
-- `lib/features/mission/presentation/quiz/widgets/quiz_content.dart`
-  - Extrae progreso, pregunta, respuestas y boton de continuar.
+### Quiz, resultados y QR
 
-### Archivos modificados
+Archivos principales:
 
 - `lib/features/mission/presentation/quiz/screens/quiz_screen.dart`
-  - Queda centrado en estado, navegacion y guardado de finalizacion.
-  - Usa `QuizMission`, `QuizRouteProgress` y `QuizContent`.
-- `lib/features/mission/presentation/quiz/screens/result_view_screen.dart`
-  - Usa `ExtremaduraMapBackground`.
 - `lib/features/mission/presentation/quiz/screens/route_result_screen.dart`
-  - Usa `ExtremaduraMapBackground`.
-  - Normaliza imports relativos y textos sin caracteres corruptos.
-
-## Refactor actual: QR
-
-### Archivos creados
-
-- `lib/features/mission/presentation/qr_scanner/widgets/mission_scanner_overlay.dart`
-  - Extrae barra superior, linterna, slider de zoom y loader de procesamiento.
-
-### Archivos modificados
-
+- `lib/features/mission/presentation/quiz/quiz_route_progress.dart`
 - `lib/features/mission/presentation/qr_scanner/screens/mission_scanner_screen.dart`
-  - Queda centrado en controlador, scan, navegacion y estado de linterna/procesamiento.
-  - Usa `MissionScannerOverlay`.
-  - Normaliza el import de rutas a relativo.
+- `lib/features/mission/presentation/qr_scanner/widgets/mission_scanner_overlay.dart`
 
-## Notas para el siguiente workspace
+Que hace ahora:
 
-- Los cambios actuales posteriores a `d14badd` todavia no estan commiteados.
-- Si el siguiente workspace aplica estos cambios manualmente, conviene hacerlo en este orden:
-  1. Crear widgets compartidos (`StrokeTitle`, `AuthLogo`, `auth_snack_bar`).
-  2. Crear loaders/modelos de home (`HomeDataLoader`, `HomeSummary`, `HomeRouteData`).
-  3. Extraer widgets de home (`HomeContent`, `HomeRouteList`, `home_cards`).
-  4. Actualizar imports de rutas para usar `StrokeTitle`.
-  5. Extraer fondo comun `ExtremaduraMapBackground` y actualizar pantallas que usan el mapa.
-  6. Extraer `CityCard`, `CitySelectionContent`, `CityItem` y actualizar `CitySelectionScreen`.
-  7. Extraer `RouteCard`, `RouteSelectionContent` y `RouteItem`.
-  8. Extraer modelos/widgets de quiz y overlay de QR.
-  9. Actualizar login/registro para usar `createAuthUseCases` y `AuthLogo`.
-- Antes de mergear, ejecutar `flutter analyze` y una prueba visual de login, registro, home, perfil, seleccion de ciudad, seleccion de ruta, quiz, resultados y QR cuando el entorno lo permita.
+- `QuizRouteProgress` centraliza el progreso temporal de ruta.
+- La pantalla de resultados se reorganizo visualmente y limpia mejor respuestas con saltos raros.
+- La card principal de resultados deja ver el mapa de fondo.
+- El QR tiene mas cooldown para evitar disparos demasiado rapidos.
+
+### Fondo e imagenes compartidas
+
+Archivos principales:
+
+- `lib/core/widgets/backgrounds/extremadura_map_background.dart`
+- `lib/core/widgets/titles/stroke_title.dart`
+- `lib/core/widgets/images/storage_aware_image.dart`
+
+Que hace ahora:
+
+- `ExtremaduraMapBackground` se reutiliza en varias pantallas.
+- `StrokeTitle` ya no vive duplicado en distintas vistas.
+- `StorageAwareImage` unifica la carga de imagenes desde assets, `https://`, `gs://` o rutas internas tipo `Contenido/...`.
+
+## Firebase y persistencia
+
+### Imagenes en Firebase Storage
+
+Ya soportado en:
+
+- ciudades
+- rutas
+- punto de interes / detalle de monumento
+- logos de rangos
+
+Formato recomendado en Firestore:
+
+- `Contenido/Ciudades/badajoz.jpg`
+- `Contenido/Rutas/anfiteatro.jpg`
+- `Contenido/PuntosInteres/teatro_romano.jpg`
+- `Contenido/Rangos/bronce.png`
+
+No hace falta guardar la URL publica larga si la app puede resolver la ruta interna.
+
+### Resultado de rutas
+
+Estado actual:
+
+- La mejor marca resumida por ruta se sigue guardando en `usuarios.rutas_completadas`.
+
+Archivos implicados:
+
+- `lib/features/mission/presentation/navigation/provider/trip_provider.dart`
+
+Comportamiento actual:
+
+- Si un usuario repite una ruta y mejora su mejor marca, se suma solo la diferencia positiva a `usuarios.puntos`.
+- Si hace peor resultado, no suma puntos globales.
+
+## Convenciones importantes
+
+- `usuarios.puntos` es la fuente de verdad para el rango visible y para `Puntos totales` en Home.
+- `usuarios.rutas_completadas` se usa como resumen por ruta, no como fuente de verdad para el total global del usuario.
+- El listado de rutas de una ciudad depende de `id_ciudad`.
+- El inicio de una ruta depende de que todos sus puntos de interes tengan mision.
+
+## Archivos especialmente sensibles
+
+Si se va a tocar comportamiento y no solo UI, revisar primero:
+
+- `lib/features/mission/presentation/navigation/provider/trip_provider.dart`
+- `lib/features/profile/data/home_data_loader.dart`
+- `lib/features/profile/data/home_summary.dart`
+- `lib/features/routes/data/routes_repository_impl.dart`
+- `lib/features/routes/domain/usecases/routes_use_cases.dart`
+- `lib/core/constants/firestore_contract.dart`
+- `docs/base_datos_firestore.md`
+
+## Nota para el equipo
+
+Este archivo se ira actualizando solo con cambios ya aplicados y comprobados dentro del proyecto.
+No se esta usando como roadmap de futuro, sino como fotografia del estado real del codigo.

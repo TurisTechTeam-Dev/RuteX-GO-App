@@ -18,17 +18,11 @@ class ProfileRemoteDatasource {
 
   Future<List<Map<String, dynamic>>> getCompletedRoutes(String uid) async {
     final querySnapShot = await db
-        .collection(FirestoreCollections.usuarios)
-        .doc(uid)
-        .collection(FirestoreSubcollections.intentosRuta)
-        .orderBy(RouteAttemptFields.fechaCompletada, descending: true)
+        .collection(FirestoreCollections.resultado)
+        .where(ResultFields.idUsuario, isEqualTo: uid)
         .get();
 
-    return querySnapShot.docs.map((doc) {
-      final data = Map<String, dynamic>.from(doc.data());
-      data['id'] = doc.id;
-      return data;
-    }).toList();
+    return querySnapShot.docs.map((doc) => doc.data()).toList();
   }
 
   Future<Map<String, dynamic>> getConfigRangos(String rangoId) async {

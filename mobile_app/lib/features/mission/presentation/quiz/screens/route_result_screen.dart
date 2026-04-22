@@ -64,19 +64,18 @@ class _ResultPanel extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 28),
-          _InfoRow(label: 'Mejor puntuacion', value: result.scoreLabel),
-          if (result.hasDifferentAttemptScore)
-            _InfoRow(
-              label: 'Puntuacion del intento',
-              value: '${result.attemptScore}/${result.totalPossiblePoints}',
-            ),
+          _InfoRow(label: 'Mejor puntuación', value: result.scoreLabel),
           _InfoRow(
-            label: 'Puntos de interes visitados',
+            label: 'Puntuación del intento',
+            value: '${result.attemptScore}/${result.totalPossiblePoints}',
+          ),
+          _InfoRow(
+            label: 'Puntos de interés visitados',
             value: result.visitedPoisLabel,
           ),
           if (result.skippedPois.isNotEmpty)
             _InfoRow(
-              label: 'Puntos de interes saltados',
+              label: 'Puntos de interés saltados',
               value: '${result.skippedPois.length}/${result.totalPois}',
             ),
           _InfoRow(label: 'Tiempo del intento', value: result.time),
@@ -430,8 +429,6 @@ class _RouteResultData {
 
   String get scoreLabel => '$score/$totalPossiblePoints';
 
-  bool get hasDifferentAttemptScore => attemptScore != score;
-
   String get visitedPoisLabel => '$visitedMonuments/$totalPois';
 
   Map<String, List<_AnswerResultData>> get groupedAnswers {
@@ -495,7 +492,7 @@ class _AnswerResultData {
 
   factory _AnswerResultData.fromMap(Map data) {
     return _AnswerResultData(
-      monumentName: data['monumentName']?.toString() ?? 'Punto de interes',
+      monumentName: data['monumentName']?.toString() ?? 'Punto de interés',
       question: data['question']?.toString() ?? '',
       selectedAnswer: data['selectedAnswer']?.toString() ?? '',
       correctAnswer: data['correctAnswer']?.toString() ?? '',

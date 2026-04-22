@@ -8,10 +8,6 @@ class FirestoreCollections {
   static const usuarios = 'usuarios';
 }
 
-class FirestoreSubcollections {
-  static const intentosRuta = 'intentos_ruta';
-}
-
 class FirestoreDocs {
   static const rangosConfig = '3CpvEa6pk5fvifbr73jW';
 }
@@ -78,21 +74,6 @@ class CompletedRouteFields {
 class ResultFields {
   static const idUsuario = 'id_usuario';
   static const idRuta = 'id_ruta';
-}
-
-class RouteAttemptFields {
-  static const rutaId = 'rutaId';
-  static const nombreRuta = 'nombre_ruta';
-  static const fechaCompletada = 'fecha_completada';
-  static const tiempoEmpleado = 'tiempo_empleado';
-  static const tiempoEmpleadoSegundos = 'tiempo_empleado_segundos';
-  static const puntosObtenidos = 'puntos_obtenidos';
-  static const mejorPuntuacion = 'mejor_puntuacion';
-  static const puntosTotales = 'puntos_totales';
-  static const misionesCompletadas = 'misiones_completadas';
-  static const puntosInteresVisitados = 'puntos_interes_visitados';
-  static const puntosInteresSaltados = 'puntos_interes_saltados';
-  static const respuestas = 'respuestas';
 }
 
 class RankFields {

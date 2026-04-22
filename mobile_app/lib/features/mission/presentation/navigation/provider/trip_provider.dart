@@ -358,17 +358,6 @@ class TripSimulationProvider extends ChangeNotifier {
       visitedPois: visitedPois,
       skippedPois: skippedPois,
     );
-    await _saveRouteAttempt(
-      routeName: routeName,
-      elapsedTime: elapsedTime,
-      currentAttemptPoints: currentAttemptPoints,
-      savedBestPoints: savedBestPoints,
-      visitedPois: visitedPois,
-      completedMissions: QuizRouteProgress.visitedMonuments,
-      totalPossiblePoints: (_pointsOfInterest.length * 30) + 10,
-      skippedPois: skippedPois,
-      answers: answers,
-    );
     final correctAnswers = answers.where((answer) => answer.isCorrect).length;
     final totalAnswers = answers.length;
     final completedMissions = QuizRouteProgress.visitedMonuments;
@@ -487,45 +476,6 @@ class TripSimulationProvider extends ChangeNotifier {
 
       transaction.update(userRef, updates);
       return currentAttemptPoints;
-    });
-  }
-
-  Future<void> _saveRouteAttempt({
-    required String routeName,
-    required Duration elapsedTime,
-    required int currentAttemptPoints,
-    required int savedBestPoints,
-    required int visitedPois,
-    required int completedMissions,
-    required int totalPossiblePoints,
-    required List<PointOfInterest> skippedPois,
-    required List<QuizAnswerResult> answers,
-  }) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    final attemptsRef = FirebaseFirestore.instance
-        .collection(FirestoreCollections.usuarios)
-        .doc(user.uid)
-        .collection(FirestoreSubcollections.intentosRuta);
-
-    await attemptsRef.add({
-      RouteAttemptFields.rutaId: routeId,
-      RouteAttemptFields.nombreRuta: routeName,
-      RouteAttemptFields.fechaCompletada: FieldValue.serverTimestamp(),
-      RouteAttemptFields.tiempoEmpleado: _formatElapsedTime(elapsedTime),
-      RouteAttemptFields.tiempoEmpleadoSegundos: elapsedTime.inSeconds,
-      RouteAttemptFields.puntosObtenidos: currentAttemptPoints,
-      RouteAttemptFields.mejorPuntuacion: savedBestPoints,
-      RouteAttemptFields.puntosTotales: totalPossiblePoints,
-      RouteAttemptFields.misionesCompletadas: completedMissions,
-      RouteAttemptFields.puntosInteresVisitados: visitedPois,
-      RouteAttemptFields.puntosInteresSaltados: skippedPois
-          .map((poi) => {'id': poi.id, 'nombre': poi.nombre})
-          .toList(),
-      RouteAttemptFields.respuestas: answers
-          .map((answer) => answer.toMap())
-          .toList(),
     });
   }
 
