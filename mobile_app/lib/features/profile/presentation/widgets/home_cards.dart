@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/firestore_contract.dart';
 import '../../../../core/widgets/cards/custom_cards.dart';
+import '../../../../core/widgets/images/storage_aware_image.dart';
 
 class HomeUserCard extends StatelessWidget {
   final Map<String, dynamic> userData;
@@ -103,12 +104,12 @@ class _RankLine extends StatelessWidget {
           const SizedBox(width: 6),
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
-            child: Image.network(
-              rankLogo,
+            child: StorageAwareImage(
+              source: rankLogo,
               width: 22,
               height: 22,
               fit: BoxFit.contain,
-              errorBuilder: (_, _, _) => const Icon(
+              fallback: const Icon(
                 Icons.emoji_events,
                 size: 20,
                 color: AppColors.verdePrincipal,

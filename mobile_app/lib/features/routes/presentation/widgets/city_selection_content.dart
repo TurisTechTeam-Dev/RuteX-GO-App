@@ -67,27 +67,48 @@ class _CityGrid extends StatelessWidget {
           return const Center(child: Text("No hay ciudades disponibles"));
         }
 
-        final cities = docs.map(CityItem.fromDoc).toList()
-          ..sort((a, b) {
-            if (a.available == b.available) return 0;
-            return a.available ? -1 : 1;
-          });
+        return StreamBuilder<QuerySnapshot>(
+          stream: routesUseCases.executeGetRutas(),
+          builder: (context, routesSnapshot) {
+            final routesDocs = routesSnapshot.data?.docs ?? const [];
+            final routeCountByCity = <String, int>{};
 
-        return GridView.builder(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 30),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 0.72,
-          ),
-          itemCount: cities.length,
-          itemBuilder: (context, index) {
-            final city = cities[index];
+            for (final doc in routesDocs) {
+              final data = doc.data() as Map<String, dynamic>;
+              final cityId = data['id_ciudad']?.toString();
+              if (cityId == null || cityId.isEmpty) continue;
+              routeCountByCity[cityId] = (routeCountByCity[cityId] ?? 0) + 1;
+            }
 
-            return CityCard(
-              city: city,
-              routesStream: routesUseCases.executeGetRutasByCiudad(city.id),
+            final cities = docs.map(CityItem.fromDoc).toList()
+              ..sort((a, b) {
+                final aHasRoutes = (routeCountByCity[a.id] ?? 0) > 0;
+                final bHasRoutes = (routeCountByCity[b.id] ?? 0) > 0;
+
+                if (aHasRoutes != bHasRoutes) {
+                  return aHasRoutes ? -1 : 1;
+                }
+
+                return a.title.toLowerCase().compareTo(b.title.toLowerCase());
+              });
+
+            return GridView.builder(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 30),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: 0.72,
+              ),
+              itemCount: cities.length,
+              itemBuilder: (context, index) {
+                final city = cities[index];
+
+                return CityCard(
+                  city: city,
+                  routesStream: routesUseCases.executeGetRutasByCiudad(city.id),
+                );
+              },
             );
           },
         );

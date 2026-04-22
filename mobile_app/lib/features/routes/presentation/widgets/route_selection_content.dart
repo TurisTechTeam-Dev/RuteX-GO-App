@@ -73,10 +73,24 @@ class _RouteList extends StatelessWidget {
 
         final routes = routeDocs.map(RouteItem.fromDoc).toList();
 
-        return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          itemCount: routes.length,
-          itemBuilder: (context, index) => RouteCard(route: routes[index]),
+        return FutureBuilder<Map<String, bool>>(
+          future: routesUseCases.executeGetRouteAvailability(routes),
+          builder: (context, availabilitySnapshot) {
+            final availability = availabilitySnapshot.data ?? const <String, bool>{};
+
+            return ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              itemCount: routes.length,
+              itemBuilder: (context, index) {
+                final route = routes[index];
+                final canStart = availabilitySnapshot.connectionState ==
+                        ConnectionState.done &&
+                    (availability[route.id] ?? false);
+
+                return RouteCard(route: route, canStart: canStart);
+              },
+            );
+          },
         );
       },
     );

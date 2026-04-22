@@ -231,12 +231,38 @@ Uso en app:
 - Si el usuario salta puntos de interes, se guardan en `puntos_interes_saltados` cuando ese intento queda como mejor resultado de la ruta.
 - Al finalizar ruta se incrementa `usuarios.puntos` solo por la diferencia positiva frente a la mejor puntuacion anterior.
 - Si la ruta ya estaba completada, se conserva la mejor puntuacion: una repeticion peor no sobrescribe el resultado anterior; una mejor si lo actualiza.
+- Cada finalizacion de ruta tambien se guarda como intento historico en `usuarios/{uid}/intentos_ruta`, aunque no mejore la marca.
 
 Notas:
 
 - El codigo soporta variantes legacy para el ID de ruta: `rutaId`, `id_ruta` y `routeId`.
 - El Home muestra estadisticas de rutas calculadas desde `rutas_completadas`.
 - El rango del usuario tambien se calcula desde `rutas_completadas`, para que no pueda quedar desalineado si `usuarios.puntos` se modifica manualmente.
+
+### Subcoleccion `intentos_ruta`
+
+Cada documento en `usuarios/{uid}/intentos_ruta/{intentoId}` guarda un intento completo de ruta:
+
+```text
+rutaId: string
+nombre_ruta: string
+fecha_completada: timestamp
+tiempo_empleado: string
+tiempo_empleado_segundos: number
+puntos_obtenidos: number
+mejor_puntuacion: number
+puntos_totales: number
+misiones_completadas: number
+puntos_interes_visitados: number
+puntos_interes_saltados: array<map>
+respuestas: array<map>
+```
+
+Uso en app:
+
+- Se escribe al finalizar una ruta desde `TripSimulationProvider.finishRoute()`.
+- Sirve como historico persistente para futuros popups o detalles por intento.
+- No sustituye a `rutas_completadas`: esa sigue guardando la mejor marca resumida por ruta.
 
 ## `resultado`
 

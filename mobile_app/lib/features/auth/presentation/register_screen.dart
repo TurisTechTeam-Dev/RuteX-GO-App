@@ -6,7 +6,6 @@ import '../../../core/utils/validadores.dart';
 import '../../../core/widgets/auth/auth_card.dart';
 import '../../../core/widgets/auth/auth_logo.dart';
 import '../../../core/widgets/auth/auth_snack_bar.dart';
-import '../../../core/widgets/backgrounds/extremadura_map_background.dart';
 import '../../../core/widgets/buttons/custom_button.dart';
 import '../../../core/widgets/inputs/custom_inputs.dart';
 import '../domain/usecases/auth_use_cases.dart';
@@ -84,10 +83,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
         }
       } catch (e) {
         if (mounted) {
-          String errorMessage = "Error al registrarse";
+          var errorMessage = "Error al registrarse";
 
           if (e.toString().contains('email-already-in-use')) {
-            errorMessage = "El correo electrónico ya está registrado.";
+            errorMessage = "El correo electronico ya esta registrado.";
           } else {
             errorMessage = e.toString().replaceAll("Exception: ", "");
           }
@@ -101,7 +100,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     } else if (!_aceptaTerminos) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Debes aceptar los términos y condiciones."),
+          content: Text("Debes aceptar los terminos y condiciones."),
         ),
       );
     }
@@ -110,23 +109,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      body: Stack(
-        children: [
-          const ExtremaduraMapBackground(opacity: 0.3),
-          SafeArea(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                children: [
-                  const SizedBox(height: 20),
-                  AuthLogo(height: size.height * 0.10),
-                  const SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 30),
-                    child: AuthCard(
+      body: SafeArea(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            image: DecorationImage(
+              image: AssetImage('assets/Mapa_fondo_Extremadura.png'),
+              opacity: 0.3,
+              fit: BoxFit.contain,
+            ),
+          ),
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + keyboardInset),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AuthLogo(height: size.height * 0.10),
+                    const SizedBox(height: 10),
+                    AuthCard(
                       children: [
                         Form(
                           key: _formKey,
@@ -152,19 +162,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 label: 'Email',
                                 hint: 'Introduce tu email',
                                 controller: _emailController,
-                                keyboardType: TextInputType.emailAddress,
+                                keyboardType: TextInputType.text,
                                 validator: Validadores.validarEmail,
                               ),
                               CustomInput(
-                                label: 'Contraseña',
-                                hint: 'Introduce tu contraseña',
+                                label: 'Contrasena',
+                                hint: 'Introduce tu contrasena',
                                 controller: _passwordController,
                                 isPassword: true,
                                 validator: Validadores.validarPassword,
                               ),
                               CustomInput(
-                                label: 'Confirmar contraseña',
-                                hint: 'Repite tu contraseña',
+                                label: 'Confirmar contrasena',
+                                hint: 'Repite tu contrasena',
                                 controller: _confirmPasswordController,
                                 isPassword: true,
                                 validator: (value) =>
@@ -183,13 +193,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       visualDensity: VisualDensity.compact,
                                       onChanged: (value) {
                                         setState(
-                                          () => _aceptaTerminos = value!,
+                                          () => _aceptaTerminos = value ?? false,
                                         );
                                         _validateForm();
                                       },
                                     ),
                                     Text(
-                                      "Acepto términos y condiciones",
+                                      "Acepto terminos y condiciones",
                                       style: Theme.of(context)
                                           .textTheme
                                           .labelMedium
@@ -214,11 +224,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Text("¿Ya tienes cuenta?  "),
+                                  const Text("Ya tienes cuenta?  "),
                                   GestureDetector(
                                     onTap: () => Navigator.pop(context),
                                     child: const Text(
-                                      "Iniciar sesión",
+                                      "Iniciar sesion",
                                       style: TextStyle(
                                         color: AppColors.verdePrincipal,
                                         fontWeight: FontWeight.bold,
@@ -232,13 +242,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 30),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }

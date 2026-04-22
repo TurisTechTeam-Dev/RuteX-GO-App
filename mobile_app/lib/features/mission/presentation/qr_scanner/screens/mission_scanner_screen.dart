@@ -29,6 +29,8 @@ class MissionScannerScreen extends StatefulWidget {
 }
 
 class _MissionScannerScreenState extends State<MissionScannerScreen> {
+  static const Duration _scanCooldown = Duration(milliseconds: 2800);
+
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final MissionUseCases _useCases = MissionUseCases(MissionRepositoryImpl());
 
@@ -38,6 +40,7 @@ class _MissionScannerScreenState extends State<MissionScannerScreen> {
 
   bool _isProcessing = false;
   bool _flashOn = false;
+  DateTime? _lastScanAt;
 
   @override
   void dispose() {
@@ -47,8 +50,14 @@ class _MissionScannerScreenState extends State<MissionScannerScreen> {
 
   void _onQrCodeDetected(String code) async {
     debugPrint("QR detectado: $code");
+    final now = DateTime.now();
     if (_isProcessing) return;
+    if (_lastScanAt != null &&
+        now.difference(_lastScanAt!) < _scanCooldown) {
+      return;
+    }
 
+    _lastScanAt = now;
     setState(() => _isProcessing = true);
 
     await _scannerController.stop();

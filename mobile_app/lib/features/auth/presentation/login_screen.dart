@@ -9,7 +9,6 @@ import '../../../core/utils/validadores.dart';
 import '../../../core/widgets/auth/auth_card.dart';
 import '../../../core/widgets/auth/auth_logo.dart';
 import '../../../core/widgets/auth/auth_snack_bar.dart';
-import '../../../core/widgets/backgrounds/extremadura_map_background.dart';
 import '../../../core/widgets/buttons/custom_button.dart';
 import '../../../core/widgets/inputs/custom_inputs.dart';
 import 'auth_use_cases_factory.dart';
@@ -53,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
         final isAdmin = await _authUseCases.checkAdminStatus(user.uid);
 
         debugPrint(
-          "VERIFICACIÓN: Web=$kIsWeb | Admin=$isAdmin | Email=${user.email}",
+          "VERIFICACION: Web=$kIsWeb | Admin=$isAdmin | Email=${user.email}",
         );
 
         if (!mounted) return;
@@ -80,7 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            "Introduce un email válido arriba para recuperar tu contraseña",
+            "Introduce un email valido arriba para recuperar tu contrasena",
           ),
           backgroundColor: Colors.orange,
         ),
@@ -95,7 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Correo de recuperación enviado."),
+            content: Text("Correo de recuperacion enviado."),
             backgroundColor: AppColors.exito,
           ),
         );
@@ -137,106 +136,118 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       extendBodyBehindAppBar: true,
-      body: Stack(
-        children: [
-          const ExtremaduraMapBackground(),
-          SingleChildScrollView(
+      body: SafeArea(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            image: DecorationImage(
+              image: AssetImage('assets/Mapa_fondo_Extremadura.png'),
+              opacity: 0.4,
+              fit: BoxFit.contain,
+            ),
+          ),
+          child: SingleChildScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            padding: EdgeInsets.only(bottom: keyboardInset + 24),
-            child: Column(
-              children: [
-                const SizedBox(height: 80),
-                AuthLogo(height: size.height * 0.18),
-                const SizedBox(height: 20),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40),
-                  child: Text(
-                    '"Descubre rutas culturales, aprende y juega recorriendo la historia de Extremadura."',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      height: 1.2,
-                      color: AppColors.negroTexto,
+            padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + keyboardInset),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AuthLogo(height: size.height * 0.18),
+                    const SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        '"Descubre rutas culturales, aprende y juega recorriendo la historia de Extremadura."',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          height: 1.2,
+                          color: AppColors.negroTexto,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 35),
-                  child: AuthCard(
-                    children: [
-                      Form(
-                        key: _formKey,
-                        child: Column(
-                          children: [
-                            CustomInput(
-                              label: 'Email',
-                              hint: 'Introduce tu email',
-                              controller: _emailController,
-                              keyboardType: TextInputType.emailAddress,
-                              validator: Validadores.validarEmail,
+                    const SizedBox(height: 20),
+                    AuthCard(
+                      children: [
+                        Form(
+                          key: _formKey,
+                          child: Column(
+                            children: [
+                              CustomInput(
+                                label: 'Email',
+                                hint: 'Introduce tu email',
+                                controller: _emailController,
+                                keyboardType: TextInputType.text,
+                                validator: Validadores.validarEmail,
+                              ),
+                              CustomInput(
+                                label: 'Contrasena',
+                                hint: 'Introduce tu contrasena',
+                                isPassword: true,
+                                controller: _passwordController,
+                                validator: Validadores.validarPassword,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+                        CustomButton(
+                          text: _isLoading ? "CARGANDO..." : "Iniciar sesion",
+                          onPressed: _isLoading ? null : _handleLogin,
+                        ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: _recoverPassword,
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.zero,
                             ),
-                            CustomInput(
-                              label: 'Contraseña',
-                              hint: 'Introduce tu contraseña',
-                              isPassword: true,
-                              controller: _passwordController,
-                              validator: Validadores.validarPassword,
+                            child: Text(
+                              "Has olvidado tu contrasena?",
+                              style: Theme.of(context).textTheme.labelMedium
+                                  ?.copyWith(
+                                    fontSize: 11,
+                                    color: AppColors.grisSombra,
+                                  ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "No tienes cuenta?  ",
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(fontWeight: FontWeight.w700),
+                            ),
+                            GestureDetector(
+                              onTap: _openRegister,
+                              child: const Text(
+                                "Registrate",
+                                style: TextStyle(
+                                  color: AppColors.verdePrincipal,
+                                  fontWeight: FontWeight.bold,
+                                  decoration: TextDecoration.none,
+                                ),
+                              ),
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(height: 30),
-                      CustomButton(
-                        text: _isLoading ? "CARGANDO..." : "Iniciar sesión",
-                        onPressed: _isLoading ? null : _handleLogin,
-                      ),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: _recoverPassword,
-                          style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                          child: Text(
-                            "¿Has olvidado tu contraseña?",
-                            style: Theme.of(context).textTheme.labelMedium
-                                ?.copyWith(
-                                  fontSize: 11,
-                                  color: AppColors.grisSombra,
-                                ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "¿No tienes cuenta?  ",
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(fontWeight: FontWeight.w700),
-                          ),
-                          GestureDetector(
-                            onTap: _openRegister,
-                            child: const Text(
-                              "Regístrate",
-                              style: TextStyle(
-                                color: AppColors.verdePrincipal,
-                                fontWeight: FontWeight.bold,
-                                decoration: TextDecoration.none,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 50),
-              ],
+              ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../../core/widgets/cards/custom_cards.dart';
+import '../../../../core/widgets/images/storage_aware_image.dart';
 import '../models/city_item.dart';
 
 class CityCard extends StatelessWidget {
@@ -14,19 +15,31 @@ class CityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomCard(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        children: [
-          _CityImage(image: city.image),
-          const SizedBox(height: 8),
-          _StrokeCityTitle(text: city.title),
-          const SizedBox(height: 6),
-          _RouteCounter(available: city.available, routesStream: routesStream),
-          const Spacer(),
-          _ExploreButton(available: city.available, cityId: city.id),
-        ],
-      ),
+    return StreamBuilder<QuerySnapshot>(
+      stream: routesStream,
+      builder: (context, snapshot) {
+        final routesCount = snapshot.data?.docs.length ?? 0;
+        final hasRoutes = routesCount > 0;
+
+        return CustomCard(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            children: [
+              _CityImage(image: city.image),
+              const SizedBox(height: 8),
+              _StrokeCityTitle(text: city.title),
+              const SizedBox(height: 6),
+              _RouteCounter(
+                hasRoutes: hasRoutes,
+                isLoading: snapshot.connectionState == ConnectionState.waiting,
+                routesCount: routesCount,
+              ),
+              const Spacer(),
+              _ExploreButton(hasRoutes: hasRoutes, cityId: city.id),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -47,20 +60,41 @@ class _CityImage extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(5),
-          child: image.startsWith('http')
-              ? Image.network(
-                  image,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) =>
-                      const _CityFallbackIcon(),
-                )
-              : Image.asset(
-                  image,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) =>
-                      const _CityFallbackIcon(),
-                ),
+          child: _CityImageContent(image: image),
         ),
+      ),
+    );
+  }
+}
+
+class _CityImageContent extends StatelessWidget {
+  final String image;
+
+  const _CityImageContent({required this.image});
+
+  @override
+  Widget build(BuildContext context) {
+    return StorageAwareImage(
+      source: image,
+      fit: BoxFit.cover,
+      placeholder: const _CityLoadingState(),
+      fallback: const _CityFallbackIcon(),
+    );
+  }
+}
+
+class _CityLoadingState extends StatelessWidget {
+  const _CityLoadingState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: AppColors.blancoTarjeta,
+      alignment: Alignment.center,
+      child: const SizedBox(
+        width: 20,
+        height: 20,
+        child: CircularProgressIndicator(strokeWidth: 2),
       ),
     );
   }
@@ -80,43 +114,41 @@ class _CityFallbackIcon extends StatelessWidget {
 }
 
 class _RouteCounter extends StatelessWidget {
-  final bool available;
-  final Stream<QuerySnapshot> routesStream;
+  final bool hasRoutes;
+  final bool isLoading;
+  final int routesCount;
 
-  const _RouteCounter({required this.available, required this.routesStream});
+  const _RouteCounter({
+    required this.hasRoutes,
+    required this.isLoading,
+    required this.routesCount,
+  });
 
   @override
   Widget build(BuildContext context) {
-    if (!available) {
+    if (isLoading) {
+      return Text("...", style: Theme.of(context).textTheme.labelMedium);
+    }
+
+    if (!hasRoutes) {
       return Text(
         "Proximamente",
         style: Theme.of(context).textTheme.labelMedium,
       );
     }
 
-    return StreamBuilder<QuerySnapshot>(
-      stream: routesStream,
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return Text("...", style: Theme.of(context).textTheme.labelMedium);
-        }
-
-        final routesCount = snapshot.data!.docs.length;
-
-        return Text(
-          "$routesCount rutas disponibles",
-          style: Theme.of(context).textTheme.labelMedium,
-        );
-      },
+    return Text(
+      "$routesCount rutas disponibles",
+      style: Theme.of(context).textTheme.labelMedium,
     );
   }
 }
 
 class _ExploreButton extends StatelessWidget {
-  final bool available;
+  final bool hasRoutes;
   final String cityId;
 
-  const _ExploreButton({required this.available, required this.cityId});
+  const _ExploreButton({required this.hasRoutes, required this.cityId});
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +156,7 @@ class _ExploreButton extends StatelessWidget {
       height: 32,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: available
+          backgroundColor: hasRoutes
               ? AppColors.verdePrincipal
               : AppColors.grisSombra,
           foregroundColor: AppColors.blancoPuro,
@@ -133,7 +165,7 @@ class _ExploreButton extends StatelessWidget {
             context,
           ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
-        onPressed: available
+        onPressed: hasRoutes
             ? () {
                 Navigator.pushNamed(
                   context,

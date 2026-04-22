@@ -19,10 +19,7 @@ class HomeSummary {
   });
 
   factory HomeSummary.fromHomeData(HomeData data) {
-    final totalPoints = _sumRouteValue(
-      data.routes,
-      CompletedRouteFields.puntosObtenidos,
-    );
+    final totalPoints = _asInt(data.user[UserFields.puntos]);
     final rank = _rankForPoints(totalPoints, data.rangos);
 
     return HomeSummary(

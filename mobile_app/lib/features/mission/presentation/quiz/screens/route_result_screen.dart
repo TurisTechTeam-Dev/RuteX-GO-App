@@ -44,7 +44,7 @@ class _ResultPanel extends StatelessWidget {
       constraints: const BoxConstraints(maxWidth: 360),
       padding: const EdgeInsets.fromLTRB(22, 28, 22, 28),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.white.withValues(alpha: 0.84),
         border: Border.all(color: AppColors.negroTexto, width: 2),
         borderRadius: BorderRadius.circular(8),
       ),
@@ -64,19 +64,22 @@ class _ResultPanel extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 28),
-          _InfoRow(label: 'Puntuación', value: result.scoreLabel),
+          _InfoRow(label: 'Mejor puntuacion', value: result.scoreLabel),
           if (result.hasDifferentAttemptScore)
             _InfoRow(
-              label: 'Puntuación del intento',
+              label: 'Puntuacion del intento',
               value: '${result.attemptScore}/${result.totalPossiblePoints}',
             ),
-          _InfoRow(label: 'Monumentos visitados', value: result.monumentsLabel),
+          _InfoRow(
+            label: 'Puntos de interes visitados',
+            value: result.visitedPoisLabel,
+          ),
           if (result.skippedPois.isNotEmpty)
             _InfoRow(
-              label: 'Puntos saltados',
+              label: 'Puntos de interes saltados',
               value: '${result.skippedPois.length}/${result.totalPois}',
             ),
-          _InfoRow(label: 'Tiempo', value: result.time),
+          _InfoRow(label: 'Tiempo del intento', value: result.time),
           const SizedBox(height: 28),
           _ActionButton(
             label: 'Ver\nresultados',
@@ -131,8 +134,8 @@ class _InfoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         border: Border.all(color: AppColors.negroTexto),
         borderRadius: BorderRadius.circular(4),
@@ -193,19 +196,11 @@ class _QuestionResultsSheet extends StatelessWidget {
             width: double.infinity,
             color: const Color(0xFF009640),
             padding: const EdgeInsets.fromLTRB(20, 18, 20, 14),
-            child: Column(
+            child: const Column(
               children: [
-                const Text(
+                Text(
                   'Resultados',
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Puntuación total: ${result.correctAnswers}/${result.totalAnswers} respuestas',
-                    style: const TextStyle(fontWeight: FontWeight.w700),
-                  ),
                 ),
               ],
             ),
@@ -221,7 +216,7 @@ class _QuestionResultsSheet extends StatelessWidget {
                     children: [
                       ...groupedResults.entries.map(
                         (entry) => Padding(
-                          padding: const EdgeInsets.only(bottom: 20),
+                          padding: const EdgeInsets.only(bottom: 24),
                           child: _MonumentAnswerGroup(
                             monumentName: entry.key,
                             answers: entry.value,
@@ -268,7 +263,7 @@ class _SkippedPoisGroup extends StatelessWidget {
       children: [
         const Divider(height: 28),
         const Text(
-          'Puntos saltados',
+          'Puntos de interes saltados',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 12),
@@ -282,7 +277,7 @@ class _SkippedPoisGroup extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    '$poi: misión no realizada',
+                    '${_AnswerTextSanitizer.clean(poi)}: mision no realizada',
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
@@ -315,7 +310,7 @@ class _MonumentAnswerGroup extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                monumentName,
+                _AnswerTextSanitizer.clean(monumentName),
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
@@ -325,7 +320,12 @@ class _MonumentAnswerGroup extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
-        ...answers.map((answer) => _AnswerTile(answer: answer)),
+        ...answers.map(
+          (answer) => Padding(
+            padding: const EdgeInsets.only(bottom: 14),
+            child: _AnswerTile(answer: answer),
+          ),
+        ),
       ],
     );
   }
@@ -338,8 +338,18 @@ class _AnswerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+    final question = _AnswerTextSanitizer.clean(answer.question);
+    final selectedAnswer = _AnswerTextSanitizer.clean(answer.selectedAnswer);
+    final correctAnswer = _AnswerTextSanitizer.clean(answer.correctAnswer);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: Colors.black12),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -348,31 +358,46 @@ class _AnswerTile extends StatelessWidget {
             size: 18,
             color: answer.isCorrect ? const Color(0xFF007E35) : Colors.red,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(answer.question, style: const TextStyle(fontSize: 13)),
-                const SizedBox(height: 4),
+                if (question.isNotEmpty)
+                  Text(question, style: const TextStyle(fontSize: 13)),
+                if (question.isNotEmpty) const SizedBox(height: 6),
                 Text(
-                  answer.selectedAnswer,
+                  selectedAnswer,
                   style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
-                if (!answer.isCorrect)
+                if (!answer.isCorrect && correctAnswer.isNotEmpty) ...[
+                  const SizedBox(height: 6),
                   Text(
-                    'Respuesta correcta: ${answer.correctAnswer}',
+                    'Respuesta correcta: $correctAnswer',
                     style: const TextStyle(
                       color: Color(0xFF007E35),
                       fontSize: 12,
                     ),
                   ),
+                ],
               ],
             ),
           ),
         ],
       ),
     );
+  }
+}
+
+class _AnswerTextSanitizer {
+  static String clean(String value) {
+    return value
+        .replaceAll('\r\n', '\n')
+        .split('\n')
+        .map((line) => line.trim())
+        .where((line) => line.isNotEmpty)
+        .join('\n')
+        .trim();
   }
 }
 
@@ -407,7 +432,7 @@ class _RouteResultData {
 
   bool get hasDifferentAttemptScore => attemptScore != score;
 
-  String get monumentsLabel => '$visitedMonuments/$totalPois';
+  String get visitedPoisLabel => '$visitedMonuments/$totalPois';
 
   Map<String, List<_AnswerResultData>> get groupedAnswers {
     final grouped = <String, List<_AnswerResultData>>{};
@@ -470,7 +495,7 @@ class _AnswerResultData {
 
   factory _AnswerResultData.fromMap(Map data) {
     return _AnswerResultData(
-      monumentName: data['monumentName']?.toString() ?? 'Punto de interés',
+      monumentName: data['monumentName']?.toString() ?? 'Punto de interes',
       question: data['question']?.toString() ?? '',
       selectedAnswer: data['selectedAnswer']?.toString() ?? '',
       correctAnswer: data['correctAnswer']?.toString() ?? '',

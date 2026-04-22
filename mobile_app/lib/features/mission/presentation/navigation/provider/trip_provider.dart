@@ -47,6 +47,7 @@ class TripSimulationProvider extends ChangeNotifier {
   final String routeId;
   final RoutingService _routingService = RoutingService();
   final DateTime _startedAt = DateTime.now();
+  LatLng? _lastRoutedPosition;
 
   // --- ESTADO ---
   List<PointOfInterest> _pointsOfInterest = [];
@@ -179,9 +180,11 @@ class TripSimulationProvider extends ChangeNotifier {
     try {
       final points = await _routingService.getRoute(_currentPosition, target);
       _routePoints = points.isNotEmpty ? points : [_currentPosition, target];
+      _lastRoutedPosition = _currentPosition;
     } catch (e) {
       debugPrint("⚠️ [OSRM] Error de conexión. Usando línea recta temporal.");
       _routePoints = [_currentPosition, target];
+      _lastRoutedPosition = _currentPosition;
     }
     notifyListeners();
   }
@@ -234,9 +237,29 @@ class TripSimulationProvider extends ChangeNotifier {
           if (!_isSimulating) {
             _currentPosition = LatLng(pos.latitude, pos.longitude);
             _checkArrivalProximity(_currentPosition);
+            _refreshStreetRouteIfNeeded();
             notifyListeners();
           }
         });
+  }
+
+  void _refreshStreetRouteIfNeeded() {
+    if (_allPoisCompleted || _currentPoiIndex == -1 || _hasReachedDestination) {
+      return;
+    }
+
+    final lastPosition = _lastRoutedPosition;
+    if (lastPosition == null) return;
+
+    final movedDistance = const Distance().as(
+      LengthUnit.Meter,
+      lastPosition,
+      _currentPosition,
+    );
+
+    if (movedDistance >= 25) {
+      unawaited(_calculateStreetRoute());
+    }
   }
 
   void _checkArrivalProximity(LatLng pos) {
@@ -325,14 +348,26 @@ class TripSimulationProvider extends ChangeNotifier {
         : QuizRouteProgress.routePoints;
     final visitedPois = _completedPoiIndices.length;
     final skippedPois = _skippedPois();
+    final elapsedTime = DateTime.now().difference(_startedAt);
+    final routeName = await _loadRouteName();
+    final answers = List<QuizAnswerResult>.from(
+      QuizRouteProgress.answerResults,
+    );
     final savedBestPoints = await _saveBestRouteProgress(
       currentAttemptPoints: currentAttemptPoints,
       visitedPois: visitedPois,
       skippedPois: skippedPois,
     );
-    final routeName = await _loadRouteName();
-    final answers = List<QuizAnswerResult>.from(
-      QuizRouteProgress.answerResults,
+    await _saveRouteAttempt(
+      routeName: routeName,
+      elapsedTime: elapsedTime,
+      currentAttemptPoints: currentAttemptPoints,
+      savedBestPoints: savedBestPoints,
+      visitedPois: visitedPois,
+      completedMissions: QuizRouteProgress.visitedMonuments,
+      totalPossiblePoints: (_pointsOfInterest.length * 30) + 10,
+      skippedPois: skippedPois,
+      answers: answers,
     );
     final correctAnswers = answers.where((answer) => answer.isCorrect).length;
     final totalAnswers = answers.length;
@@ -350,7 +385,7 @@ class TripSimulationProvider extends ChangeNotifier {
       correctAnswers: correctAnswers,
       totalAnswers: totalAnswers,
       routeName: routeName,
-      elapsedTime: DateTime.now().difference(_startedAt),
+      elapsedTime: elapsedTime,
       answerResults: answers,
       skippedPoiNames: skippedPois.map((poi) => poi.nombre).toList(),
     );
@@ -453,6 +488,56 @@ class TripSimulationProvider extends ChangeNotifier {
       transaction.update(userRef, updates);
       return currentAttemptPoints;
     });
+  }
+
+  Future<void> _saveRouteAttempt({
+    required String routeName,
+    required Duration elapsedTime,
+    required int currentAttemptPoints,
+    required int savedBestPoints,
+    required int visitedPois,
+    required int completedMissions,
+    required int totalPossiblePoints,
+    required List<PointOfInterest> skippedPois,
+    required List<QuizAnswerResult> answers,
+  }) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final attemptsRef = FirebaseFirestore.instance
+        .collection(FirestoreCollections.usuarios)
+        .doc(user.uid)
+        .collection(FirestoreSubcollections.intentosRuta);
+
+    await attemptsRef.add({
+      RouteAttemptFields.rutaId: routeId,
+      RouteAttemptFields.nombreRuta: routeName,
+      RouteAttemptFields.fechaCompletada: FieldValue.serverTimestamp(),
+      RouteAttemptFields.tiempoEmpleado: _formatElapsedTime(elapsedTime),
+      RouteAttemptFields.tiempoEmpleadoSegundos: elapsedTime.inSeconds,
+      RouteAttemptFields.puntosObtenidos: currentAttemptPoints,
+      RouteAttemptFields.mejorPuntuacion: savedBestPoints,
+      RouteAttemptFields.puntosTotales: totalPossiblePoints,
+      RouteAttemptFields.misionesCompletadas: completedMissions,
+      RouteAttemptFields.puntosInteresVisitados: visitedPois,
+      RouteAttemptFields.puntosInteresSaltados: skippedPois
+          .map((poi) => {'id': poi.id, 'nombre': poi.nombre})
+          .toList(),
+      RouteAttemptFields.respuestas: answers
+          .map((answer) => answer.toMap())
+          .toList(),
+    });
+  }
+
+  String _formatElapsedTime(Duration duration) {
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    final seconds = duration.inSeconds.remainder(60);
+
+    if (hours > 0) return '${hours}h ${minutes}min';
+    if (minutes > 0) return '${minutes}min ${seconds}s';
+
+    return '${seconds}s';
   }
 
   int _asInt(dynamic value) {

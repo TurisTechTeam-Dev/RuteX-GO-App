@@ -4,6 +4,7 @@ import 'package:mobile_app/core/widgets/cards/custom_cards.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/routes/app_routes.dart';
 import '../../../../../core/widgets/bars/top_app_bar.dart';
+import '../../../../../core/widgets/images/storage_aware_image.dart';
 import '../../mission_flow_result.dart';
 
 class MonumentInfoScreen extends StatefulWidget {
@@ -48,18 +49,16 @@ class _MonumentInfoScreenState extends State<MonumentInfoScreen> {
                 ),
               ),
               child: imagen != null && imagen.toString().isNotEmpty
-                  ? Image.network(
-                      imagen,
+                  ? StorageAwareImage(
+                      source: imagen.toString(),
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Center(
-                          child: Icon(
-                            Icons.broken_image,
-                            size: 80,
-                            color: AppColors.verdePrincipal,
-                          ),
-                        );
-                      },
+                      fallback: const Center(
+                        child: Icon(
+                          Icons.broken_image,
+                          size: 80,
+                          color: AppColors.verdePrincipal,
+                        ),
+                      ),
                     )
                   : const Center(
                       child: Icon(

@@ -15,6 +15,8 @@ dependencies:
   firebase_core: ^4.4.0
   firebase_auth: ^6.1.4
   cloud_firestore: ^6.1.2
+  cached_network_image: ^3.4.1
+  firebase_storage: ^13.0.2
   intl: ^0.20.2
   mobile_scanner: ^7.2.0
   flutter_joystick: ^0.2.2

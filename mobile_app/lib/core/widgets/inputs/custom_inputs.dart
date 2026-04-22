@@ -37,6 +37,12 @@ class CustomInput extends StatelessWidget {
           obscureText: isPassword,
           keyboardType: keyboardType,
           validator: validator,
+          scrollPadding: const EdgeInsets.only(
+            left: 24,
+            top: 24,
+            right: 24,
+            bottom: 24,
+          ),
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 15),
           decoration: InputDecoration(
             hintText: hint,
@@ -47,6 +53,7 @@ class CustomInput extends StatelessWidget {
               horizontal: 10,
               vertical: 10,
             ),
+            isDense: true,
 
             // Borde base
             border: OutlineInputBorder(
@@ -79,8 +86,8 @@ class CustomInput extends StatelessWidget {
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: const BorderSide(
-              color: AppColors.error,
-              width: 2,
+                color: AppColors.error,
+                width: 2,
               ),
             ),
           ),
