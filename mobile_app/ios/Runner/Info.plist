@@ -28,6 +28,15 @@
     <key>NSCameraUsageDescription</key>
     <string>RutexGO necesita acceso a la cámara para escanear los códigos QR en los puntos turísticos.</string>
 
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>RutexGO necesita acceder a tu galería para que puedas subir fotos de tus rutas.</string>
+
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>RutexGO necesita tu ubicación para mostrarte los monumentos cercanos en el mapa.</string>
+
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>RutexGO necesita conocer tu ubicación para avisarte de puntos de interés cercanos.</string>
+
     <key>UILaunchStoryboardName</key>
     <string>LaunchScreen</string>
     <key>UIMainStoryboardFile</key>
@@ -49,5 +58,6 @@
     <true/>
     <key>UIApplicationSupportsIndirectInputEvents</key>
     <true/>
+
 </dict>
 </plist>

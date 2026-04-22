@@ -8,6 +8,8 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+apply(from = project(":flutter_config").file("dotenv.gradle"))
+
 android {
     namespace = "com.rutexgo.mobile_app"
     compileSdk = flutter.compileSdkVersion

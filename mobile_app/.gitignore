@@ -45,4 +45,6 @@ app.*.map.json
 /android/app/release
 
 # Al final de tu .gitignore añade esto:
-!android/app/google-services.json
+.env
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
