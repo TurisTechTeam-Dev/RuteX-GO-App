@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../core/routes/app_routes.dart';
@@ -16,7 +17,7 @@ class MapNavigationScreen extends StatefulWidget {
 
 class _MapNavigationScreenState extends State<MapNavigationScreen> {
   bool _isDialogOpen = false;
-  final MapController _mapController = MapController();
+  GoogleMapController? _googleMapController;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +48,9 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
         children: [
           // Vista del mapa con datos dinámicos
           MapView(
-            mapController: _mapController,
+            onMapCreated: (controller) {
+              _googleMapController = controller;
+            },
             currentPosition: tripProvider.currentPosition,
             routePoints: tripProvider.routePoints,
             pointsOfInterest: tripProvider.pointsOfInterest,

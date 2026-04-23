@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:latlong2/latlong.dart' as osm;
 import '../../domain/entity/poi_entity.dart';
 
 class POIModel extends PointOfInterest {
@@ -25,7 +25,6 @@ class POIModel extends PointOfInterest {
           lat = locData.latitude;
           lng = locData.longitude;
         } else if (locData is Map) {
-          // A veces Firebase devuelve mapas en lugar de GeoPoints en modo offline
           lat = (locData['latitude'] ?? locData['lat'] ?? 0.0).toDouble();
           lng = (locData['longitude'] ?? locData['lng'] ?? 0.0).toDouble();
         }
@@ -43,7 +42,7 @@ class POIModel extends PointOfInterest {
       id: id,
       nombre: json['nombre'] ?? 'Sin nombre',
       descripcion: json['descripción'] ?? json['descripcion'] ?? 'Sin descripción',
-      localizacion: LatLng(lat, lng),
+      localizacion: osm.LatLng(lat, lng),
       qrCode: json['qr_code'] ?? '',
       radioActivacion: (json['radio_activacion'] as num?)?.toInt() ?? 50,
     );

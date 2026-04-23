@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart'; // Import que te funciona
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:latlong2/latlong.dart' as osm;
 
 import '../../features/mission/domain/entity/poi_entity.dart';
 
 class MapView extends StatefulWidget {
-  final MapController? mapController;
-  final List<LatLng> routePoints;
+  final GoogleMapController? mapController;
+  final List<osm.LatLng> routePoints;
   final List<PointOfInterest> pointsOfInterest;
-  final LatLng? currentPosition;
+  final osm.LatLng? currentPosition;
+  final Function(GoogleMapController)? onMapCreated;
 
   const MapView({
     super.key,
@@ -16,6 +17,7 @@ class MapView extends StatefulWidget {
     required this.routePoints,
     required this.pointsOfInterest,
     this.currentPosition,
+    this.onMapCreated,
   });
 
   @override
@@ -31,14 +33,11 @@ class _MapViewState extends State<MapView> {
     if (widget.mapController != null &&
         widget.currentPosition != null &&
         widget.currentPosition != oldWidget.currentPosition) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-
-        widget.mapController!.move(
-          widget.currentPosition!,
-          widget.mapController!.camera.zoom,
-        );
-      });
+      widget.mapController!.animateCamera(
+        CameraUpdate.newLatLng(
+          LatLng(widget.currentPosition!.latitude, widget.currentPosition!.longitude),
+        ),
+      );
     }
   }
 
@@ -47,84 +46,61 @@ class _MapViewState extends State<MapView> {
     // Definimos el centro de Mérida como constante de seguridad
     const LatLng meridaCentro = LatLng(38.9161, -6.3437);
 
-    // Lógica de validación: si la posición es nula o es (0,0), usamos Mérida
-    final LatLng centerToUse =
-    (widget.currentPosition == null || widget.currentPosition!.latitude == 0)
+    // Convertimos los puntos de la ruta de OSRM a LatLng de Google Maps
+    final List <LatLng> googleRoutePoints = widget.routePoints
+        .map((point) => LatLng(point.latitude, point.longitude))
+        .toList();
+
+    // Convertimos la posición actual para el marcador
+    final LatLng userPos = (widget.currentPosition == null || widget.currentPosition!.latitude == 0)
         ? meridaCentro
-        : widget.currentPosition!;
+        : LatLng(widget.currentPosition!.latitude, widget.currentPosition!.longitude);
 
-    return FlutterMap(
-      mapController: widget.mapController,
-      options: MapOptions(
-        initialCenter: centerToUse,
-        initialZoom: 16.0,
-        // Permitir rotación para que sea más inmersivo
-        interactionOptions: const InteractionOptions(
-          flags: InteractiveFlag.all,
-        ),
+    return GoogleMap(
+      onMapCreated: widget.onMapCreated,
+      initialCameraPosition: CameraPosition(
+        target: userPos,
+        zoom: 15,
       ),
-      children: [
-        // Capa de mapa (OpenStreetMap)
-        TileLayer(
-          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          userAgentPackageName: 'com.rutexgo.mobile_app',
-        ),
+      myLocationEnabled: false,
+      zoomControlsEnabled: false,
+      mapToolbarEnabled: false,
+      compassEnabled: false,
 
-        // Capa de la ruta calculada por OSRM
-        if (widget.routePoints.isNotEmpty)
-          PolylineLayer(
-            polylines: [
-              Polyline(
-                points: widget.routePoints,
-                color: Colors.blue.withOpacity(0.8),
-                strokeWidth: 5.0,
-              ),
-            ],
+      // Capa de Lineas (Ruta)
+      polylines: {
+        Polyline(
+          polylineId: const PolylineId("ruttexgo_route"),
+          points: googleRoutePoints,
+          color: Colors.blue.withAlpha(170),
+          width: 6,
+          jointType: JointType.round
+        )
+      },
+
+      // Capa de Marcadores (POIs y posición actual)
+      markers: {
+        // Marcador de posicion actual (icono azul)
+        Marker(
+          markerId: const MarkerId("user_marker"),
+          position: userPos,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+          infoWindow: const InfoWindow(
+            title: 'Tu posición',
           ),
-
-        // Capa de Marcadores
-        MarkerLayer(
-          markers: [
-            // 1. Puntos de Interés (Monumentos)
-            ...widget.pointsOfInterest.map(
-                  (poi) => Marker(
-                point: poi.localizacion,
-                width: 50,
-                height: 50,
-                child: const Icon(
-                  Icons.location_on,
-                  color: Colors.red,
-                  size: 40,
-                  shadows: [Shadow(color: Colors.black26, blurRadius: 10)],
-                ),
-              ),
-            ),
-
-            // 2. Marcador del Usuario / Simulación
-            Marker(
-              point: centerToUse,
-              width: 60,
-              height: 60,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Aura de pulsación
-                  Container(
-                    width: 25,
-                    height: 25,
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.2),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  // Icono de navegación
-                  const Icon(Icons.navigation, color: Colors.blue, size: 35),
-                ],
-              ),
-            ),
-          ],
         ),
-      ],
+        // Marcadores de POIs
+        ...widget.pointsOfInterest.map(
+          (poi) => Marker(
+            markerId: MarkerId(poi.id),
+            position: LatLng(poi.localizacion.latitude, poi.localizacion.longitude),
+            infoWindow: InfoWindow(
+                title: poi.nombre,
+              snippet: "Pulsa para ver detalles"
+            ),
+          ),
+        ),
+      },
     );
   }
 }

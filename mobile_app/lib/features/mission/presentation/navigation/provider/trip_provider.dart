@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:latlong2/latlong.dart' as osm;
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:geolocator/geolocator.dart';
 import '../../../../../core/map/routing_service.dart';
 import '../../../domain/entity/poi_entity.dart';
@@ -18,11 +19,11 @@ class TripSimulationProvider extends ChangeNotifier {
   final List<int> _completedPoiIndices = [];
   List<int> get completedPoiIndices => _completedPoiIndices;
 
-  List<LatLng> _routePoints = [];
-  List<LatLng> get routePoints => _routePoints;
+  List<osm.LatLng> _routePoints = [];
+  List<osm.LatLng> get routePoints => _routePoints;
 
-  LatLng _currentPosition = const LatLng(38.9161, -6.3437); // Mérida por defecto
-  LatLng get currentPosition => _currentPosition;
+  osm.LatLng _currentPosition = const osm.LatLng(38.9161, -6.3437); // Mérida por defecto
+  osm.LatLng get currentPosition => _currentPosition;
 
   int _currentPoiIndex = -1;
   int get currentPoiIndex => _currentPoiIndex;
@@ -90,8 +91,8 @@ class TripSimulationProvider extends ChangeNotifier {
 
     // Ordenamos la lista de pendientes por distancia real al GPS actual
     pendingPois.sort((a, b) {
-      double distA = const Distance().as(LengthUnit.Meter, _currentPosition, a.localizacion);
-      double distB = const Distance().as(LengthUnit.Meter, _currentPosition, b.localizacion);
+      double distA = const osm.Distance().as(osm.LengthUnit.Meter, _currentPosition, a.localizacion);
+      double distB = const osm.Distance().as(osm.LengthUnit.Meter, _currentPosition, b.localizacion);
       return distA.compareTo(distB);
     });
 
@@ -153,7 +154,7 @@ class TripSimulationProvider extends ChangeNotifier {
 
     // Posición inicial
     Position pos = await Geolocator.getCurrentPosition();
-    _currentPosition = LatLng(pos.latitude, pos.longitude);
+    _currentPosition = osm.LatLng(pos.latitude, pos.longitude);
 
     // Escucha activa de movimiento
     _positionStream = Geolocator.getPositionStream(
@@ -163,18 +164,18 @@ class TripSimulationProvider extends ChangeNotifier {
       ),
     ).listen((Position pos) {
       if (!_isSimulating) {
-        _currentPosition = LatLng(pos.latitude, pos.longitude);
+        _currentPosition = osm.LatLng(pos.latitude, pos.longitude);
         _checkArrivalProximity(_currentPosition);
         notifyListeners();
       }
     });
   }
 
-  void _checkArrivalProximity(LatLng pos) {
+  void _checkArrivalProximity(osm.LatLng pos) {
     if (_hasReachedDestination || _allPoisCompleted || _currentPoiIndex == -1) return;
 
     final target = _pointsOfInterest[_currentPoiIndex];
-    double distance = const Distance().as(LengthUnit.Meter, pos, target.localizacion);
+    double distance = const osm.Distance().as(osm.LengthUnit.Meter, pos, target.localizacion);
 
     // Comprobamos contra el radio de Firebase (recomendado 20m)
     if (distance <= target.radioActivacion) {
@@ -204,7 +205,7 @@ class TripSimulationProvider extends ChangeNotifier {
     // Si terminó la simulación y NO saltó el popup por pocos metros, lo forzamos
     if (_isSimulating && !_hasReachedDestination) {
       final target = _pointsOfInterest[_currentPoiIndex];
-      double finalDist = const Distance().as(LengthUnit.Meter, _currentPosition, target.localizacion);
+      double finalDist = const osm.Distance().as(osm.LengthUnit.Meter, _currentPosition, target.localizacion);
 
       debugPrint("🏁 [SIM] Fin de puntos. Distancia final al monumento: ${finalDist.toInt()}m");
 
@@ -223,7 +224,7 @@ class TripSimulationProvider extends ChangeNotifier {
 
   double get distanceToNextPoi {
     if (_currentPoiIndex == -1 || _allPoisCompleted) return 0.0;
-    return const Distance().as(LengthUnit.Meter, _currentPosition, _pointsOfInterest[_currentPoiIndex].localizacion);
+    return const osm.Distance().as(osm.LengthUnit.Meter, _currentPosition, _pointsOfInterest[_currentPoiIndex].localizacion);
   }
 
   void skipToNext() => markCurrentPoiAsCompleted();
