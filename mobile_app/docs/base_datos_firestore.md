@@ -171,7 +171,8 @@ Uso en app:
   - `descripcion` si existe
   - `dificultad`
   - `duracion`
-  - `imagen_asset` si existe
+  - `imagen`
+  - `imagen_asset` como compatibilidad legacy si falta `imagen`
   - `id_puntos_interes`
 - `TripSimulationProvider` carga los puntos por `id_puntos_interes`.
 - `HomeDataLoader` usa:

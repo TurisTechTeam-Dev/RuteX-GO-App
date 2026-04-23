@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../core/map/map_view.dart';
@@ -19,7 +18,6 @@ class MapNavigationScreen extends StatefulWidget {
 
 class _MapNavigationScreenState extends State<MapNavigationScreen> {
   bool _isDialogOpen = false;
-  final MapController _mapController = MapController();
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +58,6 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
         body: Stack(
           children: [
             MapView(
-              mapController: _mapController,
               currentPosition: tripProvider.currentPosition,
               routePoints: tripProvider.routePoints,
               pointsOfInterest: tripProvider.pointsOfInterest,

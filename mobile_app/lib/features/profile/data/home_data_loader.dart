@@ -45,10 +45,7 @@ class HomeDataLoader {
       rutasProgreso,
       validRouteIds,
     );
-    final orphanedPoints = _sumRemovedRoutePoints(
-      rutasProgreso,
-      validRouteIds,
-    );
+    final orphanedPoints = _sumRemovedRoutePoints(rutasProgreso, validRouteIds);
 
     for (final doc in rutasDocs) {
       final data = doc.data();
@@ -96,8 +93,7 @@ class HomeDataLoader {
 
     if (orphanedPoints > 0 || hasOrphanedRoutes) {
       final currentPoints = _asInt(userData[UserFields.puntos]);
-      final updatedPoints = (currentPoints - orphanedPoints).clamp(0, 1 << 31)
-          as int;
+      final updatedPoints = (currentPoints - orphanedPoints).clamp(0, 1 << 31);
       normalizedUserData[UserFields.puntos] = updatedPoints;
 
       await userRef.update({

@@ -28,6 +28,9 @@
     <key>NSCameraUsageDescription</key>
     <string>RutexGO necesita acceso a la cámara para escanear los códigos QR en los puntos turísticos.</string>
 
+    <key>Maps_API_KEY</key>
+    <string></string>
+
     <key>UILaunchStoryboardName</key>
     <string>LaunchScreen</string>
     <key>UIMainStoryboardFile</key>

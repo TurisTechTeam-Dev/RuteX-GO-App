@@ -90,8 +90,8 @@ class RouteItem {
 
   static String _routeImage(Map<String, dynamic> data) {
     const fallbackKeys = [
+      RouteFields.imagen,
       RouteFields.imagenAsset,
-      'imagen',
       'image',
       'imagen_url',
     ];

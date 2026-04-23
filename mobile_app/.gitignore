@@ -46,3 +46,4 @@ app.*.map.json
 
 # Al final de tu .gitignore añade esto:
 !android/app/google-services.json
+.env

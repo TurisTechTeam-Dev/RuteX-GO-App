@@ -70,6 +70,8 @@ Que hace ahora:
 - Las ciudades se ordenan primero por disponibilidad real de rutas y luego alfabeticamente.
 - Una ciudad puede mostrar `Explorar` si tiene rutas, aunque `isActive` no gobierne ese flujo.
 - Las rutas muestran `Tiempo estimado` y `Puntos totales`.
+- Las rutas leen la imagen desde `rutas.imagen` como campo principal.
+- `rutas.imagen_asset` queda como compatibilidad legacy si falta `imagen`.
 - `Comenzar ruta` solo se habilita si todos los puntos de interes de esa ruta tienen mision asociada.
 - Si faltan misiones, la card lo explica visualmente y el boton queda como `Ruta no disponible`.
 
@@ -89,6 +91,32 @@ Que hace ahora:
 - La pantalla de resultados se reorganizo visualmente y limpia mejor respuestas con saltos raros.
 - La card principal de resultados deja ver el mapa de fondo.
 - El QR tiene mas cooldown para evitar disparos demasiado rapidos.
+
+### Navegacion y mapas
+
+Archivos principales:
+
+- `lib/core/map/map_view.dart`
+- `lib/core/map/routing_service.dart`
+- `lib/features/mission/presentation/navigation/screens/map_navigation_screen.dart`
+- `android/app/build.gradle.kts`
+- `android/app/src/main/AndroidManifest.xml`
+- `.env`
+
+Que hace ahora:
+
+- `MapView` puede pintar con Google Maps o con el mapa anterior de `flutter_map`.
+- Por defecto no se crea `GoogleMap`; esto evita consumo de Google Maps durante pruebas normales.
+- Para probar Google Maps se debe arrancar con `--dart-define=USE_GOOGLE_MAPS=true`.
+- Android lee `Maps_API_KEY` desde `.env` en Gradle y la expone al manifest como `@string/Maps_API_KEY`.
+- `.env` queda ignorado por Git para no subir la key.
+- La ruta visual sigue usando los puntos calculados por `RoutingService`; el mapa solo pinta la polyline.
+
+Notas actuales:
+
+- Google Maps ya funciona como mapa embebido, pero no se usa Google Directions/Routes.
+- `RoutingService` usa OSRM para calcular la polyline. El servidor publico de OSRM puede devolver rutas con comportamiento parecido a coche aunque se intente usar perfil peatonal.
+- QR, quiz y resultados no consumen Google Maps; el consumo aparece al crear el widget `GoogleMap`.
 
 ### Fondo e imagenes compartidas
 
