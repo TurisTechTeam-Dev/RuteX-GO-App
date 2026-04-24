@@ -23,4 +23,8 @@ class MissionUseCases {
 
     return repository.getPointsByIds(ids);
   }
+
+  Future<int> getRoutePointCount(String routeId) {
+    return repository.getRoutePointCount(routeId);
+  }
 }

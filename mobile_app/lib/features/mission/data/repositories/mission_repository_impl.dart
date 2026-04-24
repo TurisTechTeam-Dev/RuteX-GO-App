@@ -64,6 +64,11 @@ class MissionRepositoryImpl implements MissionRepository {
   }
 
   @override
+  Future<int> getRoutePointCount(String routeId) async {
+    return (await getRoutePointIds(routeId)).length;
+  }
+
+  @override
   Future<List<PointOfInterest>> getPointsByIds(List<String> ids) async {
     if (ids.isEmpty) return [];
 

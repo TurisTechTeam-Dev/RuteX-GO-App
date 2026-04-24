@@ -8,5 +8,7 @@ abstract class MissionRepository {
 
   Future<List<String>> getRoutePointIds(String routeId);
 
+  Future<int> getRoutePointCount(String routeId);
+
   Future<List<PointOfInterest>> getPointsByIds(List<String> ids);
 }

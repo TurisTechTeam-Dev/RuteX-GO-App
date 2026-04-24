@@ -1,8 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../../core/constants/app_colors.dart';
-import '../../../../../core/constants/firestore_contract.dart';
+import '../../../domain/usecases/mission_use_cases.dart';
 import '../../mission_flow_result.dart';
 import '../models/quiz_mission.dart';
 import '../models/quiz_question.dart';
@@ -20,6 +20,7 @@ class QuizScreen extends StatefulWidget {
 
 class _QuizScreenState extends State<QuizScreen> {
   late final QuizMission _mission = widget.mission;
+  late final MissionUseCases _missionUseCases;
 
   int _currentIndex = 0;
   int? _selectedOption;
@@ -32,6 +33,7 @@ class _QuizScreenState extends State<QuizScreen> {
   @override
   void initState() {
     super.initState();
+    _missionUseCases = context.read<MissionUseCases>();
     QuizRouteProgress.ensureRoute(_routeId);
   }
 
@@ -157,16 +159,8 @@ class _QuizScreenState extends State<QuizScreen> {
     final routeId = _routeId;
     if (routeId == null || routeId.isEmpty) return _mission.totalPois;
 
-    final routeDoc = await FirebaseFirestore.instance
-        .collection(FirestoreCollections.rutas)
-        .doc(routeId)
-        .get();
-    final data = routeDoc.data();
-    final pointsOfInterest = data?[RouteFields.idPuntosInteres];
-
-    if (pointsOfInterest is List && pointsOfInterest.isNotEmpty) {
-      return pointsOfInterest.length;
-    }
+    final targetMonuments = await _missionUseCases.getRoutePointCount(routeId);
+    if (targetMonuments > 0) return targetMonuments;
 
     return _mission.totalPois;
   }
