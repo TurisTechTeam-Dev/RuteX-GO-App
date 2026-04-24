@@ -72,11 +72,6 @@ class CompletedRouteFields {
   static const puntosInteresSaltados = 'puntos_interes_saltados';
 }
 
-class ResultFields {
-  static const idUsuario = 'id_usuario';
-  static const idRuta = 'id_ruta';
-}
-
 class RankFields {
   static const rangos = 'rangos';
   static const logo = 'logo';
