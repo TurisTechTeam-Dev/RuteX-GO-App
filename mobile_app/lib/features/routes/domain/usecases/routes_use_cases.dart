@@ -19,6 +19,10 @@ class RoutesUseCases {
     return repository.getRoutesByCity(cityId);
   }
 
+  Stream<List<TouristRoute>> getRoutesByCityKeys(Set<String> cityKeys) {
+    return repository.getRoutesByCityKeys(cityKeys);
+  }
+
   Future<Map<String, bool>> executeGetRouteAvailability(
     List<TouristRoute> routes,
   ) async {

@@ -1,5 +1,6 @@
 import '../entities/mission.dart';
 import '../entities/poi_entity.dart';
+import '../entities/route_progress_save_result.dart';
 
 abstract class MissionRepository {
   Future<PointOfInterest?> getPointByQr(String qrCode);
@@ -14,7 +15,7 @@ abstract class MissionRepository {
 
   Future<List<PointOfInterest>> getPointsByIds(List<String> ids);
 
-  Future<int> saveBestRouteProgress({
+  Future<RouteProgressSaveResult> saveBestRouteProgress({
     required String routeId,
     required int currentAttemptPoints,
     required int visitedPois,

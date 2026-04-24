@@ -5,6 +5,7 @@ import '../../../../core/routes/app_routes.dart';
 import '../../../../core/widgets/cards/custom_cards.dart';
 import '../../../../core/widgets/images/storage_aware_image.dart';
 import '../../domain/entities/city.dart';
+import '../models/route_selection_args.dart';
 
 class CityCard extends StatelessWidget {
   final City city;
@@ -36,7 +37,7 @@ class CityCard extends StatelessWidget {
             routesCount: routesCount,
           ),
           const Spacer(),
-          _ExploreButton(hasRoutes: hasRoutes, cityId: city.id),
+          _ExploreButton(hasRoutes: hasRoutes, city: city),
         ],
       ),
     );
@@ -145,9 +146,9 @@ class _RouteCounter extends StatelessWidget {
 
 class _ExploreButton extends StatelessWidget {
   final bool hasRoutes;
-  final String cityId;
+  final City city;
 
-  const _ExploreButton({required this.hasRoutes, required this.cityId});
+  const _ExploreButton({required this.hasRoutes, required this.city});
 
   @override
   Widget build(BuildContext context) {
@@ -169,7 +170,7 @@ class _ExploreButton extends StatelessWidget {
                 Navigator.pushNamed(
                   context,
                   AppRoutes.routeSelection,
-                  arguments: cityId,
+                  arguments: RouteSelectionArgs(cityKeys: city.routeKeys),
                 );
               }
             : null,

@@ -1,3 +1,5 @@
+import '../../../../core/utils/text_normalizer.dart';
+
 class City {
   final String id;
   final String title;
@@ -10,4 +12,11 @@ class City {
     required this.image,
     required this.available,
   });
+
+  Set<String> get routeKeys {
+    return {
+      id,
+      TextNormalizer.toAsciiSlug(title),
+    }.where((key) => key.isNotEmpty).toSet();
+  }
 }

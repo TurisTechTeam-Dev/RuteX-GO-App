@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/backgrounds/extremadura_map_background.dart';
@@ -9,12 +10,12 @@ import 'route_card.dart';
 
 class RouteSelectionContent extends StatelessWidget {
   final RoutesUseCases routesUseCases;
-  final String cityId;
+  final Set<String> cityKeys;
 
   const RouteSelectionContent({
     super.key,
     required this.routesUseCases,
-    required this.cityId,
+    required this.cityKeys,
   });
 
   @override
@@ -32,7 +33,7 @@ class RouteSelectionContent extends StatelessWidget {
               Expanded(
                 child: _RouteList(
                   routesUseCases: routesUseCases,
-                  cityId: cityId,
+                  cityKeys: cityKeys,
                 ),
               ),
             ],
@@ -45,21 +46,31 @@ class RouteSelectionContent extends StatelessWidget {
 
 class _RouteList extends StatelessWidget {
   final RoutesUseCases routesUseCases;
-  final String cityId;
+  final Set<String> cityKeys;
 
-  const _RouteList({required this.routesUseCases, required this.cityId});
+  const _RouteList({required this.routesUseCases, required this.cityKeys});
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<TouristRoute>>(
-      stream: routesUseCases.getRoutesByCity(cityId),
+      stream: routesUseCases.getRoutesByCityKeys(cityKeys),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
 
         if (snapshot.hasError) {
-          return const Center(child: Text("Error al cargar las rutas"));
+          debugPrint('Error loading routes by city: ${snapshot.error}');
+
+          final errorDetails = snapshot.error.toString();
+          return Center(
+            child: Text(
+              kDebugMode
+                  ? "Error al cargar las rutas\n$errorDetails"
+                  : "Error al cargar las rutas",
+              textAlign: TextAlign.center,
+            ),
+          );
         }
 
         final routes = snapshot.data ?? const <TouristRoute>[];

@@ -2,10 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../../core/constants/firestore_contract.dart';
 
-class MissionRemoteDatasource {
+class MissionRemoteDataSource {
   final FirebaseFirestore firestore;
 
-  const MissionRemoteDatasource(this.firestore);
+  const MissionRemoteDataSource(this.firestore);
 
   Future<QuerySnapshot<Map<String, dynamic>>> getPointByQr(String qrCode) {
     return firestore

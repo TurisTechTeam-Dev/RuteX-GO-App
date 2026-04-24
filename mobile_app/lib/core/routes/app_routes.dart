@@ -16,6 +16,7 @@ import '../../features/mission/presentation/quiz/screens/route_result_screen.dar
 import '../../features/profile/presentation/home_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/routes/domain/usecases/routes_use_cases.dart';
+import '../../features/routes/presentation/models/route_selection_args.dart';
 import '../../features/routes/presentation/city_selection_screen.dart';
 import '../../features/routes/presentation/route_selection_screen.dart';
 import '../../features/admin_panel/presentation/admin_panel_screen.dart';
@@ -60,11 +61,11 @@ class AppRoutes {
         );
 
       case routeSelection:
-        final String cityId = settings.arguments as String? ?? '';
+        final args = settings.arguments as RouteSelectionArgs?;
         return MaterialPageRoute(
           builder: (context) => RouteSelectionScreen(
             routesUseCases: context.read<RoutesUseCases>(),
-            cityId: cityId,
+            cityKeys: args?.cityKeys ?? const <String>{},
           ),
         );
 

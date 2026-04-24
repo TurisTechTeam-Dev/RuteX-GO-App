@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/backgrounds/extremadura_map_background.dart';
@@ -70,12 +71,28 @@ class _CityGrid extends StatelessWidget {
         return StreamBuilder<List<TouristRoute>>(
           stream: routesUseCases.getRoutes(),
           builder: (context, routesSnapshot) {
+            if (routesSnapshot.hasError) {
+              debugPrint(
+                'Error loading routes for city selection: ${routesSnapshot.error}',
+              );
+
+              final errorDetails = routesSnapshot.error.toString();
+              return Center(
+                child: Text(
+                  kDebugMode
+                      ? "Error al cargar las rutas\n$errorDetails"
+                      : "Error al cargar las rutas",
+                  textAlign: TextAlign.center,
+                ),
+              );
+            }
+
             final routes = routesSnapshot.data ?? const <TouristRoute>[];
 
             final routeCountByCityFromRoutes = <String, int>{};
             for (final city in cities) {
               routeCountByCityFromRoutes[city.id] = routes
-                  .where((route) => route.cityId == city.id)
+                  .where((route) => city.routeKeys.contains(route.cityId))
                   .length;
             }
 

@@ -9,6 +9,7 @@ import '../../quiz/quiz_route_progress.dart';
 
 class RouteCompletionSummary {
   final int currentAttemptPoints;
+  final int previousBestPoints;
   final int savedBestPoints;
   final int visitedPois;
   final int completedMissions;
@@ -23,6 +24,7 @@ class RouteCompletionSummary {
 
   const RouteCompletionSummary({
     required this.currentAttemptPoints,
+    required this.previousBestPoints,
     required this.savedBestPoints,
     required this.visitedPois,
     required this.completedMissions,
@@ -45,6 +47,7 @@ class TripSimulationProvider extends ChangeNotifier {
   final RoutingService _routingService = RoutingService();
   final DateTime _startedAt = DateTime.now();
   LatLng? _lastRoutedPosition;
+  int _routeCalculationVersion = 0;
 
   // --- State ---
   List<PointOfInterest> _pointsOfInterest = [];
@@ -70,6 +73,9 @@ class TripSimulationProvider extends ChangeNotifier {
 
   bool _isSimulating = false;
   bool get isSimulating => _isSimulating;
+
+  bool _isCalculatingRoute = false;
+  bool get isCalculatingRoute => _isCalculatingRoute;
 
   bool _hasReachedDestination = false;
   bool get hasReachedDestination => _hasReachedDestination;
@@ -161,20 +167,41 @@ class TripSimulationProvider extends ChangeNotifier {
       return;
     }
 
-    final target = _pointsOfInterest[_currentPoiIndex].location;
+    final calculationVersion = ++_routeCalculationVersion;
+    final targetIndex = _currentPoiIndex;
+
+    _isCalculatingRoute = true;
+    _routePoints = [];
+    notifyListeners();
+
+    final target = _pointsOfInterest[targetIndex].location;
     debugPrint(
-      "[OSRM] Building route to: ${_pointsOfInterest[_currentPoiIndex].name}",
+      "[OSRM] Building route to: ${_pointsOfInterest[targetIndex].name}",
     );
 
+    late final List<LatLng> nextRoutePoints;
     try {
       final points = await _routingService.getRoute(_currentPosition, target);
-      _routePoints = points.isNotEmpty ? points : [_currentPosition, target];
-      _lastRoutedPosition = _currentPosition;
+      nextRoutePoints = points.isNotEmpty ? points : [_currentPosition, target];
     } catch (e) {
       debugPrint("[OSRM] Connection error. Falling back to a straight line.");
-      _routePoints = [_currentPosition, target];
-      _lastRoutedPosition = _currentPosition;
+      nextRoutePoints = [_currentPosition, target];
     }
+
+    final isStaleCalculation =
+        calculationVersion != _routeCalculationVersion ||
+        targetIndex != _currentPoiIndex;
+    if (isStaleCalculation) {
+      if (calculationVersion == _routeCalculationVersion) {
+        _isCalculatingRoute = false;
+        notifyListeners();
+      }
+      return;
+    }
+
+    _routePoints = nextRoutePoints;
+    _lastRoutedPosition = _currentPosition;
+    _isCalculatingRoute = false;
     notifyListeners();
   }
 
@@ -191,6 +218,7 @@ class TripSimulationProvider extends ChangeNotifier {
     }
 
     _hasReachedDestination = false;
+    _isSimulating = false;
 
     _selectNearestTargetPoi();
 
@@ -274,6 +302,14 @@ class TripSimulationProvider extends ChangeNotifier {
 
   Future<void> startSimulation() async {
     if (_allPoisCompleted || _currentPoiIndex == -1) return;
+    if (_isCalculatingRoute) return;
+
+    if (_routePoints.isEmpty) {
+      await _calculateStreetRoute();
+      if (_routePoints.isEmpty || _allPoisCompleted || _currentPoiIndex == -1) {
+        return;
+      }
+    }
 
     debugPrint(
       "[SIM] Starting automatic route to ${_pointsOfInterest[_currentPoiIndex].name}.",
@@ -321,8 +357,6 @@ class TripSimulationProvider extends ChangeNotifier {
     );
   }
 
-  void skipToNext() => markCurrentPoiAsCompleted();
-
   Future<RouteCompletionSummary> finishRoute() async {
     final completedAllMissions =
         QuizRouteProgress.visitedMonuments >= _pointsOfInterest.length;
@@ -337,7 +371,7 @@ class TripSimulationProvider extends ChangeNotifier {
       QuizRouteProgress.answerResults,
     );
     final completedMissions = QuizRouteProgress.visitedMonuments;
-    final savedBestPoints = await missionUseCases.saveBestRouteProgress(
+    final saveResult = await missionUseCases.saveBestRouteProgress(
       routeId: routeId,
       currentAttemptPoints: currentAttemptPoints,
       visitedPois: visitedPois,
@@ -351,7 +385,8 @@ class TripSimulationProvider extends ChangeNotifier {
 
     return RouteCompletionSummary(
       currentAttemptPoints: currentAttemptPoints,
-      savedBestPoints: savedBestPoints,
+      previousBestPoints: saveResult.previousBestPoints,
+      savedBestPoints: saveResult.savedBestPoints,
       visitedPois: visitedPois,
       completedMissions: completedMissions,
       totalPois: _pointsOfInterest.length,

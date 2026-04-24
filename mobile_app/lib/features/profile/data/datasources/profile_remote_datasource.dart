@@ -2,18 +2,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../../core/constants/firestore_contract.dart';
 
-class ProfileRemoteDatasource {
-  final FirebaseFirestore db;
+class ProfileRemoteDataSource {
+  final FirebaseFirestore firestore;
   static const int _firestoreWhereInLimit = 10;
 
-  ProfileRemoteDatasource(this.db);
+  ProfileRemoteDataSource(this.firestore);
 
   Future<DocumentSnapshot<Map<String, dynamic>>> getUserDoc(String uid) {
-    return db.collection(FirestoreCollections.usuarios).doc(uid).get();
+    return firestore.collection(FirestoreCollections.usuarios).doc(uid).get();
   }
 
   Future<DocumentSnapshot<Map<String, dynamic>>> getRanksConfigDoc() {
-    return db
+    return firestore
         .collection(FirestoreCollections.configRangos)
         .doc(FirestoreDocs.rangosConfig)
         .get();
@@ -28,7 +28,7 @@ class ProfileRemoteDatasource {
 
     for (var i = 0; i < ids.length; i += _firestoreWhereInLimit) {
       final chunk = ids.skip(i).take(_firestoreWhereInLimit).toList();
-      final query = await db
+      final query = await firestore
           .collection(FirestoreCollections.rutas)
           .where(FieldPath.documentId, whereIn: chunk)
           .get();
@@ -49,7 +49,7 @@ class ProfileRemoteDatasource {
     required List<dynamic> routesProgress,
     required int points,
   }) {
-    return db.collection(FirestoreCollections.usuarios).doc(uid).update({
+    return firestore.collection(FirestoreCollections.usuarios).doc(uid).update({
       UserFields.rutasCompletadas: routesProgress,
       UserFields.puntos: points,
     });

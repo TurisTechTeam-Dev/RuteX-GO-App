@@ -31,7 +31,7 @@ List<SingleChildWidget> buildAppProviders() {
     ),
     ProxyProvider<FirebaseFirestore, RoutesRepository>(
       update: (context, firestore, previous) => RoutesRepositoryImpl(
-        remoteDatasource: RoutesRemoteDatasource(firestore),
+        remoteDataSource: RoutesRemoteDataSource(firestore),
       ),
     ),
     ProxyProvider<AuthRepository, AuthUseCases>(

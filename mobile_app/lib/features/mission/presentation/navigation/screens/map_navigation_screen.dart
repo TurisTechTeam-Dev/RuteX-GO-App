@@ -83,11 +83,14 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
               left: 30,
               right: 30,
               child: ElevatedButton(
-                onPressed: tripProvider.isSimulating
+                onPressed:
+                    tripProvider.isSimulating || tripProvider.isCalculatingRoute
                     ? null
                     : () => tripProvider.startSimulation(),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: tripProvider.isSimulating
+                  backgroundColor:
+                      tripProvider.isSimulating ||
+                          tripProvider.isCalculatingRoute
                       ? Colors.grey
                       : Colors.green,
                   padding: const EdgeInsets.symmetric(vertical: 18),
@@ -96,7 +99,9 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
                   ),
                 ),
                 child: Text(
-                  tripProvider.isSimulating
+                  tripProvider.isCalculatingRoute
+                      ? "CALCULANDO SIGUIENTE TRAMO..."
+                      : tripProvider.isSimulating
                       ? "SIMULANDO RECORRIDO..."
                       : tripProvider.completedPoiIndices.isEmpty
                       ? "COMENZAR RUTA"
@@ -308,7 +313,8 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
       arguments: RouteResultArgs(
         routeId: widget.routeId,
         routeName: summary.routeName,
-        score: summary.savedBestPoints,
+        previousBestScore: summary.previousBestPoints,
+        savedBestScore: summary.savedBestPoints,
         attemptScore: summary.currentAttemptPoints,
         visitedPois: summary.visitedPois,
         completedMissions: summary.completedMissions,

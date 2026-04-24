@@ -68,11 +68,19 @@ class _ResultPanel extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 28),
-          _InfoRow(label: 'Mejor puntuación', value: result.scoreLabel),
+          _InfoRow(
+            label: 'Mejor puntuación anterior',
+            value: result.previousBestScoreLabel,
+          ),
           _InfoRow(
             label: 'Puntuación del intento',
             value: '${result.attemptScore}/${result.totalPossiblePoints}',
           ),
+          if (result.hasNewBestScore)
+            _InfoRow(
+              label: 'Nueva mejor puntuación',
+              value: result.savedBestScoreLabel,
+            ),
           _InfoRow(
             label: 'Puntos de interés visitados',
             value: result.visitedPoisLabel,
@@ -406,7 +414,8 @@ class _AnswerTextSanitizer {
 
 class _RouteResultData {
   final String routeName;
-  final int score;
+  final int previousBestScore;
+  final int savedBestScore;
   final int attemptScore;
   final int visitedMonuments;
   final int totalPois;
@@ -419,7 +428,8 @@ class _RouteResultData {
 
   const _RouteResultData({
     required this.routeName,
-    required this.score,
+    required this.previousBestScore,
+    required this.savedBestScore,
     required this.attemptScore,
     required this.visitedMonuments,
     required this.totalPois,
@@ -431,7 +441,11 @@ class _RouteResultData {
     required this.skippedPois,
   });
 
-  String get scoreLabel => '$score/$totalPossiblePoints';
+  bool get hasNewBestScore => savedBestScore > previousBestScore;
+
+  String get previousBestScoreLabel => '$previousBestScore/$totalPossiblePoints';
+
+  String get savedBestScoreLabel => '$savedBestScore/$totalPossiblePoints';
 
   String get visitedPoisLabel => '$visitedMonuments/$totalPois';
 
@@ -448,7 +462,8 @@ class _RouteResultData {
   factory _RouteResultData.fromArgs(RouteResultArgs args) {
     return _RouteResultData(
       routeName: args.routeName,
-      score: args.score,
+      previousBestScore: args.previousBestScore,
+      savedBestScore: args.savedBestScore,
       attemptScore: args.attemptScore,
       visitedMonuments: args.visitedPois,
       totalPois: args.totalPois,
@@ -466,7 +481,8 @@ class _RouteResultData {
   factory _RouteResultData.empty() {
     return const _RouteResultData(
       routeName: 'Ruta',
-      score: 0,
+      previousBestScore: 0,
+      savedBestScore: 0,
       attemptScore: 0,
       visitedMonuments: 0,
       totalPois: 0,

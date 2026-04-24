@@ -8,15 +8,15 @@ import '../domain/entities/user_profile.dart';
 import 'datasources/profile_remote_datasource.dart';
 
 class HomeDataLoader {
-  final ProfileRemoteDatasource remoteDatasource;
+  final ProfileRemoteDataSource remoteDataSource;
 
-  const HomeDataLoader(this.remoteDatasource);
+  const HomeDataLoader(this.remoteDataSource);
 
   Future<HomeData> load(String uid) async {
-    final userDoc = await remoteDatasource.getUserDoc(uid);
+    final userDoc = await remoteDataSource.getUserDoc(uid);
     final userData = userDoc.data() ?? {};
 
-    final ranksDoc = await remoteDatasource.getRanksConfigDoc();
+    final ranksDoc = await remoteDataSource.getRanksConfigDoc();
     final ranks = _parseRanks(ranksDoc.data()?[RankFields.rangos]);
 
     final routesProgress = List<dynamic>.from(
@@ -30,7 +30,7 @@ class HomeDataLoader {
     routeIds = routeIds.toSet().toList();
 
     final routes = <HomeRoute>[];
-    final routeDocs = await remoteDatasource.getRoutesByIds(routeIds);
+    final routeDocs = await remoteDataSource.getRoutesByIds(routeIds);
     final validRouteIds = routeDocs.map((doc) => doc.id).toSet();
     final normalizedRoutesProgress = _filterValidRoutesProgress(
       routesProgress,
@@ -86,7 +86,7 @@ class HomeDataLoader {
     if (orphanedPoints > 0 || hasOrphanedRoutes) {
       totalUserPoints = (totalUserPoints - orphanedPoints).clamp(0, 1 << 31);
 
-      await remoteDatasource.updateUserHomeProgress(
+      await remoteDataSource.updateUserHomeProgress(
         uid: uid,
         routesProgress: normalizedRoutesProgress,
         points: totalUserPoints,

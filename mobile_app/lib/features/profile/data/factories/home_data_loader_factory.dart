@@ -4,5 +4,5 @@ import '../datasources/profile_remote_datasource.dart';
 import '../home_data_loader.dart';
 
 HomeDataLoader createHomeDataLoader() {
-  return HomeDataLoader(ProfileRemoteDatasource(FirebaseFirestore.instance));
+  return HomeDataLoader(ProfileRemoteDataSource(FirebaseFirestore.instance));
 }

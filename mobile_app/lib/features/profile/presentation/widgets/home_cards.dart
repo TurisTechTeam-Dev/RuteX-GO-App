@@ -20,6 +20,7 @@ class HomeUserCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final explorerLabel = _explorerLabel(user.createdAt);
+    final displayName = user.username.isNotEmpty ? user.username : user.name;
 
     return CustomCard(
       padding: const EdgeInsets.all(16),
@@ -35,7 +36,7 @@ class HomeUserCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                user.name,
+                displayName,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   color: AppColors.negroTexto,

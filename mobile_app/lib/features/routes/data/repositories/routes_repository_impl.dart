@@ -11,32 +11,37 @@ import '../models/route_model.dart';
 class RoutesRepositoryImpl implements RoutesRepository {
   static const int _firestoreWhereInLimit = 10;
 
-  final RoutesRemoteDatasource remoteDatasource;
+  final RoutesRemoteDataSource remoteDataSource;
 
-  RoutesRepositoryImpl({RoutesRemoteDatasource? remoteDatasource})
-    : remoteDatasource =
-          remoteDatasource ??
-          RoutesRemoteDatasource(FirebaseFirestore.instance);
+  RoutesRepositoryImpl({RoutesRemoteDataSource? remoteDataSource})
+    : remoteDataSource =
+          remoteDataSource ?? RoutesRemoteDataSource(FirebaseFirestore.instance);
 
   @override
   Stream<List<City>> getCities() {
-    return remoteDatasource.watchCities().map(
+    return remoteDataSource.watchCities().map(
       (snapshot) => snapshot.docs.map(CityModel.fromSnapshot).toList(),
     );
   }
 
   @override
   Stream<List<TouristRoute>> getRoutes() {
-    return remoteDatasource.watchRoutes().map(
+    return remoteDataSource.watchRoutes().map(
       (snapshot) => snapshot.docs.map(RouteModel.fromSnapshot).toList(),
     );
   }
 
   @override
   Stream<List<TouristRoute>> getRoutesByCity(String cityId) {
-    return remoteDatasource
-        .watchRoutesByCity(cityId)
-        .map((snapshot) => snapshot.docs.map(RouteModel.fromSnapshot).toList());
+    return getRoutesByCityKeys({cityId});
+  }
+
+  @override
+  Stream<List<TouristRoute>> getRoutesByCityKeys(Set<String> cityKeys) {
+    return getRoutes().map(
+      (routes) =>
+          routes.where((route) => cityKeys.contains(route.cityId)).toList(),
+    );
   }
 
   @override
@@ -47,7 +52,7 @@ class RoutesRepositoryImpl implements RoutesRepository {
 
     for (var i = 0; i < pointIds.length; i += _firestoreWhereInLimit) {
       final chunk = pointIds.skip(i).take(_firestoreWhereInLimit).toList();
-      final snapshot = await remoteDatasource.getMissionsByPointIds(chunk);
+      final snapshot = await remoteDataSource.getMissionsByPointIds(chunk);
 
       for (final doc in snapshot.docs) {
         final pointId = doc.data()[MissionFields.puntosInteresId]?.toString();

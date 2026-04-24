@@ -1,5 +1,6 @@
 import '../entities/mission_scan_result.dart';
 import '../entities/poi_entity.dart';
+import '../entities/route_progress_save_result.dart';
 import '../repositories/mission_repository.dart';
 
 class MissionUseCases {
@@ -32,7 +33,7 @@ class MissionUseCases {
     return repository.getRouteName(routeId);
   }
 
-  Future<int> saveBestRouteProgress({
+  Future<RouteProgressSaveResult> saveBestRouteProgress({
     required String routeId,
     required int currentAttemptPoints,
     required int visitedPois,

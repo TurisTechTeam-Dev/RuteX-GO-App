@@ -3,7 +3,8 @@ import '../quiz_route_progress.dart';
 class RouteResultArgs {
   final String routeId;
   final String routeName;
-  final int score;
+  final int previousBestScore;
+  final int savedBestScore;
   final int attemptScore;
   final int visitedPois;
   final int completedMissions;
@@ -18,7 +19,8 @@ class RouteResultArgs {
   const RouteResultArgs({
     required this.routeId,
     required this.routeName,
-    required this.score,
+    required this.previousBestScore,
+    required this.savedBestScore,
     required this.attemptScore,
     required this.visitedPois,
     required this.completedMissions,

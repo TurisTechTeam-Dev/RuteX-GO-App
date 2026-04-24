@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../../core/constants/firestore_contract.dart';
+import '../../../../core/utils/text_normalizer.dart';
 import '../../domain/entities/city.dart';
 
 class CityModel extends City {
@@ -16,7 +17,7 @@ class CityModel extends City {
     final fallbackImage = "assets/images_selection/${doc.id}.jpg";
 
     return CityModel(
-      id: doc.id,
+      id: TextNormalizer.toAsciiSlug(doc.id),
       title: data[CityFields.nombre]?.toString() ?? '',
       image: data[CityFields.imagen]?.toString() ?? fallbackImage,
       available: data[CityFields.isActive] == true,
