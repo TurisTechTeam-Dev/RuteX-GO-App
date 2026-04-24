@@ -7,7 +7,9 @@ import '../../mission_flow_result.dart';
 import '../../quiz/models/route_result_args.dart';
 import '../../quiz/quiz_route_progress.dart';
 import '../../qr_scanner/models/mission_scanner_args.dart';
+import '../models/route_completion_summary.dart';
 import '../provider/trip_provider.dart';
+import '../widgets/navigation_info_panel.dart';
 
 class MapNavigationScreen extends StatefulWidget {
   final String routeId;
@@ -76,7 +78,12 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
                 top: 15,
                 left: 15,
                 right: 15,
-                child: _buildDynamicInfoPanel(tripProvider),
+                child: NavigationInfoPanel(
+                  nextStopName: tripProvider
+                      .pointsOfInterest[tripProvider.currentPoiIndex]
+                      .name,
+                  distanceToNextStop: tripProvider.distanceToNextPoi,
+                ),
               ),
             Positioned(
               bottom: bottomPadding + 48,
@@ -115,53 +122,6 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildDynamicInfoPanel(TripSimulationProvider provider) {
-    if (provider.allPoisCompleted) return const SizedBox.shrink();
-
-    final nextPoi = provider.pointsOfInterest[provider.currentPoiIndex];
-    final distance = provider.distanceToNextPoi;
-
-    return Container(
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10)],
-      ),
-      child: Row(
-        children: [
-          const CircleAvatar(
-            backgroundColor: Colors.green,
-            child: Icon(Icons.directions_walk, color: Colors.white),
-          ),
-          const SizedBox(width: 15),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  "Siguiente parada: ${nextPoi.name}",
-                  style: const TextStyle(fontSize: 13, color: Colors.grey),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  distance >= 1000
-                      ? "${(distance / 1000).toStringAsFixed(1)} km"
-                      : "${distance.toStringAsFixed(0)} m",
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
