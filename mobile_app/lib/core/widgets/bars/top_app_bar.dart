@@ -1,8 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../constants/app_colors.dart';
 import '../../routes/app_routes.dart';
+import '../../../features/auth/domain/usecases/auth_use_cases.dart';
 
 class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showBack;
@@ -149,11 +150,11 @@ class CustomDrawer extends StatelessWidget {
             ),
             TextButton(
               onPressed: () async {
-                await FirebaseAuth.instance.signOut();
+                await context.read<AuthUseCases>().logout();
                 if (context.mounted) {
                   Navigator.of(
                     context,
-                  ).pushNamedAndRemoveUntil('/login', (route) => false);
+                  ).pushNamedAndRemoveUntil(AppRoutes.login, (route) => false);
                 }
               },
               child: const Text("Salir", style: TextStyle(color: Colors.red)),
