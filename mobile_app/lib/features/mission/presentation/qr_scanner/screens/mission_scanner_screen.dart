@@ -8,22 +8,17 @@ import '../../../domain/usecases/mission_use_cases.dart';
 import '../../mission_flow_result.dart';
 import '../../monument_detail/models/monument_info_args.dart';
 import '../../quiz/quiz_route_progress.dart';
+import '../models/mission_scanner_args.dart';
 import '../widgets/mission_scanner_overlay.dart';
 
 class MissionScannerScreen extends StatefulWidget {
   final MissionUseCases missionUseCases;
-  final String? routeId;
-  final int? totalPois;
-  final String? expectedPointId;
-  final String? expectedPointName;
+  final MissionScannerArgs args;
 
   const MissionScannerScreen({
     super.key,
     required this.missionUseCases,
-    this.routeId,
-    this.totalPois,
-    this.expectedPointId,
-    this.expectedPointName,
+    required this.args,
   });
 
   @override
@@ -67,8 +62,9 @@ class _MissionScannerScreenState extends State<MissionScannerScreen> {
     if (result != null && mounted) {
       final pointId = result.point.id;
 
-      if (widget.expectedPointId != null && pointId != widget.expectedPointId) {
-        final expectedName = widget.expectedPointName ?? 'este punto';
+      if (widget.args.expectedPointId != null &&
+          pointId != widget.args.expectedPointId) {
+        final expectedName = widget.args.expectedPointName ?? 'este punto';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Este QR no pertenece a $expectedName"),
@@ -82,7 +78,7 @@ class _MissionScannerScreenState extends State<MissionScannerScreen> {
         return;
       }
 
-      if (widget.routeId != null &&
+      if (widget.args.routeId != null &&
           QuizRouteProgress.hasVisitedPoint(pointId)) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -102,8 +98,8 @@ class _MissionScannerScreenState extends State<MissionScannerScreen> {
         AppRoutes.monumentInfo,
         arguments: MonumentInfoArgs(
           scanResult: result,
-          routeId: widget.routeId,
-          totalPois: widget.totalPois,
+          routeId: widget.args.routeId,
+          totalPois: widget.args.totalPois,
         ),
       );
 

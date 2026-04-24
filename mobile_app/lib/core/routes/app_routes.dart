@@ -7,6 +7,7 @@ import '../../features/mission/domain/usecases/mission_use_cases.dart';
 import '../../features/mission/presentation/navigation/provider/trip_provider.dart';
 import '../../features/mission/presentation/navigation/screens/map_navigation_screen.dart';
 import '../../features/mission/presentation/monument_detail/models/monument_info_args.dart';
+import '../../features/mission/presentation/qr_scanner/models/mission_scanner_args.dart';
 import '../../features/mission/presentation/qr_scanner/screens/mission_scanner_screen.dart';
 import '../../features/mission/presentation/monument_detail/screens/monument_info_screen.dart';
 import '../../features/mission/presentation/quiz/models/quiz_mission.dart';
@@ -80,14 +81,11 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const ProfileScreen());
 
       case missionQrScanner:
-        final args = settings.arguments as Map<String, dynamic>?;
+        final args = settings.arguments as MissionScannerArgs?;
         return MaterialPageRoute(
           builder: (context) => MissionScannerScreen(
             missionUseCases: context.read<MissionUseCases>(),
-            routeId: args?['routeId']?.toString(),
-            totalPois: _asInt(args?['totalPois']),
-            expectedPointId: args?['expectedPointId']?.toString(),
-            expectedPointName: args?['expectedPointName']?.toString(),
+            args: args ?? const MissionScannerArgs(),
           ),
         );
 
@@ -114,13 +112,5 @@ class AppRoutes {
           ),
         );
     }
-  }
-
-  static int? _asInt(dynamic value) {
-    if (value is int) return value;
-    if (value is num) return value.toInt();
-    if (value is String) return int.tryParse(value);
-
-    return null;
   }
 }

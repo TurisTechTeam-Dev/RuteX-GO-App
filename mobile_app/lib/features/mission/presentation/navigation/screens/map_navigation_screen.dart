@@ -6,6 +6,7 @@ import '../../../../../core/routes/app_routes.dart';
 import '../../mission_flow_result.dart';
 import '../../quiz/models/route_result_args.dart';
 import '../../quiz/quiz_route_progress.dart';
+import '../../qr_scanner/models/mission_scanner_args.dart';
 import '../provider/trip_provider.dart';
 
 class MapNavigationScreen extends StatefulWidget {
@@ -205,12 +206,12 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
                   final result = await Navigator.pushNamed(
                     context,
                     AppRoutes.missionQrScanner,
-                    arguments: {
-                      'routeId': widget.routeId,
-                      'totalPois': provider.pointsOfInterest.length,
-                      'expectedPointId': poi.id,
-                      'expectedPointName': poi.name,
-                    },
+                    arguments: MissionScannerArgs(
+                      routeId: widget.routeId,
+                      totalPois: provider.pointsOfInterest.length,
+                      expectedPointId: poi.id,
+                      expectedPointName: poi.name,
+                    ),
                   );
 
                   if (!context.mounted) return;
