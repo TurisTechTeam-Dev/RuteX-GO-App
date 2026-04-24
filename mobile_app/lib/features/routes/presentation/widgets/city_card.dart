@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/routes/app_routes.dart';
+import '../../../../app/navigation/app_routes.dart';
 import '../../../../core/widgets/cards/custom_cards.dart';
-import '../../../../core/widgets/images/storage_aware_image.dart';
+import '../../../../core/widgets/images/framed_storage_image.dart';
 import '../../domain/entities/city.dart';
 import '../models/route_selection_args.dart';
 
@@ -27,7 +27,11 @@ class CityCard extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       child: Column(
         children: [
-          _CityImage(image: city.image),
+          FramedStorageImage(
+            source: city.image,
+            fallbackIcon: Icons.location_city,
+            fallbackIconSize: 48,
+          ),
           const SizedBox(height: 8),
           _StrokeCityTitle(text: city.title),
           const SizedBox(height: 6),
@@ -40,75 +44,6 @@ class CityCard extends StatelessWidget {
           _ExploreButton(hasRoutes: hasRoutes, city: city),
         ],
       ),
-    );
-  }
-}
-
-class _CityImage extends StatelessWidget {
-  final String image;
-
-  const _CityImage({required this.image});
-
-  @override
-  Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 16 / 9,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: AppColors.negroTexto, width: 1),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(5),
-          child: _CityImageContent(image: image),
-        ),
-      ),
-    );
-  }
-}
-
-class _CityImageContent extends StatelessWidget {
-  final String image;
-
-  const _CityImageContent({required this.image});
-
-  @override
-  Widget build(BuildContext context) {
-    return StorageAwareImage(
-      source: image,
-      fit: BoxFit.cover,
-      placeholder: const _CityLoadingState(),
-      fallback: const _CityFallbackIcon(),
-    );
-  }
-}
-
-class _CityLoadingState extends StatelessWidget {
-  const _CityLoadingState();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: AppColors.blancoTarjeta,
-      alignment: Alignment.center,
-      child: const SizedBox(
-        width: 20,
-        height: 20,
-        child: CircularProgressIndicator(strokeWidth: 2),
-      ),
-    );
-  }
-}
-
-class _CityFallbackIcon extends StatelessWidget {
-  const _CityFallbackIcon();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Icon(
-      Icons.location_city,
-      color: AppColors.verdePrincipal,
-      size: 48,
     );
   }
 }

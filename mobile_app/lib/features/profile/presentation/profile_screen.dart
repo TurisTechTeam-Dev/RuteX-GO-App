@@ -3,11 +3,12 @@ import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/backgrounds/extremadura_map_background.dart';
-import '../../../core/widgets/bars/top_app_bar.dart';
+import '../../../app/widgets/custom_drawer.dart';
+import '../../../app/widgets/top_app_bar.dart';
 import '../../auth/domain/usecases/auth_use_cases.dart';
-import '../data/factories/home_data_loader_factory.dart';
 import '../domain/entities/home_data.dart';
 import '../domain/entities/user_profile.dart';
+import '../domain/usecases/profile_use_cases.dart';
 import 'widgets/profile_content.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -26,6 +27,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _confirmPasswordController = TextEditingController();
 
   late final AuthUseCases _authUseCases;
+  late final ProfileUseCases _profileUseCases;
   late final Future<HomeData> _profileFuture;
 
   bool _isInitialized = false;
@@ -36,6 +38,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _authUseCases = context.read<AuthUseCases>();
+    _profileUseCases = context.read<ProfileUseCases>();
     _profileFuture = _loadProfileData();
   }
 
@@ -45,7 +48,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       throw Exception("No hay sesión activa.");
     }
 
-    return createHomeDataLoader().load(user.uid);
+    return _profileUseCases.getHomeData(user.uid);
   }
 
   void _initializeForm(UserProfile user) {

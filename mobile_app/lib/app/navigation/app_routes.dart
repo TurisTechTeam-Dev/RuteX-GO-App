@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../features/admin_panel/presentation/admin_panel_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/mission/domain/usecases/mission_use_cases.dart';
+import '../../features/mission/presentation/monument_detail/models/monument_info_args.dart';
+import '../../features/mission/presentation/monument_detail/screens/monument_info_screen.dart';
 import '../../features/mission/presentation/navigation/provider/trip_provider.dart';
 import '../../features/mission/presentation/navigation/screens/map_navigation_screen.dart';
-import '../../features/mission/presentation/monument_detail/models/monument_info_args.dart';
 import '../../features/mission/presentation/qr_scanner/models/mission_scanner_args.dart';
 import '../../features/mission/presentation/qr_scanner/screens/mission_scanner_screen.dart';
-import '../../features/mission/presentation/monument_detail/screens/monument_info_screen.dart';
 import '../../features/mission/presentation/quiz/models/quiz_mission.dart';
 import '../../features/mission/presentation/quiz/screens/quiz_screen.dart';
 import '../../features/mission/presentation/quiz/screens/route_result_screen.dart';
 import '../../features/profile/presentation/home_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/routes/domain/usecases/routes_use_cases.dart';
-import '../../features/routes/presentation/models/route_selection_args.dart';
 import '../../features/routes/presentation/city_selection_screen.dart';
+import '../../features/routes/presentation/models/route_selection_args.dart';
 import '../../features/routes/presentation/route_selection_screen.dart';
-import '../../features/admin_panel/presentation/admin_panel_screen.dart';
 
 class AppRoutes {
   static const String login = '/login';
@@ -38,7 +38,7 @@ class AppRoutes {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
       case mapNavigation:
-        final String routeId = settings.arguments as String? ?? '';
+        final routeId = settings.arguments as String? ?? '';
 
         return MaterialPageRoute(
           builder: (context) => ChangeNotifierProvider(
@@ -92,9 +92,7 @@ class AppRoutes {
 
       case monumentInfo:
         final data = settings.arguments as MonumentInfoArgs;
-        return MaterialPageRoute(
-          builder: (_) => MonumentInfoScreen(args: data),
-        );
+        return MaterialPageRoute(builder: (_) => MonumentInfoScreen(args: data));
 
       case quiz:
         final data = settings.arguments as QuizMission;

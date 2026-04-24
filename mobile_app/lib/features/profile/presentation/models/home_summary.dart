@@ -1,7 +1,6 @@
-import '../../../core/constants/firestore_contract.dart';
-import '../domain/entities/home_data.dart';
-import '../domain/entities/home_route.dart';
-import '../domain/entities/profile_rank.dart';
+import '../../domain/entities/home_data.dart';
+import '../../domain/entities/home_route.dart';
+import '../../domain/entities/profile_rank.dart';
 
 class HomeSummary {
   final String rankName;
@@ -28,11 +27,8 @@ class HomeSummary {
       rankName: rank.name,
       rankLogo: rank.logo,
       completedRoutes: data.routes.length,
-      completedMissions: _sumRouteValue(
-        data.routes,
-        CompletedRouteFields.misionesCompletadas,
-      ),
-      totalMissions: _sumRouteValue(data.routes, "misiones_totales"),
+      completedMissions: _completedMissions(data.routes),
+      totalMissions: _totalMissions(data.routes),
       totalPoints: totalPoints,
     );
   }
@@ -54,19 +50,15 @@ class HomeSummary {
     return _RankSummary(name: name, logo: logo);
   }
 
-  static int _sumRouteValue(List<HomeRoute> routes, String key) {
-    var total = 0;
+  static int _completedMissions(List<HomeRoute> routes) {
+    return routes.fold(
+      0,
+      (total, route) => total + route.completedMissions,
+    );
+  }
 
-    for (final route in routes) {
-      total += switch (key) {
-        CompletedRouteFields.puntosObtenidos => route.obtainedPoints,
-        CompletedRouteFields.misionesCompletadas => route.completedMissions,
-        "misiones_totales" => route.totalMissions,
-        _ => 0,
-      };
-    }
-
-    return total;
+  static int _totalMissions(List<HomeRoute> routes) {
+    return routes.fold(0, (total, route) => total + route.totalMissions);
   }
 }
 

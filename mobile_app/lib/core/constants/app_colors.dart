@@ -12,7 +12,7 @@ class AppColors {
 
   // --- SUPERFICIES Y FONDOS ---
   static const Color blancoPuro = Color(0xFFFFFFFF); // Fondo de la pantalla
-  static const Color blancoTarjeta = Color(0xFFFBFBFB); // El de la AuthCard
+  static const Color blancoTarjeta = Color(0xFFFBFBFB); // Superficie de tarjeta
   static const Color cremaInput = Color(
     0xFFF5F1E8,
   ); // El fondo de los campos de texto

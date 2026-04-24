@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../../core/map/map_view.dart';
-import '../../../../../core/routes/app_routes.dart';
+import '../../../../../app/navigation/app_routes.dart';
 import '../../mission_flow_result.dart';
 import '../../quiz/models/route_result_args.dart';
 import '../../quiz/quiz_route_progress.dart';
 import '../../qr_scanner/models/mission_scanner_args.dart';
 import '../models/route_completion_summary.dart';
 import '../provider/trip_provider.dart';
+import '../utils/route_duration_formatter.dart';
+import '../widgets/arrival_bottom_sheet.dart';
+import '../widgets/map_view.dart';
 import '../widgets/navigation_info_panel.dart';
 
 class MapNavigationScreen extends StatefulWidget {
@@ -130,7 +132,6 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
     BuildContext context,
     TripSimulationProvider provider,
   ) {
-    final bottomPadding = MediaQuery.paddingOf(context).bottom;
     final isFinalTarget =
         provider.completedPoiIndices.length + 1 >=
         provider.pointsOfInterest.length;
@@ -146,101 +147,47 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
       ),
-      builder: (sheetContext) => Container(
-        padding: EdgeInsets.fromLTRB(30, 30, 30, bottomPadding + 30),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              isFinalTarget ? "META ALCANZADA" : "HAS LLEGADO",
-              style: const TextStyle(color: Colors.grey, letterSpacing: 1.2),
+      builder: (sheetContext) => ArrivalBottomSheet(
+        poiName: poi.name,
+        isFinalTarget: isFinalTarget,
+        onScanMission: () async {
+          Navigator.pop(sheetContext);
+
+          final result = await Navigator.pushNamed(
+            context,
+            AppRoutes.missionQrScanner,
+            arguments: MissionScannerArgs(
+              routeId: widget.routeId,
+              totalPois: provider.pointsOfInterest.length,
+              expectedPointId: poi.id,
+              expectedPointName: poi.name,
             ),
-            const SizedBox(height: 8),
-            Text(
-              poi.name,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 25),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () async {
-                  Navigator.pop(sheetContext);
+          );
 
-                  final result = await Navigator.pushNamed(
-                    context,
-                    AppRoutes.missionQrScanner,
-                    arguments: MissionScannerArgs(
-                      routeId: widget.routeId,
-                      totalPois: provider.pointsOfInterest.length,
-                      expectedPointId: poi.id,
-                      expectedPointName: poi.name,
-                    ),
-                  );
+          if (!context.mounted) return;
 
-                  if (!context.mounted) return;
+          if (result == MissionFlowResult.pointCompleted) {
+            final completedRoute = provider.markCurrentPoiAsCompleted();
+            if (completedRoute) {
+              await _finishRoute(context, provider);
+              return;
+            }
+          }
 
-                  if (result == MissionFlowResult.pointCompleted) {
-                    final completedRoute = provider.markCurrentPoiAsCompleted();
-                    if (completedRoute) {
-                      await _finishRoute(context, provider);
-                      return;
-                    }
-                  }
+          setState(() => _isDialogOpen = false);
+        },
+        onSkipPoint: () async {
+          Navigator.pop(sheetContext);
 
-                  setState(() => _isDialogOpen = false);
-                },
-                icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
-                label: const Text(
-                  "ESCANEAR PARA JUGAR",
-                  style: TextStyle(color: Colors.white),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () async {
-                  Navigator.pop(sheetContext);
-
-                  if (isFinalTarget) {
-                    provider.markCurrentPoiAsCompleted();
-                    setState(() => _isDialogOpen = false);
-                    await _finishRoute(context, provider);
-                  } else {
-                    provider.markCurrentPoiAsCompleted();
-                    setState(() => _isDialogOpen = false);
-                  }
-                },
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(
-                    color: isFinalTarget ? Colors.red : Colors.grey,
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                ),
-                child: Text(
-                  isFinalTarget ? "FINALIZAR RUTA" : "SALTAR E IR AL SIGUIENTE",
-                  style: TextStyle(
-                    color: isFinalTarget ? Colors.red : Colors.black54,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+          if (isFinalTarget) {
+            provider.markCurrentPoiAsCompleted();
+            setState(() => _isDialogOpen = false);
+            await _finishRoute(context, provider);
+          } else {
+            provider.markCurrentPoiAsCompleted();
+            setState(() => _isDialogOpen = false);
+          }
+        },
       ),
     );
   }
@@ -280,24 +227,13 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
         completedMissions: summary.completedMissions,
         totalPois: summary.totalPois,
         totalPossiblePoints: summary.totalPossiblePoints,
-        elapsedTimeLabel: _formatDuration(summary.elapsedTime),
+        elapsedTimeLabel: RouteDurationFormatter.format(summary.elapsedTime),
         correctAnswers: summary.correctAnswers,
         totalAnswers: summary.totalAnswers,
         answerResults: summary.answerResults,
         skippedPois: summary.skippedPoiNames,
       ),
     );
-  }
-
-  String _formatDuration(Duration duration) {
-    final hours = duration.inHours;
-    final minutes = duration.inMinutes.remainder(60);
-    final seconds = duration.inSeconds.remainder(60);
-
-    if (hours > 0) return '${hours}h ${minutes}min';
-    if (minutes > 0) return '${minutes}min ${seconds}s';
-
-    return '${seconds}s';
   }
 
   Future<bool> _confirmRouteExit(BuildContext context) async {

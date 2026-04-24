@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/constants/app_colors.dart';
-import '../../../../../core/routes/app_routes.dart';
+import '../../../../../app/navigation/app_routes.dart';
 import '../models/route_result_data.dart';
 import 'question_results_sheet.dart';
 

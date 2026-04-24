@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../constants/app_colors.dart';
-import '../../routes/app_routes.dart';
-
-export 'custom_drawer.dart';
+import '../../core/constants/app_colors.dart';
+import '../navigation/app_routes.dart';
 
 class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showBack;

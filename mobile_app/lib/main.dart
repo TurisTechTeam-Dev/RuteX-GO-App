@@ -1,8 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'core/routes/app_routes.dart';
-import 'features/auth/presentation/auth_wrapper.dart';
+import 'app/navigation/app_routes.dart';
+import 'app/auth_wrapper.dart';
 import 'firebase_options.dart';
 import 'injection_container.dart';
 

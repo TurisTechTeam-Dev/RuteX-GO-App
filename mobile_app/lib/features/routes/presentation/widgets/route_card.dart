@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/routes/app_routes.dart';
+import '../../../../app/navigation/app_routes.dart';
 import '../../../../core/widgets/cards/custom_cards.dart';
-import '../../../../core/widgets/images/storage_aware_image.dart';
+import '../../../../core/widgets/images/framed_storage_image.dart';
 import '../../domain/entities/tourist_route.dart';
 
 class RouteCard extends StatelessWidget {
@@ -23,7 +23,7 @@ class RouteCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            _RouteImage(image: route.image),
+            FramedStorageImage(source: route.image, fallbackIcon: Icons.photo),
             const SizedBox(height: 12),
             _RouteTitle(title: route.title),
             if (hasDescription) ...[
@@ -45,75 +45,6 @@ class RouteCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _RouteImage extends StatelessWidget {
-  final String image;
-
-  const _RouteImage({required this.image});
-
-  @override
-  Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 16 / 9,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: AppColors.negroTexto, width: 1),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(5),
-          child: _RouteImageContent(image: image),
-        ),
-      ),
-    );
-  }
-}
-
-class _RouteImageContent extends StatelessWidget {
-  final String image;
-
-  const _RouteImageContent({required this.image});
-
-  @override
-  Widget build(BuildContext context) {
-    return StorageAwareImage(
-      source: image,
-      fit: BoxFit.cover,
-      placeholder: const _RouteLoadingState(),
-      fallback: const _RouteFallbackImage(),
-    );
-  }
-}
-
-class _RouteLoadingState extends StatelessWidget {
-  const _RouteLoadingState();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: AppColors.blancoTarjeta,
-      alignment: Alignment.center,
-      child: const SizedBox(
-        width: 20,
-        height: 20,
-        child: CircularProgressIndicator(strokeWidth: 2),
-      ),
-    );
-  }
-}
-
-class _RouteFallbackImage extends StatelessWidget {
-  const _RouteFallbackImage();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: AppColors.blancoTarjeta,
-      alignment: Alignment.center,
-      child: const Icon(Icons.photo, color: AppColors.verdePrincipal, size: 42),
     );
   }
 }

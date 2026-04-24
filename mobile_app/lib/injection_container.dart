@@ -9,6 +9,10 @@ import 'features/auth/domain/usecases/auth_use_cases.dart';
 import 'features/mission/data/repositories/mission_repository_impl.dart';
 import 'features/mission/domain/repositories/mission_repository.dart';
 import 'features/mission/domain/usecases/mission_use_cases.dart';
+import 'features/profile/data/datasources/profile_remote_datasource.dart';
+import 'features/profile/data/repositories/profile_repository_impl.dart';
+import 'features/profile/domain/repositories/profile_repository.dart';
+import 'features/profile/domain/usecases/profile_use_cases.dart';
 import 'features/routes/data/datasources/routes_remote_datasource.dart';
 import 'features/routes/data/repositories/routes_repository_impl.dart';
 import 'features/routes/domain/repositories/routes_repository.dart';
@@ -34,6 +38,11 @@ List<SingleChildWidget> buildAppProviders() {
         remoteDataSource: RoutesRemoteDataSource(firestore),
       ),
     ),
+    ProxyProvider<FirebaseFirestore, ProfileRepository>(
+      update: (context, firestore, previous) => ProfileRepositoryImpl(
+        remoteDataSource: ProfileRemoteDataSource(firestore),
+      ),
+    ),
     ProxyProvider<AuthRepository, AuthUseCases>(
       update: (context, repository, previous) => AuthUseCases(repository),
     ),
@@ -42,6 +51,9 @@ List<SingleChildWidget> buildAppProviders() {
     ),
     ProxyProvider<RoutesRepository, RoutesUseCases>(
       update: (context, repository, previous) => RoutesUseCases(repository),
+    ),
+    ProxyProvider<ProfileRepository, ProfileUseCases>(
+      update: (context, repository, previous) => ProfileUseCases(repository),
     ),
   ];
 }

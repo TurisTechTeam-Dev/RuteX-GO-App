@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
-import '../../../core/routes/app_routes.dart';
+import '../../../app/navigation/app_routes.dart';
 import '../../auth/domain/usecases/auth_use_cases.dart';
 
 class SplashScreen extends StatefulWidget {

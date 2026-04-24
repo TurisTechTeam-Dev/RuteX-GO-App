@@ -3,14 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
-import '../../../core/routes/app_routes.dart';
+import '../../../app/navigation/app_routes.dart';
 import '../../../core/utils/validators.dart';
-import '../../../core/widgets/auth/auth_card.dart';
-import '../../../core/widgets/auth/auth_logo.dart';
-import '../../../core/widgets/auth/auth_snack_bar.dart';
-import '../../../core/widgets/buttons/custom_button.dart';
-import '../../../core/widgets/inputs/custom_inputs.dart';
 import '../domain/usecases/auth_use_cases.dart';
+import 'widgets/auth_snack_bar.dart';
+import 'widgets/login_content.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -123,124 +120,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
-
     return Scaffold(
       resizeToAvoidBottomInset: true,
       extendBodyBehindAppBar: true,
-      body: SafeArea(
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOut,
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            image: DecorationImage(
-              image: AssetImage('assets/Mapa_fondo_Extremadura.png'),
-              opacity: 0.4,
-              fit: BoxFit.contain,
-            ),
-          ),
-          child: SingleChildScrollView(
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + keyboardInset),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    AuthLogo(height: size.height * 0.18),
-                    const SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        '"Descubre rutas culturales, aprende y juega recorriendo la historia de Extremadura."',
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          height: 1.2,
-                          color: AppColors.negroTexto,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    AuthCard(
-                      children: [
-                        Form(
-                          key: _formKey,
-                          child: Column(
-                            children: [
-                              CustomInput(
-                                label: 'Email',
-                                hint: 'Introduce tu email',
-                                controller: _emailController,
-                                keyboardType: TextInputType.text,
-                                validator: Validators.validateEmail,
-                              ),
-                              CustomInput(
-                                label: 'Contraseña',
-                                hint: 'Introduce tu contraseña',
-                                isPassword: true,
-                                controller: _passwordController,
-                                validator: Validators.validatePassword,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 30),
-                        CustomButton(
-                          text: _isLoading ? "CARGANDO..." : "Iniciar sesión",
-                          onPressed: _isLoading ? null : _handleLogin,
-                        ),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: _recoverPassword,
-                            style: TextButton.styleFrom(
-                              padding: EdgeInsets.zero,
-                            ),
-                            child: Text(
-                              "¿Has olvidado tu contraseña?",
-                              style: Theme.of(context).textTheme.labelMedium
-                                  ?.copyWith(
-                                    fontSize: 11,
-                                    color: AppColors.grisSombra,
-                                  ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "¿No tienes cuenta?  ",
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(fontWeight: FontWeight.w700),
-                            ),
-                            GestureDetector(
-                              onTap: _openRegister,
-                              child: const Text(
-                                "Regístrate",
-                                style: TextStyle(
-                                  color: AppColors.verdePrincipal,
-                                  fontWeight: FontWeight.bold,
-                                  decoration: TextDecoration.none,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
+      body: LoginContent(
+        formKey: _formKey,
+        emailController: _emailController,
+        passwordController: _passwordController,
+        isLoading: _isLoading,
+        onLogin: _handleLogin,
+        onRecoverPassword: _recoverPassword,
+        onOpenRegister: _openRegister,
       ),
     );
   }

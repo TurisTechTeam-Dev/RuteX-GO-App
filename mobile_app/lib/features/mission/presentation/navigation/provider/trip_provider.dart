@@ -6,6 +6,8 @@ import '../../../../../core/map/routing_service.dart';
 import '../../../domain/entities/poi_entity.dart';
 import '../../../domain/usecases/mission_use_cases.dart';
 import '../models/route_completion_summary.dart';
+import '../utils/navigation_distance_utils.dart';
+import '../utils/route_target_selector.dart';
 import '../../quiz/quiz_route_progress.dart';
 
 class TripSimulationProvider extends ChangeNotifier {
@@ -90,39 +92,20 @@ class TripSimulationProvider extends ChangeNotifier {
   void _selectNearestTargetPoi() {
     if (_pointsOfInterest.isEmpty) return;
 
-    final pendingPois = _pointsOfInterest
-        .where(
-          (poi) =>
-              !_completedPoiIndices.contains(_pointsOfInterest.indexOf(poi)),
-        )
-        .toList();
+    final nextPoiIndex = RouteTargetSelector.nearestPendingPoiIndex(
+      pointsOfInterest: _pointsOfInterest,
+      completedPoiIndices: _completedPoiIndices,
+      currentPosition: _currentPosition,
+    );
 
-    if (pendingPois.isEmpty) {
+    if (nextPoiIndex == -1) {
       debugPrint("[ROUTE] No pending points left. Route completed.");
       _allPoisCompleted = true;
       _currentPoiIndex = -1;
       return;
     }
 
-    debugPrint(
-      "[ROUTE] Calculating proximity across ${pendingPois.length} pending points.",
-    );
-
-    pendingPois.sort((a, b) {
-      double distA = const Distance().as(
-        LengthUnit.Meter,
-        _currentPosition,
-        a.location,
-      );
-      double distB = const Distance().as(
-        LengthUnit.Meter,
-        _currentPosition,
-        b.location,
-      );
-      return distA.compareTo(distB);
-    });
-
-    _currentPoiIndex = _pointsOfInterest.indexOf(pendingPois.first);
+    _currentPoiIndex = nextPoiIndex;
     debugPrint(
       "[ROUTE] New dynamic target: ${_pointsOfInterest[_currentPoiIndex].name}",
     );
@@ -234,8 +217,7 @@ class TripSimulationProvider extends ChangeNotifier {
     final lastPosition = _lastRoutedPosition;
     if (lastPosition == null) return;
 
-    final movedDistance = const Distance().as(
-      LengthUnit.Meter,
+    final movedDistance = NavigationDistanceUtils.metersBetween(
       lastPosition,
       _currentPosition,
     );
@@ -251,8 +233,7 @@ class TripSimulationProvider extends ChangeNotifier {
     }
 
     final target = _pointsOfInterest[_currentPoiIndex];
-    double distance = const Distance().as(
-      LengthUnit.Meter,
+    final distance = NavigationDistanceUtils.metersBetween(
       pos,
       target.location,
     );
@@ -295,17 +276,16 @@ class TripSimulationProvider extends ChangeNotifier {
     }
     if (_isSimulating && !_hasReachedDestination) {
       final target = _pointsOfInterest[_currentPoiIndex];
-      double finalDist = const Distance().as(
-        LengthUnit.Meter,
+      final finalDistance = NavigationDistanceUtils.metersBetween(
         _currentPosition,
         target.location,
       );
 
       debugPrint(
-        "[SIM] End of route points. Final distance: ${finalDist.toInt()}m",
+        "[SIM] End of route points. Final distance: ${finalDistance.toInt()}m",
       );
 
-      if (finalDist < 200) {
+      if (finalDistance < 200) {
         debugPrint("[SIM] Forcing arrival by final proximity.");
         _hasReachedDestination = true;
       }
@@ -319,8 +299,7 @@ class TripSimulationProvider extends ChangeNotifier {
 
   double get distanceToNextPoi {
     if (_currentPoiIndex == -1 || _allPoisCompleted) return 0.0;
-    return const Distance().as(
-      LengthUnit.Meter,
+    return NavigationDistanceUtils.metersBetween(
       _currentPosition,
       _pointsOfInterest[_currentPoiIndex].location,
     );

@@ -2,10 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../core/routes/app_routes.dart';
-import '../../splash/presentation/splash_screen.dart';
-import '../domain/entities/auth_user.dart';
-import '../domain/usecases/auth_use_cases.dart';
+import '../features/auth/domain/entities/auth_user.dart';
+import '../features/auth/domain/usecases/auth_use_cases.dart';
+import '../features/splash/presentation/splash_screen.dart';
+import 'navigation/app_routes.dart';
 
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});

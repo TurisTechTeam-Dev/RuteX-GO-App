@@ -3,7 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as google_maps;
 import 'package:latlong2/latlong.dart';
 
-import '../../features/mission/domain/entities/poi_entity.dart';
+import '../../../domain/entities/poi_entity.dart';
 
 class MapView extends StatefulWidget {
   static const bool useGoogleMaps = bool.fromEnvironment(
@@ -152,11 +152,11 @@ class _MapViewState extends State<MapView> {
   }
 
   LatLng _centerToUse() {
-    const meridaCentro = LatLng(38.9161, -6.3437);
+    const meridaCenter = LatLng(38.9161, -6.3437);
     final currentPosition = widget.currentPosition;
 
     if (currentPosition == null || currentPosition.latitude == 0) {
-      return meridaCentro;
+      return meridaCenter;
     }
 
     return currentPosition;
@@ -180,7 +180,7 @@ class _MapViewState extends State<MapView> {
         icon: google_maps.BitmapDescriptor.defaultMarkerWithHue(
           google_maps.BitmapDescriptor.hueAzure,
         ),
-        infoWindow: const google_maps.InfoWindow(title: 'Tu posicion'),
+        infoWindow: const google_maps.InfoWindow(title: 'Tu posición'),
       ),
     };
   }

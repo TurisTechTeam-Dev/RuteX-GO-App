@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/backgrounds/extremadura_map_background.dart';
 import '../../../../core/widgets/titles/stroke_title.dart';
-import '../../data/home_summary.dart';
 import '../../domain/entities/home_data.dart';
+import '../models/home_summary.dart';
 import 'home_cards.dart';
 import 'home_route_list.dart';
 

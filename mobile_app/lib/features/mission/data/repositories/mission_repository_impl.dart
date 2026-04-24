@@ -8,6 +8,7 @@ import '../../domain/entities/poi_entity.dart';
 import '../../domain/entities/route_progress_save_result.dart';
 import '../../domain/repositories/mission_repository.dart';
 import '../datasources/mission_remote_datasource.dart';
+import '../models/completed_route_progress_model.dart';
 import '../models/mission_model.dart';
 import '../models/poi_model.dart';
 
@@ -136,56 +137,31 @@ class MissionRepositoryImpl implements MissionRepository {
         data[UserFields.rutasCompletadas] ?? [],
       );
       final normalizedRoutes = List<dynamic>.from(completedRoutes);
+      final savedProgress = CompletedRouteProgressModel.findMatch(
+        completedRoutes: normalizedRoutes,
+        routeId: routeId,
+      );
+      final previousBestPoints = savedProgress.previousBestPoints;
 
-      var existingIndex = -1;
-      var previousBestPoints = 0;
-
-      for (var i = 0; i < normalizedRoutes.length; i++) {
-        final route = normalizedRoutes[i];
-
-        if (route is String && route == routeId) {
-          existingIndex = i;
-          break;
-        }
-
-        if (route is Map) {
-          final savedRouteId =
-              route[CompletedRouteFields.rutaId] ??
-              route[CompletedRouteFields.idRuta] ??
-              route[CompletedRouteFields.routeId];
-
-          if (savedRouteId?.toString() == routeId) {
-            existingIndex = i;
-            previousBestPoints = _asInt(
-              route[CompletedRouteFields.puntosObtenidos] ??
-                  route[CompletedRouteFields.puntos],
-            );
-            break;
-          }
-        }
-      }
-
-      if (existingIndex != -1 && previousBestPoints >= currentAttemptPoints) {
+      if (savedProgress.exists && previousBestPoints >= currentAttemptPoints) {
         return RouteProgressSaveResult(
           previousBestPoints: previousBestPoints,
           savedBestPoints: previousBestPoints,
         );
       }
 
-      final routeProgress = {
-        CompletedRouteFields.rutaId: routeId,
-        CompletedRouteFields.puntosObtenidos: currentAttemptPoints,
-        CompletedRouteFields.monumentosVisitados: visitedPois,
-        CompletedRouteFields.misionesCompletadas: completedMissions,
-        CompletedRouteFields.puntosInteresSaltados: skippedPois
-            .map((poi) => {'id': poi.id, 'nombre': poi.name})
-            .toList(),
-      };
+      final routeProgress = CompletedRouteProgressModel.toFirestore(
+        routeId: routeId,
+        currentAttemptPoints: currentAttemptPoints,
+        visitedPois: visitedPois,
+        completedMissions: completedMissions,
+        skippedPois: skippedPois,
+      );
 
-      if (existingIndex == -1) {
+      if (!savedProgress.exists) {
         normalizedRoutes.add(routeProgress);
       } else {
-        normalizedRoutes[existingIndex] = routeProgress;
+        normalizedRoutes[savedProgress.index] = routeProgress;
       }
 
       final updates = <String, dynamic>{
@@ -205,11 +181,4 @@ class MissionRepositoryImpl implements MissionRepository {
     });
   }
 
-  int _asInt(dynamic value) {
-    if (value is int) return value;
-    if (value is num) return value.toInt();
-    if (value is String) return int.tryParse(value) ?? 0;
-
-    return 0;
-  }
 }

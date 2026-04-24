@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../../../core/constants/app_colors.dart';
-import '../../../../../core/routes/app_routes.dart';
-import '../../../../../core/widgets/qr_scanner/scanner_widget.dart';
+import '../../../../../app/navigation/app_routes.dart';
 import '../../../domain/usecases/mission_use_cases.dart';
 import '../../mission_flow_result.dart';
 import '../../monument_detail/models/monument_info_args.dart';
 import '../../quiz/quiz_route_progress.dart';
 import '../models/mission_scanner_args.dart';
 import '../widgets/mission_scanner_overlay.dart';
+import '../widgets/rutex_scanner_widget.dart';
 
 class MissionScannerScreen extends StatefulWidget {
   final MissionUseCases missionUseCases;

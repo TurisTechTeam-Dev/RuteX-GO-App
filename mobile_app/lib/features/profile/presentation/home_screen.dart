@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
-import '../../../core/routes/app_routes.dart';
-import '../../../core/widgets/bars/top_app_bar.dart';
+import '../../../app/navigation/app_routes.dart';
+import '../../../app/widgets/custom_drawer.dart';
+import '../../../app/widgets/top_app_bar.dart';
 import '../../auth/domain/usecases/auth_use_cases.dart';
-import '../data/factories/home_data_loader_factory.dart';
 import '../domain/entities/home_data.dart';
+import '../domain/usecases/profile_use_cases.dart';
 import 'widgets/home_content.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -25,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
       throw Exception("No hay sesión activa.");
     }
 
-    return createHomeDataLoader().load(user.uid);
+    return context.read<ProfileUseCases>().getHomeData(user.uid);
   }
 
   @override
