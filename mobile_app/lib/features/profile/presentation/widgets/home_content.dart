@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/backgrounds/extremadura_map_background.dart';
 import '../../../../core/widgets/titles/stroke_title.dart';
-import '../../data/home_data.dart';
 import '../../data/home_summary.dart';
+import '../../domain/entities/home_data.dart';
 import 'home_cards.dart';
 import 'home_route_list.dart';
 
@@ -31,7 +31,7 @@ class HomeContent extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     HomeUserCard(
-                      userData: data.user,
+                      user: data.user,
                       rankName: summary.rankName,
                       rankLogo: summary.rankLogo,
                     ),

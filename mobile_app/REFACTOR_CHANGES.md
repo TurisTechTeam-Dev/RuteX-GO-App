@@ -24,8 +24,12 @@ La idea es que cualquier companero pueda abrirlo, entender el estado actual y sa
 Archivos principales:
 
 - `lib/features/profile/presentation/home_screen.dart`
+- `lib/features/profile/domain/entities/home_data.dart`
+- `lib/features/profile/domain/entities/home_route.dart`
+- `lib/features/profile/domain/entities/profile_rank.dart`
+- `lib/features/profile/domain/entities/user_profile.dart`
+- `lib/features/profile/data/factories/home_data_loader_factory.dart`
 - `lib/features/profile/data/home_data_loader.dart`
-- `lib/features/profile/data/home_data.dart`
 - `lib/features/profile/data/home_summary.dart`
 - `lib/features/profile/presentation/widgets/home_content.dart`
 - `lib/features/profile/presentation/widgets/home_cards.dart`
@@ -34,8 +38,10 @@ Archivos principales:
 Que hace ahora:
 
 - `home_screen.dart` actua como contenedor simple.
-- `home_data_loader.dart` carga usuario, rangos y rutas completadas.
-- `home_summary.dart` calcula el resumen visible del home.
+- `home_data_loader.dart` carga usuario, rangos y rutas completadas a partir del uid recibido.
+- `home_data_loader_factory.dart` encapsula el wiring de Firestore para el Home.
+- `HomeData`, `HomeRoute`, `ProfileRank` y `UserProfile` tipan los datos visibles del Home.
+- `home_summary.dart` calcula el resumen visible del home usando entidades, no mapas.
 - `home_cards.dart` contiene las cards de usuario, estadisticas y rutas.
 - `home_route_list.dart` pinta la lista de rutas completadas.
 

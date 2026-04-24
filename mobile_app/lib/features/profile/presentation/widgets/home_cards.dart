@@ -1,26 +1,25 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/firestore_contract.dart';
 import '../../../../core/widgets/cards/custom_cards.dart';
 import '../../../../core/widgets/images/storage_aware_image.dart';
+import '../../domain/entities/user_profile.dart';
 
 class HomeUserCard extends StatelessWidget {
-  final Map<String, dynamic> userData;
+  final UserProfile user;
   final String rankName;
   final String rankLogo;
 
   const HomeUserCard({
     super.key,
-    required this.userData,
+    required this.user,
     required this.rankName,
     required this.rankLogo,
   });
 
   @override
   Widget build(BuildContext context) {
-    final explorerLabel = _explorerLabel(userData[UserFields.fechaCreacion]);
+    final explorerLabel = _explorerLabel(user.createdAt);
 
     return CustomCard(
       padding: const EdgeInsets.all(16),
@@ -36,7 +35,7 @@ class HomeUserCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                userData['nombre'] ?? 'Sin nombre',
+                user.name,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   color: AppColors.negroTexto,
@@ -56,25 +55,17 @@ class HomeUserCard extends StatelessWidget {
     );
   }
 
-  String _explorerLabel(dynamic createdAt) {
-    final createdDate = _dateFromFirestoreValue(createdAt);
-    if (createdDate == null) return "Explorador";
+  String _explorerLabel(DateTime? createdAt) {
+    if (createdAt == null) return "Explorador";
 
-    final days = DateTime.now().difference(createdDate).inDays;
+    final days = DateTime.now().difference(createdAt).inDays;
     if (days <= 0) return "Explorador desde hoy";
-    if (days == 1) return "Explorador desde hace 1 dia";
+    if (days == 1) return "Explorador desde hace 1 día";
     if (days < 30) return "Explorador desde hace $days días";
 
     final months = days ~/ 30;
     if (months == 1) return "Explorador desde hace 1 mes";
     return "Explorador desde hace $months meses";
-  }
-
-  DateTime? _dateFromFirestoreValue(dynamic value) {
-    if (value is Timestamp) return value.toDate();
-    if (value is DateTime) return value;
-
-    return null;
   }
 }
 

@@ -1,132 +1,137 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../core/constants/firestore_contract.dart';
-import 'home_data.dart';
+import '../domain/entities/home_data.dart';
+import '../domain/entities/home_route.dart';
+import '../domain/entities/profile_rank.dart';
+import '../domain/entities/user_profile.dart';
+import 'datasources/profile_remote_datasource.dart';
 
 class HomeDataLoader {
-  static const int _firestoreWhereInLimit = 10;
+  final ProfileRemoteDatasource remoteDatasource;
 
-  const HomeDataLoader();
+  const HomeDataLoader(this.remoteDatasource);
 
-  Future<HomeData> load() async {
-    final uid = FirebaseAuth.instance.currentUser!.uid;
-    final firestore = FirebaseFirestore.instance;
-    final userRef = firestore
-        .collection(FirestoreCollections.usuarios)
-        .doc(uid);
-
-    final userDoc = await userRef.get();
-
+  Future<HomeData> load(String uid) async {
+    final userDoc = await remoteDatasource.getUserDoc(uid);
     final userData = userDoc.data() ?? {};
 
-    final rangosDoc = await firestore
-        .collection(FirestoreCollections.configRangos)
-        .doc(FirestoreDocs.rangosConfig)
-        .get();
+    final ranksDoc = await remoteDatasource.getRanksConfigDoc();
+    final ranks = _parseRanks(ranksDoc.data()?[RankFields.rangos]);
 
-    final rangos = rangosDoc.data()?[RankFields.rangos] ?? [];
-
-    final rutasProgreso = List<dynamic>.from(
+    final routesProgress = List<dynamic>.from(
       userData[UserFields.rutasCompletadas] ?? [],
     );
 
-    var rutasIds = rutasProgreso
+    var routeIds = routesProgress
         .map(_routeIdFromProgress)
         .whereType<String>()
         .toList();
+    routeIds = routeIds.toSet().toList();
 
-    rutasIds = rutasIds.toSet().toList();
-
-    final rutas = <HomeRouteData>[];
-    final rutasDocs = await _loadRoutesByIds(firestore, rutasIds);
-    final validRouteIds = rutasDocs.map((doc) => doc.id).toSet();
+    final routes = <HomeRoute>[];
+    final routeDocs = await remoteDatasource.getRoutesByIds(routeIds);
+    final validRouteIds = routeDocs.map((doc) => doc.id).toSet();
     final normalizedRoutesProgress = _filterValidRoutesProgress(
-      rutasProgreso,
+      routesProgress,
       validRouteIds,
     );
-    final orphanedPoints = _sumRemovedRoutePoints(rutasProgreso, validRouteIds);
+    final orphanedPoints = _sumRemovedRoutePoints(
+      routesProgress,
+      validRouteIds,
+    );
 
-    for (final doc in rutasDocs) {
+    for (final doc in routeDocs) {
       final data = doc.data();
-      final puntosInteres = List<dynamic>.from(
+      final pointIds = List<dynamic>.from(
         data[RouteFields.idPuntosInteres] ?? [],
-      );
-      final misionesTotales = puntosInteres.length;
-      final puntosTotales = _asInt(
+      ).map((pointId) => pointId.toString()).toList();
+      final totalMissions = pointIds.length;
+      final totalPoints = _asInt(
         data[RouteFields.puntosTotales],
-        defaultValue: _routeTotalPoints(misionesTotales),
+        defaultValue: _routeTotalPoints(totalMissions),
       );
 
-      final progreso = _progressMapForRoute(rutasProgreso, doc.id);
-      final hasDetailedProgress = progreso.isNotEmpty;
+      final progress = _progressMapForRoute(routesProgress, doc.id);
+      final hasDetailedProgress = progress.isNotEmpty;
 
-      final puntosObtenidos = _asInt(
-        progreso[CompletedRouteFields.puntosObtenidos] ??
-            progreso[CompletedRouteFields.puntos],
-        defaultValue: hasDetailedProgress ? 0 : puntosTotales,
+      final obtainedPoints = _asInt(
+        progress[CompletedRouteFields.puntosObtenidos] ??
+            progress[CompletedRouteFields.puntos],
+        defaultValue: hasDetailedProgress ? 0 : totalPoints,
       );
-      final misionesCompletadas = _asInt(
-        progreso[CompletedRouteFields.misionesCompletadas] ??
-            progreso[CompletedRouteFields.monumentosVisitados],
-        defaultValue: misionesTotales,
+      final completedMissions = _asInt(
+        progress[CompletedRouteFields.misionesCompletadas] ??
+            progress[CompletedRouteFields.monumentosVisitados],
+        defaultValue: totalMissions,
       );
 
-      rutas.add(
-        HomeRouteData(
+      routes.add(
+        HomeRoute(
           id: doc.id,
           name: data[RouteFields.nombre]?.toString() ?? "Ruta",
-          totalPoints: puntosTotales,
-          pointsOfInterest: puntosInteres,
-          totalMissions: misionesTotales,
-          obtainedPoints: puntosObtenidos,
-          completedMissions: misionesCompletadas,
+          totalPoints: totalPoints,
+          pointIds: pointIds,
+          totalMissions: totalMissions,
+          obtainedPoints: obtainedPoints,
+          completedMissions: completedMissions,
         ),
       );
     }
 
-    final normalizedUserData = Map<String, dynamic>.from(userData);
-    normalizedUserData[UserFields.rutasCompletadas] = normalizedRoutesProgress;
-
+    var totalUserPoints = _asInt(userData[UserFields.puntos]);
     final hasOrphanedRoutes =
-        normalizedRoutesProgress.length != rutasProgreso.length;
+        normalizedRoutesProgress.length != routesProgress.length;
 
     if (orphanedPoints > 0 || hasOrphanedRoutes) {
-      final currentPoints = _asInt(userData[UserFields.puntos]);
-      final updatedPoints = (currentPoints - orphanedPoints).clamp(0, 1 << 31);
-      normalizedUserData[UserFields.puntos] = updatedPoints;
+      totalUserPoints = (totalUserPoints - orphanedPoints).clamp(0, 1 << 31);
 
-      await userRef.update({
-        UserFields.rutasCompletadas: normalizedRoutesProgress,
-        UserFields.puntos: updatedPoints,
-      });
+      await remoteDatasource.updateUserHomeProgress(
+        uid: uid,
+        routesProgress: normalizedRoutesProgress,
+        points: totalUserPoints,
+      );
     }
 
-    return HomeData(user: normalizedUserData, routes: rutas, rangos: rangos);
+    return HomeData(
+      user: _parseUser(userData, uid, totalUserPoints),
+      routes: routes,
+      ranks: ranks,
+    );
   }
 
-  static Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>>
-  _loadRoutesByIds(FirebaseFirestore firestore, List<String> ids) async {
-    if (ids.isEmpty) return [];
+  static UserProfile _parseUser(
+    Map<String, dynamic> data,
+    String uid,
+    int points,
+  ) {
+    return UserProfile(
+      uid: data[UserFields.uid]?.toString() ?? uid,
+      name: data[UserFields.nombre]?.toString() ?? 'Sin nombre',
+      username: data[UserFields.usuario]?.toString() ?? '',
+      email: data[UserFields.email]?.toString() ?? '',
+      points: points,
+      createdAt: _dateFromFirestoreValue(data[UserFields.fechaCreacion]),
+    );
+  }
 
-    final docsById = <String, QueryDocumentSnapshot<Map<String, dynamic>>>{};
+  static List<ProfileRank> _parseRanks(dynamic rawRanks) {
+    if (rawRanks is! List) return const [];
 
-    for (var i = 0; i < ids.length; i += _firestoreWhereInLimit) {
-      final chunk = ids.skip(i).take(_firestoreWhereInLimit).toList();
-      final query = await firestore
-          .collection(FirestoreCollections.rutas)
-          .where(FieldPath.documentId, whereIn: chunk)
-          .get();
+    return rawRanks.whereType<Map>().map((rank) {
+      return ProfileRank(
+        name: rank[RankFields.nombre]?.toString() ?? '',
+        logo: rank[RankFields.logo]?.toString() ?? '',
+        neededPoints: _asInt(rank[RankFields.puntosNecesarios]),
+      );
+    }).toList();
+  }
 
-      for (final doc in query.docs) {
-        docsById[doc.id] = doc;
-      }
-    }
+  static DateTime? _dateFromFirestoreValue(dynamic value) {
+    if (value is Timestamp) return value.toDate();
+    if (value is DateTime) return value;
 
-    return ids
-        .map((id) => docsById[id])
-        .whereType<QueryDocumentSnapshot<Map<String, dynamic>>>()
-        .toList();
+    return null;
   }
 
   static String? _routeIdFromProgress(dynamic progress) {

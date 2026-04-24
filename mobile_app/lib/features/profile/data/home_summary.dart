@@ -1,5 +1,7 @@
 import '../../../core/constants/firestore_contract.dart';
-import 'home_data.dart';
+import '../domain/entities/home_data.dart';
+import '../domain/entities/home_route.dart';
+import '../domain/entities/profile_rank.dart';
 
 class HomeSummary {
   final String rankName;
@@ -19,8 +21,8 @@ class HomeSummary {
   });
 
   factory HomeSummary.fromHomeData(HomeData data) {
-    final totalPoints = _asInt(data.user[UserFields.puntos]);
-    final rank = _rankForPoints(totalPoints, data.rangos);
+    final totalPoints = data.user.points;
+    final rank = _rankForPoints(totalPoints, data.ranks);
 
     return HomeSummary(
       rankName: rank.name,
@@ -35,26 +37,24 @@ class HomeSummary {
     );
   }
 
-  static _RankSummary _rankForPoints(int points, List<dynamic> ranks) {
+  static _RankSummary _rankForPoints(int points, List<ProfileRank> ranks) {
     String name = "Esclavo";
     String logo = "";
     int maxPoints = -1;
 
     for (final rank in ranks) {
-      if (rank is! Map) continue;
-
-      final neededPoints = _asInt(rank[RankFields.puntosNecesarios]);
+      final neededPoints = rank.neededPoints;
       if (points >= neededPoints && neededPoints > maxPoints) {
         maxPoints = neededPoints;
-        name = rank[RankFields.nombre]?.toString() ?? name;
-        logo = rank[RankFields.logo]?.toString() ?? logo;
+        name = rank.name.isNotEmpty ? rank.name : name;
+        logo = rank.logo.isNotEmpty ? rank.logo : logo;
       }
     }
 
     return _RankSummary(name: name, logo: logo);
   }
 
-  static int _sumRouteValue(List<HomeRouteData> routes, String key) {
+  static int _sumRouteValue(List<HomeRoute> routes, String key) {
     var total = 0;
 
     for (final route in routes) {
@@ -67,14 +67,6 @@ class HomeSummary {
     }
 
     return total;
-  }
-
-  static int _asInt(dynamic value, [int defaultValue = 0]) {
-    if (value is int) return value;
-    if (value is num) return value.toInt();
-    if (value is String) return int.tryParse(value) ?? defaultValue;
-
-    return defaultValue;
   }
 }
 

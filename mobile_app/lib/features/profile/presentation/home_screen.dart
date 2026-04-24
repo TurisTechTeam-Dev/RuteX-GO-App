@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/routes/app_routes.dart';
 import '../../../core/widgets/bars/top_app_bar.dart';
-import '../data/home_data.dart';
-import '../data/home_data_loader.dart';
+import '../../auth/domain/usecases/auth_use_cases.dart';
+import '../data/factories/home_data_loader_factory.dart';
+import '../domain/entities/home_data.dart';
 import 'widgets/home_content.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -15,7 +17,16 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late final Future<HomeData> homeFuture = const HomeDataLoader().load();
+  late final Future<HomeData> homeFuture = _loadHomeData();
+
+  Future<HomeData> _loadHomeData() async {
+    final user = context.read<AuthUseCases>().getCurrentUser();
+    if (user == null) {
+      throw Exception("No hay sesión activa.");
+    }
+
+    return createHomeDataLoader().load(user.uid);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,15 +34,13 @@ class _HomeScreenState extends State<HomeScreen> {
       extendBodyBehindAppBar: true,
       appBar: const TopAppBar(),
       endDrawer: const CustomDrawer(),
-
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.verdePrincipal,
-        child: const Icon(Icons.explore, color: Colors.white),
         onPressed: () {
           Navigator.pushNamed(context, AppRoutes.citySelection);
         },
+        child: const Icon(Icons.explore, color: Colors.white),
       ),
-
       body: FutureBuilder<HomeData>(
         future: homeFuture,
         builder: (context, snapshot) {

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../data/home_data.dart';
+import '../../domain/entities/home_route.dart';
 import 'home_cards.dart';
 
 class HomeRouteList extends StatelessWidget {
-  final List<HomeRouteData> routes;
+  final List<HomeRoute> routes;
 
   const HomeRouteList({super.key, required this.routes});
 
