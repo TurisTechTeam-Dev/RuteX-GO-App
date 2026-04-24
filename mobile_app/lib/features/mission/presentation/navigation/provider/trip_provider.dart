@@ -46,7 +46,7 @@ class TripSimulationProvider extends ChangeNotifier {
   final DateTime _startedAt = DateTime.now();
   LatLng? _lastRoutedPosition;
 
-  // --- ESTADO ---
+  // --- State ---
   List<PointOfInterest> _pointsOfInterest = [];
   List<PointOfInterest> get pointsOfInterest => _pointsOfInterest;
 
@@ -59,7 +59,7 @@ class TripSimulationProvider extends ChangeNotifier {
   LatLng _currentPosition = const LatLng(
     38.9161,
     -6.3437,
-  ); // Mérida por defecto
+  ); // Default Merida position.
   LatLng get currentPosition => _currentPosition;
 
   int _currentPoiIndex = -1;
@@ -83,9 +83,7 @@ class TripSimulationProvider extends ChangeNotifier {
     required this.missionUseCases,
     required this.routeId,
   }) {
-    debugPrint(
-      "🚀 [TRIP_PROVIDER] Inicializando Navegación Dinámica por Proximidad...",
-    );
+    debugPrint("[TRIP_PROVIDER] Initializing proximity-based navigation.");
     _initializeTrip();
   }
 
@@ -94,33 +92,29 @@ class TripSimulationProvider extends ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      debugPrint("📡 [DB] Descargando puntos para la ruta: $routeId");
+      debugPrint("[DB] Loading points for route: $routeId");
       _pointsOfInterest = await missionUseCases.executeGetPointsForRoute(
         routeId,
       );
-      debugPrint(
-        "✅ [DB] ${_pointsOfInterest.length} puntos cargados correctamente.",
-      );
+      debugPrint("[DB] Loaded ${_pointsOfInterest.length} points.");
 
       await _initGpsTracking();
 
-      // Al iniciar, buscamos el más cercano a nuestra posición actual
+      // Start with the closest pending point to the current position.
       _selectNearestTargetPoi();
       await _calculateStreetRoute();
     } catch (e) {
-      debugPrint("❌ [TRIP_PROVIDER] Error crítico en inicialización: $e");
+      debugPrint("[TRIP_PROVIDER] Critical initialization error: $e");
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  /// LÓGICA DINÁMICA: Selecciona el monumento no visitado más cercano al usuario.
-  /// Esto resuelve el conflicto Teatro-Anfiteatro por exclusión.
+  /// Selects the closest unvisited point to the user.
   void _selectNearestTargetPoi() {
     if (_pointsOfInterest.isEmpty) return;
 
-    // Filtramos solo los que NO han sido completados
     final pendingPois = _pointsOfInterest
         .where(
           (poi) =>
@@ -129,17 +123,16 @@ class TripSimulationProvider extends ChangeNotifier {
         .toList();
 
     if (pendingPois.isEmpty) {
-      debugPrint("🏁 [LÓGICA] No quedan puntos pendientes. ¡Ruta finalizada!");
+      debugPrint("[ROUTE] No pending points left. Route completed.");
       _allPoisCompleted = true;
       _currentPoiIndex = -1;
       return;
     }
 
     debugPrint(
-      "⚖️ [LÓGICA] Calculando proximidad entre ${pendingPois.length} monumentos restantes...",
+      "[ROUTE] Calculating proximity across ${pendingPois.length} pending points.",
     );
 
-    // Ordenamos la lista de pendientes por distancia real al GPS actual
     pendingPois.sort((a, b) {
       double distA = const Distance().as(
         LengthUnit.Meter,
@@ -154,14 +147,13 @@ class TripSimulationProvider extends ChangeNotifier {
       return distA.compareTo(distB);
     });
 
-    // El nuevo objetivo es el primero de la lista (el más cercano)
     _currentPoiIndex = _pointsOfInterest.indexOf(pendingPois.first);
     debugPrint(
-      "🎯 [DESTINO] Nuevo objetivo dinámico: ${_pointsOfInterest[_currentPoiIndex].name}",
+      "[ROUTE] New dynamic target: ${_pointsOfInterest[_currentPoiIndex].name}",
     );
   }
 
-  /// Calcula la ruta por calles usando OSRM hacia el objetivo actual
+  /// Calculates the street route to the current target with OSRM.
   Future<void> _calculateStreetRoute() async {
     if (_allPoisCompleted || _currentPoiIndex == -1) {
       _routePoints = [];
@@ -171,7 +163,7 @@ class TripSimulationProvider extends ChangeNotifier {
 
     final target = _pointsOfInterest[_currentPoiIndex].location;
     debugPrint(
-      "🌐 [OSRM] Trazando camino hacia: ${_pointsOfInterest[_currentPoiIndex].name}",
+      "[OSRM] Building route to: ${_pointsOfInterest[_currentPoiIndex].name}",
     );
 
     try {
@@ -179,19 +171,19 @@ class TripSimulationProvider extends ChangeNotifier {
       _routePoints = points.isNotEmpty ? points : [_currentPosition, target];
       _lastRoutedPosition = _currentPosition;
     } catch (e) {
-      debugPrint("⚠️ [OSRM] Error de conexión. Usando línea recta temporal.");
+      debugPrint("[OSRM] Connection error. Falling back to a straight line.");
       _routePoints = [_currentPosition, target];
       _lastRoutedPosition = _currentPosition;
     }
     notifyListeners();
   }
 
-  /// Marca el punto actual como visitado y fuerza el recálculo al siguiente más cercano
+  /// Marks the current point as visited and recalculates the closest target.
   bool markCurrentPoiAsCompleted() {
     if (_currentPoiIndex == -1) return _allPoisCompleted;
 
     debugPrint(
-      "✅ [PROGRESO] '${_pointsOfInterest[_currentPoiIndex].name}' marcado como completado.",
+      "[PROGRESS] '${_pointsOfInterest[_currentPoiIndex].name}' marked as completed.",
     );
 
     if (!_completedPoiIndices.contains(_currentPoiIndex)) {
@@ -200,7 +192,6 @@ class TripSimulationProvider extends ChangeNotifier {
 
     _hasReachedDestination = false;
 
-    // Recalcular cuál es el más cercano AHORA (excluyendo el que acabamos de terminar)
     _selectNearestTargetPoi();
 
     if (!_allPoisCompleted) {
@@ -210,25 +201,23 @@ class TripSimulationProvider extends ChangeNotifier {
     return _allPoisCompleted;
   }
 
-  // --- CONTROL GPS ---
+  // --- GPS control ---
 
   Future<void> _initGpsTracking() async {
-    debugPrint("🛰️ [GPS] Configurando sensor...");
+    debugPrint("[GPS] Configuring position stream.");
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
     }
 
-    // Posición inicial
     Position pos = await Geolocator.getCurrentPosition();
     _currentPosition = LatLng(pos.latitude, pos.longitude);
 
-    // Escucha activa de movimiento
     _positionStream =
         Geolocator.getPositionStream(
           locationSettings: const LocationSettings(
             accuracy: LocationAccuracy.high,
-            distanceFilter: 10, // Actualiza cada 3 metros para suavidad
+            distanceFilter: 10,
           ),
         ).listen((Position pos) {
           if (!_isSimulating) {
@@ -271,10 +260,9 @@ class TripSimulationProvider extends ChangeNotifier {
       target.location,
     );
 
-    // Comprobamos contra el radio de Firebase (recomendado 20m)
     if (distance <= target.activationRadius) {
       debugPrint(
-        "📍 [LLEGADA] ¡Has llegado a ${target.name}! Distancia: ${distance.toInt()}m",
+        "[ARRIVAL] Reached ${target.name}. Distance: ${distance.toInt()}m",
       );
       _hasReachedDestination = true;
       _isSimulating = false;
@@ -282,13 +270,13 @@ class TripSimulationProvider extends ChangeNotifier {
     }
   }
 
-  // --- SIMULACIÓN PARA PRUEBAS ---
+  // --- Test simulation ---
 
   Future<void> startSimulation() async {
     if (_allPoisCompleted || _currentPoiIndex == -1) return;
 
     debugPrint(
-      "🎬 [SIM] Iniciando recorrido automático hacia ${_pointsOfInterest[_currentPoiIndex].name}...",
+      "[SIM] Starting automatic route to ${_pointsOfInterest[_currentPoiIndex].name}.",
     );
     _isSimulating = true;
     _hasReachedDestination = false;
@@ -300,7 +288,6 @@ class TripSimulationProvider extends ChangeNotifier {
       notifyListeners();
       await Future.delayed(const Duration(milliseconds: 90));
     }
-    // Si terminó la simulación y NO saltó el popup por pocos metros, lo forzamos
     if (_isSimulating && !_hasReachedDestination) {
       final target = _pointsOfInterest[_currentPoiIndex];
       double finalDist = const Distance().as(
@@ -310,12 +297,11 @@ class TripSimulationProvider extends ChangeNotifier {
       );
 
       debugPrint(
-        "🏁 [SIM] Fin de puntos. Distancia final al monumento: ${finalDist.toInt()}m",
+        "[SIM] End of route points. Final distance: ${finalDist.toInt()}m",
       );
 
-      // Si al terminar estamos a menos de 100 metros, asumimos llegada para que el usuario no se quede bloqueado
       if (finalDist < 200) {
-        debugPrint("🎯 [SIM] Forzando llegada por proximidad final.");
+        debugPrint("[SIM] Forcing arrival by final proximity.");
         _hasReachedDestination = true;
       }
     }
@@ -324,7 +310,7 @@ class TripSimulationProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // --- HELPERS PARA UI ---
+  // --- UI helpers ---
 
   double get distanceToNextPoi {
     if (_currentPoiIndex == -1 || _allPoisCompleted) return 0.0;
@@ -388,7 +374,7 @@ class TripSimulationProvider extends ChangeNotifier {
 
   @override
   void dispose() {
-    debugPrint("🗑️ [TRIP_PROVIDER] Limpiando recursos y cerrando GPS Stream.");
+    debugPrint("[TRIP_PROVIDER] Disposing GPS stream.");
     _positionStream?.cancel();
     super.dispose();
   }
