@@ -14,7 +14,6 @@ import '../../features/mission/presentation/quiz/screens/quiz_screen.dart';
 import '../../features/mission/presentation/quiz/screens/route_result_screen.dart';
 import '../../features/profile/presentation/home_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
-import '../../features/routes/data/repositories/routes_repository_impl.dart';
 import '../../features/routes/domain/usecases/routes_use_cases.dart';
 import '../../features/routes/presentation/city_selection_screen.dart';
 import '../../features/routes/presentation/route_selection_screen.dart';
@@ -35,8 +34,6 @@ class AppRoutes {
   static const String adminPanel = '/admin_panel';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
-    final routesUseCases = RoutesUseCases(RoutesRepositoryImpl());
-
     switch (settings.name) {
       case mapNavigation:
         final String routeId = settings.arguments as String? ?? '';
@@ -56,14 +53,16 @@ class AppRoutes {
 
       case citySelection:
         return MaterialPageRoute(
-          builder: (_) => CitySelectionScreen(routesUseCases: routesUseCases),
+          builder: (context) => CitySelectionScreen(
+            routesUseCases: context.read<RoutesUseCases>(),
+          ),
         );
 
       case routeSelection:
         final String cityId = settings.arguments as String? ?? '';
         return MaterialPageRoute(
-          builder: (_) => RouteSelectionScreen(
-            routesUseCases: routesUseCases,
+          builder: (context) => RouteSelectionScreen(
+            routesUseCases: context.read<RoutesUseCases>(),
             cityId: cityId,
           ),
         );
@@ -83,7 +82,8 @@ class AppRoutes {
       case missionQrScanner:
         final args = settings.arguments as Map<String, dynamic>?;
         return MaterialPageRoute(
-          builder: (_) => MissionScannerScreen(
+          builder: (context) => MissionScannerScreen(
+            missionUseCases: context.read<MissionUseCases>(),
             routeId: args?['routeId']?.toString(),
             totalPois: _asInt(args?['totalPois']),
             expectedPointId: args?['expectedPointId']?.toString(),

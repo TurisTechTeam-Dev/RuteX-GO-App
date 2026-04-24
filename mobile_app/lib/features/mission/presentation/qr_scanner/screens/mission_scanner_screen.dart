@@ -4,7 +4,6 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/routes/app_routes.dart';
 import '../../../../../core/widgets/qr_scanner/scanner_widget.dart';
-import '../../../data/repositories/mission_repository_impl.dart';
 import '../../../domain/usecases/mission_use_cases.dart';
 import '../../mission_flow_result.dart';
 import '../../monument_detail/models/monument_info_args.dart';
@@ -12,6 +11,7 @@ import '../../quiz/quiz_route_progress.dart';
 import '../widgets/mission_scanner_overlay.dart';
 
 class MissionScannerScreen extends StatefulWidget {
+  final MissionUseCases missionUseCases;
   final String? routeId;
   final int? totalPois;
   final String? expectedPointId;
@@ -19,6 +19,7 @@ class MissionScannerScreen extends StatefulWidget {
 
   const MissionScannerScreen({
     super.key,
+    required this.missionUseCases,
     this.routeId,
     this.totalPois,
     this.expectedPointId,
@@ -33,7 +34,6 @@ class _MissionScannerScreenState extends State<MissionScannerScreen> {
   static const Duration _scanCooldown = Duration(milliseconds: 2800);
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final MissionUseCases _useCases = MissionUseCases(MissionRepositoryImpl());
 
   final MobileScannerController _scannerController = MobileScannerController(
     detectionSpeed: DetectionSpeed.noDuplicates,
@@ -50,7 +50,7 @@ class _MissionScannerScreenState extends State<MissionScannerScreen> {
   }
 
   void _onQrCodeDetected(String code) async {
-    debugPrint("QR detectado: $code");
+    debugPrint("QR detected: $code");
     final now = DateTime.now();
     if (_isProcessing) return;
     if (_lastScanAt != null && now.difference(_lastScanAt!) < _scanCooldown) {
@@ -62,7 +62,7 @@ class _MissionScannerScreenState extends State<MissionScannerScreen> {
 
     await _scannerController.stop();
 
-    final result = await _useCases.executeScan(code);
+    final result = await widget.missionUseCases.executeScan(code);
 
     if (result != null && mounted) {
       final pointId = result.point.id;
