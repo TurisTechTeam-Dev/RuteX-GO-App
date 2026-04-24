@@ -34,6 +34,20 @@ class AuthUseCases {
     return repository.recoverPassword(email);
   }
 
+  Future<void> requestEmailChange(String newEmail) {
+    return repository.requestEmailChange(newEmail);
+  }
+
+  Future<void> updatePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) {
+    return repository.updatePassword(
+      currentPassword: currentPassword,
+      newPassword: newPassword,
+    );
+  }
+
   Future<void> logout() {
     return repository.logout();
   }

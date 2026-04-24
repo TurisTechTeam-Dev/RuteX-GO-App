@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:mobile_app/features/auth/domain/usecases/auth_use_cases.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
@@ -11,6 +10,7 @@ import '../../../core/widgets/auth/auth_logo.dart';
 import '../../../core/widgets/auth/auth_snack_bar.dart';
 import '../../../core/widgets/buttons/custom_button.dart';
 import '../../../core/widgets/inputs/custom_inputs.dart';
+import '../domain/usecases/auth_use_cases.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -48,7 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final isAdmin = await _authUseCases.checkAdminStatus(user.uid);
 
       debugPrint(
-        "VERIFICACION: Web=$kIsWeb | Admin=$isAdmin | Email=${user.email}",
+        "AUTH CHECK: Web=$kIsWeb | Admin=$isAdmin | Email=${user.email}",
       );
 
       if (!mounted) return;

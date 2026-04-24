@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../features/auth/domain/usecases/auth_use_cases.dart';
 import '../../constants/app_colors.dart';
 import '../../routes/app_routes.dart';
-import '../../../features/auth/domain/usecases/auth_use_cases.dart';
 
 class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showBack;
@@ -45,13 +45,17 @@ class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
       ],
       bottom: const PreferredSize(
         preferredSize: Size.fromHeight(2),
-        child: Divider(height: 1, thickness: 1, color: AppColors.negroTexto),
+        child: SizedBox(
+          width: double.infinity,
+          height: 2,
+          child: ColoredBox(color: AppColors.negroTexto),
+        ),
       ),
     );
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight + 2);
 }
 
 class CustomDrawer extends StatelessWidget {

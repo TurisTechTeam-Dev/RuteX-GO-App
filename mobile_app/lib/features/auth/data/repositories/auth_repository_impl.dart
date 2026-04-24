@@ -94,6 +94,47 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<void> requestEmailChange(String newEmail) async {
+    try {
+      final user = firebaseAuth.currentUser;
+      if (user == null) {
+        throw Exception("No hay sesión activa.");
+      }
+
+      await user.verifyBeforeUpdateEmail(newEmail);
+    } on FirebaseAuthException catch (e) {
+      throw Exception(_mapError(e.code));
+    }
+  }
+
+  @override
+  Future<void> updatePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      final user = firebaseAuth.currentUser;
+      if (user == null) {
+        throw Exception("No hay sesión activa.");
+      }
+
+      final email = user.email;
+      if (email == null || email.isEmpty) {
+        throw Exception("No se pudo comprobar el email del usuario.");
+      }
+
+      final credential = EmailAuthProvider.credential(
+        email: email,
+        password: currentPassword,
+      );
+      await user.reauthenticateWithCredential(credential);
+      await user.updatePassword(newPassword);
+    } on FirebaseAuthException catch (e) {
+      throw Exception(_mapError(e.code));
+    }
+  }
+
+  @override
   Future<void> logout() async {
     await firebaseAuth.signOut();
   }
@@ -119,6 +160,7 @@ class AuthRepositoryImpl implements AuthRepository {
       case 'user-not-found':
         return "El correo no está registrado.";
       case 'wrong-password':
+      case 'invalid-credential':
         return "La contraseña es incorrecta.";
       case 'invalid-email':
         return "El formato del email no es válido.";
@@ -128,6 +170,8 @@ class AuthRepositoryImpl implements AuthRepository {
         return "Este correo ya está registrado.";
       case 'weak-password':
         return "La contraseña es muy corta.";
+      case 'requires-recent-login':
+        return "Por seguridad, vuelve a iniciar sesión antes de cambiar estos datos.";
       default:
         return "Error de autenticación. Inténtalo de nuevo.";
     }

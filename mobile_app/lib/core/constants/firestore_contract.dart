@@ -51,6 +51,7 @@ class RouteFields {
 class UserFields {
   static const email = 'email';
   static const fechaCreacion = 'fecha_creacion';
+  static const fotoPerfil = 'foto_perfil';
   static const isAdmin = 'isAdmin';
   static const nombre = 'nombre';
   static const puntos = 'puntos';

@@ -26,11 +26,7 @@ class HomeUserCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          const CircleAvatar(
-            radius: 30,
-            backgroundColor: AppColors.verdePrincipal,
-            child: Icon(Icons.person, color: AppColors.blancoPuro),
-          ),
+          _UserAvatar(avatarUrl: user.avatarUrl),
           const SizedBox(width: 16),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,6 +63,37 @@ class HomeUserCard extends StatelessWidget {
     final months = days ~/ 30;
     if (months == 1) return "Explorador desde hace 1 mes";
     return "Explorador desde hace $months meses";
+  }
+}
+
+class _UserAvatar extends StatelessWidget {
+  final String avatarUrl;
+
+  const _UserAvatar({required this.avatarUrl});
+
+  @override
+  Widget build(BuildContext context) {
+    if (avatarUrl.isEmpty) {
+      return const CircleAvatar(
+        radius: 30,
+        backgroundColor: AppColors.verdePrincipal,
+        child: Icon(Icons.person, color: AppColors.blancoPuro),
+      );
+    }
+
+    return ClipOval(
+      child: StorageAwareImage(
+        source: avatarUrl,
+        width: 60,
+        height: 60,
+        fit: BoxFit.cover,
+        fallback: const CircleAvatar(
+          radius: 30,
+          backgroundColor: AppColors.verdePrincipal,
+          child: Icon(Icons.person, color: AppColors.blancoPuro),
+        ),
+      ),
+    );
   }
 }
 

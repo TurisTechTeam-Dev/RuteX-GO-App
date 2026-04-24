@@ -28,36 +28,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   bool _acceptedTerms = false;
   bool _isLoading = false;
-  bool _isButtonEnabled = false;
 
   late final AuthUseCases _authUseCases;
+
+  bool get _isButtonEnabled {
+    return _usernameController.text.isNotEmpty &&
+        _nameController.text.isNotEmpty &&
+        _emailController.text.isNotEmpty &&
+        _passwordController.text.isNotEmpty &&
+        _confirmPasswordController.text.isNotEmpty &&
+        _acceptedTerms;
+  }
 
   @override
   void initState() {
     super.initState();
     _authUseCases = context.read<AuthUseCases>();
 
-    _usernameController.addListener(_validateForm);
-    _nameController.addListener(_validateForm);
-    _emailController.addListener(_validateForm);
-    _passwordController.addListener(_validateForm);
-    _confirmPasswordController.addListener(_validateForm);
+    _usernameController.addListener(_refreshFormState);
+    _nameController.addListener(_refreshFormState);
+    _emailController.addListener(_refreshFormState);
+    _passwordController.addListener(_refreshFormState);
+    _confirmPasswordController.addListener(_refreshFormState);
   }
 
-  void _validateForm() {
-    setState(() {
-      _isButtonEnabled =
-          _usernameController.text.isNotEmpty &&
-          _nameController.text.isNotEmpty &&
-          _emailController.text.isNotEmpty &&
-          _passwordController.text.isNotEmpty &&
-          _confirmPasswordController.text.isNotEmpty &&
-          _acceptedTerms;
-    });
-  }
+  void _refreshFormState() => setState(() {});
 
   @override
   void dispose() {
+    _usernameController.removeListener(_refreshFormState);
+    _nameController.removeListener(_refreshFormState);
+    _emailController.removeListener(_refreshFormState);
+    _passwordController.removeListener(_refreshFormState);
+    _confirmPasswordController.removeListener(_refreshFormState);
     _usernameController.dispose();
     _nameController.dispose();
     _emailController.dispose();
@@ -195,7 +198,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                         setState(
                                           () => _acceptedTerms = value ?? false,
                                         );
-                                        _validateForm();
                                       },
                                     ),
                                     Text(

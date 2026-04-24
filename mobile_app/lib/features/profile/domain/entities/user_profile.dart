@@ -3,6 +3,7 @@ class UserProfile {
   final String name;
   final String username;
   final String email;
+  final String avatarUrl;
   final int points;
   final DateTime? createdAt;
 
@@ -11,6 +12,7 @@ class UserProfile {
     required this.name,
     required this.username,
     required this.email,
+    required this.avatarUrl,
     required this.points,
     this.createdAt,
   });

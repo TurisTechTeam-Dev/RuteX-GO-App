@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/backgrounds/extremadura_map_background.dart';
 import '../../../../core/widgets/titles/stroke_title.dart';
 import '../../domain/entities/city.dart';
@@ -22,7 +21,6 @@ class CitySelectionContent extends StatelessWidget {
         SafeArea(
           child: Column(
             children: [
-              Container(height: 2, color: AppColors.negroTexto),
               const SizedBox(height: 20),
               const StrokeTitle(text: "Selecciona una ciudad"),
               const SizedBox(height: 6),

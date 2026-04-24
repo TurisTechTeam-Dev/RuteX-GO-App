@@ -24,7 +24,6 @@ class HomeContent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(height: 2, color: AppColors.negroTexto),
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(

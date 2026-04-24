@@ -110,6 +110,7 @@ class HomeDataLoader {
       name: data[UserFields.nombre]?.toString() ?? 'Sin nombre',
       username: data[UserFields.usuario]?.toString() ?? '',
       email: data[UserFields.email]?.toString() ?? '',
+      avatarUrl: data[UserFields.fotoPerfil]?.toString() ?? '',
       points: points,
       createdAt: _dateFromFirestoreValue(data[UserFields.fechaCreacion]),
     );

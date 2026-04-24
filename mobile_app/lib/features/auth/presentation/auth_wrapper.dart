@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:mobile_app/features/auth/domain/entities/auth_user.dart';
-import 'package:mobile_app/features/auth/domain/usecases/auth_use_cases.dart';
-import 'package:mobile_app/features/splash/presentation/splash_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/routes/app_routes.dart';
+import '../../splash/presentation/splash_screen.dart';
+import '../domain/entities/auth_user.dart';
+import '../domain/usecases/auth_use_cases.dart';
 
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
