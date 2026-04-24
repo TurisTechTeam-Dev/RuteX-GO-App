@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../../../core/map/map_view.dart';
 import '../../../../../core/routes/app_routes.dart';
 import '../../mission_flow_result.dart';
+import '../../quiz/models/route_result_args.dart';
 import '../../quiz/quiz_route_progress.dart';
 import '../provider/trip_provider.dart';
 
@@ -303,23 +304,21 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
     Navigator.pushReplacementNamed(
       context,
       AppRoutes.routeResult,
-      arguments: {
-        'routeId': widget.routeId,
-        'puntuacion': summary.savedBestPoints,
-        'puntuacionIntento': summary.currentAttemptPoints,
-        'monumentos': summary.visitedPois,
-        'misiones': summary.completedMissions,
-        'totalPois': summary.totalPois,
-        'puntosTotales': summary.totalPossiblePoints,
-        'routeName': summary.routeName,
-        'tiempo': _formatDuration(summary.elapsedTime),
-        'correctAnswers': summary.correctAnswers,
-        'totalAnswers': summary.totalAnswers,
-        'answerResults': summary.answerResults
-            .map((answer) => answer.toMap())
-            .toList(),
-        'skippedPois': summary.skippedPoiNames,
-      },
+      arguments: RouteResultArgs(
+        routeId: widget.routeId,
+        routeName: summary.routeName,
+        score: summary.savedBestPoints,
+        attemptScore: summary.currentAttemptPoints,
+        visitedPois: summary.visitedPois,
+        completedMissions: summary.completedMissions,
+        totalPois: summary.totalPois,
+        totalPossiblePoints: summary.totalPossiblePoints,
+        elapsedTimeLabel: _formatDuration(summary.elapsedTime),
+        correctAnswers: summary.correctAnswers,
+        totalAnswers: summary.totalAnswers,
+        answerResults: summary.answerResults,
+        skippedPois: summary.skippedPoiNames,
+      ),
     );
   }
 

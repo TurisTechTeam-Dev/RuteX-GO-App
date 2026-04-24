@@ -4,14 +4,18 @@ import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/routes/app_routes.dart';
 import '../../../../../core/widgets/backgrounds/extremadura_map_background.dart';
 import '../../../../../core/widgets/bars/top_app_bar.dart';
+import '../models/route_result_args.dart';
+import '../quiz_route_progress.dart';
 
 class RouteResultScreen extends StatelessWidget {
   const RouteResultScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)?.settings.arguments as Map? ?? {};
-    final result = _RouteResultData.fromArgs(args);
+    final args = ModalRoute.of(context)?.settings.arguments;
+    final result = args is RouteResultArgs
+        ? _RouteResultData.fromArgs(args)
+        : _RouteResultData.empty();
 
     return Scaffold(
       appBar: const TopAppBar(showBack: false),
@@ -441,37 +445,38 @@ class _RouteResultData {
     return grouped;
   }
 
-  factory _RouteResultData.fromArgs(Map args) {
-    final rawAnswers = args['answerResults'];
-    final answers = rawAnswers is List
-        ? rawAnswers.whereType<Map>().map(_AnswerResultData.fromMap).toList()
-        : <_AnswerResultData>[];
-    final rawSkippedPois = args['skippedPois'];
-    final skippedPois = rawSkippedPois is List
-        ? rawSkippedPois.map((poi) => poi.toString()).toList()
-        : <String>[];
-
+  factory _RouteResultData.fromArgs(RouteResultArgs args) {
     return _RouteResultData(
-      routeName: args['routeName']?.toString() ?? 'Ruta',
-      score: _asInt(args['puntuacion']),
-      attemptScore: _asInt(args['puntuacionIntento']),
-      visitedMonuments: _asInt(args['monumentos']),
-      totalPois: _asInt(args['totalPois']),
-      totalPossiblePoints: _asInt(args['puntosTotales'], defaultValue: 100),
-      correctAnswers: _asInt(args['correctAnswers']),
-      totalAnswers: _asInt(args['totalAnswers']),
-      time: args['tiempo']?.toString() ?? '--',
-      answerResults: answers,
-      skippedPois: skippedPois,
+      routeName: args.routeName,
+      score: args.score,
+      attemptScore: args.attemptScore,
+      visitedMonuments: args.visitedPois,
+      totalPois: args.totalPois,
+      totalPossiblePoints: args.totalPossiblePoints,
+      correctAnswers: args.correctAnswers,
+      totalAnswers: args.totalAnswers,
+      time: args.elapsedTimeLabel,
+      answerResults: args.answerResults
+          .map(_AnswerResultData.fromQuiz)
+          .toList(),
+      skippedPois: args.skippedPois,
     );
   }
 
-  static int _asInt(dynamic value, {int defaultValue = 0}) {
-    if (value is int) return value;
-    if (value is num) return value.toInt();
-    if (value is String) return int.tryParse(value) ?? defaultValue;
-
-    return defaultValue;
+  factory _RouteResultData.empty() {
+    return const _RouteResultData(
+      routeName: 'Ruta',
+      score: 0,
+      attemptScore: 0,
+      visitedMonuments: 0,
+      totalPois: 0,
+      totalPossiblePoints: 100,
+      correctAnswers: 0,
+      totalAnswers: 0,
+      time: '--',
+      answerResults: [],
+      skippedPois: [],
+    );
   }
 }
 
@@ -490,13 +495,13 @@ class _AnswerResultData {
     required this.isCorrect,
   });
 
-  factory _AnswerResultData.fromMap(Map data) {
+  factory _AnswerResultData.fromQuiz(QuizAnswerResult data) {
     return _AnswerResultData(
-      monumentName: data['monumentName']?.toString() ?? 'Punto de interés',
-      question: data['question']?.toString() ?? '',
-      selectedAnswer: data['selectedAnswer']?.toString() ?? '',
-      correctAnswer: data['correctAnswer']?.toString() ?? '',
-      isCorrect: data['isCorrect'] == true,
+      monumentName: data.monumentName,
+      question: data.question,
+      selectedAnswer: data.selectedAnswer,
+      correctAnswer: data.correctAnswer,
+      isCorrect: data.isCorrect,
     );
   }
 }
