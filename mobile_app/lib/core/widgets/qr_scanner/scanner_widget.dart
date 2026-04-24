@@ -54,10 +54,7 @@ class _RutexScannerWidgetState extends State<RutexScannerWidget> {
               width: 260,
               height: 260,
               decoration: BoxDecoration(
-                border: Border.all(
-                  color: AppColors.verdeBorde,
-                  width: 4,
-                ),
+                border: Border.all(color: AppColors.verdeBorde, width: 4),
                 borderRadius: BorderRadius.circular(24),
               ),
             ),

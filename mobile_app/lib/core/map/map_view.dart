@@ -3,7 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as google_maps;
 import 'package:latlong2/latlong.dart';
 
-import '../../features/mission/domain/entity/poi_entity.dart';
+import '../../features/mission/domain/entities/poi_entity.dart';
 
 class MapView extends StatefulWidget {
   static const bool useGoogleMaps = bool.fromEnvironment(
@@ -115,7 +115,7 @@ class _MapViewState extends State<MapView> {
           markers: [
             ...widget.pointsOfInterest.map(
               (poi) => Marker(
-                point: poi.localizacion,
+                point: poi.location,
                 width: 50,
                 height: 50,
                 child: const Icon(
@@ -167,11 +167,11 @@ class _MapViewState extends State<MapView> {
       ...widget.pointsOfInterest.map(
         (poi) => google_maps.Marker(
           markerId: google_maps.MarkerId('poi_${poi.id}'),
-          position: _toGoogleLatLng(poi.localizacion),
+          position: _toGoogleLatLng(poi.location),
           icon: google_maps.BitmapDescriptor.defaultMarkerWithHue(
             google_maps.BitmapDescriptor.hueRed,
           ),
-          infoWindow: google_maps.InfoWindow(title: poi.nombre),
+          infoWindow: google_maps.InfoWindow(title: poi.name),
         ),
       ),
       google_maps.Marker(

@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/constants/firestore_contract.dart';
-import '../../domain/entity/poi_entity.dart';
-import '../../domain/repository/mission_repository.dart';
+import '../../domain/entities/poi_entity.dart';
+import '../../domain/repositories/mission_repository.dart';
 
 class MissionRepositoryImpl implements MissionRepository {
   static const int _firestoreWhereInLimit = 10;
@@ -11,7 +11,7 @@ class MissionRepositoryImpl implements MissionRepository {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   @override
-  Future<Map<String, dynamic>?> getPuntoByQr(String qrCode) async {
+  Future<Map<String, dynamic>?> getPointByQr(String qrCode) async {
     final snapshot = await _db
         .collection(FirestoreCollections.puntosInteres)
         .where(PointInterestFields.qrCode, isEqualTo: qrCode)

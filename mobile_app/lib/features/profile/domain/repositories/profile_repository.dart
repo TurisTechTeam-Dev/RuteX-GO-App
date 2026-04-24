@@ -3,6 +3,5 @@ abstract class ProfileRepository {
 
   Future<List<Map<String, dynamic>>> getCompletedRoutes(String uid);
 
-  Future<Map<String, dynamic>> getConfigRangos(String rangoId);
-  
+  Future<Map<String, dynamic>> getRankConfig(String rankId);
 }

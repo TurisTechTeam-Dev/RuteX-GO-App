@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-// Pantallas
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/mission/domain/usecases/mission_use_cases.dart';
@@ -13,7 +12,7 @@ import '../../features/mission/presentation/quiz/screens/quiz_screen.dart';
 import '../../features/mission/presentation/quiz/screens/route_result_screen.dart';
 import '../../features/profile/presentation/home_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
-import '../../features/routes/data/routes_repository_impl.dart';
+import '../../features/routes/data/repositories/routes_repository_impl.dart';
 import '../../features/routes/domain/usecases/routes_use_cases.dart';
 import '../../features/routes/presentation/city_selection_screen.dart';
 import '../../features/routes/presentation/route_selection_screen.dart';
@@ -59,11 +58,11 @@ class AppRoutes {
         );
 
       case routeSelection:
-        final String idCiudad = settings.arguments as String? ?? '';
+        final String cityId = settings.arguments as String? ?? '';
         return MaterialPageRoute(
           builder: (_) => RouteSelectionScreen(
             routesUseCases: routesUseCases,
-            idCiudad: idCiudad,
+            cityId: cityId,
           ),
         );
 

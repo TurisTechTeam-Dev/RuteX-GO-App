@@ -6,46 +6,44 @@ import '../../../../core/constants/firestore_contract.dart';
 
 class PointOfInterest {
   final String id;
-  final String nombre;
-  final String descripcion;
-  final LatLng localizacion;
+  final String name;
+  final String description;
+  final LatLng location;
   final String qrCode;
-  final int radioActivacion;
+  final int activationRadius;
 
   PointOfInterest({
     required this.id,
-    required this.nombre,
-    required this.descripcion,
-    required this.localizacion,
+    required this.name,
+    required this.description,
+    required this.location,
     required this.qrCode,
-    required this.radioActivacion,
+    required this.activationRadius,
   });
 
   factory PointOfInterest.fromFirestore(Map<String, dynamic> data, String id) {
-    final locData = data[PointInterestFields.localizacion];
+    final locationData = data[PointInterestFields.localizacion];
 
-    double lat = 0;
-    double lng = 0;
+    double latitude = 0;
+    double longitude = 0;
 
-    if (locData is GeoPoint) {
-      lat = locData.latitude;
-      lng = locData.longitude;
+    if (locationData is GeoPoint) {
+      latitude = locationData.latitude;
+      longitude = locationData.longitude;
     } else {
-      debugPrint(
-        "Alerta: el POI con ID $id no tiene un GeoPoint válido en Firebase.",
-      );
+      debugPrint('Warning: point $id does not have a valid Firebase GeoPoint.');
     }
 
     return PointOfInterest(
       id: id,
-      nombre: data[PointInterestFields.nombre]?.toString() ?? 'Sin nombre',
-      descripcion:
+      name: data[PointInterestFields.nombre]?.toString() ?? 'Sin nombre',
+      description:
           data[PointInterestFields.descripcion]?.toString() ??
           data['descripci\u00F3n']?.toString() ??
           '',
       qrCode: data[PointInterestFields.qrCode]?.toString() ?? '',
-      localizacion: LatLng(lat, lng),
-      radioActivacion:
+      location: LatLng(latitude, longitude),
+      activationRadius:
           (data[PointInterestFields.radioActivacion] as num?)?.toInt() ?? 40,
     );
   }

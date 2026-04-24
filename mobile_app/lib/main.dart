@@ -4,10 +4,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'core/routes/app_routes.dart';
-import 'features/auth/data/auth_repository_impl.dart';
+import 'features/auth/data/repositories/auth_repository_impl.dart';
 import 'features/auth/domain/usecases/auth_use_cases.dart';
 import 'features/auth/presentation/auth_wrapper.dart';
-import 'features/mission/data/repository/mission_repository_impl.dart';
+import 'features/mission/data/repositories/mission_repository_impl.dart';
 import 'features/mission/domain/usecases/mission_use_cases.dart';
 import 'firebase_options.dart';
 
@@ -15,16 +15,14 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // 1. Inicializamos Repositorios
-  final missionRepo = MissionRepositoryImpl();
-  final authRepo = AuthRepositoryImpl(
+  final missionRepository = MissionRepositoryImpl();
+  final authRepository = AuthRepositoryImpl(
     FirebaseAuth.instance,
     FirebaseFirestore.instance,
   );
 
-  // 2. Inicializamos UseCases
-  final missionUseCases = MissionUseCases(missionRepo);
-  final authUseCases = AuthUseCases(authRepo);
+  final missionUseCases = MissionUseCases(missionRepository);
+  final authUseCases = AuthUseCases(authRepository);
 
   runApp(
     MultiProvider(

@@ -207,8 +207,7 @@ class CustomDrawer extends StatelessWidget {
                 SizedBox(height: 10),
                 _InfoBullet(
                   bold: "Mejor marca: ",
-                  text:
-                      "si repites una ruta, se conserva tu mejor puntuación.",
+                  text: "si repites una ruta, se conserva tu mejor puntuación.",
                 ),
                 SizedBox(height: 10),
                 _InfoBullet(

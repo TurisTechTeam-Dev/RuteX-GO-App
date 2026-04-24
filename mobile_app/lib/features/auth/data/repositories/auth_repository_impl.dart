@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../../../core/constants/firestore_contract.dart';
-import '../domain/repository/auth_repository.dart';
+import '../../../../core/constants/firestore_contract.dart';
+import '../../domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final FirebaseAuth firebaseAuth;
@@ -34,8 +34,8 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> register({
-    required String nombre,
-    required String usuario,
+    required String name,
+    required String username,
     required String email,
     required String password,
   }) async {
@@ -49,8 +49,8 @@ class AuthRepositoryImpl implements AuthRepository {
 
       await firestore.collection(FirestoreCollections.usuarios).doc(uid).set({
         UserFields.uid: uid,
-        UserFields.nombre: nombre,
-        UserFields.usuario: usuario,
+        UserFields.nombre: name,
+        UserFields.usuario: username,
         UserFields.email: email,
         UserFields.fechaCreacion: FieldValue.serverTimestamp(),
         UserFields.ultimoAcceso: FieldValue.serverTimestamp(),

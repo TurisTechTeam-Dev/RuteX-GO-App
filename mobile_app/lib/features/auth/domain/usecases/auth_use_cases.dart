@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../repository/auth_repository.dart';
+import '../repositories/auth_repository.dart';
 
 class AuthUseCases {
   final AuthRepository repository;
@@ -14,14 +14,14 @@ class AuthUseCases {
   }
 
   Future<void> register({
-    required String nombre,
-    required String usuario,
+    required String name,
+    required String username,
     required String email,
     required String password,
   }) {
     return repository.register(
-      nombre: nombre,
-      usuario: usuario,
+      name: name,
+      username: username,
       email: email,
       password: password,
     );

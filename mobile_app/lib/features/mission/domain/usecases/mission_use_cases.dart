@@ -1,5 +1,5 @@
-import '../entity/poi_entity.dart';
-import '../repository/mission_repository.dart';
+import '../entities/poi_entity.dart';
+import '../repositories/mission_repository.dart';
 
 class MissionUseCases {
   final MissionRepository repository;
@@ -7,13 +7,13 @@ class MissionUseCases {
   MissionUseCases(this.repository);
 
   Future<Map<String, dynamic>?> executeScan(String qrCode) async {
-    final punto = await repository.getPuntoByQr(qrCode);
-    if (punto == null) return null;
+    final point = await repository.getPointByQr(qrCode);
+    if (point == null) return null;
 
-    final mission = await repository.getMissionByPointId(punto['id']);
+    final mission = await repository.getMissionByPointId(point['id']);
     if (mission == null) return null;
 
-    return {'punto': punto, 'mision': mission};
+    return {'punto': point, 'mision': mission};
   }
 
   Future<List<PointOfInterest>> executeGetPointsForRoute(String routeId) async {

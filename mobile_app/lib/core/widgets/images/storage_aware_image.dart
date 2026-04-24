@@ -46,7 +46,8 @@ class StorageAwareImage extends StatelessWidget {
         width: width,
         height: height,
         fit: fit,
-        placeholder: (context, url) => placeholder ?? const _DefaultLoadingState(),
+        placeholder: (context, url) =>
+            placeholder ?? const _DefaultLoadingState(),
         errorWidget: (context, url, error) => fallback,
       );
     }
@@ -68,7 +69,8 @@ class StorageAwareImage extends StatelessWidget {
           width: width,
           height: height,
           fit: fit,
-          placeholder: (context, url) => placeholder ?? const _DefaultLoadingState(),
+          placeholder: (context, url) =>
+              placeholder ?? const _DefaultLoadingState(),
           errorWidget: (context, url, error) => fallback,
         );
       },

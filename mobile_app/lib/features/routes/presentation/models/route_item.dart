@@ -30,7 +30,8 @@ class RouteItem {
   factory RouteItem.fromDoc(QueryDocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     final pointsOfInterest = data[RouteFields.idPuntosInteres] as List?;
-    final pointIds = pointsOfInterest?.map((point) => point.toString()).toList() ??
+    final pointIds =
+        pointsOfInterest?.map((point) => point.toString()).toList() ??
         const <String>[];
     final totalPois = pointsOfInterest?.length ?? 0;
 

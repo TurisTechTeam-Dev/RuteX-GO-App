@@ -72,8 +72,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       try {
         await _authUseCases.register(
-          nombre: _nombreController.text.trim(),
-          usuario: _usuarioController.text.trim(),
+          name: _nombreController.text.trim(),
+          username: _usuarioController.text.trim(),
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
@@ -193,7 +193,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       visualDensity: VisualDensity.compact,
                                       onChanged: (value) {
                                         setState(
-                                          () => _aceptaTerminos = value ?? false,
+                                          () =>
+                                              _aceptaTerminos = value ?? false,
                                         );
                                         _validateForm();
                                       },

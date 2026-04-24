@@ -3,11 +3,7 @@ class HomeData {
   final List<HomeRouteData> routes;
   final List<dynamic> rangos;
 
-  HomeData({
-    required this.user,
-    required this.routes,
-    required this.rangos,
-  });
+  HomeData({required this.user, required this.routes, required this.rangos});
 }
 
 class HomeRouteData {

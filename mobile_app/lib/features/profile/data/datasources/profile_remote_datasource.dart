@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../../core/constants/firestore_contract.dart';
+import '../../../../core/constants/firestore_contract.dart';
 
 class ProfileRemoteDatasource {
   final FirebaseFirestore db;
@@ -25,10 +25,10 @@ class ProfileRemoteDatasource {
     return querySnapShot.docs.map((doc) => doc.data()).toList();
   }
 
-  Future<Map<String, dynamic>> getConfigRangos(String rangoId) async {
+  Future<Map<String, dynamic>> getRankConfig(String rankId) async {
     final docSnapShot = await db
         .collection(FirestoreCollections.configRangos)
-        .doc(rangoId)
+        .doc(rankId)
         .get();
 
     return docSnapShot.data()!;

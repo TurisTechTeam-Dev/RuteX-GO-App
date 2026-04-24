@@ -13,7 +13,7 @@ class ProfileUseCases {
     return repository.getCompletedRoutes(uid);
   }
 
-  Future<Map<String, dynamic>> getConfigRangos(String configId) {
-    return repository.getConfigRangos(configId);
+  Future<Map<String, dynamic>> getRankConfig(String configId) {
+    return repository.getRankConfig(configId);
   }
 }

@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../../core/constants/firestore_contract.dart';
-import '../domain/repository/routes_repository.dart';
+import '../../../../core/constants/firestore_contract.dart';
+import '../../domain/repositories/routes_repository.dart';
 
 class RoutesRepositoryImpl implements RoutesRepository {
   static const int _firestoreWhereInLimit = 10;
@@ -9,20 +9,20 @@ class RoutesRepositoryImpl implements RoutesRepository {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   @override
-  Stream<QuerySnapshot> getCiudades() {
+  Stream<QuerySnapshot> getCities() {
     return _db.collection(FirestoreCollections.ciudades).snapshots();
   }
 
   @override
-  Stream<QuerySnapshot> getRutas() {
+  Stream<QuerySnapshot> getRoutes() {
     return _db.collection(FirestoreCollections.rutas).snapshots();
   }
 
   @override
-  Stream<QuerySnapshot> getRutasByCiudad(String idCiudad) {
+  Stream<QuerySnapshot> getRoutesByCity(String cityId) {
     return _db
         .collection(FirestoreCollections.rutas)
-        .where(RouteFields.idCiudad, isEqualTo: idCiudad)
+        .where(RouteFields.idCiudad, isEqualTo: cityId)
         .snapshots();
   }
 

@@ -4,7 +4,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/routes/app_routes.dart';
 import '../../../../../core/widgets/qr_scanner/scanner_widget.dart';
-import '../../../data/repository/mission_repository_impl.dart';
+import '../../../data/repositories/mission_repository_impl.dart';
 import '../../../domain/usecases/mission_use_cases.dart';
 import '../../mission_flow_result.dart';
 import '../../quiz/quiz_route_progress.dart';
@@ -52,8 +52,7 @@ class _MissionScannerScreenState extends State<MissionScannerScreen> {
     debugPrint("QR detectado: $code");
     final now = DateTime.now();
     if (_isProcessing) return;
-    if (_lastScanAt != null &&
-        now.difference(_lastScanAt!) < _scanCooldown) {
+    if (_lastScanAt != null && now.difference(_lastScanAt!) < _scanCooldown) {
       return;
     }
 

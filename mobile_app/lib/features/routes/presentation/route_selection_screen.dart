@@ -7,12 +7,12 @@ import 'widgets/route_selection_content.dart';
 
 class RouteSelectionScreen extends StatelessWidget {
   final RoutesUseCases routesUseCases;
-  final String idCiudad;
+  final String cityId;
 
   const RouteSelectionScreen({
     super.key,
     required this.routesUseCases,
-    required this.idCiudad,
+    required this.cityId,
   });
 
   @override
@@ -22,7 +22,7 @@ class RouteSelectionScreen extends StatelessWidget {
       endDrawer: const CustomDrawer(),
       body: RouteSelectionContent(
         routesUseCases: routesUseCases,
-        cityId: idCiudad,
+        cityId: cityId,
       ),
       bottomNavigationBar: Container(
         height: 60,

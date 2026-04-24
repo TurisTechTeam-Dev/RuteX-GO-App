@@ -85,10 +85,7 @@ class CustomInput extends StatelessWidget {
             // Borde cuando salta error
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(
-                color: AppColors.error,
-                width: 2,
-              ),
+              borderSide: const BorderSide(color: AppColors.error, width: 2),
             ),
           ),
         ),

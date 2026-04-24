@@ -113,11 +113,7 @@ class _RouteFallbackImage extends StatelessWidget {
     return Container(
       color: AppColors.blancoTarjeta,
       alignment: Alignment.center,
-      child: const Icon(
-        Icons.photo,
-        color: AppColors.verdePrincipal,
-        size: 42,
-      ),
+      child: const Icon(Icons.photo, color: AppColors.verdePrincipal, size: 42),
     );
   }
 }
@@ -272,9 +268,7 @@ class _StartRouteButton extends StatelessWidget {
                 );
               }
             : null,
-        child: Text(
-          canStart ? "Comenzar ruta" : "Ruta no disponible",
-        ),
+        child: Text(canStart ? "Comenzar ruta" : "Ruta no disponible"),
       ),
     );
   }

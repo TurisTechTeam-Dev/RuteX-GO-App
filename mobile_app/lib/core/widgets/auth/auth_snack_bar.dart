@@ -6,9 +6,6 @@ void showAuthSnackBar(
   Color? backgroundColor,
 }) {
   ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(message),
-      backgroundColor: backgroundColor,
-    ),
+    SnackBar(content: Text(message), backgroundColor: backgroundColor),
   );
 }

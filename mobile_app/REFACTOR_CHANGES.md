@@ -5,8 +5,17 @@ La idea es que cualquier companero pueda abrirlo, entender el estado actual y sa
 
 ## Validacion usada
 
-- En este workspace no se esta usando `dart format` ni `flutter analyze` porque ambos comandos se quedan colgados.
-- La comprobacion ligera que se esta usando es `git diff --check` y revision manual de los archivos tocados.
+- `dart format` y `flutter analyze` si funcionan, pero desde Codex deben ejecutarse fuera del sandbox porque Dart/Flutter escribe telemetria/cache en `C:\Users\Diego\AppData\Roaming\.dart-tool\`.
+- Si se ejecutan dentro del sandbox pueden parecer colgados y dejar procesos `dart`/`dartvm` vivos.
+- Error raiz observado: `FileSystemException: Failed to set file modification time, path = 'C:\Users\Diego\AppData\Roaming\.dart-tool\dart-flutter-telemetry-session.json' (OS Error: Acceso denegado, errno = 5)`.
+- Comandos recomendados para Codex:
+  - `Stop-Process -Name dart,dartvm -Force` si hay procesos Dart colgados.
+  - `dart format lib` con permisos escalados.
+  - `flutter analyze --no-pub` con permisos escalados.
+  - `git diff --check` como comprobacion ligera adicional.
+- Ultima validacion correcta conocida:
+  - `dart format lib`: `Formatted 77 files (42 changed) in 0.45 seconds.`
+  - `flutter analyze --no-pub`: `No issues found.`
 
 ## Estructura refactorizada
 

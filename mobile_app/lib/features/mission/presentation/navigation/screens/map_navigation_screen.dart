@@ -138,7 +138,7 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  "Siguiente parada: ${nextPoi.nombre}",
+                  "Siguiente parada: ${nextPoi.name}",
                   style: const TextStyle(fontSize: 13, color: Colors.grey),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -190,7 +190,7 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              poi.nombre,
+              poi.name,
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
@@ -208,7 +208,7 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
                       'routeId': widget.routeId,
                       'totalPois': provider.pointsOfInterest.length,
                       'expectedPointId': poi.id,
-                      'expectedPointName': poi.nombre,
+                      'expectedPointName': poi.name,
                     },
                   );
 

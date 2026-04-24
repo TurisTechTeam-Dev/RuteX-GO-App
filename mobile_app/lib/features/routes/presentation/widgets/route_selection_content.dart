@@ -53,7 +53,7 @@ class _RouteList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: routesUseCases.executeGetRutasByCiudad(cityId),
+      stream: routesUseCases.getRoutesByCity(cityId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -76,14 +76,16 @@ class _RouteList extends StatelessWidget {
         return FutureBuilder<Map<String, bool>>(
           future: routesUseCases.executeGetRouteAvailability(routes),
           builder: (context, availabilitySnapshot) {
-            final availability = availabilitySnapshot.data ?? const <String, bool>{};
+            final availability =
+                availabilitySnapshot.data ?? const <String, bool>{};
 
             return ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               itemCount: routes.length,
               itemBuilder: (context, index) {
                 final route = routes[index];
-                final canStart = availabilitySnapshot.connectionState ==
+                final canStart =
+                    availabilitySnapshot.connectionState ==
                         ConnectionState.done &&
                     (availability[route.id] ?? false);
 

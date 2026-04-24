@@ -6,7 +6,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../../../../core/constants/firestore_contract.dart';
 import '../../../../../core/map/routing_service.dart';
-import '../../../domain/entity/poi_entity.dart';
+import '../../../domain/entities/poi_entity.dart';
 import '../../../domain/usecases/mission_use_cases.dart';
 import '../../quiz/quiz_route_progress.dart';
 
@@ -147,12 +147,12 @@ class TripSimulationProvider extends ChangeNotifier {
       double distA = const Distance().as(
         LengthUnit.Meter,
         _currentPosition,
-        a.localizacion,
+        a.location,
       );
       double distB = const Distance().as(
         LengthUnit.Meter,
         _currentPosition,
-        b.localizacion,
+        b.location,
       );
       return distA.compareTo(distB);
     });
@@ -160,7 +160,7 @@ class TripSimulationProvider extends ChangeNotifier {
     // El nuevo objetivo es el primero de la lista (el más cercano)
     _currentPoiIndex = _pointsOfInterest.indexOf(pendingPois.first);
     debugPrint(
-      "🎯 [DESTINO] Nuevo objetivo dinámico: ${_pointsOfInterest[_currentPoiIndex].nombre}",
+      "🎯 [DESTINO] Nuevo objetivo dinámico: ${_pointsOfInterest[_currentPoiIndex].name}",
     );
   }
 
@@ -172,9 +172,9 @@ class TripSimulationProvider extends ChangeNotifier {
       return;
     }
 
-    final target = _pointsOfInterest[_currentPoiIndex].localizacion;
+    final target = _pointsOfInterest[_currentPoiIndex].location;
     debugPrint(
-      "🌐 [OSRM] Trazando camino hacia: ${_pointsOfInterest[_currentPoiIndex].nombre}",
+      "🌐 [OSRM] Trazando camino hacia: ${_pointsOfInterest[_currentPoiIndex].name}",
     );
 
     try {
@@ -194,7 +194,7 @@ class TripSimulationProvider extends ChangeNotifier {
     if (_currentPoiIndex == -1) return _allPoisCompleted;
 
     debugPrint(
-      "✅ [PROGRESO] '${_pointsOfInterest[_currentPoiIndex].nombre}' marcado como completado.",
+      "✅ [PROGRESO] '${_pointsOfInterest[_currentPoiIndex].name}' marcado como completado.",
     );
 
     if (!_completedPoiIndices.contains(_currentPoiIndex)) {
@@ -271,13 +271,13 @@ class TripSimulationProvider extends ChangeNotifier {
     double distance = const Distance().as(
       LengthUnit.Meter,
       pos,
-      target.localizacion,
+      target.location,
     );
 
     // Comprobamos contra el radio de Firebase (recomendado 20m)
-    if (distance <= target.radioActivacion) {
+    if (distance <= target.activationRadius) {
       debugPrint(
-        "📍 [LLEGADA] ¡Has llegado a ${target.nombre}! Distancia: ${distance.toInt()}m",
+        "📍 [LLEGADA] ¡Has llegado a ${target.name}! Distancia: ${distance.toInt()}m",
       );
       _hasReachedDestination = true;
       _isSimulating = false;
@@ -291,7 +291,7 @@ class TripSimulationProvider extends ChangeNotifier {
     if (_allPoisCompleted || _currentPoiIndex == -1) return;
 
     debugPrint(
-      "🎬 [SIM] Iniciando recorrido automático hacia ${_pointsOfInterest[_currentPoiIndex].nombre}...",
+      "🎬 [SIM] Iniciando recorrido automático hacia ${_pointsOfInterest[_currentPoiIndex].name}...",
     );
     _isSimulating = true;
     _hasReachedDestination = false;
@@ -309,7 +309,7 @@ class TripSimulationProvider extends ChangeNotifier {
       double finalDist = const Distance().as(
         LengthUnit.Meter,
         _currentPosition,
-        target.localizacion,
+        target.location,
       );
 
       debugPrint(
@@ -334,7 +334,7 @@ class TripSimulationProvider extends ChangeNotifier {
     return const Distance().as(
       LengthUnit.Meter,
       _currentPosition,
-      _pointsOfInterest[_currentPoiIndex].localizacion,
+      _pointsOfInterest[_currentPoiIndex].location,
     );
   }
 
@@ -376,7 +376,7 @@ class TripSimulationProvider extends ChangeNotifier {
       routeName: routeName,
       elapsedTime: elapsedTime,
       answerResults: answers,
-      skippedPoiNames: skippedPois.map((poi) => poi.nombre).toList(),
+      skippedPoiNames: skippedPois.map((poi) => poi.name).toList(),
     );
   }
 
@@ -455,7 +455,7 @@ class TripSimulationProvider extends ChangeNotifier {
         CompletedRouteFields.misionesCompletadas:
             QuizRouteProgress.visitedMonuments,
         CompletedRouteFields.puntosInteresSaltados: skippedPois
-            .map((poi) => {'id': poi.id, 'nombre': poi.nombre})
+            .map((poi) => {'id': poi.id, 'nombre': poi.name})
             .toList(),
       };
 
@@ -477,17 +477,6 @@ class TripSimulationProvider extends ChangeNotifier {
       transaction.update(userRef, updates);
       return currentAttemptPoints;
     });
-  }
-
-  String _formatElapsedTime(Duration duration) {
-    final hours = duration.inHours;
-    final minutes = duration.inMinutes.remainder(60);
-    final seconds = duration.inSeconds.remainder(60);
-
-    if (hours > 0) return '${hours}h ${minutes}min';
-    if (minutes > 0) return '${minutes}min ${seconds}s';
-
-    return '${seconds}s';
   }
 
   int _asInt(dynamic value) {

@@ -9,10 +9,7 @@ class AuthLogo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Hero(
       tag: 'logo',
-      child: Image.asset(
-        'assets/Logo_Color_Rutexgo.png',
-        height: height,
-      ),
+      child: Image.asset('assets/Logo_Color_Rutexgo.png', height: height),
     );
   }
 }

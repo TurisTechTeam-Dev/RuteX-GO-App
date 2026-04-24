@@ -20,10 +20,15 @@ class RoutingService {
       );
 
       try {
-        final response = await http.get(url, headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'RutexGo_App_Demo',
-        }).timeout(const Duration(seconds: 12));
+        final response = await http
+            .get(
+              url,
+              headers: {
+                'Accept': 'application/json',
+                'User-Agent': 'RutexGo_App_Demo',
+              },
+            )
+            .timeout(const Duration(seconds: 12));
 
         if (response.statusCode == 200) {
           final data = json.decode(response.body);

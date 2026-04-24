@@ -1,4 +1,4 @@
-import 'package:mobile_app/features/profile/data/profile_remote_datasource.dart';
+import 'package:mobile_app/features/profile/data/datasources/profile_remote_datasource.dart';
 import 'package:mobile_app/features/profile/domain/repositories/profile_repository.dart';
 
 class ProfileRepositoryImpl implements ProfileRepository {
@@ -17,8 +17,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Future <Map<String, dynamic>> getConfigRangos (String rangoId) async{
-    return await remoteDatasource.getConfigRangos(rangoId);
+  Future<Map<String, dynamic>> getRankConfig(String rankId) async {
+    return await remoteDatasource.getRankConfig(rankId);
   }
-
 }

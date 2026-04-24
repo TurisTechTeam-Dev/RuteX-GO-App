@@ -51,7 +51,7 @@ class _CityGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: routesUseCases.executeGetCiudades(),
+      stream: routesUseCases.getCities(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -68,7 +68,7 @@ class _CityGrid extends StatelessWidget {
         }
 
         return StreamBuilder<QuerySnapshot>(
-          stream: routesUseCases.executeGetRutas(),
+          stream: routesUseCases.getRoutes(),
           builder: (context, routesSnapshot) {
             final routesDocs = routesSnapshot.data?.docs ?? const [];
             final routeCountByCity = <String, int>{};
@@ -106,7 +106,7 @@ class _CityGrid extends StatelessWidget {
 
                 return CityCard(
                   city: city,
-                  routesStream: routesUseCases.executeGetRutasByCiudad(city.id),
+                  routesStream: routesUseCases.getRoutesByCity(city.id),
                 );
               },
             );
