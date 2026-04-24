@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/routes/app_routes.dart';
@@ -9,7 +10,6 @@ import '../../../core/widgets/auth/auth_snack_bar.dart';
 import '../../../core/widgets/buttons/custom_button.dart';
 import '../../../core/widgets/inputs/custom_inputs.dart';
 import '../domain/usecases/auth_use_cases.dart';
-import 'auth_use_cases_factory.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -35,7 +35,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   void initState() {
     super.initState();
-    _authUseCases = createAuthUseCases();
+    _authUseCases = context.read<AuthUseCases>();
 
     _usuarioController.addListener(_validateForm);
     _nombreController.addListener(_validateForm);

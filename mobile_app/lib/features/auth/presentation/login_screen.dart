@@ -1,7 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:mobile_app/features/auth/domain/usecases/auth_use_cases.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/routes/app_routes.dart';
@@ -11,7 +11,6 @@ import '../../../core/widgets/auth/auth_logo.dart';
 import '../../../core/widgets/auth/auth_snack_bar.dart';
 import '../../../core/widgets/buttons/custom_button.dart';
 import '../../../core/widgets/inputs/custom_inputs.dart';
-import 'auth_use_cases_factory.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -32,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    _authUseCases = createAuthUseCases();
+    _authUseCases = context.read<AuthUseCases>();
   }
 
   Future<void> _handleLogin() async {
@@ -41,29 +40,23 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await _authUseCases.login(
+      final user = await _authUseCases.login(
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
 
-      final user = FirebaseAuth.instance.currentUser;
+      final isAdmin = await _authUseCases.checkAdminStatus(user.uid);
 
-      if (user != null) {
-        final isAdmin = await _authUseCases.checkAdminStatus(user.uid);
+      debugPrint(
+        "VERIFICACION: Web=$kIsWeb | Admin=$isAdmin | Email=${user.email}",
+      );
 
-        debugPrint(
-          "VERIFICACION: Web=$kIsWeb | Admin=$isAdmin | Email=${user.email}",
-        );
+      if (!mounted) return;
 
-        if (!mounted) return;
-
-        if (kIsWeb && isAdmin) {
-          Navigator.pushReplacementNamed(context, AppRoutes.adminPanel);
-        } else {
-          Navigator.pushReplacementNamed(context, AppRoutes.home);
-        }
+      if (kIsWeb && isAdmin) {
+        Navigator.pushReplacementNamed(context, AppRoutes.adminPanel);
       } else {
-        throw Exception("No se pudo recuperar el usuario tras el login");
+        Navigator.pushReplacementNamed(context, AppRoutes.home);
       }
     } catch (e) {
       if (!mounted) return;
@@ -94,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Correo de recuperacion enviado."),
+            content: Text("Correo de recuperación enviado."),
             backgroundColor: AppColors.exito,
           ),
         );
@@ -223,14 +216,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              "No tienes cuenta?  ",
+                              "¿No tienes cuenta?  ",
                               style: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(fontWeight: FontWeight.w700),
                             ),
                             GestureDetector(
                               onTap: _openRegister,
                               child: const Text(
-                                "Registrate",
+                                "Regístrate",
                                 style: TextStyle(
                                   color: AppColors.verdePrincipal,
                                   fontWeight: FontWeight.bold,

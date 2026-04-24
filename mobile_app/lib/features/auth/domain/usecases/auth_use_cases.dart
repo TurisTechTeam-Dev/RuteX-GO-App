@@ -1,5 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
-
+import '../entities/auth_user.dart';
 import '../repositories/auth_repository.dart';
 
 class AuthUseCases {
@@ -7,10 +6,14 @@ class AuthUseCases {
 
   AuthUseCases(this.repository);
 
-  Stream<User?> get authStateChanges => repository.authStateChanges;
+  Stream<AuthUser?> get authStateChanges => repository.authStateChanges;
 
-  Future<void> login(String email, String password) {
+  Future<AuthUser> login(String email, String password) {
     return repository.login(email: email, password: password);
+  }
+
+  AuthUser? getCurrentUser() {
+    return repository.getCurrentUser();
   }
 
   Future<void> register({

@@ -1,6 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile_app/features/auth/domain/entities/auth_user.dart';
 import 'package:mobile_app/features/auth/domain/usecases/auth_use_cases.dart';
 import 'package:mobile_app/features/splash/presentation/splash_screen.dart';
 import 'package:provider/provider.dart';
@@ -14,20 +14,19 @@ class AuthWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     final authUseCases = Provider.of<AuthUseCases>(context, listen: false);
 
-    return StreamBuilder<User?>(
+    return StreamBuilder<AuthUser?>(
       stream: authUseCases.authStateChanges,
       builder: (context, snapshot) {
-        // Mientras se establece la conexión con Firebase
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
 
-        // Si hay un usuario logueado
-        if (snapshot.hasData && snapshot.data != null) {
+        final user = snapshot.data;
+        if (user != null) {
           return FutureBuilder<bool>(
-            future: authUseCases.checkAdminStatus(snapshot.data!.uid),
+            future: authUseCases.checkAdminStatus(user.uid),
             builder: (context, adminSnapshot) {
               if (adminSnapshot.connectionState == ConnectionState.waiting) {
                 return const Scaffold(
@@ -35,20 +34,16 @@ class AuthWrapper extends StatelessWidget {
                 );
               }
 
-              final bool isAdmin = adminSnapshot.data ?? false;
-
-              // REGLA DE ORO: Si es Web y Admin, mantenlo en el panel
+              final isAdmin = adminSnapshot.data ?? false;
               if (kIsWeb && isAdmin) {
                 return const AdminRedirector();
               }
 
-              // Si es móvil o no es admin, dejamos que el Splash maneje la entrada
               return const SplashScreen();
             },
           );
         }
 
-        // 3. Si no hay sesión activa, al Splash (que mandará al Login)
         return const SplashScreen();
       },
     );

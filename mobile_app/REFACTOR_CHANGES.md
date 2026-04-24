@@ -49,14 +49,23 @@ Comportamiento actual:
 
 Archivos principales:
 
+- `lib/features/auth/domain/entities/auth_user.dart`
+- `lib/features/auth/data/models/auth_user_model.dart`
+- `lib/features/auth/domain/repositories/auth_repository.dart`
+- `lib/features/auth/data/repositories/auth_repository_impl.dart`
+- `lib/features/auth/domain/usecases/auth_use_cases.dart`
 - `lib/features/auth/presentation/login_screen.dart`
 - `lib/features/auth/presentation/register_screen.dart`
+- `lib/features/auth/presentation/auth_wrapper.dart`
 - `lib/core/widgets/auth/auth_logo.dart`
 - `lib/core/widgets/auth/auth_snack_bar.dart`
 - `lib/core/widgets/inputs/custom_inputs.dart`
 
 Que hace ahora:
 
+- `AuthUser` evita que domain y presentation dependan directamente de `firebase_auth.User`.
+- `AuthRepository.login` devuelve `AuthUser`, por lo que Login ya no consulta `FirebaseAuth.instance.currentUser`.
+- Login, registro, splash y auth wrapper leen `AuthUseCases` desde `Provider`; la UI ya no crea repositorios ni inicializa Firebase directamente.
 - Login y registro usan fondo comun con mapa de Extremadura.
 - Se ajusto el comportamiento del teclado para evitar saltos raros del layout.
 - `CustomInput` tiene `scrollPadding` para mejorar el enfoque de campos.

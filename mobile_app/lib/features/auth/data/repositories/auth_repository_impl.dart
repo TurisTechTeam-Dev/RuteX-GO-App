@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../../core/constants/firestore_contract.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../models/auth_user_model.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final FirebaseAuth firebaseAuth;
@@ -11,25 +12,42 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this.firebaseAuth, this.firestore);
 
   @override
-  Stream<User?> get authStateChanges => firebaseAuth.authStateChanges();
+  Stream<AuthUserModel?> get authStateChanges =>
+      firebaseAuth.authStateChanges().map(
+        (user) => user == null ? null : AuthUserModel.fromFirebaseUser(user),
+      );
 
   @override
-  Future<void> login({required String email, required String password}) async {
+  Future<AuthUserModel> login({
+    required String email,
+    required String password,
+  }) async {
     try {
       final userCredential = await firebaseAuth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      if (userCredential.user != null) {
-        await firestore
-            .collection(FirestoreCollections.usuarios)
-            .doc(userCredential.user!.uid)
-            .update({UserFields.ultimoAcceso: FieldValue.serverTimestamp()});
+      final user = userCredential.user;
+      if (user == null) {
+        throw Exception("No se pudo recuperar el usuario tras el login");
       }
+
+      await firestore
+          .collection(FirestoreCollections.usuarios)
+          .doc(user.uid)
+          .update({UserFields.ultimoAcceso: FieldValue.serverTimestamp()});
+
+      return AuthUserModel.fromFirebaseUser(user);
     } on FirebaseAuthException catch (e) {
       throw Exception(_mapError(e.code));
     }
+  }
+
+  @override
+  AuthUserModel? getCurrentUser() {
+    final user = firebaseAuth.currentUser;
+    return user == null ? null : AuthUserModel.fromFirebaseUser(user);
   }
 
   @override
