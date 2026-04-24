@@ -27,4 +27,24 @@ class MissionUseCases {
   Future<int> getRoutePointCount(String routeId) {
     return repository.getRoutePointCount(routeId);
   }
+
+  Future<String> getRouteName(String routeId) {
+    return repository.getRouteName(routeId);
+  }
+
+  Future<int> saveBestRouteProgress({
+    required String routeId,
+    required int currentAttemptPoints,
+    required int visitedPois,
+    required int completedMissions,
+    required List<PointOfInterest> skippedPois,
+  }) {
+    return repository.saveBestRouteProgress(
+      routeId: routeId,
+      currentAttemptPoints: currentAttemptPoints,
+      visitedPois: visitedPois,
+      completedMissions: completedMissions,
+      skippedPois: skippedPois,
+    );
+  }
 }

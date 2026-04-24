@@ -1,10 +1,7 @@
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
-import '../../../../../core/constants/firestore_contract.dart';
 import '../../../../../core/map/routing_service.dart';
 import '../../../domain/entities/poi_entity.dart';
 import '../../../domain/usecases/mission_use_cases.dart';
@@ -349,18 +346,20 @@ class TripSimulationProvider extends ChangeNotifier {
     final visitedPois = _completedPoiIndices.length;
     final skippedPois = _skippedPois();
     final elapsedTime = DateTime.now().difference(_startedAt);
-    final routeName = await _loadRouteName();
+    final routeName = await missionUseCases.getRouteName(routeId);
     final answers = List<QuizAnswerResult>.from(
       QuizRouteProgress.answerResults,
     );
-    final savedBestPoints = await _saveBestRouteProgress(
+    final completedMissions = QuizRouteProgress.visitedMonuments;
+    final savedBestPoints = await missionUseCases.saveBestRouteProgress(
+      routeId: routeId,
       currentAttemptPoints: currentAttemptPoints,
       visitedPois: visitedPois,
+      completedMissions: completedMissions,
       skippedPois: skippedPois,
     );
     final correctAnswers = answers.where((answer) => answer.isCorrect).length;
     final totalAnswers = answers.length;
-    final completedMissions = QuizRouteProgress.visitedMonuments;
 
     QuizRouteProgress.reset();
 
@@ -385,106 +384,6 @@ class TripSimulationProvider extends ChangeNotifier {
         .map((index) => _pointsOfInterest[index])
         .where((poi) => !QuizRouteProgress.visitedPointIds.contains(poi.id))
         .toList();
-  }
-
-  Future<String> _loadRouteName() async {
-    final doc = await FirebaseFirestore.instance
-        .collection(FirestoreCollections.rutas)
-        .doc(routeId)
-        .get();
-
-    return doc.data()?[RouteFields.nombre]?.toString() ?? 'Ruta completada';
-  }
-
-  Future<int> _saveBestRouteProgress({
-    required int currentAttemptPoints,
-    required int visitedPois,
-    required List<PointOfInterest> skippedPois,
-  }) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return currentAttemptPoints;
-
-    final userRef = FirebaseFirestore.instance
-        .collection(FirestoreCollections.usuarios)
-        .doc(user.uid);
-
-    return FirebaseFirestore.instance.runTransaction((transaction) async {
-      final snapshot = await transaction.get(userRef);
-      final data = snapshot.data() ?? {};
-      final completedRoutes = List<dynamic>.from(
-        data[UserFields.rutasCompletadas] ?? [],
-      );
-      final normalizedRoutes = List<dynamic>.from(completedRoutes);
-
-      var existingIndex = -1;
-      var previousBestPoints = 0;
-
-      for (var i = 0; i < normalizedRoutes.length; i++) {
-        final route = normalizedRoutes[i];
-
-        if (route is String && route == routeId) {
-          existingIndex = i;
-          break;
-        }
-
-        if (route is Map) {
-          final savedRouteId =
-              route[CompletedRouteFields.rutaId] ??
-              route[CompletedRouteFields.idRuta] ??
-              route[CompletedRouteFields.routeId];
-
-          if (savedRouteId?.toString() == routeId) {
-            existingIndex = i;
-            previousBestPoints = _asInt(
-              route[CompletedRouteFields.puntosObtenidos] ??
-                  route[CompletedRouteFields.puntos],
-            );
-            break;
-          }
-        }
-      }
-
-      if (existingIndex != -1 && previousBestPoints >= currentAttemptPoints) {
-        return previousBestPoints;
-      }
-
-      final routeProgress = {
-        CompletedRouteFields.rutaId: routeId,
-        CompletedRouteFields.puntosObtenidos: currentAttemptPoints,
-        CompletedRouteFields.monumentosVisitados: visitedPois,
-        CompletedRouteFields.misionesCompletadas:
-            QuizRouteProgress.visitedMonuments,
-        CompletedRouteFields.puntosInteresSaltados: skippedPois
-            .map((poi) => {'id': poi.id, 'nombre': poi.name})
-            .toList(),
-      };
-
-      if (existingIndex == -1) {
-        normalizedRoutes.add(routeProgress);
-      } else {
-        normalizedRoutes[existingIndex] = routeProgress;
-      }
-
-      final updates = <String, dynamic>{
-        UserFields.rutasCompletadas: normalizedRoutes,
-      };
-
-      final pointsDelta = currentAttemptPoints - previousBestPoints;
-      if (pointsDelta > 0) {
-        updates[UserFields.puntos] = FieldValue.increment(pointsDelta);
-      }
-
-      transaction.update(userRef, updates);
-      return currentAttemptPoints;
-    });
-  }
-
-  int _asInt(dynamic value) {
-    if (value is int) return value;
-    if (value is num) return value.toInt();
-    if (value is String) return int.tryParse(value) ?? 0;
-
-    return 0;
   }
 
   @override

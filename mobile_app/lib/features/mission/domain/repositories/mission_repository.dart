@@ -10,5 +10,15 @@ abstract class MissionRepository {
 
   Future<int> getRoutePointCount(String routeId);
 
+  Future<String> getRouteName(String routeId);
+
   Future<List<PointOfInterest>> getPointsByIds(List<String> ids);
+
+  Future<int> saveBestRouteProgress({
+    required String routeId,
+    required int currentAttemptPoints,
+    required int visitedPois,
+    required int completedMissions,
+    required List<PointOfInterest> skippedPois,
+  });
 }

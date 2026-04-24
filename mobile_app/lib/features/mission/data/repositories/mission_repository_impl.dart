@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/constants/firestore_contract.dart';
@@ -13,11 +14,18 @@ class MissionRepositoryImpl implements MissionRepository {
   static const int _firestoreWhereInLimit = 10;
 
   final MissionRemoteDatasource remoteDatasource;
+  final FirebaseAuth firebaseAuth;
+  final FirebaseFirestore firestore;
 
-  MissionRepositoryImpl({MissionRemoteDatasource? remoteDatasource})
-    : remoteDatasource =
-          remoteDatasource ??
-          MissionRemoteDatasource(FirebaseFirestore.instance);
+  MissionRepositoryImpl({
+    MissionRemoteDatasource? remoteDatasource,
+    FirebaseAuth? firebaseAuth,
+    FirebaseFirestore? firestore,
+  }) : firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
+       firestore = firestore ?? FirebaseFirestore.instance,
+       remoteDatasource =
+           remoteDatasource ??
+           MissionRemoteDatasource(firestore ?? FirebaseFirestore.instance);
 
   @override
   Future<PointOfInterest?> getPointByQr(String qrCode) async {
@@ -69,6 +77,13 @@ class MissionRepositoryImpl implements MissionRepository {
   }
 
   @override
+  Future<String> getRouteName(String routeId) async {
+    final doc = await remoteDatasource.getRouteById(routeId);
+
+    return doc.data()?[RouteFields.nombre]?.toString() ?? 'Ruta completada';
+  }
+
+  @override
   Future<List<PointOfInterest>> getPointsByIds(List<String> ids) async {
     if (ids.isEmpty) return [];
 
@@ -91,5 +106,98 @@ class MissionRepositoryImpl implements MissionRepository {
         .map((id) => pointsById[id])
         .whereType<PointOfInterest>()
         .toList();
+  }
+
+  @override
+  Future<int> saveBestRouteProgress({
+    required String routeId,
+    required int currentAttemptPoints,
+    required int visitedPois,
+    required int completedMissions,
+    required List<PointOfInterest> skippedPois,
+  }) async {
+    final user = firebaseAuth.currentUser;
+    if (user == null) return currentAttemptPoints;
+
+    final userRef = firestore
+        .collection(FirestoreCollections.usuarios)
+        .doc(user.uid);
+
+    return firestore.runTransaction((transaction) async {
+      final snapshot = await transaction.get(userRef);
+      final data = snapshot.data() ?? {};
+      final completedRoutes = List<dynamic>.from(
+        data[UserFields.rutasCompletadas] ?? [],
+      );
+      final normalizedRoutes = List<dynamic>.from(completedRoutes);
+
+      var existingIndex = -1;
+      var previousBestPoints = 0;
+
+      for (var i = 0; i < normalizedRoutes.length; i++) {
+        final route = normalizedRoutes[i];
+
+        if (route is String && route == routeId) {
+          existingIndex = i;
+          break;
+        }
+
+        if (route is Map) {
+          final savedRouteId =
+              route[CompletedRouteFields.rutaId] ??
+              route[CompletedRouteFields.idRuta] ??
+              route[CompletedRouteFields.routeId];
+
+          if (savedRouteId?.toString() == routeId) {
+            existingIndex = i;
+            previousBestPoints = _asInt(
+              route[CompletedRouteFields.puntosObtenidos] ??
+                  route[CompletedRouteFields.puntos],
+            );
+            break;
+          }
+        }
+      }
+
+      if (existingIndex != -1 && previousBestPoints >= currentAttemptPoints) {
+        return previousBestPoints;
+      }
+
+      final routeProgress = {
+        CompletedRouteFields.rutaId: routeId,
+        CompletedRouteFields.puntosObtenidos: currentAttemptPoints,
+        CompletedRouteFields.monumentosVisitados: visitedPois,
+        CompletedRouteFields.misionesCompletadas: completedMissions,
+        CompletedRouteFields.puntosInteresSaltados: skippedPois
+            .map((poi) => {'id': poi.id, 'nombre': poi.name})
+            .toList(),
+      };
+
+      if (existingIndex == -1) {
+        normalizedRoutes.add(routeProgress);
+      } else {
+        normalizedRoutes[existingIndex] = routeProgress;
+      }
+
+      final updates = <String, dynamic>{
+        UserFields.rutasCompletadas: normalizedRoutes,
+      };
+
+      final pointsDelta = currentAttemptPoints - previousBestPoints;
+      if (pointsDelta > 0) {
+        updates[UserFields.puntos] = FieldValue.increment(pointsDelta);
+      }
+
+      transaction.update(userRef, updates);
+      return currentAttemptPoints;
+    });
+  }
+
+  int _asInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? 0;
+
+    return 0;
   }
 }
