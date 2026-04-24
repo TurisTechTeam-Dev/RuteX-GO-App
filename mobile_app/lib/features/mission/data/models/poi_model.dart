@@ -10,6 +10,7 @@ class POIModel extends PointOfInterest {
     required super.id,
     required super.name,
     required super.description,
+    required super.image,
     required super.location,
     required super.qrCode,
     required super.activationRadius,
@@ -47,7 +48,8 @@ class POIModel extends PointOfInterest {
       description:
           json[PointInterestFields.descripcion]?.toString() ??
           json['descripci\u00F3n']?.toString() ??
-          'Sin descripcion',
+          'Sin descripción',
+      image: json[PointInterestFields.imagen]?.toString() ?? '',
       location: LatLng(latitude, longitude),
       qrCode: json[PointInterestFields.qrCode]?.toString() ?? '',
       activationRadius:
@@ -59,6 +61,7 @@ class POIModel extends PointOfInterest {
     return {
       PointInterestFields.nombre: name,
       PointInterestFields.descripcion: description,
+      PointInterestFields.imagen: image,
       PointInterestFields.localizacion: GeoPoint(
         location.latitude,
         location.longitude,

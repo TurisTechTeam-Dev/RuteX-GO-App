@@ -65,17 +65,24 @@ Que hace ahora:
 
 Archivos principales:
 
+- `lib/features/routes/data/datasources/routes_remote_datasource.dart`
+- `lib/features/routes/data/models/city_model.dart`
+- `lib/features/routes/data/models/route_model.dart`
+- `lib/features/routes/domain/entities/city.dart`
+- `lib/features/routes/domain/entities/tourist_route.dart`
+- `lib/features/routes/domain/repositories/routes_repository.dart`
 - `lib/features/routes/presentation/city_selection_screen.dart`
 - `lib/features/routes/presentation/widgets/city_selection_content.dart`
 - `lib/features/routes/presentation/widgets/city_card.dart`
-- `lib/features/routes/presentation/models/city_item.dart`
 - `lib/features/routes/presentation/route_selection_screen.dart`
 - `lib/features/routes/presentation/widgets/route_selection_content.dart`
 - `lib/features/routes/presentation/widgets/route_card.dart`
-- `lib/features/routes/presentation/models/route_item.dart`
 
 Que hace ahora:
 
+- `routes` ya usa un patron mas limpio: datasource para Firestore, models para parseo, entities en domain y widgets sin `QuerySnapshot`.
+- `RoutesRepository` devuelve `Stream<List<City>>` y `Stream<List<TouristRoute>>`, no tipos de Firestore.
+- `RoutesRemoteDatasource` concentra las queries contra `ciudades`, `rutas` y `misiones`.
 - Las ciudades se ordenan primero por disponibilidad real de rutas y luego alfabeticamente.
 - Una ciudad puede mostrar `Explorar` si tiene rutas, aunque `isActive` no gobierne ese flujo.
 - Las rutas muestran `Tiempo estimado` y `Puntos totales`.
@@ -88,6 +95,15 @@ Que hace ahora:
 
 Archivos principales:
 
+- `lib/features/mission/data/datasources/mission_remote_datasource.dart`
+- `lib/features/mission/data/models/mission_model.dart`
+- `lib/features/mission/data/models/poi_model.dart`
+- `lib/features/mission/domain/entities/mission.dart`
+- `lib/features/mission/domain/entities/mission_scan_result.dart`
+- `lib/features/mission/data/repositories/mission_repository_impl.dart`
+- `lib/features/mission/domain/entities/poi_entity.dart`
+- `lib/features/mission/domain/repositories/mission_repository.dart`
+- `lib/features/mission/presentation/monument_detail/models/monument_info_args.dart`
 - `lib/features/mission/presentation/quiz/screens/quiz_screen.dart`
 - `lib/features/mission/presentation/quiz/screens/route_result_screen.dart`
 - `lib/features/mission/presentation/quiz/quiz_route_progress.dart`
@@ -96,6 +112,13 @@ Archivos principales:
 
 Que hace ahora:
 
+- `PointOfInterest` ya es una entidad de dominio pura y no importa Firestore.
+- `Mission` y `MissionQuestion` encapsulan la mision y sus preguntas en domain.
+- `MissionScanResult` tipa el resultado del escaneo QR.
+- `POIModel` concentra el parseo desde Firestore hacia `PointOfInterest`.
+- `MissionModel` concentra el parseo desde Firestore hacia `Mission`.
+- `MissionRemoteDatasource` concentra las queries de puntos, misiones y rutas usadas por el repositorio de misiones.
+- El flujo QR -> monumento -> quiz ya no pasa mapas con claves `punto`/`mision`; usa `MissionScanResult`, `MonumentInfoArgs` y `QuizMission`.
 - `QuizRouteProgress` centraliza el progreso temporal de ruta.
 - La pantalla de resultados se reorganizo visualmente y limpia mejor respuestas con saltos raros.
 - La card principal de resultados deja ver el mapa de fondo.

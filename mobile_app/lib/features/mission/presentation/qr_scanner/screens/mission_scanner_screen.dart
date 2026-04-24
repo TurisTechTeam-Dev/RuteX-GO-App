@@ -7,6 +7,7 @@ import '../../../../../core/widgets/qr_scanner/scanner_widget.dart';
 import '../../../data/repositories/mission_repository_impl.dart';
 import '../../../domain/usecases/mission_use_cases.dart';
 import '../../mission_flow_result.dart';
+import '../../monument_detail/models/monument_info_args.dart';
 import '../../quiz/quiz_route_progress.dart';
 import '../widgets/mission_scanner_overlay.dart';
 
@@ -64,8 +65,7 @@ class _MissionScannerScreenState extends State<MissionScannerScreen> {
     final result = await _useCases.executeScan(code);
 
     if (result != null && mounted) {
-      final point = result['punto'];
-      final pointId = point is Map ? point['id']?.toString() : null;
+      final pointId = result.point.id;
 
       if (widget.expectedPointId != null && pointId != widget.expectedPointId) {
         final expectedName = widget.expectedPointName ?? 'este punto';
@@ -100,11 +100,11 @@ class _MissionScannerScreenState extends State<MissionScannerScreen> {
       final resultFromMission = await Navigator.pushNamed(
         context,
         AppRoutes.monumentInfo,
-        arguments: {
-          ...result,
-          if (widget.routeId != null) 'routeId': widget.routeId,
-          if (widget.totalPois != null) 'totalPois': widget.totalPois,
-        },
+        arguments: MonumentInfoArgs(
+          scanResult: result,
+          routeId: widget.routeId,
+          totalPois: widget.totalPois,
+        ),
       );
 
       if (!mounted) return;
@@ -148,7 +148,6 @@ class _MissionScannerScreenState extends State<MissionScannerScreen> {
               onCodeDetected: _onQrCodeDetected,
             ),
           ),
-
           MissionScannerOverlay(
             controller: _scannerController,
             isProcessing: _isProcessing,

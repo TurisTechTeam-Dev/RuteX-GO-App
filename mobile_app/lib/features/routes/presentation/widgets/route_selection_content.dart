@@ -1,11 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/backgrounds/extremadura_map_background.dart';
 import '../../../../core/widgets/titles/stroke_title.dart';
+import '../../domain/entities/tourist_route.dart';
 import '../../domain/usecases/routes_use_cases.dart';
-import '../models/route_item.dart';
 import 'route_card.dart';
 
 class RouteSelectionContent extends StatelessWidget {
@@ -52,7 +51,7 @@ class _RouteList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
+    return StreamBuilder<List<TouristRoute>>(
       stream: routesUseCases.getRoutesByCity(cityId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -63,15 +62,13 @@ class _RouteList extends StatelessWidget {
           return const Center(child: Text("Error al cargar las rutas"));
         }
 
-        final routeDocs = snapshot.data?.docs ?? [];
+        final routes = snapshot.data ?? const <TouristRoute>[];
 
-        if (routeDocs.isEmpty) {
+        if (routes.isEmpty) {
           return const Center(
             child: Text("No hay rutas disponibles para esta ciudad"),
           );
         }
-
-        final routes = routeDocs.map(RouteItem.fromDoc).toList();
 
         return FutureBuilder<Map<String, bool>>(
           future: routesUseCases.executeGetRouteAvailability(routes),

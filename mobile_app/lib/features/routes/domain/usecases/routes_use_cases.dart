@@ -1,6 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
-import '../../presentation/models/route_item.dart';
+import '../entities/city.dart';
+import '../entities/tourist_route.dart';
 import '../repositories/routes_repository.dart';
 
 class RoutesUseCases {
@@ -8,20 +7,20 @@ class RoutesUseCases {
 
   RoutesUseCases(this.repository);
 
-  Stream<QuerySnapshot> getCities() {
+  Stream<List<City>> getCities() {
     return repository.getCities();
   }
 
-  Stream<QuerySnapshot> getRoutes() {
+  Stream<List<TouristRoute>> getRoutes() {
     return repository.getRoutes();
   }
 
-  Stream<QuerySnapshot> getRoutesByCity(String cityId) {
+  Stream<List<TouristRoute>> getRoutesByCity(String cityId) {
     return repository.getRoutesByCity(cityId);
   }
 
   Future<Map<String, bool>> executeGetRouteAvailability(
-    List<RouteItem> routes,
+    List<TouristRoute> routes,
   ) async {
     final allPointIds = routes
         .expand((route) => route.pointIds)

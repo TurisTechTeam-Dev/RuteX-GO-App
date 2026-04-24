@@ -6,11 +6,13 @@ import '../../../../../core/routes/app_routes.dart';
 import '../../../../../core/widgets/bars/top_app_bar.dart';
 import '../../../../../core/widgets/images/storage_aware_image.dart';
 import '../../mission_flow_result.dart';
+import '../../quiz/models/quiz_mission.dart';
+import '../models/monument_info_args.dart';
 
 class MonumentInfoScreen extends StatefulWidget {
-  final Map<String, dynamic> data;
+  final MonumentInfoArgs args;
 
-  const MonumentInfoScreen({super.key, required this.data});
+  const MonumentInfoScreen({super.key, required this.args});
 
   @override
   State<MonumentInfoScreen> createState() => _MonumentInfoScreenState();
@@ -21,25 +23,17 @@ class _MonumentInfoScreenState extends State<MonumentInfoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final punto = widget.data['punto'] ?? {};
-    final mission = widget.data['mision'] ?? {};
-    final routeId = widget.data['routeId']?.toString();
-    final totalPois = widget.data['totalPois'];
-
-    final nombre = punto['nombre'] ?? "Monumento";
-    final descripcion = punto['descripcion'] ?? "";
-    final imagen = punto['imagen'];
+    final point = widget.args.scanResult.point;
+    final mission = widget.args.scanResult.mission;
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: const TopAppBar(showBack: true),
       drawer: const CustomDrawer(),
-
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// IMAGEN MONUMENTO
             Container(
               width: double.infinity,
               height: 220,
@@ -48,9 +42,9 @@ class _MonumentInfoScreenState extends State<MonumentInfoScreen> {
                   bottom: BorderSide(color: AppColors.negroTexto, width: 2),
                 ),
               ),
-              child: imagen != null && imagen.toString().isNotEmpty
+              child: point.image.isNotEmpty
                   ? StorageAwareImage(
-                      source: imagen.toString(),
+                      source: point.image,
                       fit: BoxFit.cover,
                       fallback: const Center(
                         child: Icon(
@@ -68,9 +62,7 @@ class _MonumentInfoScreenState extends State<MonumentInfoScreen> {
                       ),
                     ),
             ),
-
             const SizedBox(height: 20),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
@@ -78,7 +70,7 @@ class _MonumentInfoScreenState extends State<MonumentInfoScreen> {
                 children: [
                   Center(
                     child: Text(
-                      nombre,
+                      point.name,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontSize: 28,
@@ -87,17 +79,14 @@ class _MonumentInfoScreenState extends State<MonumentInfoScreen> {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 20),
-
-                  /// CARD DESCRIPCIÓN
                   CustomCard(
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          descripcion,
+                          point.description,
                           maxLines: expanded ? null : 5,
                           overflow: expanded
                               ? TextOverflow.visible
@@ -108,11 +97,8 @@ class _MonumentInfoScreenState extends State<MonumentInfoScreen> {
                             color: Colors.black87,
                           ),
                         ),
-
                         const SizedBox(height: 10),
-
-                        /// MOSTRAR MÁS
-                        if (descripcion.length > 200)
+                        if (point.description.length > 200)
                           GestureDetector(
                             onTap: () {
                               setState(() {
@@ -130,10 +116,7 @@ class _MonumentInfoScreenState extends State<MonumentInfoScreen> {
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 30),
-
-                  /// BOTÓN MISIÓN
                   SizedBox(
                     width: double.infinity,
                     height: 55,
@@ -148,13 +131,13 @@ class _MonumentInfoScreenState extends State<MonumentInfoScreen> {
                         final result = await Navigator.pushNamed(
                           context,
                           AppRoutes.quiz,
-                          arguments: {
-                            'mision': mission,
-                            'routeId': ?routeId,
-                            'pointId': ?punto['id']?.toString(),
-                            'pointName': nombre.toString(),
-                            'totalPois': ?totalPois,
-                          },
+                          arguments: QuizMission.fromMission(
+                            mission: mission,
+                            routeId: widget.args.routeId,
+                            pointId: point.id,
+                            pointName: point.name,
+                            totalPois: widget.args.totalPois,
+                          ),
                         );
 
                         if (!context.mounted) return;
@@ -176,7 +159,6 @@ class _MonumentInfoScreenState extends State<MonumentInfoScreen> {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 80),
                 ],
               ),
@@ -184,7 +166,6 @@ class _MonumentInfoScreenState extends State<MonumentInfoScreen> {
           ],
         ),
       ),
-
       bottomNavigationBar: Container(
         height: 60,
         decoration: const BoxDecoration(

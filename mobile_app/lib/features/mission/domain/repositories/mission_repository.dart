@@ -1,9 +1,10 @@
+import '../entities/mission.dart';
 import '../entities/poi_entity.dart';
 
 abstract class MissionRepository {
-  Future<Map<String, dynamic>?> getPointByQr(String qrCode);
+  Future<PointOfInterest?> getPointByQr(String qrCode);
 
-  Future<Map<String, dynamic>?> getMissionByPointId(String pointId);
+  Future<Mission?> getMissionByPointId(String pointId);
 
   Future<List<String>> getRoutePointIds(String routeId);
 

@@ -1,33 +1,23 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../../core/constants/firestore_contract.dart';
+import '../../domain/entities/tourist_route.dart';
 
-class RouteItem {
-  final String id;
-  final String title;
-  final String description;
-  final String difficulty;
-  final String time;
-  final List<String> pointIds;
-  final int totalPois;
-  final int totalPoints;
-  final String image;
-
-  const RouteItem({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.difficulty,
-    required this.time,
-    required this.pointIds,
-    required this.totalPois,
-    required this.totalPoints,
-    required this.image,
+class RouteModel extends TouristRoute {
+  const RouteModel({
+    required super.id,
+    required super.cityId,
+    required super.title,
+    required super.description,
+    required super.difficulty,
+    required super.time,
+    required super.pointIds,
+    required super.totalPois,
+    required super.totalPoints,
+    required super.image,
   });
 
-  String get pointsLabel => "$totalPoints puntos";
-
-  factory RouteItem.fromDoc(QueryDocumentSnapshot doc) {
+  factory RouteModel.fromSnapshot(QueryDocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     final pointsOfInterest = data[RouteFields.idPuntosInteres] as List?;
     final pointIds =
@@ -35,8 +25,9 @@ class RouteItem {
         const <String>[];
     final totalPois = pointsOfInterest?.length ?? 0;
 
-    return RouteItem(
+    return RouteModel(
       id: doc.id,
+      cityId: data[RouteFields.idCiudad]?.toString() ?? '',
       title: data[RouteFields.nombre]?.toString() ?? 'Ruta',
       description: data[RouteFields.descripcion]?.toString() ?? '',
       difficulty: data[RouteFields.dificultad]?.toString() ?? 'Media',

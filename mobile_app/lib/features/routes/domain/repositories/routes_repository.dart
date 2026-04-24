@@ -1,8 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import '../entities/city.dart';
+import '../entities/tourist_route.dart';
 
 abstract class RoutesRepository {
-  Stream<QuerySnapshot> getCities();
-  Stream<QuerySnapshot> getRoutes();
-  Stream<QuerySnapshot> getRoutesByCity(String cityId);
+  Stream<List<City>> getCities();
+  Stream<List<TouristRoute>> getRoutes();
+  Stream<List<TouristRoute>> getRoutesByCity(String cityId);
   Future<Set<String>> getPointIdsWithMission(List<String> pointIds);
 }

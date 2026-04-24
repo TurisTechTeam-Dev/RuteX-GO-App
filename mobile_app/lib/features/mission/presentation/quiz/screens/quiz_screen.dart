@@ -10,16 +10,16 @@ import '../quiz_route_progress.dart';
 import '../widgets/quiz_content.dart';
 
 class QuizScreen extends StatefulWidget {
-  final Map<String, dynamic> data;
+  final QuizMission mission;
 
-  const QuizScreen({super.key, required this.data});
+  const QuizScreen({super.key, required this.mission});
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
 }
 
 class _QuizScreenState extends State<QuizScreen> {
-  late final QuizMission _mission = QuizMission.fromArgs(widget.data);
+  late final QuizMission _mission = widget.mission;
 
   int _currentIndex = 0;
   int? _selectedOption;

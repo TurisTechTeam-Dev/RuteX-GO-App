@@ -1,11 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/backgrounds/extremadura_map_background.dart';
 import '../../../../core/widgets/titles/stroke_title.dart';
+import '../../domain/entities/city.dart';
+import '../../domain/entities/tourist_route.dart';
 import '../../domain/usecases/routes_use_cases.dart';
-import '../models/city_item.dart';
 import 'city_card.dart';
 
 class CitySelectionContent extends StatelessWidget {
@@ -50,7 +50,7 @@ class _CityGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
+    return StreamBuilder<List<City>>(
       stream: routesUseCases.getCities(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -61,29 +61,28 @@ class _CityGrid extends StatelessWidget {
           return const Center(child: Text("Error al cargar las ciudades"));
         }
 
-        final docs = snapshot.data?.docs.toList() ?? [];
+        final cities = snapshot.data ?? const <City>[];
 
-        if (docs.isEmpty) {
+        if (cities.isEmpty) {
           return const Center(child: Text("No hay ciudades disponibles"));
         }
 
-        return StreamBuilder<QuerySnapshot>(
+        return StreamBuilder<List<TouristRoute>>(
           stream: routesUseCases.getRoutes(),
           builder: (context, routesSnapshot) {
-            final routesDocs = routesSnapshot.data?.docs ?? const [];
-            final routeCountByCity = <String, int>{};
+            final routes = routesSnapshot.data ?? const <TouristRoute>[];
 
-            for (final doc in routesDocs) {
-              final data = doc.data() as Map<String, dynamic>;
-              final cityId = data['id_ciudad']?.toString();
-              if (cityId == null || cityId.isEmpty) continue;
-              routeCountByCity[cityId] = (routeCountByCity[cityId] ?? 0) + 1;
+            final routeCountByCityFromRoutes = <String, int>{};
+            for (final city in cities) {
+              routeCountByCityFromRoutes[city.id] = routes
+                  .where((route) => route.cityId == city.id)
+                  .length;
             }
 
-            final cities = docs.map(CityItem.fromDoc).toList()
+            final sortedCities = [...cities]
               ..sort((a, b) {
-                final aHasRoutes = (routeCountByCity[a.id] ?? 0) > 0;
-                final bHasRoutes = (routeCountByCity[b.id] ?? 0) > 0;
+                final aHasRoutes = (routeCountByCityFromRoutes[a.id] ?? 0) > 0;
+                final bHasRoutes = (routeCountByCityFromRoutes[b.id] ?? 0) > 0;
 
                 if (aHasRoutes != bHasRoutes) {
                   return aHasRoutes ? -1 : 1;
@@ -100,13 +99,15 @@ class _CityGrid extends StatelessWidget {
                 mainAxisSpacing: 16,
                 childAspectRatio: 0.72,
               ),
-              itemCount: cities.length,
+              itemCount: sortedCities.length,
               itemBuilder: (context, index) {
-                final city = cities[index];
+                final city = sortedCities[index];
 
                 return CityCard(
                   city: city,
-                  routesStream: routesUseCases.getRoutesByCity(city.id),
+                  routesCount: routeCountByCityFromRoutes[city.id] ?? 0,
+                  isLoadingRoutes:
+                      routesSnapshot.connectionState == ConnectionState.waiting,
                 );
               },
             );

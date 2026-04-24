@@ -1,4 +1,4 @@
-import '../../../../../core/constants/firestore_contract.dart';
+import '../../../domain/entities/mission.dart';
 import 'quiz_question.dart';
 
 class QuizMission {
@@ -18,43 +18,22 @@ class QuizMission {
     required this.totalPois,
   });
 
-  factory QuizMission.fromArgs(Map<String, dynamic> args) {
-    final data = _extractMissionData(args);
-    final questions = data[MissionFields.preguntas];
-
+  factory QuizMission.fromMission({
+    required Mission mission,
+    required String? routeId,
+    required String? pointId,
+    required String pointName,
+    required int? totalPois,
+  }) {
     return QuizMission(
-      title: data[MissionFields.titulo]?.toString() ?? "Misión",
-      questions: questions is List
-          ? questions
-                .whereType<Map>()
-                .map(
-                  (question) =>
-                      QuizQuestion.fromMap(Map<String, dynamic>.from(question)),
-                )
-                .toList()
-          : const [],
-      routeId: args['routeId']?.toString(),
-      pointId: args['pointId']?.toString(),
-      pointName: args['pointName']?.toString() ?? 'Punto de interés',
-      totalPois: _resolveTotalPois(args['totalPois']),
+      title: mission.title,
+      questions: mission.questions
+          .map(QuizQuestion.fromMissionQuestion)
+          .toList(),
+      routeId: routeId,
+      pointId: pointId,
+      pointName: pointName,
+      totalPois: totalPois != null && totalPois > 0 ? totalPois : 3,
     );
-  }
-
-  static Map<String, dynamic> _extractMissionData(Map<String, dynamic> args) {
-    final mission = args['mision'];
-
-    if (mission is Map) {
-      return Map<String, dynamic>.from(mission);
-    }
-
-    return args;
-  }
-
-  static int _resolveTotalPois(dynamic totalPois) {
-    if (totalPois is int && totalPois > 0) return totalPois;
-    if (totalPois is num && totalPois > 0) return totalPois.toInt();
-    if (totalPois is String) return int.tryParse(totalPois) ?? 3;
-
-    return 3;
   }
 }

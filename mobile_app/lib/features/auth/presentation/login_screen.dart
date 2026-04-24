@@ -79,7 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            "Introduce un email valido arriba para recuperar tu contrasena",
+            "Introduce un email válido arriba para recuperar tu contraseña",
           ),
           backgroundColor: Colors.orange,
         ),
@@ -187,8 +187,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 validator: Validadores.validarEmail,
                               ),
                               CustomInput(
-                                label: 'Contrasena',
-                                hint: 'Introduce tu contrasena',
+                                label: 'Contraseña',
+                                hint: 'Introduce tu contraseña',
                                 isPassword: true,
                                 controller: _passwordController,
                                 validator: Validadores.validarPassword,
@@ -198,7 +198,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 30),
                         CustomButton(
-                          text: _isLoading ? "CARGANDO..." : "Iniciar sesion",
+                          text: _isLoading ? "CARGANDO..." : "Iniciar sesión",
                           onPressed: _isLoading ? null : _handleLogin,
                         ),
                         Align(
@@ -209,7 +209,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               padding: EdgeInsets.zero,
                             ),
                             child: Text(
-                              "Has olvidado tu contrasena?",
+                              "¿Has olvidado tu contraseña?",
                               style: Theme.of(context).textTheme.labelMedium
                                   ?.copyWith(
                                     fontSize: 11,

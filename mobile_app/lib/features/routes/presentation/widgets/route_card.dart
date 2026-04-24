@@ -4,10 +4,10 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../../core/widgets/cards/custom_cards.dart';
 import '../../../../core/widgets/images/storage_aware_image.dart';
-import '../models/route_item.dart';
+import '../../domain/entities/tourist_route.dart';
 
 class RouteCard extends StatelessWidget {
-  final RouteItem route;
+  final TouristRoute route;
   final bool canStart;
 
   const RouteCard({super.key, required this.route, required this.canStart});
@@ -150,7 +150,7 @@ class _RouteTitle extends StatelessWidget {
 }
 
 class _RouteDetails extends StatelessWidget {
-  final RouteItem route;
+  final TouristRoute route;
 
   const _RouteDetails({required this.route});
 

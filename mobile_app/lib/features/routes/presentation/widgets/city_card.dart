@@ -1,45 +1,44 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../../core/widgets/cards/custom_cards.dart';
 import '../../../../core/widgets/images/storage_aware_image.dart';
-import '../models/city_item.dart';
+import '../../domain/entities/city.dart';
 
 class CityCard extends StatelessWidget {
-  final CityItem city;
-  final Stream<QuerySnapshot> routesStream;
+  final City city;
+  final int routesCount;
+  final bool isLoadingRoutes;
 
-  const CityCard({super.key, required this.city, required this.routesStream});
+  const CityCard({
+    super.key,
+    required this.city,
+    required this.routesCount,
+    required this.isLoadingRoutes,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: routesStream,
-      builder: (context, snapshot) {
-        final routesCount = snapshot.data?.docs.length ?? 0;
-        final hasRoutes = routesCount > 0;
+    final hasRoutes = routesCount > 0;
 
-        return CustomCard(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            children: [
-              _CityImage(image: city.image),
-              const SizedBox(height: 8),
-              _StrokeCityTitle(text: city.title),
-              const SizedBox(height: 6),
-              _RouteCounter(
-                hasRoutes: hasRoutes,
-                isLoading: snapshot.connectionState == ConnectionState.waiting,
-                routesCount: routesCount,
-              ),
-              const Spacer(),
-              _ExploreButton(hasRoutes: hasRoutes, cityId: city.id),
-            ],
+    return CustomCard(
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        children: [
+          _CityImage(image: city.image),
+          const SizedBox(height: 8),
+          _StrokeCityTitle(text: city.title),
+          const SizedBox(height: 6),
+          _RouteCounter(
+            hasRoutes: hasRoutes,
+            isLoading: isLoadingRoutes,
+            routesCount: routesCount,
           ),
-        );
-      },
+          const Spacer(),
+          _ExploreButton(hasRoutes: hasRoutes, cityId: city.id),
+        ],
+      ),
     );
   }
 }
@@ -132,7 +131,7 @@ class _RouteCounter extends StatelessWidget {
 
     if (!hasRoutes) {
       return Text(
-        "Proximamente",
+        "Próximamente",
         style: Theme.of(context).textTheme.labelMedium,
       );
     }

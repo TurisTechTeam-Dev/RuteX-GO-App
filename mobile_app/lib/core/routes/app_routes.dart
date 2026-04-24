@@ -6,8 +6,10 @@ import '../../features/auth/presentation/register_screen.dart';
 import '../../features/mission/domain/usecases/mission_use_cases.dart';
 import '../../features/mission/presentation/navigation/provider/trip_provider.dart';
 import '../../features/mission/presentation/navigation/screens/map_navigation_screen.dart';
+import '../../features/mission/presentation/monument_detail/models/monument_info_args.dart';
 import '../../features/mission/presentation/qr_scanner/screens/mission_scanner_screen.dart';
 import '../../features/mission/presentation/monument_detail/screens/monument_info_screen.dart';
+import '../../features/mission/presentation/quiz/models/quiz_mission.dart';
 import '../../features/mission/presentation/quiz/screens/quiz_screen.dart';
 import '../../features/mission/presentation/quiz/screens/route_result_screen.dart';
 import '../../features/profile/presentation/home_screen.dart';
@@ -90,14 +92,14 @@ class AppRoutes {
         );
 
       case monumentInfo:
-        final data = settings.arguments as Map<String, dynamic>;
+        final data = settings.arguments as MonumentInfoArgs;
         return MaterialPageRoute(
-          builder: (_) => MonumentInfoScreen(data: data),
+          builder: (_) => MonumentInfoScreen(args: data),
         );
 
       case quiz:
-        final data = settings.arguments as Map<String, dynamic>;
-        return MaterialPageRoute(builder: (_) => QuizScreen(data: data));
+        final data = settings.arguments as QuizMission;
+        return MaterialPageRoute(builder: (_) => QuizScreen(mission: data));
 
       case routeResult:
         return MaterialPageRoute(

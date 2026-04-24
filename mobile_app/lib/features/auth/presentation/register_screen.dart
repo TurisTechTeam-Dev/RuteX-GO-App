@@ -86,7 +86,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           var errorMessage = "Error al registrarse";
 
           if (e.toString().contains('email-already-in-use')) {
-            errorMessage = "El correo electronico ya esta registrado.";
+            errorMessage = "El correo electrónico ya está registrado.";
           } else {
             errorMessage = e.toString().replaceAll("Exception: ", "");
           }
@@ -100,7 +100,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     } else if (!_aceptaTerminos) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Debes aceptar los terminos y condiciones."),
+          content: Text("Debes aceptar los términos y condiciones."),
         ),
       );
     }
@@ -166,15 +166,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 validator: Validadores.validarEmail,
                               ),
                               CustomInput(
-                                label: 'Contrasena',
-                                hint: 'Introduce tu contrasena',
+                                label: 'Contraseña',
+                                hint: 'Introduce tu contraseña',
                                 controller: _passwordController,
                                 isPassword: true,
                                 validator: Validadores.validarPassword,
                               ),
                               CustomInput(
-                                label: 'Confirmar contrasena',
-                                hint: 'Repite tu contrasena',
+                                label: 'Confirmar contraseña',
+                                hint: 'Repite tu contraseña',
                                 controller: _confirmPasswordController,
                                 isPassword: true,
                                 validator: (value) =>
@@ -200,7 +200,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       },
                                     ),
                                     Text(
-                                      "Acepto terminos y condiciones",
+                                      "Acepto términos y condiciones",
                                       style: Theme.of(context)
                                           .textTheme
                                           .labelMedium
@@ -229,7 +229,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   GestureDetector(
                                     onTap: () => Navigator.pop(context),
                                     child: const Text(
-                                      "Iniciar sesion",
+                                      "Iniciar sesión",
                                       style: TextStyle(
                                         color: AppColors.verdePrincipal,
                                         fontWeight: FontWeight.bold,

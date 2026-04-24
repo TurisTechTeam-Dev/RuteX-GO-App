@@ -262,7 +262,7 @@ class _SkippedPoisGroup extends StatelessWidget {
       children: [
         const Divider(height: 28),
         const Text(
-          'Puntos de interes saltados',
+          'Puntos de interés saltados',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 12),
@@ -276,7 +276,7 @@ class _SkippedPoisGroup extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    '${_AnswerTextSanitizer.clean(poi)}: mision no realizada',
+                    '${_AnswerTextSanitizer.clean(poi)}: misión no realizada',
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),

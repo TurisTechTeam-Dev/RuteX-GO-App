@@ -1,29 +1,42 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../../core/constants/firestore_contract.dart';
+import '../../domain/entities/city.dart';
+import '../../domain/entities/tourist_route.dart';
 import '../../domain/repositories/routes_repository.dart';
+import '../datasources/routes_remote_datasource.dart';
+import '../models/city_model.dart';
+import '../models/route_model.dart';
 
 class RoutesRepositoryImpl implements RoutesRepository {
   static const int _firestoreWhereInLimit = 10;
 
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final RoutesRemoteDatasource remoteDatasource;
+
+  RoutesRepositoryImpl({RoutesRemoteDatasource? remoteDatasource})
+    : remoteDatasource =
+          remoteDatasource ??
+          RoutesRemoteDatasource(FirebaseFirestore.instance);
 
   @override
-  Stream<QuerySnapshot> getCities() {
-    return _db.collection(FirestoreCollections.ciudades).snapshots();
+  Stream<List<City>> getCities() {
+    return remoteDatasource.watchCities().map(
+      (snapshot) => snapshot.docs.map(CityModel.fromSnapshot).toList(),
+    );
   }
 
   @override
-  Stream<QuerySnapshot> getRoutes() {
-    return _db.collection(FirestoreCollections.rutas).snapshots();
+  Stream<List<TouristRoute>> getRoutes() {
+    return remoteDatasource.watchRoutes().map(
+      (snapshot) => snapshot.docs.map(RouteModel.fromSnapshot).toList(),
+    );
   }
 
   @override
-  Stream<QuerySnapshot> getRoutesByCity(String cityId) {
-    return _db
-        .collection(FirestoreCollections.rutas)
-        .where(RouteFields.idCiudad, isEqualTo: cityId)
-        .snapshots();
+  Stream<List<TouristRoute>> getRoutesByCity(String cityId) {
+    return remoteDatasource
+        .watchRoutesByCity(cityId)
+        .map((snapshot) => snapshot.docs.map(RouteModel.fromSnapshot).toList());
   }
 
   @override
@@ -34,10 +47,7 @@ class RoutesRepositoryImpl implements RoutesRepository {
 
     for (var i = 0; i < pointIds.length; i += _firestoreWhereInLimit) {
       final chunk = pointIds.skip(i).take(_firestoreWhereInLimit).toList();
-      final snapshot = await _db
-          .collection(FirestoreCollections.misiones)
-          .where(MissionFields.puntosInteresId, whereIn: chunk)
-          .get();
+      final snapshot = await remoteDatasource.getMissionsByPointIds(chunk);
 
       for (final doc in snapshot.docs) {
         final pointId = doc.data()[MissionFields.puntosInteresId]?.toString();

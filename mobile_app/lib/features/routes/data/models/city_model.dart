@@ -1,25 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../../core/constants/firestore_contract.dart';
+import '../../domain/entities/city.dart';
 
-class CityItem {
-  final String id;
-  final String title;
-  final String image;
-  final bool available;
-
-  const CityItem({
-    required this.id,
-    required this.title,
-    required this.image,
-    required this.available,
+class CityModel extends City {
+  const CityModel({
+    required super.id,
+    required super.title,
+    required super.image,
+    required super.available,
   });
 
-  factory CityItem.fromDoc(QueryDocumentSnapshot doc) {
+  factory CityModel.fromSnapshot(QueryDocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     final fallbackImage = "assets/images_selection/${doc.id}.jpg";
 
-    return CityItem(
+    return CityModel(
       id: doc.id,
       title: data[CityFields.nombre]?.toString() ?? '',
       image: data[CityFields.imagen]?.toString() ?? fallbackImage,
