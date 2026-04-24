@@ -12,16 +12,6 @@ class QuizAnswerResult {
     required this.correctAnswer,
     required this.isCorrect,
   });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'monumentName': monumentName,
-      'question': question,
-      'selectedAnswer': selectedAnswer,
-      'correctAnswer': correctAnswer,
-      'isCorrect': isCorrect,
-    };
-  }
 }
 
 class QuizRouteProgress {
