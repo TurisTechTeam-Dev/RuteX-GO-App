@@ -1,17 +1,16 @@
-class Validadores {
-  static String? validarCampoVacio(String? value, String nombreCampo) {
+class Validators {
+  static String? validateRequiredField(String? value, String fieldName) {
     if (value == null || value.isEmpty) {
-      return 'El campo $nombreCampo es obligatorio';
+      return 'El campo $fieldName es obligatorio';
     }
     return null;
   }
 
-  static String? validarEmail(String? value) {
+  static String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
       return 'El email es obligatorio';
     }
 
-    // Expresión regular para validar formato de email.
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (!emailRegex.hasMatch(value)) {
       return 'El formato del email no es válido';
@@ -19,7 +18,7 @@ class Validadores {
     return null;
   }
 
-  static String? validarPassword(String? value) {
+  static String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'La contraseña es obligatoria';
     }
@@ -29,14 +28,14 @@ class Validadores {
     return null;
   }
 
-  static String? validarCoincidencia(String? value, String passwordOriginal) {
-    if (value != passwordOriginal) {
+  static String? validatePasswordMatch(String? value, String originalPassword) {
+    if (value != originalPassword) {
       return 'Las contraseñas no coinciden';
     }
     return null;
   }
 
-  static String? validarNombre(String? value) {
+  static String? validateName(String? value) {
     if (value == null || value.isEmpty) {
       return "El nombre es obligatorio";
     }

@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/routes/app_routes.dart';
-import '../../../core/utils/validadores.dart';
+import '../../../core/utils/validators.dart';
 import '../../../core/widgets/auth/auth_card.dart';
 import '../../../core/widgets/auth/auth_logo.dart';
 import '../../../core/widgets/auth/auth_snack_bar.dart';
@@ -67,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _recoverPassword() async {
-    final emailError = Validadores.validarEmail(_emailController.text);
+    final emailError = Validators.validateEmail(_emailController.text);
     if (emailError != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -177,14 +177,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                 hint: 'Introduce tu email',
                                 controller: _emailController,
                                 keyboardType: TextInputType.text,
-                                validator: Validadores.validarEmail,
+                                validator: Validators.validateEmail,
                               ),
                               CustomInput(
                                 label: 'Contraseña',
                                 hint: 'Introduce tu contraseña',
                                 isPassword: true,
                                 controller: _passwordController,
-                                validator: Validadores.validarPassword,
+                                validator: Validators.validatePassword,
                               ),
                             ],
                           ),

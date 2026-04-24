@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/routes/app_routes.dart';
-import '../../../core/utils/validadores.dart';
+import '../../../core/utils/validators.dart';
 import '../../../core/widgets/auth/auth_card.dart';
 import '../../../core/widgets/auth/auth_logo.dart';
 import '../../../core/widgets/auth/auth_snack_bar.dart';
@@ -20,13 +20,13 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _usuarioController = TextEditingController();
-  final _nombreController = TextEditingController();
+  final _usernameController = TextEditingController();
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
-  bool _aceptaTerminos = false;
+  bool _acceptedTerms = false;
   bool _isLoading = false;
   bool _isButtonEnabled = false;
 
@@ -37,8 +37,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.initState();
     _authUseCases = context.read<AuthUseCases>();
 
-    _usuarioController.addListener(_validateForm);
-    _nombreController.addListener(_validateForm);
+    _usernameController.addListener(_validateForm);
+    _nameController.addListener(_validateForm);
     _emailController.addListener(_validateForm);
     _passwordController.addListener(_validateForm);
     _confirmPasswordController.addListener(_validateForm);
@@ -47,19 +47,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
   void _validateForm() {
     setState(() {
       _isButtonEnabled =
-          _usuarioController.text.isNotEmpty &&
-          _nombreController.text.isNotEmpty &&
+          _usernameController.text.isNotEmpty &&
+          _nameController.text.isNotEmpty &&
           _emailController.text.isNotEmpty &&
           _passwordController.text.isNotEmpty &&
           _confirmPasswordController.text.isNotEmpty &&
-          _aceptaTerminos;
+          _acceptedTerms;
     });
   }
 
   @override
   void dispose() {
-    _usuarioController.dispose();
-    _nombreController.dispose();
+    _usernameController.dispose();
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -67,13 +67,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _handleRegister() async {
-    if (_formKey.currentState!.validate() && _aceptaTerminos) {
+    if (_formKey.currentState!.validate() && _acceptedTerms) {
       setState(() => _isLoading = true);
 
       try {
         await _authUseCases.register(
-          name: _nombreController.text.trim(),
-          username: _usuarioController.text.trim(),
+          name: _nameController.text.trim(),
+          username: _usernameController.text.trim(),
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
@@ -97,7 +97,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       } finally {
         if (mounted) setState(() => _isLoading = false);
       }
-    } else if (!_aceptaTerminos) {
+    } else if (!_acceptedTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Debes aceptar los términos y condiciones."),
@@ -145,9 +145,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               CustomInput(
                                 label: 'Usuario',
                                 hint: 'Introduce tu nombre de usuario',
-                                controller: _usuarioController,
+                                controller: _usernameController,
                                 validator: (value) =>
-                                    Validadores.validarCampoVacio(
+                                    Validators.validateRequiredField(
                                       value,
                                       'Usuario',
                                     ),
@@ -155,22 +155,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               CustomInput(
                                 label: 'Nombre',
                                 hint: 'Introduce tu nombre',
-                                controller: _nombreController,
-                                validator: Validadores.validarNombre,
+                                controller: _nameController,
+                                validator: Validators.validateName,
                               ),
                               CustomInput(
                                 label: 'Email',
                                 hint: 'Introduce tu email',
                                 controller: _emailController,
                                 keyboardType: TextInputType.text,
-                                validator: Validadores.validarEmail,
+                                validator: Validators.validateEmail,
                               ),
                               CustomInput(
                                 label: 'Contraseña',
                                 hint: 'Introduce tu contraseña',
                                 controller: _passwordController,
                                 isPassword: true,
-                                validator: Validadores.validarPassword,
+                                validator: Validators.validatePassword,
                               ),
                               CustomInput(
                                 label: 'Confirmar contraseña',
@@ -178,7 +178,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 controller: _confirmPasswordController,
                                 isPassword: true,
                                 validator: (value) =>
-                                    Validadores.validarCoincidencia(
+                                    Validators.validatePasswordMatch(
                                       value,
                                       _passwordController.text,
                                     ),
@@ -188,13 +188,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 child: Row(
                                   children: [
                                     Checkbox(
-                                      value: _aceptaTerminos,
+                                      value: _acceptedTerms,
                                       activeColor: AppColors.verdePrincipal,
                                       visualDensity: VisualDensity.compact,
                                       onChanged: (value) {
                                         setState(
-                                          () =>
-                                              _aceptaTerminos = value ?? false,
+                                          () => _acceptedTerms = value ?? false,
                                         );
                                         _validateForm();
                                       },
@@ -225,7 +224,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Text("Ya tienes cuenta?  "),
+                                  const Text("¿Ya tienes cuenta?  "),
                                   GestureDetector(
                                     onTap: () => Navigator.pop(context),
                                     child: const Text(
