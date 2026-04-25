@@ -488,11 +488,13 @@ Antes de solicitar la integración de un cambio (PR):
 
 ## 📄 Licencia y Derechos
 
-Este proyecto está protegido por una **Licencia Propietaria**. No se permite la copia, distribución, modificación ni uso comercial del código o sus recursos sin la autorización expresa del equipo desarrollador.
+Este proyecto es propiedad exclusiva de **TurisTechTeam-Dev**. Todos los derechos reservados. El código y los recursos están protegidos por una **Licencia Propietaria**, lo que prohíbe su copia, distribución o uso comercial sin autorización expresa.
 
-Consulta el archivo [LICENSE](LICENSE) para más detalles.
+Para más detalles sobre los términos de uso, consulta las versiones oficiales de la licencia:
+* 🇪🇸 [Licencia en Español (LICENSE_ES.md)](LICENSE_ES.md)
+* 🇬🇧 [Proprietary License in English (LICENSE.md)](LICENSE.md)
 
-© 2025 **TurisTech Team** **Desarrolladores:** Andrés Fernández Expósito · Diego Vivas Paredes · Joel Manuel García Villarino
+© 2025-2026 **TurisTechTeam-Dev**: Andrés Fernández Expósito • Diego Vivas Paredes • Joel Manuel García Villarino
 
 ---
 
