@@ -1,22 +1,35 @@
-Copyright (c) 2025 TurisTechTeam-Dev  
-All rights reserved.
+# PROPRIETARY SOFTWARE LICENSE - TurisTechTeam-Dev
 
-Permission is granted to download and view this software and its documentation for personal, educational, or evaluation purposes only.
+**Copyright (c) 2025-2026 TurisTechTeam-Dev**
 
-You are NOT permitted to:
-- Use the software for commercial purposes.
-- Modify, distribute, sublicense, or create derivative works.
-- Redistribute the software or its contents in any medium.
-- Publish, sell, rent, or lease any portion of the software.
-- Reverse-engineer, decompile, or attempt to extract the source code.
+**Intellectual Property Holders:**
+* Andrés Fernández Expósito
+* Joel Manuel García Villarino
+* Diego Vivas Paredes
 
-This software is protected under intellectual property laws and remains the exclusive property of TurisTechTeam-Dev and its authors:
+---
 
-- Andrés Fernández Expósito  
-- Joel Manuel García Villarino  
-- Diego Vivas Paredes  
+### 1. INTELLECTUAL PROPERTY
+This software, including its source code, interface design, graphics, databases, and accompanying documentation, is the exclusive property of the authors mentioned above. All rights are reserved and protected by the **Intellectual Property Law of Spain** and current international treaties.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING FROM THE USE OF THIS SOFTWARE.
+### 2. LIMITED LICENSE GRANT
+A **non-exclusive, non-transferable, and revocable** license is granted for:
+* Downloading, installing, and executing the software solely for **academic and personal evaluation purposes**.
 
-For licensing inquiries or commercial usage, please contact:
-turistechteam@gmail.com
+### 3. RESTRICTIONS (PROHIBITIONS)
+It is strictly prohibited, without prior written authorization from the holders, to:
+* **Commercial Exploitation:** Use the software or any part of its business logic for financial gain.
+* **Redistribution:** Copy, distribute, rent, sell, or publish the source code or binary on any public or private platform.
+* **Modification:** Create derivative works, make changes to the code, or adapt the software for other uses.
+* **Reverse Engineering:** Attempt to decompile, disassemble, or decrypt the source code, communication protocols, or proprietary algorithms.
+
+### 4. REFERENCE DATE AND EVIDENCE
+The version history in this GitHub repository serves as proof of authorship and a timestamp of the code's creation. Any unauthorized use will be detected and may be subject to legal action.
+
+### 5. DISCLAIMER OF WARRANTY
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. THE AUTHORS ARE NOT LIABLE FOR ANY CLAIMS, DAMAGES, OR OTHER LIABILITIES ARISING FROM THE USE OF THE SOFTWARE.
+
+---
+
+For licensing inquiries or commercial use, contact:
+**turistechteam@gmail.com**
