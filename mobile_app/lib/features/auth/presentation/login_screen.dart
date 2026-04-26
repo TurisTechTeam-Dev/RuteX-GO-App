@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../app/navigation/app_routes.dart';
 import '../../../core/utils/validators.dart';
+import '../data/repositories/auth_repository_impl.dart';
 import '../domain/usecases/auth_use_cases.dart';
 import 'widgets/auth_snack_bar.dart';
 import 'widgets/login_content.dart';
@@ -42,24 +43,42 @@ class _LoginScreenState extends State<LoginScreen> {
         _passwordController.text.trim(),
       );
 
-      final isAdmin = await _authUseCases.checkAdminStatus(user.uid);
-
-      debugPrint(
-        "AUTH CHECK: Web=$kIsWeb | Admin=$isAdmin | Email=${user.email}",
-      );
-
-      if (!mounted) return;
-
-      if (kIsWeb && isAdmin) {
-        Navigator.pushReplacementNamed(context, AppRoutes.adminPanel);
-      } else {
-        Navigator.pushReplacementNamed(context, AppRoutes.home);
-      }
+      await _navigateAfterLogin(user.uid, user.email);
     } catch (e) {
       if (!mounted) return;
       showAuthSnackBar(context, e.toString(), backgroundColor: AppColors.error);
     } finally {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _handleGoogleLogin() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final user = await _authUseCases.loginWithGoogle();
+      await _navigateAfterLogin(user.uid, user.email);
+    } on GoogleSignInCancelledException {
+      return;
+    } catch (e) {
+      if (!mounted) return;
+      showAuthSnackBar(context, e.toString(), backgroundColor: AppColors.error);
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _navigateAfterLogin(String uid, String? email) async {
+    final isAdmin = await _authUseCases.checkAdminStatus(uid);
+
+    debugPrint("AUTH CHECK: Web=$kIsWeb | Admin=$isAdmin | Email=$email");
+
+    if (!mounted) return;
+
+    if (kIsWeb && isAdmin) {
+      Navigator.pushReplacementNamed(context, AppRoutes.adminPanel);
+    } else {
+      Navigator.pushReplacementNamed(context, AppRoutes.home);
     }
   }
 
@@ -129,6 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
         passwordController: _passwordController,
         isLoading: _isLoading,
         onLogin: _handleLogin,
+        onGoogleLogin: _handleGoogleLogin,
         onRecoverPassword: _recoverPassword,
         onOpenRegister: _openRegister,
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/validators.dart';
@@ -13,6 +14,7 @@ class LoginContent extends StatelessWidget {
   final TextEditingController passwordController;
   final bool isLoading;
   final VoidCallback onLogin;
+  final VoidCallback onGoogleLogin;
   final VoidCallback onRecoverPassword;
   final VoidCallback onOpenRegister;
 
@@ -23,6 +25,7 @@ class LoginContent extends StatelessWidget {
     required this.passwordController,
     required this.isLoading,
     required this.onLogin,
+    required this.onGoogleLogin,
     required this.onRecoverPassword,
     required this.onOpenRegister,
   });
@@ -80,6 +83,11 @@ class LoginContent extends StatelessWidget {
                       CustomButton(
                         text: isLoading ? "CARGANDO..." : "Iniciar sesión",
                         onPressed: isLoading ? null : onLogin,
+                      ),
+                      const SizedBox(height: 12),
+                      _GoogleSignInButton(
+                        isLoading: isLoading,
+                        onPressed: onGoogleLogin,
                       ),
                       Align(
                         alignment: Alignment.centerRight,
@@ -165,4 +173,91 @@ class _LoginForm extends StatelessWidget {
       ),
     );
   }
+}
+
+class _GoogleSignInButton extends StatelessWidget {
+  final bool isLoading;
+  final VoidCallback onPressed;
+
+  const _GoogleSignInButton({
+    required this.isLoading,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 46,
+      child: OutlinedButton.icon(
+        onPressed: isLoading ? null : onPressed,
+        icon: const _GoogleLogo(),
+        label: const Text(
+          "Continuar con Google",
+          textAlign: TextAlign.center,
+        ),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.negroTexto,
+          side: const BorderSide(color: AppColors.verdeBorde, width: 1.5),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      ),
+    );
+  }
+}
+
+class _GoogleLogo extends StatelessWidget {
+  const _GoogleLogo();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      width: 22,
+      height: 22,
+      child: CustomPaint(painter: _GoogleLogoPainter()),
+    );
+  }
+}
+
+class _GoogleLogoPainter extends CustomPainter {
+  const _GoogleLogoPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final stroke = size.width * 0.16;
+    final rect = Offset(stroke / 2, stroke / 2) &
+        Size(size.width - stroke, size.height - stroke);
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = stroke
+      ..strokeCap = StrokeCap.round;
+
+    paint.color = const Color(0xFF4285F4);
+    canvas.drawArc(rect, -0.08 * math.pi, 0.58 * math.pi, false, paint);
+
+    paint.color = const Color(0xFF34A853);
+    canvas.drawArc(rect, 0.48 * math.pi, 0.42 * math.pi, false, paint);
+
+    paint.color = const Color(0xFFFBBC05);
+    canvas.drawArc(rect, 0.90 * math.pi, 0.38 * math.pi, false, paint);
+
+    paint.color = const Color(0xFFEA4335);
+    canvas.drawArc(rect, 1.28 * math.pi, 0.50 * math.pi, false, paint);
+
+    final centerY = size.height / 2;
+    paint.color = const Color(0xFF4285F4);
+    canvas.drawLine(
+      Offset(size.width * 0.54, centerY),
+      Offset(size.width * 0.92, centerY),
+      paint,
+    );
+    canvas.drawLine(
+      Offset(size.width * 0.82, centerY),
+      Offset(size.width * 0.82, size.height * 0.68),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

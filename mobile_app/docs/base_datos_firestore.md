@@ -225,6 +225,8 @@ Uso en app:
   - `puntos: 0`
   - `rutas_completadas: []`
   - `isAdmin: false`
+- `AuthRepositoryImpl.loginWithGoogle()` crea el mismo documento si el usuario entra por Google por primera vez.
+- En login con Google, `avatar` se inicializa con la foto de Google si Firebase la devuelve.
 - `ProfileRemoteDataSource.uploadAvatar()` sube la imagen a Storage en `Avatares/{uid}/perfil_{timestamp}.jpg`.
 - `ProfileRemoteDataSource.updateAvatar()` guarda esa ruta interna de Storage en `usuarios.avatar`.
 - `ProfileRemoteDataSource.updateUsername()` actualiza `usuarios.usuario`.

@@ -12,6 +12,10 @@ class AuthUseCases {
     return repository.login(email: email, password: password);
   }
 
+  Future<AuthUser> loginWithGoogle() {
+    return repository.loginWithGoogle();
+  }
+
   AuthUser? getCurrentUser() {
     return repository.getCurrentUser();
   }
