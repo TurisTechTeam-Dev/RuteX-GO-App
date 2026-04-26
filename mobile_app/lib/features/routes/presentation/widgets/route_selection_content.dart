@@ -84,6 +84,8 @@ class _RouteList extends StatelessWidget {
           builder: (context, availabilitySnapshot) {
             final availability =
                 availabilitySnapshot.data ?? const <String, bool>{};
+            final isCheckingAvailability =
+                availabilitySnapshot.connectionState != ConnectionState.done;
 
             return ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -91,11 +93,14 @@ class _RouteList extends StatelessWidget {
               itemBuilder: (context, index) {
                 final route = routes[index];
                 final canStart =
-                    availabilitySnapshot.connectionState ==
-                        ConnectionState.done &&
+                    !isCheckingAvailability &&
                     (availability[route.id] ?? false);
 
-                return RouteCard(route: route, canStart: canStart);
+                return RouteCard(
+                  route: route,
+                  canStart: canStart,
+                  isCheckingAvailability: isCheckingAvailability,
+                );
               },
             );
           },

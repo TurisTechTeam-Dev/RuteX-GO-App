@@ -19,6 +19,7 @@ dependencies:
   firebase_storage: ^13.0.2
   intl: ^0.20.2
   mobile_scanner: ^7.2.0
+  image_picker: ^1.2.1
   flutter_joystick: ^0.2.2
   provider: ^6.1.5
   latlong2: ^0.9.1

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
-import '../../../core/constants/app_colors.dart';
-import '../../../core/widgets/backgrounds/extremadura_map_background.dart';
 import '../../../app/widgets/custom_drawer.dart';
 import '../../../app/widgets/top_app_bar.dart';
+import '../../../core/constants/app_colors.dart';
+import '../../../core/widgets/backgrounds/extremadura_map_background.dart';
 import '../../auth/domain/usecases/auth_use_cases.dart';
 import '../domain/entities/home_data.dart';
 import '../domain/entities/user_profile.dart';
@@ -19,20 +20,27 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  final _usernameFormKey = GlobalKey<FormState>();
   final _emailFormKey = GlobalKey<FormState>();
   final _passwordFormKey = GlobalKey<FormState>();
+  final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _currentPasswordController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _imagePicker = ImagePicker();
 
   late final AuthUseCases _authUseCases;
   late final ProfileUseCases _profileUseCases;
-  late final Future<HomeData> _profileFuture;
+  late Future<HomeData> _profileFuture;
 
-  bool _isInitialized = false;
+  bool _isEditingUsername = false;
+  bool _isEditingEmail = false;
+  bool _isEditingPassword = false;
+  bool _isSavingUsername = false;
   bool _isSavingEmail = false;
   bool _isSavingPassword = false;
+  bool _isUploadingAvatar = false;
 
   @override
   void initState() {
@@ -52,13 +60,90 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _initializeForm(UserProfile user) {
-    if (_isInitialized) return;
-
     final authEmail = _authUseCases.getCurrentUser()?.email;
-    _emailController.text = authEmail?.isNotEmpty == true
-        ? authEmail!
-        : user.email;
-    _isInitialized = true;
+    final username = user.username.isNotEmpty ? user.username : user.name;
+    final email = authEmail?.isNotEmpty == true ? authEmail! : user.email;
+
+    if (!_isEditingUsername && _usernameController.text != username) {
+      _usernameController.text = username;
+    }
+
+    if (!_isEditingEmail && _emailController.text != email) {
+      _emailController.text = email;
+    }
+  }
+
+  void _refreshProfile() {
+    setState(() {
+      _profileFuture = _loadProfileData();
+    });
+  }
+
+  Future<void> _updateUsername() async {
+    if (!_usernameFormKey.currentState!.validate()) return;
+
+    final user = _authUseCases.getCurrentUser();
+    if (user == null) {
+      _showMessage("No hay sesión activa.", isError: true);
+      return;
+    }
+
+    setState(() => _isSavingUsername = true);
+    try {
+      await _profileUseCases.updateUsername(
+        uid: user.uid,
+        username: _usernameController.text.trim(),
+      );
+      if (!mounted) return;
+
+      setState(() => _isEditingUsername = false);
+      _showMessage("Usuario actualizado correctamente.");
+      _refreshProfile();
+    } catch (e) {
+      if (!mounted) return;
+      _showMessage(e.toString(), isError: true);
+    } finally {
+      if (mounted) setState(() => _isSavingUsername = false);
+    }
+  }
+
+  Future<void> _changeAvatar() async {
+    final user = _authUseCases.getCurrentUser();
+    if (user == null) {
+      _showMessage("No hay sesión activa.", isError: true);
+      return;
+    }
+
+    final image = await _imagePicker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 82,
+      maxWidth: 900,
+      maxHeight: 900,
+    );
+    if (image == null) return;
+
+    setState(() => _isUploadingAvatar = true);
+    try {
+      final bytes = await image.readAsBytes();
+      final avatarPath = await _profileUseCases.uploadAvatar(
+        uid: user.uid,
+        bytes: bytes,
+        contentType: image.mimeType ?? 'image/jpeg',
+      );
+      await _profileUseCases.updateAvatar(
+        uid: user.uid,
+        avatarPath: avatarPath,
+      );
+      if (!mounted) return;
+
+      _showMessage("Foto de perfil actualizada.");
+      _refreshProfile();
+    } catch (e) {
+      if (!mounted) return;
+      _showMessage(e.toString(), isError: true);
+    } finally {
+      if (mounted) setState(() => _isUploadingAvatar = false);
+    }
   }
 
   Future<void> _requestEmailChange() async {
@@ -69,6 +154,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await _authUseCases.requestEmailChange(_emailController.text.trim());
       if (!mounted) return;
 
+      setState(() => _isEditingEmail = false);
       _showMessage(
         "Te hemos enviado un correo para confirmar el cambio de email.",
       );
@@ -94,6 +180,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _confirmPasswordController.clear();
       if (!mounted) return;
 
+      setState(() => _isEditingPassword = false);
       _showMessage("Contraseña actualizada correctamente.");
     } catch (e) {
       if (!mounted) return;
@@ -114,6 +201,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   void dispose() {
+    _usernameController.dispose();
     _emailController.dispose();
     _currentPasswordController.dispose();
     _passwordController.dispose();
@@ -146,15 +234,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                 return ProfileContent(
                   user: data.user,
+                  usernameFormKey: _usernameFormKey,
                   emailFormKey: _emailFormKey,
                   passwordFormKey: _passwordFormKey,
+                  usernameController: _usernameController,
                   emailController: _emailController,
                   currentPasswordController: _currentPasswordController,
                   passwordController: _passwordController,
                   confirmPasswordController: _confirmPasswordController,
+                  isEditingUsername: _isEditingUsername,
+                  isEditingEmail: _isEditingEmail,
+                  isEditingPassword: _isEditingPassword,
+                  isSavingUsername: _isSavingUsername,
                   isSavingEmail: _isSavingEmail,
                   isSavingPassword: _isSavingPassword,
+                  isUploadingAvatar: _isUploadingAvatar,
+                  onEditUsername: () =>
+                      setState(() => _isEditingUsername = true),
+                  onCancelUsername: () {
+                    _usernameController.text = data.user.username.isNotEmpty
+                        ? data.user.username
+                        : data.user.name;
+                    setState(() => _isEditingUsername = false);
+                  },
+                  onSaveUsername: _updateUsername,
+                  onChangeAvatar: _changeAvatar,
+                  onEditEmail: () => setState(() => _isEditingEmail = true),
+                  onCancelEmail: () {
+                    final authEmail = _authUseCases.getCurrentUser()?.email;
+                    _emailController.text = authEmail?.isNotEmpty == true
+                        ? authEmail!
+                        : data.user.email;
+                    setState(() => _isEditingEmail = false);
+                  },
                   onSaveEmail: _requestEmailChange,
+                  onEditPassword: () =>
+                      setState(() => _isEditingPassword = true),
+                  onCancelPassword: () {
+                    _currentPasswordController.clear();
+                    _passwordController.clear();
+                    _confirmPasswordController.clear();
+                    setState(() => _isEditingPassword = false);
+                  },
                   onSavePassword: _updatePassword,
                 );
               },

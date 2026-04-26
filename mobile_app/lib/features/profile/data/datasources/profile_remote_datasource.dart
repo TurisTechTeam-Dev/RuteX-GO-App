@@ -1,12 +1,17 @@
+import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 import '../../../../core/constants/firestore_contract.dart';
 
 class ProfileRemoteDataSource {
   final FirebaseFirestore firestore;
+  final FirebaseStorage storage;
   static const int _firestoreWhereInLimit = 10;
 
-  ProfileRemoteDataSource(this.firestore);
+  ProfileRemoteDataSource(this.firestore, {FirebaseStorage? storage})
+    : storage = storage ?? FirebaseStorage.instance;
 
   Future<DocumentSnapshot<Map<String, dynamic>>> getUserDoc(String uid) {
     return firestore.collection(FirestoreCollections.usuarios).doc(uid).get();
@@ -52,6 +57,35 @@ class ProfileRemoteDataSource {
     return firestore.collection(FirestoreCollections.usuarios).doc(uid).update({
       UserFields.rutasCompletadas: routesProgress,
       UserFields.puntos: points,
+    });
+  }
+
+  Future<void> updateUsername({
+    required String uid,
+    required String username,
+  }) {
+    return firestore.collection(FirestoreCollections.usuarios).doc(uid).update({
+      UserFields.usuario: username,
+    });
+  }
+
+  Future<String> uploadAvatar({
+    required String uid,
+    required Uint8List bytes,
+    required String contentType,
+  }) async {
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final ref = storage.ref('Avatares/$uid/perfil_$timestamp.jpg');
+    await ref.putData(bytes, SettableMetadata(contentType: contentType));
+    return ref.fullPath;
+  }
+
+  Future<void> updateAvatar({
+    required String uid,
+    required String avatarPath,
+  }) {
+    return firestore.collection(FirestoreCollections.usuarios).doc(uid).update({
+      UserFields.avatar: avatarPath,
     });
   }
 }

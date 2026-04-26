@@ -8,11 +8,17 @@ import '../../domain/entities/user_profile.dart';
 class ProfileHeader extends StatelessWidget {
   final UserProfile user;
   final String displayName;
+  final bool isUploadingAvatar;
+  final VoidCallback onChangeAvatar;
+  final VoidCallback onEditUsername;
 
   const ProfileHeader({
     super.key,
     required this.user,
     required this.displayName,
+    required this.isUploadingAvatar,
+    required this.onChangeAvatar,
+    required this.onEditUsername,
   });
 
   @override
@@ -22,19 +28,36 @@ class ProfileHeader extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       child: Row(
         children: [
-          _ProfileAvatar(avatarUrl: user.avatarUrl),
+          _ProfileAvatar(
+            avatarUrl: user.avatarUrl,
+            isUploading: isUploadingAvatar,
+            onChangeAvatar: onChangeAvatar,
+          ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  displayName,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.negroTexto,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        displayName,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.negroTexto,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: 'Editar usuario',
+                      visualDensity: VisualDensity.compact,
+                      icon: const Icon(Icons.edit, size: 20),
+                      color: AppColors.verdePrincipal,
+                      onPressed: onEditUsername,
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -57,8 +80,61 @@ class ProfileHeader extends StatelessWidget {
 
 class _ProfileAvatar extends StatelessWidget {
   final String avatarUrl;
+  final bool isUploading;
+  final VoidCallback onChangeAvatar;
 
-  const _ProfileAvatar({required this.avatarUrl});
+  const _ProfileAvatar({
+    required this.avatarUrl,
+    required this.isUploading,
+    required this.onChangeAvatar,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final avatar = _AvatarImage(avatarUrl: avatarUrl);
+
+    return SizedBox(
+      width: 76,
+      height: 76,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned.fill(child: avatar),
+          Positioned(
+            right: -2,
+            bottom: -2,
+            child: SizedBox(
+              width: 30,
+              height: 30,
+              child: FloatingActionButton.small(
+                heroTag: null,
+                tooltip: 'Cambiar foto',
+                backgroundColor: AppColors.verdePrincipal,
+                foregroundColor: AppColors.blancoPuro,
+                onPressed: isUploading ? null : onChangeAvatar,
+                child: isUploading
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.blancoPuro,
+                        ),
+                      )
+                    : const Icon(Icons.photo_camera, size: 17),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AvatarImage extends StatelessWidget {
+  final String avatarUrl;
+
+  const _AvatarImage({required this.avatarUrl});
 
   @override
   Widget build(BuildContext context) {

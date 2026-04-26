@@ -44,10 +44,33 @@ class MissionRepositoryImpl implements MissionRepository {
     try {
       final snapshot = await remoteDataSource.getMissionByPointId(pointId);
 
-      if (snapshot.docs.isEmpty) return null;
+      if (snapshot.docs.isNotEmpty) {
+        final doc = snapshot.docs.first;
+        return MissionModel.fromFirestore(doc.data(), doc.id);
+      }
 
-      final doc = snapshot.docs.first;
-      return MissionModel.fromFirestore(doc.data(), doc.id);
+      final singularSnapshot = await remoteDataSource
+          .getMissionBySingularPointId(pointId);
+
+      if (singularSnapshot.docs.isNotEmpty) {
+        final doc = singularSnapshot.docs.first;
+        return MissionModel.fromFirestore(doc.data(), doc.id);
+      }
+
+      final refSnapshot = await remoteDataSource.getMissionByPointRef(pointId);
+
+      if (refSnapshot.docs.isNotEmpty) {
+        final doc = refSnapshot.docs.first;
+        return MissionModel.fromFirestore(doc.data(), doc.id);
+      }
+
+      final singularRefSnapshot = await remoteDataSource
+          .getMissionBySingularPointRef(pointId);
+
+      if (singularRefSnapshot.docs.isNotEmpty) {
+        final doc = singularRefSnapshot.docs.first;
+        return MissionModel.fromFirestore(doc.data(), doc.id);
+      }
     } catch (e) {
       debugPrint("Failed to load mission for point '$pointId': $e");
     }
@@ -67,7 +90,10 @@ class MissionRepositoryImpl implements MissionRepository {
     final routePointIds = doc.data()?[RouteFields.idPuntosInteres];
 
     if (routePointIds is List) {
-      return routePointIds.map((e) => e.toString()).toList();
+      return routePointIds
+          .map(_pointIdFromRouteValue)
+          .where((pointId) => pointId.isNotEmpty)
+          .toList();
     }
 
     return [];
@@ -179,6 +205,29 @@ class MissionRepositoryImpl implements MissionRepository {
         savedBestPoints: currentAttemptPoints,
       );
     });
+  }
+
+  String _pointIdFromRouteValue(dynamic rawValue) {
+    if (rawValue == null) return '';
+
+    if (rawValue is DocumentReference) {
+      return rawValue.id.trim();
+    }
+
+    if (rawValue is Map) {
+      const nestedKeys = ['id', 'uid', 'path', 'ref', 'reference'];
+      for (final key in nestedKeys) {
+        final value = _pointIdFromRouteValue(rawValue[key]);
+        if (value.isNotEmpty) return value;
+      }
+    }
+
+    final value = rawValue.toString().trim();
+    if (value.isEmpty) return '';
+
+    final segments = value.split('/');
+    final lastSegment = segments.last.trim();
+    return lastSegment.isEmpty ? value : lastSegment;
   }
 
 }

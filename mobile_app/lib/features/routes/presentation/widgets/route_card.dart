@@ -9,8 +9,14 @@ import '../../domain/entities/tourist_route.dart';
 class RouteCard extends StatelessWidget {
   final TouristRoute route;
   final bool canStart;
+  final bool isCheckingAvailability;
 
-  const RouteCard({super.key, required this.route, required this.canStart});
+  const RouteCard({
+    super.key,
+    required this.route,
+    required this.canStart,
+    this.isCheckingAvailability = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -36,12 +42,16 @@ class RouteCard extends StatelessWidget {
             ],
             const SizedBox(height: 12),
             _RouteDetails(route: route),
-            if (!canStart) ...[
+            if (!isCheckingAvailability && !canStart) ...[
               const SizedBox(height: 12),
               const _RouteBlockedHint(),
             ],
             const SizedBox(height: 12),
-            _StartRouteButton(routeId: route.id, canStart: canStart),
+            _StartRouteButton(
+              routeId: route.id,
+              canStart: canStart,
+              isCheckingAvailability: isCheckingAvailability,
+            ),
           ],
         ),
       ),
@@ -173,8 +183,13 @@ class _RouteBlockedHint extends StatelessWidget {
 class _StartRouteButton extends StatelessWidget {
   final String routeId;
   final bool canStart;
+  final bool isCheckingAvailability;
 
-  const _StartRouteButton({required this.routeId, required this.canStart});
+  const _StartRouteButton({
+    required this.routeId,
+    required this.canStart,
+    required this.isCheckingAvailability,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -190,7 +205,7 @@ class _StartRouteButton extends StatelessWidget {
           disabledForegroundColor: AppColors.blancoPuro,
           padding: const EdgeInsets.symmetric(horizontal: 24),
         ),
-        onPressed: canStart
+        onPressed: canStart && !isCheckingAvailability
             ? () {
                 Navigator.pushNamed(
                   context,
@@ -199,7 +214,13 @@ class _StartRouteButton extends StatelessWidget {
                 );
               }
             : null,
-        child: Text(canStart ? "Comenzar ruta" : "Ruta no disponible"),
+        child: Text(
+          isCheckingAvailability
+              ? "Comprobando..."
+              : canStart
+              ? "Comenzar ruta"
+              : "Ruta no disponible",
+        ),
       ),
     );
   }

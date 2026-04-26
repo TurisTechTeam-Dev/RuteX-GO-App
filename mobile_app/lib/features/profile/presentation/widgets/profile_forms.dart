@@ -5,17 +5,19 @@ import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/cards/custom_cards.dart';
 import '../../../../core/widgets/inputs/custom_inputs.dart';
 
-class EmailFormCard extends StatelessWidget {
+class UsernameFormCard extends StatelessWidget {
   final GlobalKey<FormState> formKey;
   final TextEditingController controller;
   final bool isSaving;
+  final VoidCallback onCancel;
   final VoidCallback onSave;
 
-  const EmailFormCard({
+  const UsernameFormCard({
     super.key,
     required this.formKey,
     required this.controller,
     required this.isSaving,
+    required this.onCancel,
     required this.onSave,
   });
 
@@ -29,19 +31,87 @@ class EmailFormCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const _SectionTitle("Correo electrónico"),
+            const _SectionTitle("Nombre de usuario"),
             const SizedBox(height: 12),
             CustomInput(
-              label: "Nuevo email",
-              hint: "Introduce tu nuevo email",
-              keyboardType: TextInputType.emailAddress,
+              label: "Usuario",
+              hint: "Introduce tu nombre de usuario",
               controller: controller,
-              validator: Validators.validateEmail,
+              validator: (value) =>
+                  Validators.validateRequiredField(value, "usuario"),
             ),
-            _ProfileActionButton(
-              text: isSaving ? "ENVIANDO..." : "Enviar verificación",
-              onPressed: isSaving ? null : onSave,
+            _ProfileActionRow(
+              isSaving: isSaving,
+              savingText: "GUARDANDO...",
+              saveText: "Guardar usuario",
+              onCancel: onCancel,
+              onSave: onSave,
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class EmailFormCard extends StatelessWidget {
+  final GlobalKey<FormState> formKey;
+  final TextEditingController controller;
+  final bool isSaving;
+  final bool isEditing;
+  final VoidCallback onEdit;
+  final VoidCallback onCancel;
+  final VoidCallback onSave;
+
+  const EmailFormCard({
+    super.key,
+    required this.formKey,
+    required this.controller,
+    required this.isSaving,
+    required this.isEditing,
+    required this.onEdit,
+    required this.onCancel,
+    required this.onSave,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomCard(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      child: Form(
+        key: formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _EditableSectionTitle(
+              text: "Correo electrónico",
+              isEditing: isEditing,
+              onEdit: onEdit,
+            ),
+            if (!isEditing) ...[
+              const SizedBox(height: 8),
+              Text(
+                controller.text,
+                style: const TextStyle(color: AppColors.grisNeutro),
+              ),
+            ] else ...[
+              const SizedBox(height: 12),
+              CustomInput(
+                label: "Nuevo email",
+                hint: "Introduce tu nuevo email",
+                keyboardType: TextInputType.emailAddress,
+                controller: controller,
+                validator: Validators.validateEmail,
+              ),
+              _ProfileActionRow(
+                isSaving: isSaving,
+                savingText: "ENVIANDO...",
+                saveText: "Enviar verificación",
+                onCancel: onCancel,
+                onSave: onSave,
+              ),
+            ],
           ],
         ),
       ),
@@ -55,6 +125,9 @@ class PasswordFormCard extends StatelessWidget {
   final TextEditingController passwordController;
   final TextEditingController confirmPasswordController;
   final bool isSaving;
+  final bool isEditing;
+  final VoidCallback onEdit;
+  final VoidCallback onCancel;
   final VoidCallback onSave;
 
   const PasswordFormCard({
@@ -64,6 +137,9 @@ class PasswordFormCard extends StatelessWidget {
     required this.passwordController,
     required this.confirmPasswordController,
     required this.isSaving,
+    required this.isEditing,
+    required this.onEdit,
+    required this.onCancel,
     required this.onSave,
   });
 
@@ -77,39 +153,83 @@ class PasswordFormCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const _SectionTitle("Contraseña"),
-            const SizedBox(height: 12),
-            CustomInput(
-              label: "Contraseña actual",
-              hint: "Introduce tu contraseña actual",
-              isPassword: true,
-              controller: currentPasswordController,
-              validator: Validators.validatePassword,
+            _EditableSectionTitle(
+              text: "Contraseña",
+              isEditing: isEditing,
+              onEdit: onEdit,
             ),
-            CustomInput(
-              label: "Nueva contraseña",
-              hint: "Introduce tu nueva contraseña",
-              isPassword: true,
-              controller: passwordController,
-              validator: Validators.validatePassword,
-            ),
-            CustomInput(
-              label: "Confirmar contraseña",
-              hint: "Repite tu nueva contraseña",
-              isPassword: true,
-              controller: confirmPasswordController,
-              validator: (value) => Validators.validatePasswordMatch(
-                value,
-                passwordController.text,
+            if (!isEditing) ...[
+              const SizedBox(height: 8),
+              const Text(
+                "••••••••",
+                style: TextStyle(color: AppColors.grisNeutro),
               ),
-            ),
-            _ProfileActionButton(
-              text: isSaving ? "GUARDANDO..." : "Actualizar contraseña",
-              onPressed: isSaving ? null : onSave,
-            ),
+            ] else ...[
+              const SizedBox(height: 12),
+              CustomInput(
+                label: "Contraseña actual",
+                hint: "Introduce tu contraseña actual",
+                isPassword: true,
+                controller: currentPasswordController,
+                validator: Validators.validatePassword,
+              ),
+              CustomInput(
+                label: "Nueva contraseña",
+                hint: "Introduce tu nueva contraseña",
+                isPassword: true,
+                controller: passwordController,
+                validator: Validators.validatePassword,
+              ),
+              CustomInput(
+                label: "Confirmar contraseña",
+                hint: "Repite tu nueva contraseña",
+                isPassword: true,
+                controller: confirmPasswordController,
+                validator: (value) => Validators.validatePasswordMatch(
+                  value,
+                  passwordController.text,
+                ),
+              ),
+              _ProfileActionRow(
+                isSaving: isSaving,
+                savingText: "GUARDANDO...",
+                saveText: "Actualizar contraseña",
+                onCancel: onCancel,
+                onSave: onSave,
+              ),
+            ],
           ],
         ),
       ),
+    );
+  }
+}
+
+class _EditableSectionTitle extends StatelessWidget {
+  final String text;
+  final bool isEditing;
+  final VoidCallback onEdit;
+
+  const _EditableSectionTitle({
+    required this.text,
+    required this.isEditing,
+    required this.onEdit,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(child: _SectionTitle(text)),
+        if (!isEditing)
+          IconButton(
+            tooltip: 'Editar',
+            visualDensity: VisualDensity.compact,
+            icon: const Icon(Icons.edit, size: 20),
+            color: AppColors.verdePrincipal,
+            onPressed: onEdit,
+          ),
+      ],
     );
   }
 }
@@ -132,6 +252,50 @@ class _SectionTitle extends StatelessWidget {
   }
 }
 
+class _ProfileActionRow extends StatelessWidget {
+  final bool isSaving;
+  final String savingText;
+  final String saveText;
+  final VoidCallback onCancel;
+  final VoidCallback onSave;
+
+  const _ProfileActionRow({
+    required this.isSaving,
+    required this.savingText,
+    required this.saveText,
+    required this.onCancel,
+    required this.onSave,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton(
+            onPressed: isSaving ? null : onCancel,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.negroTexto,
+              side: const BorderSide(color: AppColors.verdeBorde),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text("Cancelar"),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _ProfileActionButton(
+            text: isSaving ? savingText : saveText,
+            onPressed: isSaving ? null : onSave,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _ProfileActionButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
@@ -141,7 +305,6 @@ class _ProfileActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: double.infinity,
       height: 44,
       child: ElevatedButton(
         onPressed: onPressed,

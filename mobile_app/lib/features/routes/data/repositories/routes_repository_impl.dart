@@ -55,7 +55,36 @@ class RoutesRepositoryImpl implements RoutesRepository {
       final snapshot = await remoteDataSource.getMissionsByPointIds(chunk);
 
       for (final doc in snapshot.docs) {
-        final pointId = doc.data()[MissionFields.puntosInteresId]?.toString();
+        final pointId = _pointIdFromMissionData(doc.data());
+        if (pointId != null && pointId.isNotEmpty) {
+          pointIdsWithMission.add(pointId);
+        }
+      }
+
+      final singularSnapshot = await remoteDataSource
+          .getMissionsBySingularPointIds(chunk);
+
+      for (final doc in singularSnapshot.docs) {
+        final pointId = _pointIdFromMissionData(doc.data());
+        if (pointId != null && pointId.isNotEmpty) {
+          pointIdsWithMission.add(pointId);
+        }
+      }
+
+      final refsSnapshot = await remoteDataSource.getMissionsByPointRefs(chunk);
+
+      for (final doc in refsSnapshot.docs) {
+        final pointId = _pointIdFromMissionData(doc.data());
+        if (pointId != null && pointId.isNotEmpty) {
+          pointIdsWithMission.add(pointId);
+        }
+      }
+
+      final singularRefsSnapshot = await remoteDataSource
+          .getMissionsBySingularPointRefs(chunk);
+
+      for (final doc in singularRefsSnapshot.docs) {
+        final pointId = _pointIdFromMissionData(doc.data());
         if (pointId != null && pointId.isNotEmpty) {
           pointIdsWithMission.add(pointId);
         }
@@ -63,5 +92,25 @@ class RoutesRepositoryImpl implements RoutesRepository {
     }
 
     return pointIdsWithMission;
+  }
+
+  String? _pointIdFromMissionData(Map<String, dynamic> data) {
+    return _pointIdFromMissionValue(data[MissionFields.puntosInteresId]) ??
+        _pointIdFromMissionValue(data[MissionFields.puntoInteresId]);
+  }
+
+  String? _pointIdFromMissionValue(dynamic rawValue) {
+    if (rawValue == null) return null;
+
+    if (rawValue is DocumentReference) {
+      return rawValue.id.trim();
+    }
+
+    final value = rawValue.toString().trim();
+    if (value.isEmpty) return null;
+
+    final segments = value.split('/');
+    final lastSegment = segments.last.trim();
+    return lastSegment.isEmpty ? value : lastSegment;
   }
 }

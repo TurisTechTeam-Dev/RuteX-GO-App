@@ -20,6 +20,7 @@ class CityFields {
 
 class MissionFields {
   static const puntosInteresId = 'puntos_interes_id';
+  static const puntoInteresId = 'punto_interes_id';
   static const preguntas = 'preguntas';
   static const titulo = 'titulo';
   static const indiceCorrecto = 'indice_correcto';
@@ -49,9 +50,9 @@ class RouteFields {
 }
 
 class UserFields {
+  static const avatar = 'avatar';
   static const email = 'email';
   static const fechaCreacion = 'fecha_creacion';
-  static const fotoPerfil = 'foto_perfil';
   static const isAdmin = 'isAdmin';
   static const nombre = 'nombre';
   static const puntos = 'puntos';

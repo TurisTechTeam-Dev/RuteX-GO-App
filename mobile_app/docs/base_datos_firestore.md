@@ -79,7 +79,7 @@ Documento ejemplo observado:
 
 ```text
 misiones/{misionId}
-puntos_interes_id: string
+punto_interes_id: string | reference<puntos_interes/{puntoInteresId}>
 preguntas: array<map>
 titulo: string
 ```
@@ -96,7 +96,7 @@ Uso en app:
 
 - `MissionRepositoryImpl.getMissionByPointId(pointId)` busca:
   - coleccion `misiones`
-  - campo `puntos_interes_id == pointId`
+  - campo `punto_interes_id == pointId`
   - `limit(1)`
 - `QuizMission` espera `preguntas`.
 - `QuizQuestion` extrae la pregunta buscando la primera clave que empiece por `pregunta_`.
@@ -104,7 +104,10 @@ Uso en app:
 
 Notas:
 
-- El nombre del campo `puntos_interes_id` debe coincidir exactamente.
+- El nombre recomendado del campo es `punto_interes_id`.
+- La app mantiene compatibilidad con la variante antigua `puntos_interes_id`.
+- El valor recomendado para `punto_interes_id` es el ID string del documento de `puntos_interes`.
+- La app tambien tolera una referencia de documento a `puntos_interes/{puntoInteresId}` para datos creados desde consola/admin.
 - Si un punto de interes tiene mas de una mision, ahora mismo la app solo usara la primera que devuelva Firestore.
 
 ## `puntos_interes`
@@ -192,6 +195,7 @@ Documento ejemplo observado:
 usuarios/{uid}
 email: string
 fecha_creacion: timestamp
+avatar: string
 isAdmin: bool
 nombre: string
 puntos: number
@@ -216,10 +220,14 @@ Uso en app:
   - `nombre`
   - `usuario`
   - `email`
+  - `avatar: ""`
   - `fecha_creacion`
   - `puntos: 0`
   - `rutas_completadas: []`
   - `isAdmin: false`
+- `ProfileRemoteDataSource.uploadAvatar()` sube la imagen a Storage en `Avatares/{uid}/perfil_{timestamp}.jpg`.
+- `ProfileRemoteDataSource.updateAvatar()` guarda esa ruta interna de Storage en `usuarios.avatar`.
+- `ProfileRemoteDataSource.updateUsername()` actualiza `usuarios.usuario`.
 - `AuthRepositoryImpl.isAdmin(uid)` lee `isAdmin`.
 - `HomeDataLoader` lee `rutas_completadas` y carga las rutas por IDs en lotes.
 - `QuizScreen` escribe progreso en `rutas_completadas` con:
@@ -271,7 +279,7 @@ Riesgo detectado:
 4. Se descargan los documentos de `puntos_interes`.
 5. El mapa elige el punto pendiente mas cercano al usuario.
 6. Al llegar, el usuario escanea `puntos_interes.qr_code`.
-7. La app busca la mision por `misiones.puntos_interes_id`.
+7. La app busca la mision por `misiones.punto_interes_id`.
 8. El quiz suma 10 puntos por respuesta correcta.
 9. Al completar cada punto de interes, el mapa marca ese punto como completado y recalcula el siguiente mas cercano.
 10. Al completar todos los puntos de la ruta, aunque algunos se hayan saltado, el mapa guarda en `usuarios.rutas_completadas` y actualiza `usuarios.puntos` como dato auxiliar.
@@ -298,7 +306,7 @@ El tiempo se mide desde que se abre el mapa hasta que se finaliza la ruta. Cuand
 - No renombrar campos de Firestore sin migracion.
 - Mantener `id_puntos_interes` como array de IDs de documentos de `puntos_interes`.
 - Mantener `qr_code` unico por punto de interes.
-- Mantener `puntos_interes_id` en `misiones`.
+- Mantener `punto_interes_id` en `misiones`.
 - Revisar si `resultado` se va a usar o queda legacy.
 - Home usa la suma de `rutas_completadas[].puntos_obtenidos` para estadisticas de rutas y rango visible.
 - El listado de rutas depende de `id_ciudad`, no de `isActive`.

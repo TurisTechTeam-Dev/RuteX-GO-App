@@ -70,6 +70,7 @@ class AuthRepositoryImpl implements AuthRepository {
         UserFields.nombre: name,
         UserFields.usuario: username,
         UserFields.email: email,
+        UserFields.avatar: '',
         UserFields.fechaCreacion: FieldValue.serverTimestamp(),
         UserFields.ultimoAcceso: FieldValue.serverTimestamp(),
         UserFields.puntos: 0,

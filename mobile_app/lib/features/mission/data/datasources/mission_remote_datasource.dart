@@ -25,6 +25,44 @@ class MissionRemoteDataSource {
         .get();
   }
 
+  Future<QuerySnapshot<Map<String, dynamic>>> getMissionBySingularPointId(
+    String pointId,
+  ) {
+    return firestore
+        .collection(FirestoreCollections.misiones)
+        .where(MissionFields.puntoInteresId, isEqualTo: pointId)
+        .limit(1)
+        .get();
+  }
+
+  Future<QuerySnapshot<Map<String, dynamic>>> getMissionByPointRef(
+    String pointId,
+  ) {
+    final pointRef = firestore
+        .collection(FirestoreCollections.puntosInteres)
+        .doc(pointId.trim());
+
+    return firestore
+        .collection(FirestoreCollections.misiones)
+        .where(MissionFields.puntosInteresId, isEqualTo: pointRef)
+        .limit(1)
+        .get();
+  }
+
+  Future<QuerySnapshot<Map<String, dynamic>>> getMissionBySingularPointRef(
+    String pointId,
+  ) {
+    final pointRef = firestore
+        .collection(FirestoreCollections.puntosInteres)
+        .doc(pointId.trim());
+
+    return firestore
+        .collection(FirestoreCollections.misiones)
+        .where(MissionFields.puntoInteresId, isEqualTo: pointRef)
+        .limit(1)
+        .get();
+  }
+
   Future<DocumentSnapshot<Map<String, dynamic>>> getRouteById(String routeId) {
     return firestore
         .collection(FirestoreCollections.rutas)
