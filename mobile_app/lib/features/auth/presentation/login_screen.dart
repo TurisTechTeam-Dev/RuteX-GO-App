@@ -75,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (!mounted) return;
 
-    if (kIsWeb && isAdmin) {
+    if (isAdmin) {
       Navigator.pushReplacementNamed(context, AppRoutes.adminPanel);
     } else {
       Navigator.pushReplacementNamed(context, AppRoutes.home);

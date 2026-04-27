@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -35,7 +34,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
         if (!mounted) return;
 
-        if (kIsWeb && isAdmin) {
+        if (isAdmin) {
           Navigator.pushReplacementNamed(context, AppRoutes.adminPanel);
         } else {
           Navigator.pushReplacementNamed(context, AppRoutes.home);
