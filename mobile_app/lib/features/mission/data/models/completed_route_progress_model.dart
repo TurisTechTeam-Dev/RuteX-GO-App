@@ -65,10 +65,22 @@ class CompletedRouteProgressModel {
       CompletedRouteFields.puntosObtenidos: currentAttemptPoints,
       CompletedRouteFields.monumentosVisitados: visitedPois,
       CompletedRouteFields.misionesCompletadas: completedMissions,
-      CompletedRouteFields.puntosInteresSaltados: skippedPois
-          .map((poi) => {'id': poi.id, 'nombre': poi.name})
-          .toList(),
+      CompletedRouteFields.puntosInteresSaltados: _skippedPoisToFirestore(
+        skippedPois,
+      ),
     };
+  }
+
+  static List<Map<String, String>> _skippedPoisToFirestore(
+    List<PointOfInterest> skippedPois,
+  ) {
+    final skippedPoiMaps = <Map<String, String>>[];
+
+    for (final poi in skippedPois) {
+      skippedPoiMaps.add({'id': poi.id, 'nombre': poi.name});
+    }
+
+    return skippedPoiMaps;
   }
 
   static int _asInt(dynamic value) {

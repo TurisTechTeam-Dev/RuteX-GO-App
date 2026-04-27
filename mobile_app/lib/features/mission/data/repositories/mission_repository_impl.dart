@@ -90,10 +90,7 @@ class MissionRepositoryImpl implements MissionRepository {
     final routePointIds = doc.data()?[RouteFields.idPuntosInteres];
 
     if (routePointIds is List) {
-      return routePointIds
-          .map(_pointIdFromRouteValue)
-          .where((pointId) => pointId.isNotEmpty)
-          .toList();
+      return _pointIdsFromRouteValues(routePointIds);
     }
 
     return [];
@@ -130,10 +127,7 @@ class MissionRepositoryImpl implements MissionRepository {
 
     debugPrint("Found in Firebase: ${pointsById.length} points");
 
-    return ids
-        .map((id) => pointsById[id])
-        .whereType<PointOfInterest>()
-        .toList();
+    return _sortPointsByRequestedIds(ids, pointsById);
   }
 
   @override
@@ -230,4 +224,34 @@ class MissionRepositoryImpl implements MissionRepository {
     return lastSegment.isEmpty ? value : lastSegment;
   }
 
+  List<String> _pointIdsFromRouteValues(List<dynamic> routePointValues) {
+    final pointIds = <String>[];
+
+    for (final rawPointId in routePointValues) {
+      final pointId = _pointIdFromRouteValue(rawPointId);
+
+      if (pointId.isNotEmpty) {
+        pointIds.add(pointId);
+      }
+    }
+
+    return pointIds;
+  }
+
+  List<PointOfInterest> _sortPointsByRequestedIds(
+    List<String> requestedIds,
+    Map<String, PointOfInterest> pointsById,
+  ) {
+    final sortedPoints = <PointOfInterest>[];
+
+    for (final id in requestedIds) {
+      final point = pointsById[id];
+
+      if (point != null) {
+        sortedPoints.add(point);
+      }
+    }
+
+    return sortedPoints;
+  }
 }

@@ -20,42 +20,56 @@ class RouteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasDescription = route.description.trim().isNotEmpty;
-
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: CustomCard(
         padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            FramedStorageImage(source: route.image, fallbackIcon: Icons.photo),
-            const SizedBox(height: 12),
-            _RouteTitle(title: route.title),
-            if (hasDescription) ...[
-              const SizedBox(height: 8),
-              Text(
-                route.description.trim(),
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.labelMedium,
-              ),
-            ],
-            const SizedBox(height: 12),
-            _RouteDetails(route: route),
-            if (!isCheckingAvailability && !canStart) ...[
-              const SizedBox(height: 12),
-              const _RouteBlockedHint(),
-            ],
-            const SizedBox(height: 12),
-            _StartRouteButton(
-              routeId: route.id,
-              canStart: canStart,
-              isCheckingAvailability: isCheckingAvailability,
-            ),
-          ],
+          children: _buildCardContent(context),
         ),
       ),
     );
+  }
+
+  List<Widget> _buildCardContent(BuildContext context) {
+    final content = <Widget>[
+      FramedStorageImage(source: route.image, fallbackIcon: Icons.photo),
+      const SizedBox(height: 12),
+      _RouteTitle(title: route.title),
+    ];
+
+    final description = route.description.trim();
+    if (description.isNotEmpty) {
+      content.add(const SizedBox(height: 8));
+      content.add(
+        Text(
+          description,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.labelMedium,
+        ),
+      );
+    }
+
+    content.add(const SizedBox(height: 12));
+    content.add(_RouteDetails(route: route));
+
+    final shouldShowBlockedHint = !isCheckingAvailability && !canStart;
+    if (shouldShowBlockedHint) {
+      content.add(const SizedBox(height: 12));
+      content.add(const _RouteBlockedHint());
+    }
+
+    content.add(const SizedBox(height: 12));
+    content.add(
+      _StartRouteButton(
+        routeId: route.id,
+        canStart: canStart,
+        isCheckingAvailability: isCheckingAvailability,
+      ),
+    );
+
+    return content;
   }
 }
 
@@ -193,6 +207,8 @@ class _StartRouteButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final buttonLabel = _buttonLabel();
+
     return SizedBox(
       height: 36,
       child: ElevatedButton(
@@ -205,23 +221,31 @@ class _StartRouteButton extends StatelessWidget {
           disabledForegroundColor: AppColors.blancoPuro,
           padding: const EdgeInsets.symmetric(horizontal: 24),
         ),
-        onPressed: canStart && !isCheckingAvailability
-            ? () {
-                Navigator.pushNamed(
-                  context,
-                  AppRoutes.mapNavigation,
-                  arguments: routeId,
-                );
-              }
-            : null,
-        child: Text(
-          isCheckingAvailability
-              ? "Comprobando..."
-              : canStart
-              ? "Comenzar ruta"
-              : "Ruta no disponible",
-        ),
+        onPressed: _buildOnPressed(context),
+        child: Text(buttonLabel),
       ),
     );
+  }
+
+  VoidCallback? _buildOnPressed(BuildContext context) {
+    if (!canStart || isCheckingAvailability) {
+      return null;
+    }
+
+    return () {
+      Navigator.pushNamed(context, AppRoutes.mapNavigation, arguments: routeId);
+    };
+  }
+
+  String _buttonLabel() {
+    if (isCheckingAvailability) {
+      return "Comprobando...";
+    }
+
+    if (canStart) {
+      return "Comenzar ruta";
+    }
+
+    return "Ruta no disponible";
   }
 }

@@ -66,59 +66,73 @@ class ProfileContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final displayName = user.username.isNotEmpty ? user.username : user.name;
+    final profileSections = _buildProfileSections(displayName);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
-      child: Column(
-        children: [
-          const SizedBox(height: 20),
-          const Text(
-            "Perfil de usuario",
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 18),
-          ProfileHeader(
-            user: user,
-            displayName: displayName,
-            isUploadingAvatar: isUploadingAvatar,
-            onChangeAvatar: onChangeAvatar,
-            onEditUsername: onEditUsername,
-          ),
-          if (isEditingUsername) ...[
-            const SizedBox(height: 18),
-            UsernameFormCard(
-              formKey: usernameFormKey,
-              controller: usernameController,
-              isSaving: isSavingUsername,
-              onCancel: onCancelUsername,
-              onSave: onSaveUsername,
-            ),
-          ],
-          const SizedBox(height: 18),
-          EmailFormCard(
-            formKey: emailFormKey,
-            controller: emailController,
-            isSaving: isSavingEmail,
-            isEditing: isEditingEmail,
-            onEdit: onEditEmail,
-            onCancel: onCancelEmail,
-            onSave: onSaveEmail,
-          ),
-          const SizedBox(height: 18),
-          PasswordFormCard(
-            formKey: passwordFormKey,
-            currentPasswordController: currentPasswordController,
-            passwordController: passwordController,
-            confirmPasswordController: confirmPasswordController,
-            isSaving: isSavingPassword,
-            isEditing: isEditingPassword,
-            onEdit: onEditPassword,
-            onCancel: onCancelPassword,
-            onSave: onSavePassword,
-          ),
-        ],
+      child: Column(children: profileSections),
+    );
+  }
+
+  List<Widget> _buildProfileSections(String displayName) {
+    final sections = <Widget>[
+      const SizedBox(height: 20),
+      const Text(
+        "Perfil de usuario",
+        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      ),
+      const SizedBox(height: 18),
+      ProfileHeader(
+        user: user,
+        displayName: displayName,
+        isUploadingAvatar: isUploadingAvatar,
+        onChangeAvatar: onChangeAvatar,
+        onEditUsername: onEditUsername,
+      ),
+    ];
+
+    if (isEditingUsername) {
+      sections.add(const SizedBox(height: 18));
+      sections.add(
+        UsernameFormCard(
+          formKey: usernameFormKey,
+          controller: usernameController,
+          isSaving: isSavingUsername,
+          onCancel: onCancelUsername,
+          onSave: onSaveUsername,
+        ),
+      );
+    }
+
+    sections.add(const SizedBox(height: 18));
+    sections.add(
+      EmailFormCard(
+        formKey: emailFormKey,
+        controller: emailController,
+        isSaving: isSavingEmail,
+        isEditing: isEditingEmail,
+        onEdit: onEditEmail,
+        onCancel: onCancelEmail,
+        onSave: onSaveEmail,
       ),
     );
+
+    sections.add(const SizedBox(height: 18));
+    sections.add(
+      PasswordFormCard(
+        formKey: passwordFormKey,
+        currentPasswordController: currentPasswordController,
+        passwordController: passwordController,
+        confirmPasswordController: confirmPasswordController,
+        isSaving: isSavingPassword,
+        isEditing: isEditingPassword,
+        onEdit: onEditPassword,
+        onCancel: onCancelPassword,
+        onSave: onSavePassword,
+      ),
+    );
+
+    return sections;
   }
 }
 

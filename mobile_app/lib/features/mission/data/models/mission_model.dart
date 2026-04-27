@@ -15,16 +15,23 @@ class MissionModel extends Mission {
       id: id,
       title: data[MissionFields.titulo]?.toString() ?? 'Misión',
       questions: rawQuestions is List
-          ? rawQuestions
-                .whereType<Map>()
-                .map(
-                  (question) => MissionQuestionModel.fromMap(
-                    Map<String, dynamic>.from(question),
-                  ),
-                )
-                .toList()
+          ? _questionsFromList(rawQuestions)
           : const [],
     );
+  }
+
+  static List<MissionQuestionModel> _questionsFromList(List rawQuestions) {
+    final questions = <MissionQuestionModel>[];
+
+    for (final rawQuestion in rawQuestions) {
+      if (rawQuestion is Map) {
+        questions.add(
+          MissionQuestionModel.fromMap(Map<String, dynamic>.from(rawQuestion)),
+        );
+      }
+    }
+
+    return questions;
   }
 }
 
@@ -36,23 +43,42 @@ class MissionQuestionModel extends MissionQuestion {
   });
 
   factory MissionQuestionModel.fromMap(Map<String, dynamic> data) {
-    final questionText = data.entries
-        .firstWhere(
-          (entry) => entry.key.startsWith('pregunta_'),
-          orElse: () => const MapEntry('pregunta', 'Cargando...'),
-        )
-        .value
-        .toString();
     final answers = data[MissionFields.respuestas];
 
     return MissionQuestionModel(
-      text: questionText,
-      answers: answers is List
-          ? answers.map((answer) => answer.toString()).toList()
-          : const [],
-      correctIndex: data[MissionFields.indiceCorrecto] is int
-          ? data[MissionFields.indiceCorrecto] as int
-          : 0,
+      text: _questionTextFromData(data),
+      answers: answers is List ? _answersFromList(answers) : const [],
+      correctIndex: _correctIndexFromData(data),
     );
+  }
+
+  static String _questionTextFromData(Map<String, dynamic> data) {
+    for (final entry in data.entries) {
+      if (entry.key.startsWith('pregunta_')) {
+        return entry.value.toString();
+      }
+    }
+
+    return 'Cargando...';
+  }
+
+  static List<String> _answersFromList(List rawAnswers) {
+    final answers = <String>[];
+
+    for (final rawAnswer in rawAnswers) {
+      answers.add(rawAnswer.toString());
+    }
+
+    return answers;
+  }
+
+  static int _correctIndexFromData(Map<String, dynamic> data) {
+    final correctIndex = data[MissionFields.indiceCorrecto];
+
+    if (correctIndex is int) {
+      return correctIndex;
+    }
+
+    return 0;
   }
 }

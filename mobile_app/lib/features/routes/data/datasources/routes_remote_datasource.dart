@@ -7,11 +7,11 @@ class RoutesRemoteDataSource {
 
   const RoutesRemoteDataSource(this.firestore);
 
-  Stream<QuerySnapshot> watchCities() {
+  Stream<QuerySnapshot<Map<String, dynamic>>> watchCities() {
     return firestore.collection(FirestoreCollections.ciudades).snapshots();
   }
 
-  Stream<QuerySnapshot> watchRoutes() {
+  Stream<QuerySnapshot<Map<String, dynamic>>> watchRoutes() {
     return firestore.collection(FirestoreCollections.rutas).snapshots();
   }
 
@@ -36,13 +36,7 @@ class RoutesRemoteDataSource {
   Future<QuerySnapshot<Map<String, dynamic>>> getMissionsByPointRefs(
     List<String> pointIds,
   ) {
-    final pointRefs = pointIds
-        .map(
-          (pointId) => firestore
-              .collection(FirestoreCollections.puntosInteres)
-              .doc(pointId.trim()),
-        )
-        .toList();
+    final pointRefs = _pointRefsFromIds(pointIds);
 
     return firestore
         .collection(FirestoreCollections.misiones)
@@ -53,17 +47,27 @@ class RoutesRemoteDataSource {
   Future<QuerySnapshot<Map<String, dynamic>>> getMissionsBySingularPointRefs(
     List<String> pointIds,
   ) {
-    final pointRefs = pointIds
-        .map(
-          (pointId) => firestore
-              .collection(FirestoreCollections.puntosInteres)
-              .doc(pointId.trim()),
-        )
-        .toList();
+    final pointRefs = _pointRefsFromIds(pointIds);
 
     return firestore
         .collection(FirestoreCollections.misiones)
         .where(MissionFields.puntoInteresId, whereIn: pointRefs)
         .get();
+  }
+
+  List<DocumentReference<Map<String, dynamic>>> _pointRefsFromIds(
+    List<String> pointIds,
+  ) {
+    final pointRefs = <DocumentReference<Map<String, dynamic>>>[];
+
+    for (final pointId in pointIds) {
+      pointRefs.add(
+        firestore
+            .collection(FirestoreCollections.puntosInteres)
+            .doc(pointId.trim()),
+      );
+    }
+
+    return pointRefs;
   }
 }

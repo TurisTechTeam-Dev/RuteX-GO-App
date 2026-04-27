@@ -20,10 +20,15 @@ class AuthRepositoryImpl implements AuthRepository {
   }) : googleSignIn = googleSignIn ?? GoogleSignIn();
 
   @override
-  Stream<AuthUserModel?> get authStateChanges =>
-      firebaseAuth.authStateChanges().map(
-        (user) => user == null ? null : AuthUserModel.fromFirebaseUser(user),
-      );
+  Stream<AuthUserModel?> get authStateChanges async* {
+    await for (final user in firebaseAuth.authStateChanges()) {
+      if (user == null) {
+        yield null;
+      } else {
+        yield AuthUserModel.fromFirebaseUser(user);
+      }
+    }
+  }
 
   @override
   Future<AuthUserModel> login({
@@ -161,16 +166,12 @@ class AuthRepositoryImpl implements AuthRepository {
     if ((data[UserFields.email]?.toString() ?? '').isEmpty) {
       updates[UserFields.email] = user.email ?? '';
     }
-    if ((data[UserFields.nombre]?.toString() ?? '').isEmpty) {
-      updates[UserFields.nombre] = _displayNameForGoogleUser(user);
-    }
     if ((data[UserFields.usuario]?.toString() ?? '').isEmpty) {
       updates[UserFields.usuario] = _usernameForGoogleUser(user);
     }
     if (!data.containsKey(UserFields.avatar)) {
       updates[UserFields.avatar] = user.photoURL ?? '';
     }
-
     await userRef.update(updates);
   }
 
@@ -298,7 +299,8 @@ class AuthRepositoryImpl implements AuthRepository {
     }
 
     final details = '${error.message ?? ''} ${error.details ?? ''}';
-    if (error.code == 'sign_in_failed' && details.contains('ApiException: 10')) {
+    if (error.code == 'sign_in_failed' &&
+        details.contains('ApiException: 10')) {
       return "Google Sign-In no está configurado para esta firma de Android. Añade el SHA-1 y SHA-256 de esta app en Firebase y descarga de nuevo google-services.json.";
     }
 

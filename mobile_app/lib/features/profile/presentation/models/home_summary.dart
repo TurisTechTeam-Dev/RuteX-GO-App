@@ -51,14 +51,23 @@ class HomeSummary {
   }
 
   static int _completedMissions(List<HomeRoute> routes) {
-    return routes.fold(
-      0,
-      (total, route) => total + route.completedMissions,
-    );
+    var total = 0;
+
+    for (final route in routes) {
+      total += route.completedMissions;
+    }
+
+    return total;
   }
 
   static int _totalMissions(List<HomeRoute> routes) {
-    return routes.fold(0, (total, route) => total + route.totalMissions);
+    var total = 0;
+
+    for (final route in routes) {
+      total += route.totalMissions;
+    }
+
+    return total;
   }
 }
 

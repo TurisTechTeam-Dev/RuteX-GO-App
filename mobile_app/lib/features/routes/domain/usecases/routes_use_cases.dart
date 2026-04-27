@@ -26,21 +26,58 @@ class RoutesUseCases {
   Future<Map<String, bool>> executeGetRouteAvailability(
     List<TouristRoute> routes,
   ) async {
-    final allPointIds = routes
-        .expand((route) => route.pointIds)
-        .where((pointId) => pointId.trim().isNotEmpty)
-        .toSet()
-        .toList();
+    final allPointIds = _collectUniquePointIds(routes);
 
     final pointIdsWithMission = await repository.getPointIdsWithMission(
       allPointIds,
     );
 
-    return {
-      for (final route in routes)
-        route.id:
-            route.pointIds.isNotEmpty &&
-            route.pointIds.every(pointIdsWithMission.contains),
-    };
+    return _buildAvailabilityByRoute(routes, pointIdsWithMission);
+  }
+
+  List<String> _collectUniquePointIds(List<TouristRoute> routes) {
+    final uniquePointIds = <String>{};
+
+    for (final route in routes) {
+      for (final pointId in route.pointIds) {
+        final cleanPointId = pointId.trim();
+
+        if (cleanPointId.isNotEmpty) {
+          uniquePointIds.add(cleanPointId);
+        }
+      }
+    }
+
+    return uniquePointIds.toList();
+  }
+
+  Map<String, bool> _buildAvailabilityByRoute(
+    List<TouristRoute> routes,
+    Set<String> pointIdsWithMission,
+  ) {
+    final availabilityByRoute = <String, bool>{};
+
+    for (final route in routes) {
+      availabilityByRoute[route.id] = _routeCanStart(
+        route,
+        pointIdsWithMission,
+      );
+    }
+
+    return availabilityByRoute;
+  }
+
+  bool _routeCanStart(TouristRoute route, Set<String> pointIdsWithMission) {
+    if (route.pointIds.isEmpty) {
+      return false;
+    }
+
+    for (final pointId in route.pointIds) {
+      if (!pointIdsWithMission.contains(pointId)) {
+        return false;
+      }
+    }
+
+    return true;
   }
 }

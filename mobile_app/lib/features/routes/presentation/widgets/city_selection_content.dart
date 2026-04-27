@@ -86,25 +86,11 @@ class _CityGrid extends StatelessWidget {
             }
 
             final routes = routesSnapshot.data ?? const <TouristRoute>[];
-
-            final routeCountByCityFromRoutes = <String, int>{};
-            for (final city in cities) {
-              routeCountByCityFromRoutes[city.id] = routes
-                  .where((route) => city.routeKeys.contains(route.cityId))
-                  .length;
-            }
-
-            final sortedCities = [...cities]
-              ..sort((a, b) {
-                final aHasRoutes = (routeCountByCityFromRoutes[a.id] ?? 0) > 0;
-                final bHasRoutes = (routeCountByCityFromRoutes[b.id] ?? 0) > 0;
-
-                if (aHasRoutes != bHasRoutes) {
-                  return aHasRoutes ? -1 : 1;
-                }
-
-                return a.title.toLowerCase().compareTo(b.title.toLowerCase());
-              });
+            final routeCountByCity = _countRoutesByCity(cities, routes);
+            final sortedCities = _sortCitiesByAvailability(
+              cities,
+              routeCountByCity,
+            );
 
             return GridView.builder(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 30),
@@ -120,7 +106,7 @@ class _CityGrid extends StatelessWidget {
 
                 return CityCard(
                   city: city,
-                  routesCount: routeCountByCityFromRoutes[city.id] ?? 0,
+                  routesCount: routeCountByCity[city.id] ?? 0,
                   isLoadingRoutes:
                       routesSnapshot.connectionState == ConnectionState.waiting,
                 );
@@ -130,5 +116,52 @@ class _CityGrid extends StatelessWidget {
         );
       },
     );
+  }
+
+  Map<String, int> _countRoutesByCity(
+    List<City> cities,
+    List<TouristRoute> routes,
+  ) {
+    final routeCountByCity = <String, int>{};
+
+    for (final city in cities) {
+      var routesInCity = 0;
+
+      for (final route in routes) {
+        if (city.routeKeys.contains(route.cityId)) {
+          routesInCity++;
+        }
+      }
+
+      routeCountByCity[city.id] = routesInCity;
+    }
+
+    return routeCountByCity;
+  }
+
+  List<City> _sortCitiesByAvailability(
+    List<City> cities,
+    Map<String, int> routeCountByCity,
+  ) {
+    final sortedCities = List<City>.from(cities);
+
+    sortedCities.sort((firstCity, secondCity) {
+      final firstCityHasRoutes = (routeCountByCity[firstCity.id] ?? 0) > 0;
+      final secondCityHasRoutes = (routeCountByCity[secondCity.id] ?? 0) > 0;
+
+      if (firstCityHasRoutes && !secondCityHasRoutes) {
+        return -1;
+      }
+
+      if (!firstCityHasRoutes && secondCityHasRoutes) {
+        return 1;
+      }
+
+      final firstTitle = firstCity.title.toLowerCase();
+      final secondTitle = secondCity.title.toLowerCase();
+      return firstTitle.compareTo(secondTitle);
+    });
+
+    return sortedCities;
   }
 }

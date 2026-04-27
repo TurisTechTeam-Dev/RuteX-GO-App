@@ -105,39 +105,44 @@ class _RankLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Text(
-          "Rango: ",
-          style: TextStyle(color: AppColors.verdePrincipal),
+    final rankContent = _buildRankContent();
+
+    return Row(mainAxisSize: MainAxisSize.min, children: rankContent);
+  }
+
+  List<Widget> _buildRankContent() {
+    final content = <Widget>[
+      const Text("Rango: ", style: TextStyle(color: AppColors.verdePrincipal)),
+      Text(
+        rankName,
+        style: const TextStyle(
+          color: AppColors.verdePrincipal,
+          fontWeight: FontWeight.w600,
         ),
-        Text(
-          rankName,
-          style: const TextStyle(
-            color: AppColors.verdePrincipal,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        if (rankLogo.isNotEmpty) ...[
-          const SizedBox(width: 6),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: StorageAwareImage(
-              source: rankLogo,
-              width: 22,
-              height: 22,
-              fit: BoxFit.contain,
-              fallback: const Icon(
-                Icons.emoji_events,
-                size: 20,
-                color: AppColors.verdePrincipal,
-              ),
+      ),
+    ];
+
+    if (rankLogo.isNotEmpty) {
+      content.add(const SizedBox(width: 6));
+      content.add(
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: StorageAwareImage(
+            source: rankLogo,
+            width: 22,
+            height: 22,
+            fit: BoxFit.contain,
+            fallback: const Icon(
+              Icons.emoji_events,
+              size: 20,
+              color: AppColors.verdePrincipal,
             ),
           ),
-        ],
-      ],
-    );
+        ),
+      );
+    }
+
+    return content;
   }
 }
 

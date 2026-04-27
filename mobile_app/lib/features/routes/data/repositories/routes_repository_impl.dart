@@ -15,20 +15,21 @@ class RoutesRepositoryImpl implements RoutesRepository {
 
   RoutesRepositoryImpl({RoutesRemoteDataSource? remoteDataSource})
     : remoteDataSource =
-          remoteDataSource ?? RoutesRemoteDataSource(FirebaseFirestore.instance);
+          remoteDataSource ??
+          RoutesRemoteDataSource(FirebaseFirestore.instance);
 
   @override
-  Stream<List<City>> getCities() {
-    return remoteDataSource.watchCities().map(
-      (snapshot) => snapshot.docs.map(CityModel.fromSnapshot).toList(),
-    );
+  Stream<List<City>> getCities() async* {
+    await for (final snapshot in remoteDataSource.watchCities()) {
+      yield _citiesFromSnapshot(snapshot);
+    }
   }
 
   @override
-  Stream<List<TouristRoute>> getRoutes() {
-    return remoteDataSource.watchRoutes().map(
-      (snapshot) => snapshot.docs.map(RouteModel.fromSnapshot).toList(),
-    );
+  Stream<List<TouristRoute>> getRoutes() async* {
+    await for (final snapshot in remoteDataSource.watchRoutes()) {
+      yield _routesFromSnapshot(snapshot);
+    }
   }
 
   @override
@@ -37,11 +38,10 @@ class RoutesRepositoryImpl implements RoutesRepository {
   }
 
   @override
-  Stream<List<TouristRoute>> getRoutesByCityKeys(Set<String> cityKeys) {
-    return getRoutes().map(
-      (routes) =>
-          routes.where((route) => cityKeys.contains(route.cityId)).toList(),
-    );
+  Stream<List<TouristRoute>> getRoutesByCityKeys(Set<String> cityKeys) async* {
+    await for (final routes in getRoutes()) {
+      yield _filterRoutesByCityKeys(routes, cityKeys);
+    }
   }
 
   @override
@@ -92,6 +92,43 @@ class RoutesRepositoryImpl implements RoutesRepository {
     }
 
     return pointIdsWithMission;
+  }
+
+  List<City> _citiesFromSnapshot(QuerySnapshot<Map<String, dynamic>> snapshot) {
+    final cities = <City>[];
+
+    for (final doc in snapshot.docs) {
+      cities.add(CityModel.fromSnapshot(doc));
+    }
+
+    return cities;
+  }
+
+  List<TouristRoute> _routesFromSnapshot(
+    QuerySnapshot<Map<String, dynamic>> snapshot,
+  ) {
+    final routes = <TouristRoute>[];
+
+    for (final doc in snapshot.docs) {
+      routes.add(RouteModel.fromSnapshot(doc));
+    }
+
+    return routes;
+  }
+
+  List<TouristRoute> _filterRoutesByCityKeys(
+    List<TouristRoute> routes,
+    Set<String> cityKeys,
+  ) {
+    final filteredRoutes = <TouristRoute>[];
+
+    for (final route in routes) {
+      if (cityKeys.contains(route.cityId)) {
+        filteredRoutes.add(route);
+      }
+    }
+
+    return filteredRoutes;
   }
 
   String? _pointIdFromMissionData(Map<String, dynamic> data) {

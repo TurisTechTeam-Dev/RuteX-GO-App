@@ -24,6 +24,7 @@ class QuizContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final question = questions[currentIndex];
+    final content = _buildQuestionContent(question);
 
     return SafeArea(
       child: Column(
@@ -33,50 +34,7 @@ class QuizContent extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  LinearProgressIndicator(
-                    value: (currentIndex + 1) / questions.length,
-                    backgroundColor: Colors.grey[200],
-                    color: AppColors.verdePrincipal,
-                  ),
-                  const SizedBox(height: 20),
-                  Center(
-                    child: Text(
-                      "${currentIndex + 1} de ${questions.length}",
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 25),
-                  Text(
-                    question.text,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      height: 1.4,
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                  ...question.answers.asMap().entries.map((entry) {
-                    return QuizAnswerOption(
-                      index: entry.key,
-                      text: entry.value,
-                      isSelected: selectedOption == entry.key,
-                      onTap: () => onOptionSelected(entry.key),
-                    );
-                  }),
-                  const Spacer(),
-                  CustomButton(
-                    text: currentIndex < questions.length - 1
-                        ? "SIGUIENTE"
-                        : "FINALIZAR",
-                    onPressed: onContinue,
-                  ),
-                  const SizedBox(height: 15),
-                ],
+                children: content,
               ),
             ),
           ),
@@ -89,5 +47,60 @@ class QuizContent extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  List<Widget> _buildQuestionContent(QuizQuestion question) {
+    final content = <Widget>[
+      LinearProgressIndicator(
+        value: (currentIndex + 1) / questions.length,
+        backgroundColor: Colors.grey[200],
+        color: AppColors.verdePrincipal,
+      ),
+      const SizedBox(height: 20),
+      Center(
+        child: Text(
+          "${currentIndex + 1} de ${questions.length}",
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.grey,
+          ),
+        ),
+      ),
+      const SizedBox(height: 25),
+      Text(
+        question.text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+          height: 1.4,
+        ),
+      ),
+      const SizedBox(height: 40),
+    ];
+
+    for (var index = 0; index < question.answers.length; index++) {
+      content.add(
+        QuizAnswerOption(
+          index: index,
+          text: question.answers[index],
+          isSelected: selectedOption == index,
+          onTap: () => onOptionSelected(index),
+        ),
+      );
+    }
+
+    content.add(const Spacer());
+    content.add(
+      CustomButton(text: _continueButtonText(), onPressed: onContinue),
+    );
+    content.add(const SizedBox(height: 15));
+
+    return content;
+  }
+
+  String _continueButtonText() {
+    final isLastQuestion = currentIndex == questions.length - 1;
+    return isLastQuestion ? "FINALIZAR" : "SIGUIENTE";
   }
 }

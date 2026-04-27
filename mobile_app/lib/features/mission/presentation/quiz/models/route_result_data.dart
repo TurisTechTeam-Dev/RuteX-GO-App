@@ -32,7 +32,8 @@ class RouteResultData {
 
   bool get hasNewBestScore => savedBestScore > previousBestScore;
 
-  String get previousBestScoreLabel => '$previousBestScore/$totalPossiblePoints';
+  String get previousBestScoreLabel =>
+      '$previousBestScore/$totalPossiblePoints';
 
   String get savedBestScoreLabel => '$savedBestScore/$totalPossiblePoints';
 
@@ -60,7 +61,7 @@ class RouteResultData {
       correctAnswers: args.correctAnswers,
       totalAnswers: args.totalAnswers,
       time: args.elapsedTimeLabel,
-      answerResults: args.answerResults.map(AnswerResultData.fromQuiz).toList(),
+      answerResults: _answerResultsFromArgs(args),
       skippedPois: args.skippedPois,
     );
   }
@@ -80,6 +81,16 @@ class RouteResultData {
       answerResults: [],
       skippedPois: [],
     );
+  }
+
+  static List<AnswerResultData> _answerResultsFromArgs(RouteResultArgs args) {
+    final answerResults = <AnswerResultData>[];
+
+    for (final answer in args.answerResults) {
+      answerResults.add(AnswerResultData.fromQuiz(answer));
+    }
+
+    return answerResults;
   }
 }
 
@@ -113,12 +124,17 @@ class AnswerTextSanitizer {
   const AnswerTextSanitizer._();
 
   static String clean(String value) {
-    return value
-        .replaceAll('\r\n', '\n')
-        .split('\n')
-        .map((line) => line.trim())
-        .where((line) => line.isNotEmpty)
-        .join('\n')
-        .trim();
+    final cleanLines = <String>[];
+    final normalizedText = value.replaceAll('\r\n', '\n');
+
+    for (final line in normalizedText.split('\n')) {
+      final cleanLine = line.trim();
+
+      if (cleanLine.isNotEmpty) {
+        cleanLines.add(cleanLine);
+      }
+    }
+
+    return cleanLines.join('\n').trim();
   }
 }

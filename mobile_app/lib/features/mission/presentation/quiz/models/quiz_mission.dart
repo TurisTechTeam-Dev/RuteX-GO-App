@@ -27,13 +27,21 @@ class QuizMission {
   }) {
     return QuizMission(
       title: mission.title,
-      questions: mission.questions
-          .map(QuizQuestion.fromMissionQuestion)
-          .toList(),
+      questions: _questionsFromMission(mission),
       routeId: routeId,
       pointId: pointId,
       pointName: pointName,
       totalPois: totalPois != null && totalPois > 0 ? totalPois : 3,
     );
+  }
+
+  static List<QuizQuestion> _questionsFromMission(Mission mission) {
+    final questions = <QuizQuestion>[];
+
+    for (final question in mission.questions) {
+      questions.add(QuizQuestion.fromMissionQuestion(question));
+    }
+
+    return questions;
   }
 }

@@ -43,10 +43,7 @@ class ProfileRemoteDataSource {
       }
     }
 
-    return ids
-        .map((id) => docsById[id])
-        .whereType<QueryDocumentSnapshot<Map<String, dynamic>>>()
-        .toList();
+    return _sortDocsByRequestedIds(ids, docsById);
   }
 
   Future<void> updateUserHomeProgress({
@@ -60,10 +57,7 @@ class ProfileRemoteDataSource {
     });
   }
 
-  Future<void> updateUsername({
-    required String uid,
-    required String username,
-  }) {
+  Future<void> updateUsername({required String uid, required String username}) {
     return firestore.collection(FirestoreCollections.usuarios).doc(uid).update({
       UserFields.usuario: username,
     });
@@ -80,12 +74,26 @@ class ProfileRemoteDataSource {
     return ref.fullPath;
   }
 
-  Future<void> updateAvatar({
-    required String uid,
-    required String avatarPath,
-  }) {
+  Future<void> updateAvatar({required String uid, required String avatarPath}) {
     return firestore.collection(FirestoreCollections.usuarios).doc(uid).update({
       UserFields.avatar: avatarPath,
     });
+  }
+
+  List<QueryDocumentSnapshot<Map<String, dynamic>>> _sortDocsByRequestedIds(
+    List<String> requestedIds,
+    Map<String, QueryDocumentSnapshot<Map<String, dynamic>>> docsById,
+  ) {
+    final sortedDocs = <QueryDocumentSnapshot<Map<String, dynamic>>>[];
+
+    for (final id in requestedIds) {
+      final doc = docsById[id];
+
+      if (doc != null) {
+        sortedDocs.add(doc);
+      }
+    }
+
+    return sortedDocs;
   }
 }

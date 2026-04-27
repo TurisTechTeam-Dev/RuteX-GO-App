@@ -9,66 +9,115 @@ class QuestionResultsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final groupedResults = result.groupedAnswers;
+    final hasResults =
+        result.groupedAnswers.isNotEmpty || result.skippedPois.isNotEmpty;
 
     return SafeArea(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: double.infinity,
-            color: const Color(0xFF009640),
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 14),
-            child: const Column(
-              children: [
-                Text(
-                  'Resultados',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ),
+          const _ResultsHeader(),
           Flexible(
-            child: groupedResults.isEmpty && result.skippedPois.isEmpty
-                ? const Padding(
-                    padding: EdgeInsets.all(24),
-                    child: Text('No se respondieron preguntas en esta ruta.'),
-                  )
-                : ListView(
-                    padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
-                    children: [
-                      ...groupedResults.entries.map(
-                        (entry) => Padding(
-                          padding: const EdgeInsets.only(bottom: 24),
-                          child: _MonumentAnswerGroup(
-                            monumentName: entry.key,
-                            answers: entry.value,
-                          ),
-                        ),
-                      ),
-                      if (result.skippedPois.isNotEmpty)
-                        _SkippedPoisGroup(skippedPois: result.skippedPois),
-                    ],
-                  ),
+            child: hasResults
+                ? _ResultsList(result: result)
+                : const _EmptyResultsMessage(),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
-            child: SizedBox(
-              width: 170,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF007E35),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-                child: const Text('Cerrar'),
-              ),
-            ),
+          const _CloseButton(),
+        ],
+      ),
+    );
+  }
+}
+
+class _ResultsHeader extends StatelessWidget {
+  const _ResultsHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      color: const Color(0xFF009640),
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 14),
+      child: const Column(
+        children: [
+          Text(
+            'Resultados',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _EmptyResultsMessage extends StatelessWidget {
+  const _EmptyResultsMessage();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.all(24),
+      child: Text('No se respondieron preguntas en esta ruta.'),
+    );
+  }
+}
+
+class _ResultsList extends StatelessWidget {
+  final RouteResultData result;
+
+  const _ResultsList({required this.result});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
+      children: _buildResultItems(),
+    );
+  }
+
+  List<Widget> _buildResultItems() {
+    final items = <Widget>[];
+
+    for (final group in result.groupedAnswers.entries) {
+      items.add(
+        Padding(
+          padding: const EdgeInsets.only(bottom: 24),
+          child: _MonumentAnswerGroup(
+            monumentName: group.key,
+            answers: group.value,
+          ),
+        ),
+      );
+    }
+
+    if (result.skippedPois.isNotEmpty) {
+      items.add(_SkippedPoisGroup(skippedPois: result.skippedPois));
+    }
+
+    return items;
+  }
+}
+
+class _CloseButton extends StatelessWidget {
+  const _CloseButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
+      child: SizedBox(
+        width: 170,
+        child: ElevatedButton(
+          onPressed: () => Navigator.pop(context),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF007E35),
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+            ),
+          ),
+          child: const Text('Cerrar'),
+        ),
       ),
     );
   }
@@ -81,6 +130,8 @@ class _SkippedPoisGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final skippedRows = _buildSkippedRows();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -90,26 +141,36 @@ class _SkippedPoisGroup extends StatelessWidget {
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 12),
-        ...skippedPois.map(
-          (poi) => Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(Icons.skip_next, size: 18, color: Colors.orange),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    '${AnswerTextSanitizer.clean(poi)}: misión no realizada',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+        for (final row in skippedRows) row,
       ],
     );
+  }
+
+  List<Widget> _buildSkippedRows() {
+    final rows = <Widget>[];
+
+    for (final poi in skippedPois) {
+      rows.add(
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(Icons.skip_next, size: 18, color: Colors.orange),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '${AnswerTextSanitizer.clean(poi)}: misión no realizada',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return rows;
   }
 }
 
@@ -124,6 +185,8 @@ class _MonumentAnswerGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final answerTiles = _buildAnswerTiles();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -143,14 +206,24 @@ class _MonumentAnswerGroup extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
-        ...answers.map(
-          (answer) => Padding(
-            padding: const EdgeInsets.only(bottom: 14),
-            child: _AnswerTile(answer: answer),
-          ),
-        ),
+        for (final tile in answerTiles) tile,
       ],
     );
+  }
+
+  List<Widget> _buildAnswerTiles() {
+    final tiles = <Widget>[];
+
+    for (final answer in answers) {
+      tiles.add(
+        Padding(
+          padding: const EdgeInsets.only(bottom: 14),
+          child: _AnswerTile(answer: answer),
+        ),
+      );
+    }
+
+    return tiles;
   }
 }
 
@@ -164,6 +237,11 @@ class _AnswerTile extends StatelessWidget {
     final question = AnswerTextSanitizer.clean(answer.question);
     final selectedAnswer = AnswerTextSanitizer.clean(answer.selectedAnswer);
     final correctAnswer = AnswerTextSanitizer.clean(answer.correctAnswer);
+    final answerTexts = _buildAnswerTexts(
+      question,
+      selectedAnswer,
+      correctAnswer,
+    );
 
     return Container(
       width: double.infinity,
@@ -185,29 +263,42 @@ class _AnswerTile extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (question.isNotEmpty)
-                  Text(question, style: const TextStyle(fontSize: 13)),
-                if (question.isNotEmpty) const SizedBox(height: 6),
-                Text(
-                  selectedAnswer,
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
-                if (!answer.isCorrect && correctAnswer.isNotEmpty) ...[
-                  const SizedBox(height: 6),
-                  Text(
-                    'Respuesta correcta: $correctAnswer',
-                    style: const TextStyle(
-                      color: Color(0xFF007E35),
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ],
+              children: answerTexts,
             ),
           ),
         ],
       ),
     );
+  }
+
+  List<Widget> _buildAnswerTexts(
+    String question,
+    String selectedAnswer,
+    String correctAnswer,
+  ) {
+    final texts = <Widget>[];
+
+    if (question.isNotEmpty) {
+      texts.add(Text(question, style: const TextStyle(fontSize: 13)));
+      texts.add(const SizedBox(height: 6));
+    }
+
+    texts.add(
+      Text(selectedAnswer, style: const TextStyle(fontWeight: FontWeight.w700)),
+    );
+
+    final shouldShowCorrectAnswer =
+        !answer.isCorrect && correctAnswer.isNotEmpty;
+    if (shouldShowCorrectAnswer) {
+      texts.add(const SizedBox(height: 6));
+      texts.add(
+        Text(
+          'Respuesta correcta: $correctAnswer',
+          style: const TextStyle(color: Color(0xFF007E35), fontSize: 12),
+        ),
+      );
+    }
+
+    return texts;
   }
 }

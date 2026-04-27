@@ -43,10 +43,7 @@ class RouteModel extends TouristRoute {
     if (rawValue == null) return const <String>[];
 
     if (rawValue is Iterable) {
-      return rawValue
-          .map(_stringValue)
-          .where((value) => value.isNotEmpty)
-          .toList();
+      return _stringsFromIterable(rawValue);
     }
 
     final singleValue = _stringValue(rawValue);
@@ -172,15 +169,14 @@ class RouteModel extends TouristRoute {
   }
 
   static String _cityIdFromRouteText(Map<String, dynamic> data) {
-    final searchableText = [
+    final rawSearchableValues = [
       data[RouteFields.nombre],
       data[RouteFields.descripcion],
       data['titulo'],
       data['title'],
       data['name'],
-    ].whereType<Object>().map((value) {
-      return TextNormalizer.toAsciiSlug(value.toString());
-    }).join('_');
+    ];
+    final searchableText = _searchableRouteText(rawSearchableValues);
 
     const knownCityIds = ['merida', 'badajoz', 'caceres'];
     for (final cityId in knownCityIds) {
@@ -224,5 +220,31 @@ class RouteModel extends TouristRoute {
     }
 
     return TextNormalizer.toAsciiSlug(value);
+  }
+
+  static List<String> _stringsFromIterable(Iterable rawValues) {
+    final values = <String>[];
+
+    for (final rawValue in rawValues) {
+      final value = _stringValue(rawValue);
+
+      if (value.isNotEmpty) {
+        values.add(value);
+      }
+    }
+
+    return values;
+  }
+
+  static String _searchableRouteText(List<dynamic> rawValues) {
+    final normalizedValues = <String>[];
+
+    for (final rawValue in rawValues) {
+      if (rawValue != null) {
+        normalizedValues.add(TextNormalizer.toAsciiSlug(rawValue.toString()));
+      }
+    }
+
+    return normalizedValues.join('_');
   }
 }

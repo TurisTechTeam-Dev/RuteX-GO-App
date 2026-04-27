@@ -23,15 +23,11 @@ class HomeDataLoader {
       userData[UserFields.rutasCompletadas] ?? [],
     );
 
-    var routeIds = routesProgress
-        .map(_routeIdFromProgress)
-        .whereType<String>()
-        .toList();
-    routeIds = routeIds.toSet().toList();
+    final routeIds = _routeIdsFromProgress(routesProgress);
 
     final routes = <HomeRoute>[];
     final routeDocs = await remoteDataSource.getRoutesByIds(routeIds);
-    final validRouteIds = routeDocs.map((doc) => doc.id).toSet();
+    final validRouteIds = _routeIdsFromDocs(routeDocs);
     final normalizedRoutesProgress = _filterValidRoutesProgress(
       routesProgress,
       validRouteIds,
@@ -43,9 +39,10 @@ class HomeDataLoader {
 
     for (final doc in routeDocs) {
       final data = doc.data();
-      final pointIds = List<dynamic>.from(
+      final rawPointIds = List<dynamic>.from(
         data[RouteFields.idPuntosInteres] ?? [],
-      ).map((pointId) => pointId.toString()).toList();
+      );
+      final pointIds = _pointIdsFromRouteData(rawPointIds);
       final totalMissions = pointIds.length;
       final totalPoints = _asInt(
         data[RouteFields.puntosTotales],
@@ -119,13 +116,21 @@ class HomeDataLoader {
   static List<ProfileRank> _parseRanks(dynamic rawRanks) {
     if (rawRanks is! List) return const [];
 
-    return rawRanks.whereType<Map>().map((rank) {
-      return ProfileRank(
-        name: rank[RankFields.nombre]?.toString() ?? '',
-        logo: rank[RankFields.logo]?.toString() ?? '',
-        neededPoints: _asInt(rank[RankFields.puntosNecesarios]),
-      );
-    }).toList();
+    final ranks = <ProfileRank>[];
+
+    for (final rawRank in rawRanks) {
+      if (rawRank is Map) {
+        ranks.add(
+          ProfileRank(
+            name: rawRank[RankFields.nombre]?.toString() ?? '',
+            logo: rawRank[RankFields.logo]?.toString() ?? '',
+            neededPoints: _asInt(rawRank[RankFields.puntosNecesarios]),
+          ),
+        );
+      }
+    }
+
+    return ranks;
   }
 
   static DateTime? _dateFromFirestoreValue(dynamic value) {
@@ -153,11 +158,54 @@ class HomeDataLoader {
     List<dynamic> routesProgress,
     Set<String> validRouteIds,
   ) {
-    return routesProgress.where((progress) {
+    final validRoutesProgress = <dynamic>[];
+
+    for (final progress in routesProgress) {
       final routeId = _routeIdFromProgress(progress);
-      if (routeId == null || routeId.isEmpty) return false;
-      return validRouteIds.contains(routeId);
-    }).toList();
+      if (routeId == null || routeId.isEmpty) continue;
+
+      if (validRouteIds.contains(routeId)) {
+        validRoutesProgress.add(progress);
+      }
+    }
+
+    return validRoutesProgress;
+  }
+
+  static List<String> _routeIdsFromProgress(List<dynamic> routesProgress) {
+    final routeIds = <String>{};
+
+    for (final progress in routesProgress) {
+      final routeId = _routeIdFromProgress(progress);
+
+      if (routeId != null) {
+        routeIds.add(routeId);
+      }
+    }
+
+    return routeIds.toList();
+  }
+
+  static List<String> _pointIdsFromRouteData(List<dynamic> rawPointIds) {
+    final pointIds = <String>[];
+
+    for (final rawPointId in rawPointIds) {
+      pointIds.add(rawPointId.toString());
+    }
+
+    return pointIds;
+  }
+
+  static Set<String> _routeIdsFromDocs(
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> routeDocs,
+  ) {
+    final routeIds = <String>{};
+
+    for (final doc in routeDocs) {
+      routeIds.add(doc.id);
+    }
+
+    return routeIds;
   }
 
   static int _sumRemovedRoutePoints(

@@ -326,7 +326,7 @@ class TripSimulationProvider extends ChangeNotifier {
       completedMissions: completedMissions,
       skippedPois: skippedPois,
     );
-    final correctAnswers = answers.where((answer) => answer.isCorrect).length;
+    final correctAnswers = _countCorrectAnswers(answers);
     final totalAnswers = answers.length;
 
     QuizRouteProgress.reset();
@@ -344,15 +344,44 @@ class TripSimulationProvider extends ChangeNotifier {
       routeName: routeName,
       elapsedTime: elapsedTime,
       answerResults: answers,
-      skippedPoiNames: skippedPois.map((poi) => poi.name).toList(),
+      skippedPoiNames: _poiNames(skippedPois),
     );
   }
 
   List<PointOfInterest> _skippedPois() {
-    return _completedPoiIndices
-        .map((index) => _pointsOfInterest[index])
-        .where((poi) => !QuizRouteProgress.visitedPointIds.contains(poi.id))
-        .toList();
+    final skippedPois = <PointOfInterest>[];
+
+    for (final completedIndex in _completedPoiIndices) {
+      final poi = _pointsOfInterest[completedIndex];
+
+      if (!QuizRouteProgress.visitedPointIds.contains(poi.id)) {
+        skippedPois.add(poi);
+      }
+    }
+
+    return skippedPois;
+  }
+
+  int _countCorrectAnswers(List<QuizAnswerResult> answers) {
+    var total = 0;
+
+    for (final answer in answers) {
+      if (answer.isCorrect) {
+        total++;
+      }
+    }
+
+    return total;
+  }
+
+  List<String> _poiNames(List<PointOfInterest> pois) {
+    final names = <String>[];
+
+    for (final poi in pois) {
+      names.add(poi.name);
+    }
+
+    return names;
   }
 
   @override

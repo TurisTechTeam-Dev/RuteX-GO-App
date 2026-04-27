@@ -37,8 +37,7 @@ class UsernameFormCard extends StatelessWidget {
               label: "Usuario",
               hint: "Introduce tu nombre de usuario",
               controller: controller,
-              validator: (value) =>
-                  Validators.validateRequiredField(value, "usuario"),
+              validator: _validateUsername,
             ),
             _ProfileActionRow(
               isSaving: isSaving,
@@ -51,6 +50,10 @@ class UsernameFormCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String? _validateUsername(String? value) {
+    return Validators.validateRequiredField(value, "usuario");
   }
 }
 
@@ -83,39 +86,53 @@ class EmailFormCard extends StatelessWidget {
         key: formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _EditableSectionTitle(
-              text: "Correo electrónico",
-              isEditing: isEditing,
-              onEdit: onEdit,
-            ),
-            if (!isEditing) ...[
-              const SizedBox(height: 8),
-              Text(
-                controller.text,
-                style: const TextStyle(color: AppColors.grisNeutro),
-              ),
-            ] else ...[
-              const SizedBox(height: 12),
-              CustomInput(
-                label: "Nuevo email",
-                hint: "Introduce tu nuevo email",
-                keyboardType: TextInputType.emailAddress,
-                controller: controller,
-                validator: Validators.validateEmail,
-              ),
-              _ProfileActionRow(
-                isSaving: isSaving,
-                savingText: "ENVIANDO...",
-                saveText: "Enviar verificación",
-                onCancel: onCancel,
-                onSave: onSave,
-              ),
-            ],
-          ],
+          children: _buildFormContent(),
         ),
       ),
     );
+  }
+
+  List<Widget> _buildFormContent() {
+    final content = <Widget>[
+      _EditableSectionTitle(
+        text: "Correo electrónico",
+        isEditing: isEditing,
+        onEdit: onEdit,
+      ),
+    ];
+
+    if (!isEditing) {
+      content.add(const SizedBox(height: 8));
+      content.add(
+        Text(
+          controller.text,
+          style: const TextStyle(color: AppColors.grisNeutro),
+        ),
+      );
+      return content;
+    }
+
+    content.add(const SizedBox(height: 12));
+    content.add(
+      CustomInput(
+        label: "Nuevo email",
+        hint: "Introduce tu nuevo email",
+        keyboardType: TextInputType.emailAddress,
+        controller: controller,
+        validator: Validators.validateEmail,
+      ),
+    );
+    content.add(
+      _ProfileActionRow(
+        isSaving: isSaving,
+        savingText: "ENVIANDO...",
+        saveText: "Enviar verificación",
+        onCancel: onCancel,
+        onSave: onSave,
+      ),
+    );
+
+    return content;
   }
 }
 
@@ -152,56 +169,72 @@ class PasswordFormCard extends StatelessWidget {
         key: formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _EditableSectionTitle(
-              text: "Contraseña",
-              isEditing: isEditing,
-              onEdit: onEdit,
-            ),
-            if (!isEditing) ...[
-              const SizedBox(height: 8),
-              const Text(
-                "••••••••",
-                style: TextStyle(color: AppColors.grisNeutro),
-              ),
-            ] else ...[
-              const SizedBox(height: 12),
-              CustomInput(
-                label: "Contraseña actual",
-                hint: "Introduce tu contraseña actual",
-                isPassword: true,
-                controller: currentPasswordController,
-                validator: Validators.validatePassword,
-              ),
-              CustomInput(
-                label: "Nueva contraseña",
-                hint: "Introduce tu nueva contraseña",
-                isPassword: true,
-                controller: passwordController,
-                validator: Validators.validatePassword,
-              ),
-              CustomInput(
-                label: "Confirmar contraseña",
-                hint: "Repite tu nueva contraseña",
-                isPassword: true,
-                controller: confirmPasswordController,
-                validator: (value) => Validators.validatePasswordMatch(
-                  value,
-                  passwordController.text,
-                ),
-              ),
-              _ProfileActionRow(
-                isSaving: isSaving,
-                savingText: "GUARDANDO...",
-                saveText: "Actualizar contraseña",
-                onCancel: onCancel,
-                onSave: onSave,
-              ),
-            ],
-          ],
+          children: _buildFormContent(),
         ),
       ),
     );
+  }
+
+  List<Widget> _buildFormContent() {
+    final content = <Widget>[
+      _EditableSectionTitle(
+        text: "Contraseña",
+        isEditing: isEditing,
+        onEdit: onEdit,
+      ),
+    ];
+
+    if (!isEditing) {
+      content.add(const SizedBox(height: 8));
+      content.add(
+        const Text("••••••••", style: TextStyle(color: AppColors.grisNeutro)),
+      );
+      return content;
+    }
+
+    content.add(const SizedBox(height: 12));
+    content.add(
+      CustomInput(
+        label: "Contraseña actual",
+        hint: "Introduce tu contraseña actual",
+        isPassword: true,
+        controller: currentPasswordController,
+        validator: Validators.validatePassword,
+      ),
+    );
+    content.add(
+      CustomInput(
+        label: "Nueva contraseña",
+        hint: "Introduce tu nueva contraseña",
+        isPassword: true,
+        controller: passwordController,
+        validator: Validators.validatePassword,
+      ),
+    );
+    content.add(
+      CustomInput(
+        label: "Confirmar contraseña",
+        hint: "Repite tu nueva contraseña",
+        isPassword: true,
+        controller: confirmPasswordController,
+        validator: _validateRepeatedPassword,
+      ),
+    );
+    content.add(
+      _ProfileActionRow(
+        isSaving: isSaving,
+        savingText: "GUARDANDO...",
+        saveText: "Actualizar contraseña",
+        onCancel: onCancel,
+        onSave: onSave,
+      ),
+    );
+
+    return content;
+  }
+
+  String? _validateRepeatedPassword(String? value) {
+    return Validators.validatePasswordMatch(value, passwordController.text);
   }
 }
 

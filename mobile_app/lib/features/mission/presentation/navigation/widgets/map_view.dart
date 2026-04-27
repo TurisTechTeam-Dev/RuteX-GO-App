@@ -111,43 +111,53 @@ class _MapViewState extends State<MapView> {
               ),
             ],
           ),
-        MarkerLayer(
-          markers: [
-            ...widget.pointsOfInterest.map(
-              (poi) => Marker(
-                point: poi.location,
-                width: 50,
-                height: 50,
-                child: const Icon(
-                  Icons.location_on,
-                  color: Colors.red,
-                  size: 40,
-                  shadows: [Shadow(color: Colors.black26, blurRadius: 10)],
-                ),
-              ),
-            ),
-            Marker(
-              point: centerToUse,
-              width: 60,
-              height: 60,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: 25,
-                    height: 25,
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withValues(alpha: 0.2),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const Icon(Icons.navigation, color: Colors.blue, size: 35),
-                ],
-              ),
-            ),
-          ],
-        ),
+        MarkerLayer(markers: _buildFlutterMarkers(centerToUse)),
       ],
+    );
+  }
+
+  List<Marker> _buildFlutterMarkers(LatLng centerToUse) {
+    final markers = <Marker>[];
+
+    for (final poi in widget.pointsOfInterest) {
+      markers.add(
+        Marker(
+          point: poi.location,
+          width: 50,
+          height: 50,
+          child: const Icon(
+            Icons.location_on,
+            color: Colors.red,
+            size: 40,
+            shadows: [Shadow(color: Colors.black26, blurRadius: 10)],
+          ),
+        ),
+      );
+    }
+
+    markers.add(_buildCurrentPositionMarker(centerToUse));
+    return markers;
+  }
+
+  Marker _buildCurrentPositionMarker(LatLng centerToUse) {
+    return Marker(
+      point: centerToUse,
+      width: 60,
+      height: 60,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            width: 25,
+            height: 25,
+            decoration: BoxDecoration(
+              color: Colors.blue.withValues(alpha: 0.2),
+              shape: BoxShape.circle,
+            ),
+          ),
+          const Icon(Icons.navigation, color: Colors.blue, size: 35),
+        ],
+      ),
     );
   }
 
@@ -163,9 +173,11 @@ class _MapViewState extends State<MapView> {
   }
 
   Set<google_maps.Marker> _buildGoogleMarkers(LatLng centerToUse) {
-    return {
-      ...widget.pointsOfInterest.map(
-        (poi) => google_maps.Marker(
+    final markers = <google_maps.Marker>{};
+
+    for (final poi in widget.pointsOfInterest) {
+      markers.add(
+        google_maps.Marker(
           markerId: google_maps.MarkerId('poi_${poi.id}'),
           position: _toGoogleLatLng(poi.location),
           icon: google_maps.BitmapDescriptor.defaultMarkerWithHue(
@@ -173,7 +185,10 @@ class _MapViewState extends State<MapView> {
           ),
           infoWindow: google_maps.InfoWindow(title: poi.name),
         ),
-      ),
+      );
+    }
+
+    markers.add(
       google_maps.Marker(
         markerId: const google_maps.MarkerId('current_position'),
         position: _toGoogleLatLng(centerToUse),
@@ -182,7 +197,9 @@ class _MapViewState extends State<MapView> {
         ),
         infoWindow: const google_maps.InfoWindow(title: 'Tu posición'),
       ),
-    };
+    );
+
+    return markers;
   }
 
   Set<google_maps.Polyline> _buildGooglePolylines() {
@@ -191,11 +208,21 @@ class _MapViewState extends State<MapView> {
     return {
       google_maps.Polyline(
         polylineId: const google_maps.PolylineId('active_route'),
-        points: widget.routePoints.map(_toGoogleLatLng).toList(),
+        points: _buildGoogleRoutePoints(),
         color: Colors.blue.withValues(alpha: 0.8),
         width: 5,
       ),
     };
+  }
+
+  List<google_maps.LatLng> _buildGoogleRoutePoints() {
+    final routePoints = <google_maps.LatLng>[];
+
+    for (final point in widget.routePoints) {
+      routePoints.add(_toGoogleLatLng(point));
+    }
+
+    return routePoints;
   }
 
   google_maps.LatLng _toGoogleLatLng(LatLng point) {

@@ -16,6 +16,7 @@ class CityFields {
   static const imagen = 'imagen';
   static const isActive = 'isActive';
   static const nombre = 'nombre';
+  static const provincia = 'provincia';
 }
 
 class MissionFields {
@@ -29,6 +30,7 @@ class MissionFields {
 
 class PointInterestFields {
   static const descripcion = 'descripcion';
+  static const idCiudad = 'id_ciudad';
   static const imagen = 'imagen';
   static const localizacion = 'localizacion';
   static const nombre = 'nombre';

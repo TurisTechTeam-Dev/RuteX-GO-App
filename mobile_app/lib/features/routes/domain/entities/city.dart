@@ -14,9 +14,17 @@ class City {
   });
 
   Set<String> get routeKeys {
-    return {
-      id,
-      TextNormalizer.toAsciiSlug(title),
-    }.where((key) => key.isNotEmpty).toSet();
+    final keys = <String>{};
+
+    if (id.isNotEmpty) {
+      keys.add(id);
+    }
+
+    final normalizedTitle = TextNormalizer.toAsciiSlug(title);
+    if (normalizedTitle.isNotEmpty) {
+      keys.add(normalizedTitle);
+    }
+
+    return keys;
   }
 }
