@@ -19,6 +19,36 @@ La idea es que cualquier companero pueda abrirlo, entender el estado actual y sa
 
 ## Estructura refactorizada
 
+### Panel administrador
+
+Archivos principales:
+
+- `lib/features/admin_panel/presentation/admin_panel_screen.dart`
+- `lib/features/admin_panel/data/admin_remote_datasource.dart`
+- `lib/features/admin_panel/data/models/admin_models.dart`
+- `lib/core/widgets/nav_web/navegacion_web.dart`
+- `lib/core/widgets/nav_web/componentes_extras/admin_sidebar.dart`
+- `lib/core/widgets/nav_web/componentes_extras/admin_form_router.dart`
+- `lib/core/widgets/nav_web/componentes_extras/image_picker_box.dart`
+- `lib/core/widgets/nav_web/formulario_ruta.dart`
+- `lib/core/widgets/nav_web/formularios/formulario_ciudades.dart`
+- `lib/core/widgets/nav_web/formularios/formulario_punto_interes.dart`
+- `lib/core/widgets/nav_web/formularios/formulario_mision.dart`
+
+Que hace ahora:
+
+- El panel admin fue traido de la rama `web` de forma selectiva, sin mezclar la rama completa sobre `codex`.
+- Permite gestionar ciudades, rutas, puntos de interes y misiones.
+- `AdminRemoteDataSource` concentra streams de Firestore y subidas a Firebase Storage.
+- `AdminCityModel`, `AdminRouteModel`, `AdminPoiModel` y `AdminMissionModel` parsean Firestore para la UI admin.
+- La UI visible del admin se mantiene en espanol.
+- El codigo interno nuevo usa nombres en ingles cuando no representa directamente campos Firestore.
+- El panel es desktop-first. En movil tiene navbar compacta, drawer para el lateral y scroll horizontal para evitar solapes, pero no es la experiencia ideal para administracion intensiva.
+- Si `usuarios.isAdmin == true`, la app redirige al panel admin tambien en movil. Para demo y uso habitual, se recomienda web/portatil.
+- El selector de Misiones obtiene puntos como la app movil: ciudad -> rutas por `id_ciudad` -> `id_puntos_interes` -> documentos de `puntos_interes`.
+- Las previews de imagen ya funcionan al subir archivo local y al leer rutas internas de Firebase Storage.
+- En Flutter Web, `StorageAwareImage` usa `WebHtmlElementStrategy.prefer` para renderizar URLs resueltas de Firebase Storage.
+
 ### Home / Perfil
 
 Archivos principales:
@@ -178,6 +208,8 @@ Que hace ahora:
 - `ExtremaduraMapBackground` se reutiliza en varias pantallas.
 - `StrokeTitle` ya no vive duplicado en distintas vistas.
 - `StorageAwareImage` unifica la carga de imagenes desde assets, `https://`, `gs://` o rutas internas tipo `Contenido/...`.
+- `StorageAwareImage` prueba variantes de extension (`.jpg`, `.jpeg`, `.png`, `.webp`) cuando recibe rutas internas de Storage.
+- En web, las imagenes remotas usan estrategia HTML preferente para evitar fallos de render con Firebase Storage.
 
 ## Firebase y persistencia
 
@@ -194,7 +226,7 @@ Formato recomendado en Firestore:
 
 - `Contenido/Ciudades/badajoz.jpg`
 - `Contenido/Rutas/anfiteatro.jpg`
-- `Contenido/PuntosInteres/teatro_romano.jpg`
+- `Contenido/Puntos de Interes/teatro_romano.jpg`
 - `Contenido/Rangos/bronce.png`
 
 No hace falta guardar la URL publica larga si la app puede resolver la ruta interna.
@@ -220,6 +252,8 @@ Comportamiento actual:
 - `usuarios.rutas_completadas` se usa como resumen por ruta, no como fuente de verdad para el total global del usuario.
 - El listado de rutas de una ciudad depende de `id_ciudad`.
 - El inicio de una ruta depende de que todos sus puntos de interes tengan mision.
+- En el panel admin, no asumir que `puntos_interes` tiene siempre `id_ciudad`; para saber los puntos de una ciudad se debe seguir la relacion desde `rutas.id_puntos_interes`, igual que hace la app movil.
+- El panel admin movil es acceso de contingencia. No convertirlo en referencia visual principal sin redisenar formularios especificos para movil.
 
 ## Archivos especialmente sensibles
 
@@ -231,6 +265,8 @@ Si se va a tocar comportamiento y no solo UI, revisar primero:
 - `lib/features/routes/data/routes_repository_impl.dart`
 - `lib/features/routes/domain/usecases/routes_use_cases.dart`
 - `lib/core/constants/firestore_contract.dart`
+- `lib/features/admin_panel/data/models/admin_models.dart`
+- `lib/core/widgets/images/storage_aware_image.dart`
 - `docs/base_datos_firestore.md`
 
 ## Nota para el equipo

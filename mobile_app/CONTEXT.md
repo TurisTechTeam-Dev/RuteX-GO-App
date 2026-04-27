@@ -2,16 +2,16 @@
 
 ## Current Priority
 
-The immediate priority is to deliver a functional Codex branch for review. Codex is the mother branch and must remain the most advanced, clean, and readable version of the app.
+The immediate priority is to deliver a functional Codex branch for review/demo. Codex is the mother branch and must remain the most advanced, clean, and readable version of the app.
 
 ## Day Plan
 
 1. Finish the mobile readability refactor by removing hard-to-read spreads, compact lambda chains, and dense functional style where it harms class readability.
 2. Test the mobile app with login, Google login, register, route selection, route completion, and profile/home refresh.
 3. Fix the route completion permission issue for the demo: the client writes route progress directly, and Firestore rules allow normal users to update only their own profile/progress fields.
-4. Bring the web branch into this workspace after the mobile route-completion fix.
-5. Refactor web code to follow the same readability and naming rules as Codex.
-6. Fix web issues and polish admin-facing visual flows.
+4. Bring only the admin/web part from the web branch into this workspace after the mobile route-completion fix.
+5. Refactor admin/web code to follow the same readability and naming rules as Codex.
+6. Fix admin/web issues and polish admin-facing visual flows.
 7. Leave Codex correct as the final integration branch: mobile, backend route completion, and admin web.
 8. At final delivery/push to develop/main, remove Codex-only context docs such as `CONTEXT.md`, `NUEVA_ESTRUCTURA.md`, `REFACTOR_CHANGES.md`, and `docs/base_datos_firestore.md` if the team decides they should not ship.
 
@@ -49,7 +49,12 @@ Future professional implementation:
 
 - The `web` branch is not safe to merge wholesale into `codex`: it deletes/refactors large parts of the mobile app and renames architecture away from Codex conventions.
 - The admin panel was imported selectively from `web`: `lib/features/admin_panel`, `lib/core/widgets/nav_web`, and the required Firestore field constants.
-- Imported admin/web files currently compile and pass `flutter analyze --no-pub`; visual/manual web testing is still pending.
+- Imported admin/web files compile and pass `flutter analyze --no-pub`.
+- The admin panel is designed primarily for web/desktop. It has a compact/mobile fallback so an admin can open it from the app, but the experience is not ideal for heavy editing because forms, maps, image pickers, and side navigation are naturally wide.
+- For demos and normal admin work, use the laptop/web view. Treat the mobile admin panel as emergency/light access only.
+- Admin users currently route to the admin panel on every platform, not only web.
+- The admin panel loads mission point options the same way the mobile route flow does: city -> routes with `id_ciudad` -> route `id_puntos_interes` -> `puntos_interes` documents.
+- Existing Storage previews are fixed through `StorageAwareImage`, including Firebase Storage internal paths like `Contenido/Ciudades/merida.jpg`. On Flutter Web it uses `WebHtmlElementStrategy.prefer` to render Firebase Storage download URLs correctly.
 
 - Some features use `domain/repository` while others use `domain/repositories`.
 - Repository implementations currently live directly under `data` in some features and under `data/repository` in others.
@@ -96,13 +101,7 @@ Stop-Process -Name dart,dartvm -Force
 Last known successful validation:
 
 ```txt
-dart format lib\features\mission\data\repositories\mission_repository_impl.dart lib\features\auth\data\repositories\auth_repository_impl.dart
-Formatted 2 files.
-
 flutter analyze --no-pub
 No issues found.
-
-flutter test --no-pub test\routes_use_cases_test.dart
-All tests passed.
 
 ```

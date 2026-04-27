@@ -51,8 +51,16 @@ lib/
       cards/
         custom_cards.dart                       # Cards base reutilizables.
       images/
-        storage_aware_image.dart                # Imagen compatible con Storage/URL/assets.
+        storage_aware_image.dart                # Imagen compatible con Storage/URL/assets, tambien en Flutter Web.
         framed_storage_image.dart               # Imagen enmarcada reutilizable.
+      nav_web/                                  # Panel administrador traido de la rama web y adaptado a Codex.
+        navegacion_web.dart                     # Navbar admin responsive.
+        admin_footer.dart                       # Footer del panel admin.
+        button_close_session.dart               # Cierre de sesion del panel admin.
+        tarjeta_lista.dart                      # Listados planos admin.
+        formulario_ruta.dart                    # Formulario admin de rutas.
+        formularios/                            # Formularios admin de ciudades, puntos y misiones.
+        componentes_extras/                     # Sidebar, explorador, mapas, imagenes y routing de formularios admin.
       inputs/
         custom_inputs.dart                      # Inputs reutilizables.
       titles/
@@ -244,8 +252,12 @@ features/
         profile_header.dart                    # Cabecera del perfil.
 
   admin_panel/
+    data/
+      admin_remote_datasource.dart              # Streams y escrituras Firestore/Storage para el panel admin.
+      models/
+        admin_models.dart                       # Modelos admin para ciudades, rutas, puntos y misiones.
     presentation/
-      admin_panel_screen.dart                  # Pantalla de administracion actual.
+      admin_panel_screen.dart                  # Pantalla de administracion actual, desktop-first con fallback movil.
 
   splash/
     presentation/
@@ -267,6 +279,17 @@ CompletedRouteFields.puntosObtenidos           # Campo puntos_obtenidos.
 ```
 
 Esto es intencional. El objetivo es que al leer una clase de `data/` se identifique rapido cuando se esta llamando a la BD. No convertir estos nombres a ingles salvo que tambien se migre la base de datos.
+
+## Panel administrador
+
+- El panel administrador vive en `features/admin_panel` y `core/widgets/nav_web`.
+- Es la parte importada selectivamente desde la rama `web`; no se debe mezclar la rama `web` completa sobre `codex`.
+- La UI visible del admin esta en espanol porque el administrador previsto es el equipo/profesorado.
+- La nomenclatura interna nueva intenta seguir estilo Codex: clases/modelos/metodos en ingles cuando no representan campos reales de Firestore.
+- El panel esta pensado para escritorio/web. En movil tiene drawer, navbar compacta y scroll horizontal para evitar solapes, pero no debe considerarse una experiencia final de administracion.
+- Si `usuarios/{uid}.isAdmin == true`, la app redirige al panel admin tambien en movil. Esto permite acceso de emergencia, aunque para demo y trabajo real se recomienda portatil/web.
+- El selector de puntos en Misiones no depende solo de `puntos_interes.id_ciudad`; sigue el flujo real de la app: ciudad -> rutas por `id_ciudad` -> `rutas.id_puntos_interes`.
+- Las previews de Storage usan `StorageAwareImage` y soportan rutas internas como `Contenido/Ciudades/merida.jpg`. En Flutter Web se usa `WebHtmlElementStrategy.prefer` para que Firebase Storage renderice correctamente.
 
 ## Validacion recomendada
 
@@ -292,5 +315,6 @@ Stop-Process -Name dart,dartvm -Force
 - Los repositorios tienen interfaz en `domain/repositories` e implementacion en `data/repositories`.
 - Los widgets transversales viven en `core/widgets` o `app/widgets`.
 - Los widgets especificos viven dentro de su feature en `presentation/widgets`.
+- El panel admin ya existe dentro de Codex y permite gestionar ciudades, rutas, puntos de interes y misiones.
 - El flujo de rutas, quiz y resultado fue probado manualmente despues del refactor.
 - Ultima validacion tecnica conocida: `flutter analyze --no-pub` sin issues.

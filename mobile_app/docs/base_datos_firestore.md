@@ -38,6 +38,7 @@ Uso en app:
   - `imagen`
   - `isActive`
 - Si `imagen` esta vacia, la UI intenta usar `assets/images_selection/{ciudadId}.jpg`.
+- El panel admin usa `imagen` y tambien puede resolver rutas internas de Storage como `Contenido/Ciudades/merida.jpg`.
 
 Notas:
 
@@ -142,12 +143,14 @@ Uso en app:
   - `nombre`
   - `descripcion`
   - `imagen`
+- El panel admin puede mostrar puntos aunque `id_ciudad` no exista en `puntos_interes`, porque para filtrar por ciudad sigue la relacion desde `rutas.id_puntos_interes`.
 
 Notas:
 
 - `localizacion` debe ser `GeoPoint`.
 - `radio_activacion` controla la llegada al punto en el mapa.
 - El codigo tambien tolera una clave antigua/corrupta de descripcion con tilde, pero la clave correcta es `descripcion`.
+- Para datos nuevos del panel admin, conviene guardar `id_ciudad` en el punto; aun asi, el flujo principal de la app no depende de ese campo.
 
 ## `rutas`
 
@@ -178,6 +181,7 @@ Uso en app:
   - `imagen_asset` como compatibilidad legacy si falta `imagen`
   - `id_puntos_interes`
 - `TripSimulationProvider` carga los puntos por `id_puntos_interes`.
+- El panel admin de Misiones tambien obtiene los puntos de una ciudad desde `rutas.id_puntos_interes`, no desde `puntos_interes.id_ciudad`.
 - `HomeDataLoader` usa:
   - `id_puntos_interes`
   - `puntos_totales`
@@ -231,6 +235,7 @@ Uso en app:
 - `ProfileRemoteDataSource.updateAvatar()` guarda esa ruta interna de Storage en `usuarios.avatar`.
 - `ProfileRemoteDataSource.updateUsername()` actualiza `usuarios.usuario`.
 - `AuthRepositoryImpl.isAdmin(uid)` lee `isAdmin`.
+- Si `isAdmin == true`, la app redirige al panel administrador tambien en movil. El panel es desktop-first; el modo movil existe como acceso de contingencia.
 - `HomeDataLoader` lee `rutas_completadas` y carga las rutas por IDs en lotes.
 - `QuizScreen` escribe progreso en `rutas_completadas` con:
   - `rutaId`
@@ -286,6 +291,25 @@ Riesgo detectado:
 9. Al completar cada punto de interes, el mapa marca ese punto como completado y recalcula el siguiente mas cercano.
 10. Al completar todos los puntos de la ruta, aunque algunos se hayan saltado, el mapa guarda en `usuarios.rutas_completadas` y actualiza `usuarios.puntos` como dato auxiliar.
 11. El bonus final se suma solo si se han completado los quiz de todos los puntos de interes.
+
+## Flujo actual del panel admin
+
+- El panel administrador trabaja sobre:
+  - `ciudades`
+  - `rutas`
+  - `puntos_interes`
+  - `misiones`
+- Para crear o editar Misiones, el selector de puntos sigue el mismo contrato que la app:
+  1. Se selecciona una ciudad.
+  2. Se buscan las rutas cuyo `id_ciudad` coincide con esa ciudad.
+  3. Se leen los IDs de `rutas.id_puntos_interes`.
+  4. Se muestran los documentos de `puntos_interes` asociados a esos IDs.
+- No asumir que todos los documentos de `puntos_interes` tienen `id_ciudad`; ese campo puede ayudar, pero la relacion fiable esta en `rutas.id_puntos_interes`.
+- Las imagenes del panel admin se guardan como rutas internas de Storage, por ejemplo:
+  - `Contenido/Ciudades/merida.jpg`
+  - `Contenido/Rutas/merida_monumental_romana.jpg`
+  - `Contenido/Puntos de Interes/mer_anfiteatro_001.jpg`
+- `StorageAwareImage` resuelve esas rutas internas a URL de descarga. En Flutter Web usa estrategia HTML preferente para renderizar imagenes de Firebase Storage.
 
 ## Resultado de ruta en app
 
