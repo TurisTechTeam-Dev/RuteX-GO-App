@@ -29,6 +29,8 @@ class _CityFormState extends State<CityForm> {
   late final TextEditingController _imageController;
   bool isActive = false;
   bool _isUploading = false;
+  Uint8List? _pendingImageBytes;
+  String? _pendingImageName;
 
   @override
   void initState() {
@@ -48,6 +50,8 @@ class _CityFormState extends State<CityForm> {
       _nameController.text = widget.city?.name ?? '';
       _provinceController.text = widget.city?.province ?? '';
       _imageController.text = widget.city?.imageUrl ?? '';
+      _pendingImageBytes = null;
+      _pendingImageName = null;
       setState(() {
         isActive = widget.city?.isActive ?? false;
       });
@@ -127,32 +131,11 @@ class _CityFormState extends State<CityForm> {
                         ImagePickerBox(
                           imageUrl: _imageController.text,
                           isUploading: _isUploading,
-                          onImageSelected: (bytes, name) async {
+                          onImageSelected: (bytes, name) {
                             setState(() {
-                              _isUploading = true;
+                              _pendingImageBytes = bytes;
+                              _pendingImageName = name;
                             });
-                            try {
-                              final url = await widget.onUploadImage(
-                                bytes,
-                                name,
-                              );
-                              if (!mounted) return;
-                              setState(() {
-                                _imageController.text = url;
-                              });
-                            } catch (e) {
-                              if (!context.mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text("Error al subir: $e"),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
-                            } finally {
-                              if (mounted) {
-                                setState(() => _isUploading = false);
-                              }
-                            }
                           },
                         ),
                       ],
@@ -169,7 +152,7 @@ class _CityFormState extends State<CityForm> {
                     text: _isUploading ? 'SUBIENDO...' : 'GUARDAR CAMBIOS',
                     onPressed: _isUploading
                         ? null
-                        : () {
+                        : () async {
                             if (_nameController.text.trim().isEmpty ||
                                 _provinceController.text.trim().isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -182,12 +165,14 @@ class _CityFormState extends State<CityForm> {
                               );
                               return;
                             }
+                            final imageUrl = await _uploadPendingImage();
+                            if (imageUrl == null) return;
                             widget.onSave(
                               AdminCityModel(
                                 id: widget.city?.id,
                                 name: _nameController.text.trim(),
                                 province: _provinceController.text.trim(),
-                                imageUrl: _imageController.text.trim(),
+                                imageUrl: imageUrl,
                                 isActive: isActive,
                               ),
                             );
@@ -221,5 +206,34 @@ class _CityFormState extends State<CityForm> {
         ),
       ),
     );
+  }
+
+  Future<String?> _uploadPendingImage() async {
+    final bytes = _pendingImageBytes;
+    final name = _pendingImageName;
+    if (bytes == null || name == null) return _imageController.text.trim();
+
+    setState(() => _isUploading = true);
+    try {
+      final imageUrl = await widget.onUploadImage(bytes, name);
+      if (!mounted) return null;
+
+      _imageController.text = imageUrl;
+      _pendingImageBytes = null;
+      _pendingImageName = null;
+      return imageUrl;
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Error al subir: $e"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return null;
+    } finally {
+      if (mounted) setState(() => _isUploading = false);
+    }
   }
 }

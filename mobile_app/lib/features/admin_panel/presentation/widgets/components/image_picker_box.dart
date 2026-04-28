@@ -7,7 +7,7 @@ import 'package:mobile_app/core/widgets/images/storage_aware_image.dart';
 class ImagePickerBox extends StatefulWidget {
   final String? imageUrl;
   final bool isUploading;
-  final Future<void> Function(Uint8List bytes, String fileName) onImageSelected;
+  final void Function(Uint8List bytes, String fileName) onImageSelected;
   final String label;
 
   const ImagePickerBox({
@@ -45,7 +45,7 @@ class _ImagePickerBoxState extends State<ImagePickerBox> {
       setState(() {
         _localBytes = bytes;
       });
-      await widget.onImageSelected(bytes, image.name);
+      widget.onImageSelected(bytes, image.name);
     }
   }
 

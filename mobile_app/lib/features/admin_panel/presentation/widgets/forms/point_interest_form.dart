@@ -38,6 +38,8 @@ class _PointInterestFormState extends State<PointInterestForm> {
   late final MapController _mapController;
   late String? _selectedCityId;
   bool _isUploading = false;
+  Uint8List? _pendingImageBytes;
+  String? _pendingImageName;
 
   LatLng? _selectedCoordinates;
 
@@ -94,6 +96,8 @@ class _PointInterestFormState extends State<PointInterestForm> {
 
     _nameController.text = widget.point?.name ?? '';
     _imageController.text = widget.point?.imageUrl ?? '';
+    _pendingImageBytes = null;
+    _pendingImageName = null;
     _qrController.text = widget.point?.qrCode ?? '';
     _activationRadiusController.text = (widget.point?.activationRadius ?? 20)
         .toString();
@@ -176,29 +180,11 @@ class _PointInterestFormState extends State<PointInterestForm> {
                 child: ImagePickerBox(
                   imageUrl: _imageController.text,
                   isUploading: _isUploading,
-                  onImageSelected: (bytes, name) async {
+                  onImageSelected: (bytes, name) {
                     setState(() {
-                      _isUploading = true;
+                      _pendingImageBytes = bytes;
+                      _pendingImageName = name;
                     });
-                    try {
-                      final url = await widget.onUploadImage(bytes, name);
-                      if (!mounted) return;
-                      setState(() {
-                        _imageController.text = url;
-                      });
-                    } catch (e) {
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text("Error al subir: $e"),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                    } finally {
-                      if (mounted) {
-                        setState(() => _isUploading = false);
-                      }
-                    }
                   },
                 ),
               ),
@@ -382,7 +368,7 @@ class _PointInterestFormState extends State<PointInterestForm> {
                       text: _isUploading ? 'SUBIENDO...' : 'GUARDAR PUNTO',
                       onPressed: _isUploading
                           ? null
-                          : () {
+                          : () async {
                               final error = _validate();
                               if (error != null) {
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -393,13 +379,15 @@ class _PointInterestFormState extends State<PointInterestForm> {
                                 );
                                 return;
                               }
+                              final imageUrl = await _uploadPendingImage();
+                              if (imageUrl == null) return;
 
                               widget.onSave(
                                 AdminPoiModel(
                                   id: widget.point?.id,
                                   name: _nameController.text.trim(),
                                   description: '',
-                                  imageUrl: _imageController.text.trim(),
+                                  imageUrl: imageUrl,
                                   qrCode: _qrController.text.trim(),
                                   activationRadius:
                                       int.tryParse(
@@ -514,6 +502,35 @@ class _PointInterestFormState extends State<PointInterestForm> {
   void _zoomMap(double zoomDelta) {
     final camera = _mapController.camera;
     _mapController.move(camera.center, camera.zoom + zoomDelta);
+  }
+
+  Future<String?> _uploadPendingImage() async {
+    final bytes = _pendingImageBytes;
+    final name = _pendingImageName;
+    if (bytes == null || name == null) return _imageController.text.trim();
+
+    setState(() => _isUploading = true);
+    try {
+      final imageUrl = await widget.onUploadImage(bytes, name);
+      if (!mounted) return null;
+
+      _imageController.text = imageUrl;
+      _pendingImageBytes = null;
+      _pendingImageName = null;
+      return imageUrl;
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Error al subir: $e"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return null;
+    } finally {
+      if (mounted) setState(() => _isUploading = false);
+    }
   }
 }
 

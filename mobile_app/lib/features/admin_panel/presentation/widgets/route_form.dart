@@ -40,6 +40,8 @@ class _RouteFormState extends State<RouteForm> {
   late List<String> _selectedPointIds;
   late bool _isActive;
   bool _isUploading = false;
+  Uint8List? _pendingImageBytes;
+  String? _pendingImageName;
 
   @override
   void initState() {
@@ -72,6 +74,8 @@ class _RouteFormState extends State<RouteForm> {
       _durationController.text = widget.route?.duration ?? '';
       _totalPointsController.text = widget.route?.totalPoints.toString() ?? '';
       _imageController.text = widget.route?.imageAsset ?? '';
+      _pendingImageBytes = null;
+      _pendingImageName = null;
       setState(() {
         _selectedCity = widget.route?.cityId;
         _selectedPointIds = List<String>.from(widget.route?.pointIds ?? []);
@@ -146,23 +150,11 @@ class _RouteFormState extends State<RouteForm> {
                         ImagePickerBox(
                           imageUrl: _imageController.text,
                           isUploading: _isUploading,
-                          onImageSelected: (bytes, name) async {
+                          onImageSelected: (bytes, name) {
                             setState(() {
-                              _isUploading = true;
+                              _pendingImageBytes = bytes;
+                              _pendingImageName = name;
                             });
-                            try {
-                              final url = await widget.onUploadImage(
-                                bytes,
-                                name,
-                              );
-                              setState(() {
-                                _imageController.text = url;
-                              });
-                            } catch (e) {
-                              _showMessage("Error al subir: $e");
-                            } finally {
-                              setState(() => _isUploading = false);
-                            }
                           },
                         ),
                         const SizedBox(height: 16),
@@ -290,7 +282,7 @@ class _RouteFormState extends State<RouteForm> {
                           : 'GUARDAR RUTA',
                       onPressed: _isUploading
                           ? null
-                          : () {
+                          : () async {
                               final error = _validate(
                                 _filteredPoints().map((p) => p.id!).toSet(),
                               );
@@ -298,6 +290,8 @@ class _RouteFormState extends State<RouteForm> {
                                 _showMessage(error);
                                 return;
                               }
+                              final imagePath = await _uploadPendingImage();
+                              if (imagePath == null) return;
 
                               widget.onSave(
                                 AdminRouteModel(
@@ -309,7 +303,7 @@ class _RouteFormState extends State<RouteForm> {
                                   duration: _durationController.text.trim(),
                                   cityId: _selectedCity ?? '',
                                   pointIds: _selectedPointIds.toSet().toList(),
-                                  imageAsset: _imageController.text.trim(),
+                                  imageAsset: imagePath,
                                   isActive: _isActive,
                                   totalPoints:
                                       int.tryParse(
@@ -410,5 +404,27 @@ class _RouteFormState extends State<RouteForm> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  Future<String?> _uploadPendingImage() async {
+    final bytes = _pendingImageBytes;
+    final name = _pendingImageName;
+    if (bytes == null || name == null) return _imageController.text.trim();
+
+    setState(() => _isUploading = true);
+    try {
+      final imagePath = await widget.onUploadImage(bytes, name);
+      if (!mounted) return null;
+
+      _imageController.text = imagePath;
+      _pendingImageBytes = null;
+      _pendingImageName = null;
+      return imagePath;
+    } catch (e) {
+      if (mounted) _showMessage("Error al subir: $e");
+      return null;
+    } finally {
+      if (mounted) setState(() => _isUploading = false);
+    }
   }
 }
