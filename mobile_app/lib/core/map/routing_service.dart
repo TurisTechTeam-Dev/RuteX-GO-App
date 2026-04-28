@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 
 class RoutingService {
-  static const _walkingProfiles = ['walking', 'foot'];
+  static const _walkingProfiles = ['foot'];
 
   Future<List<LatLng>> getRoute(LatLng start, LatLng end) async {
     final route = await getNavigationRoute(start, end);

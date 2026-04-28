@@ -12,6 +12,7 @@ import '../../quiz/quiz_route_progress.dart';
 
 class TripSimulationProvider extends ChangeNotifier {
   static const int _routeCompletionBonus = 10;
+  static const Duration _simulationStepDelay = Duration(milliseconds: 260);
 
   final MissionUseCases missionUseCases;
   final String routeId;
@@ -297,7 +298,7 @@ class TripSimulationProvider extends ChangeNotifier {
       _checkArrivalProximity(_currentPosition);
       _updateCurrentNavigationStep();
       notifyListeners();
-      await Future.delayed(const Duration(milliseconds: 90));
+      await Future.delayed(_simulationStepDelay);
     }
     if (_isSimulating && !_hasReachedDestination) {
       final target = _pointsOfInterest[_currentPoiIndex];
