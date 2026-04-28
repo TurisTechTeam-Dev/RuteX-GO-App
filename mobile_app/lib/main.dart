@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'app/navigation/app_routes.dart';
 import 'app/auth_wrapper.dart';
+import 'core/theme/app_theme.dart';
+import 'core/theme/theme_provider.dart';
 import 'firebase_options.dart';
 import 'injection_container.dart';
 
@@ -20,13 +22,14 @@ class RutexApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeMode = context.watch<ThemeProvider>().themeMode;
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'RutexGo',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeMode,
       onGenerateRoute: AppRoutes.onGenerateRoute,
       home: const AuthWrapper(),
     );

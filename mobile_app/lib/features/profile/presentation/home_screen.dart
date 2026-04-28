@@ -6,9 +6,11 @@ import '../../../app/navigation/app_routes.dart';
 import '../../../app/widgets/app_info_dialog.dart';
 import '../../../app/widgets/custom_drawer.dart';
 import '../../../app/widgets/top_app_bar.dart';
+import '../../../core/widgets/audio_guide/audio_guide.dart';
 import '../../auth/domain/usecases/auth_use_cases.dart';
 import '../domain/entities/home_data.dart';
 import '../domain/usecases/profile_use_cases.dart';
+import 'models/home_summary.dart';
 import 'widgets/home_content.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -39,6 +41,13 @@ class _HomeScreenState extends State<HomeScreen> {
     return context.read<ProfileUseCases>().getHomeData(user.uid);
   }
 
+  String _buildAudioGuideText(HomeData data) {
+    final summary = HomeSummary.fromHomeData(data);
+    final name = data.user.name.trim().isEmpty ? 'explorador' : data.user.name;
+
+    return 'Hola $name. Tu rango actual es ${summary.rankName}. Tienes ${summary.totalPoints} puntos y has completado ${summary.completedRoutes} rutas. Pulsa explorar para descubrir nuevas rutas culturales.';
+  }
+
   void _showInfoDialogIfNeeded() {
     if (!widget.showInfoOnStart || _infoDialogShown) {
       return;
@@ -58,17 +67,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final autoRead = MediaQuery.of(context).accessibleNavigation;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: const TopAppBar(),
       endDrawer: const CustomDrawer(),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.verdePrincipal,
-        onPressed: () {
-          Navigator.pushNamed(context, AppRoutes.citySelection);
-        },
-        child: const Icon(Icons.explore, color: Colors.white),
-      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       body: FutureBuilder<HomeData>(
         future: homeFuture,
         builder: (context, snapshot) {
@@ -109,7 +115,37 @@ class _HomeScreenState extends State<HomeScreen> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          return HomeContent(data: snapshot.data!);
+          final data = snapshot.data!;
+
+          return Stack(
+            children: [
+              HomeContent(data: data),
+              Positioned(
+                left: 16,
+                right: 16,
+                bottom: 16,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    AudioGuideWidget(
+                      text: _buildAudioGuideText(data),
+                      autoRead: autoRead,
+                      iconColor: colorScheme.primary,
+                    ),
+                    FloatingActionButton(
+                      heroTag: "fab_explorar",
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: colorScheme.onPrimary,
+                      onPressed: () {
+                        Navigator.pushNamed(context, AppRoutes.citySelection);
+                      },
+                      child: const Icon(Icons.explore),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
         },
       ),
     );

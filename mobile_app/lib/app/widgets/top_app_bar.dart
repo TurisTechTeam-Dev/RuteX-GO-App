@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../core/constants/app_colors.dart';
 import '../navigation/app_routes.dart';
 
 class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -10,14 +9,20 @@ class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final logo = theme.brightness == Brightness.dark
+        ? 'assets/Logo_Color_Rutexgo.png'
+        : 'assets/Logo_Negro_Rutexgo.png';
+
     return AppBar(
       automaticallyImplyLeading: false,
-      backgroundColor: AppColors.blancoPuro,
+      backgroundColor: colorScheme.surface,
       elevation: 0,
       centerTitle: true,
       leading: showBack
           ? IconButton(
-              icon: const Icon(Icons.arrow_back, color: AppColors.negroTexto),
+              icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
               onPressed: () {
                 if (Navigator.of(context).canPop()) {
                   Navigator.of(context).pop();
@@ -30,23 +35,25 @@ class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
               },
             )
           : null,
-      title: Image.asset("assets/Logo_Negro_Rutexgo.png", height: 28),
+      title: Image.asset(logo, height: 28),
       actions: [
         Builder(
           builder: (context) {
             return IconButton(
-              icon: const Icon(Icons.menu, color: AppColors.negroTexto),
+              icon: Icon(Icons.menu, color: colorScheme.onSurface),
               onPressed: () => Scaffold.of(context).openEndDrawer(),
             );
           },
         ),
       ],
-      bottom: const PreferredSize(
-        preferredSize: Size.fromHeight(2),
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(2),
         child: SizedBox(
           width: double.infinity,
-          height: 2,
-          child: ColoredBox(color: AppColors.negroTexto),
+          height: 1,
+          child: ColoredBox(
+            color: colorScheme.onSurface.withValues(alpha: 0.2),
+          ),
         ),
       ),
     );

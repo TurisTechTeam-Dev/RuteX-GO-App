@@ -4,6 +4,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
+import 'core/theme/theme_provider.dart';
 import 'features/admin_panel/data/admin_remote_datasource.dart';
 import 'features/admin_panel/data/repositories/admin_repository_impl.dart';
 import 'features/admin_panel/domain/repositories/admin_repository.dart';
@@ -25,6 +26,7 @@ import 'features/routes/domain/usecases/routes_use_cases.dart';
 
 List<SingleChildWidget> buildAppProviders() {
   return [
+    ChangeNotifierProvider(create: (_) => ThemeProvider()),
     Provider<FirebaseAuth>.value(value: FirebaseAuth.instance),
     Provider<FirebaseFirestore>.value(value: FirebaseFirestore.instance),
     Provider<FirebaseStorage>.value(value: FirebaseStorage.instance),

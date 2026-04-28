@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../app/navigation/app_routes.dart';
+import '../../../core/theme/theme_selector_button.dart';
+import '../../../core/widgets/audio_guide/audio_guide.dart';
 import '../domain/usecases/auth_use_cases.dart';
 import 'widgets/auth_snack_bar.dart';
 import 'widgets/register_content.dart';
@@ -23,6 +25,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   bool _acceptedTerms = false;
   bool _isLoading = false;
+  String? _audioGuideMessage;
+
+  String get _defaultAudioGuideText =>
+      'Pantalla de registro. Escribe tu usuario, nombre, email y contrasena. Acepta los terminos y pulsa crear cuenta.';
 
   late final AuthUseCases _authUseCases;
 
@@ -55,6 +61,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
 
     if (!_acceptedTerms) {
+      _setAudioGuideMessage("Debes aceptar los terminos y condiciones.");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Debes aceptar los términos y condiciones."),
@@ -82,7 +89,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
       }
     } catch (e) {
       if (mounted) {
-        showAuthSnackBar(context, _registerErrorMessage(e));
+        final message = _registerErrorMessage(e);
+        _setAudioGuideMessage(message);
+        showAuthSnackBar(context, message);
       }
       debugPrint(e.toString());
     } finally {
@@ -104,6 +113,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() => _acceptedTerms = accepted);
   }
 
+  void _setAudioGuideMessage(String message) {
+    setState(() {
+      _audioGuideMessage = message.replaceAll("Exception: ", "");
+    });
+  }
+
   @override
   void dispose() {
     _usernameController.removeListener(_refreshFormState);
@@ -121,8 +136,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final autoRead = MediaQuery.of(context).accessibleNavigation;
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: const [ThemeSelectorButton()],
+      ),
       body: RegisterContent(
         formKey: _formKey,
         usernameController: _usernameController,
@@ -136,6 +159,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
         onAcceptedTermsChanged: _updateAcceptedTerms,
         onRegister: _handleRegister,
         onOpenLogin: () => Navigator.pop(context),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+      floatingActionButton: AudioGuideWidget(
+        text: _audioGuideMessage ?? _defaultAudioGuideText,
+        autoRead: autoRead,
       ),
     );
   }

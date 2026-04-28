@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../../core/constants/app_colors.dart';
+import '../../core/theme/theme_provider.dart';
+import '../../core/theme/theme_selector_button.dart';
 import '../navigation/app_routes.dart';
 import 'app_info_dialog.dart';
 import 'logout_dialog.dart';
@@ -10,23 +12,27 @@ class CustomDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final themeProvider = context.watch<ThemeProvider>();
+
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.50,
       child: Drawer(
         child: SafeArea(
           child: Column(
             children: [
-              const DrawerHeader(
-                decoration: BoxDecoration(color: AppColors.verdePrincipal),
+              DrawerHeader(
+                decoration: BoxDecoration(color: colorScheme.primary),
                 child: SizedBox(
                   width: double.infinity,
                   child: Align(
                     alignment: Alignment.center,
                     child: Text(
-                      'Menú',
+                      'Menu',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: AppColors.blancoTarjeta,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: colorScheme.onPrimary,
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
@@ -55,13 +61,19 @@ class CustomDrawer extends StatelessWidget {
                   );
                 },
               ),
+              ListTile(
+                leading: const Icon(Icons.color_lens_outlined),
+                title: const Text('Tema'),
+                subtitle: Text(_themeLabel(themeProvider.themeMode)),
+                onTap: () => showThemeSelector(context),
+              ),
               const Spacer(),
               const Divider(),
               ListTile(
-                leading: const Icon(Icons.exit_to_app, color: Colors.red),
-                title: const Text(
-                  'Cerrar sesión',
-                  style: TextStyle(color: Colors.red),
+                leading: Icon(Icons.exit_to_app, color: colorScheme.error),
+                title: Text(
+                  'Cerrar sesion',
+                  style: TextStyle(color: colorScheme.error),
                 ),
                 onTap: () {
                   showDialog(
@@ -81,5 +93,16 @@ class CustomDrawer extends StatelessWidget {
   void _goToRoot(BuildContext context, String routeName) {
     Navigator.pop(context);
     Navigator.pushNamedAndRemoveUntil(context, routeName, (route) => false);
+  }
+
+  String _themeLabel(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.light:
+        return 'Claro';
+      case ThemeMode.dark:
+        return 'Oscuro';
+      case ThemeMode.system:
+        return 'Sistema';
+    }
   }
 }

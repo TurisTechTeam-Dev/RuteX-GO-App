@@ -4,7 +4,9 @@ import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../app/navigation/app_routes.dart';
+import '../../../core/theme/theme_selector_button.dart';
 import '../../../core/utils/validators.dart';
+import '../../../core/widgets/audio_guide/audio_guide.dart';
 import '../data/repositories/auth_repository_impl.dart';
 import '../domain/usecases/auth_use_cases.dart';
 import 'widgets/auth_snack_bar.dart';
@@ -25,6 +27,10 @@ class _LoginScreenState extends State<LoginScreen> {
   late final AuthUseCases _authUseCases;
 
   bool _isLoading = false;
+  String? _audioGuideMessage;
+
+  String get _defaultAudioGuideText =>
+      'Pantalla de inicio de sesion. Introduce tu email y contrasena. Puedes iniciar sesion, continuar con Google, recuperar tu contrasena o registrarte si aun no tienes cuenta.';
 
   @override
   void initState() {
@@ -46,6 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
       await _navigateAfterLogin(user.uid, user.email);
     } catch (e) {
       if (!mounted) return;
+      _setAudioGuideMessage(e.toString());
       showAuthSnackBar(context, e.toString(), backgroundColor: AppColors.error);
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -62,6 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     } catch (e) {
       if (!mounted) return;
+      _setAudioGuideMessage(e.toString());
       showAuthSnackBar(context, e.toString(), backgroundColor: AppColors.error);
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -85,6 +93,9 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _recoverPassword() async {
     final emailError = Validators.validateEmail(_emailController.text);
     if (emailError != null) {
+      _setAudioGuideMessage(
+        "Introduce un email valido arriba para recuperar tu contrasena",
+      );
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -101,6 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await _authUseCases.recoverPassword(_emailController.text.trim());
       if (mounted) {
+        _setAudioGuideMessage("Correo de recuperacion enviado.");
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Correo de recuperación enviado."),
@@ -110,6 +122,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       if (mounted) {
+        _setAudioGuideMessage(e.toString());
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(e.toString()),
@@ -130,6 +143,12 @@ class _LoginScreenState extends State<LoginScreen> {
     _passwordController.clear();
   }
 
+  void _setAudioGuideMessage(String message) {
+    setState(() {
+      _audioGuideMessage = message.replaceAll("Exception: ", "");
+    });
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -139,9 +158,16 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final autoRead = MediaQuery.of(context).accessibleNavigation;
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: const [ThemeSelectorButton()],
+      ),
       body: LoginContent(
         formKey: _formKey,
         emailController: _emailController,
@@ -151,6 +177,11 @@ class _LoginScreenState extends State<LoginScreen> {
         onGoogleLogin: _handleGoogleLogin,
         onRecoverPassword: _recoverPassword,
         onOpenRegister: _openRegister,
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+      floatingActionButton: AudioGuideWidget(
+        text: _audioGuideMessage ?? _defaultAudioGuideText,
+        autoRead: autoRead,
       ),
     );
   }

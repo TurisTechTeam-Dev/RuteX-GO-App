@@ -94,7 +94,7 @@ class _InfoBullet extends StatelessWidget {
           child: RichText(
             text: TextSpan(
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.negroTexto,
+                color: Theme.of(context).colorScheme.onSurface,
                 height: 1.3,
               ),
               children: [
