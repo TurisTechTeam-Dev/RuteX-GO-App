@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/admin_navbar.dart';
-import 'package:mobile_app/features/admin_panel/data/admin_remote_datasource.dart';
 import 'package:mobile_app/features/admin_panel/data/models/admin_models.dart';
+import 'package:mobile_app/features/admin_panel/domain/usecases/admin_use_cases.dart';
 import 'package:mobile_app/features/admin_panel/presentation/models/admin_editable_item.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/components/admin_delete_confirmation.dart';
 
 class AdminFlatList extends StatelessWidget {
   final AdminNavTab currentTab;
+  final AdminUseCases adminUseCases;
   final ValueChanged<AdminEditableItem?> onItemSelected;
 
   const AdminFlatList({
     super.key,
     required this.currentTab,
+    required this.adminUseCases,
     required this.onItemSelected,
   });
 
   @override
   Widget build(BuildContext context) {
-    final dataSource = AdminRemoteDataSource();
-
     return Column(
       children: [
         Padding(
@@ -41,7 +41,7 @@ class AdminFlatList extends StatelessWidget {
 
         Expanded(
           child: StreamBuilder(
-            stream: _getStream(dataSource),
+            stream: _getStream(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
                 return Center(child: Text("Error: ${snapshot.error}"));
@@ -90,7 +90,7 @@ class AdminFlatList extends StatelessWidget {
                       onPressed: () => showAdminDeleteConfirmation(
                         context: context,
                         itemName: displayText,
-                        onConfirm: () => _deleteItem(dataSource, item),
+                        onConfirm: () => _deleteItem(item),
                       ),
                     ),
                     onTap: () => onItemSelected(item),
@@ -104,16 +104,16 @@ class AdminFlatList extends StatelessWidget {
     );
   }
 
-  Stream<List<Object>> _getStream(AdminRemoteDataSource ds) {
+  Stream<List<Object>> _getStream() {
     switch (currentTab) {
       case AdminNavTab.cities:
-        return ds.watchCities();
+        return adminUseCases.watchCities();
       case AdminNavTab.routes:
-        return ds.watchRoutes();
+        return adminUseCases.watchRoutes();
       case AdminNavTab.pointsOfInterest:
-        return ds.watchPois();
+        return adminUseCases.watchPois();
       case AdminNavTab.missions:
-        return ds.watchMissions();
+        return adminUseCases.watchMissions();
     }
   }
 
@@ -133,16 +133,16 @@ class AdminFlatList extends StatelessWidget {
     return const <AdminEditableItem>[];
   }
 
-  void _deleteItem(AdminRemoteDataSource dataSource, AdminEditableItem item) {
+  void _deleteItem(AdminEditableItem item) {
     switch (item) {
       case AdminCityItem(:final city):
-        dataSource.deleteCity(city.id!);
+        adminUseCases.deleteCity(city.id!);
       case AdminRouteItem(:final route):
-        dataSource.deleteRoute(route.id!);
+        adminUseCases.deleteRoute(route.id!);
       case AdminPoiItem(:final point):
-        dataSource.deletePoi(point.id!);
+        adminUseCases.deletePoi(point.id!);
       case AdminMissionItem(:final mission):
-        dataSource.deleteMission(mission.id!);
+        adminUseCases.deleteMission(mission.id!);
     }
   }
 

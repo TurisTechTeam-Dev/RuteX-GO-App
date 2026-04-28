@@ -1,8 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
+import 'features/admin_panel/data/admin_remote_datasource.dart';
+import 'features/admin_panel/data/repositories/admin_repository_impl.dart';
+import 'features/admin_panel/domain/repositories/admin_repository.dart';
+import 'features/admin_panel/domain/usecases/admin_use_cases.dart';
 import 'features/auth/data/repositories/auth_repository_impl.dart';
 import 'features/auth/domain/repositories/auth_repository.dart';
 import 'features/auth/domain/usecases/auth_use_cases.dart';
@@ -22,6 +27,7 @@ List<SingleChildWidget> buildAppProviders() {
   return [
     Provider<FirebaseAuth>.value(value: FirebaseAuth.instance),
     Provider<FirebaseFirestore>.value(value: FirebaseFirestore.instance),
+    Provider<FirebaseStorage>.value(value: FirebaseStorage.instance),
     ProxyProvider2<FirebaseAuth, FirebaseFirestore, AuthRepository>(
       update: (context, firebaseAuth, firestore, previous) =>
           AuthRepositoryImpl(firebaseAuth, firestore),
@@ -43,6 +49,14 @@ List<SingleChildWidget> buildAppProviders() {
         remoteDataSource: ProfileRemoteDataSource(firestore),
       ),
     ),
+    ProxyProvider2<FirebaseFirestore, FirebaseStorage, AdminRepository>(
+      update: (context, firestore, storage, previous) => AdminRepositoryImpl(
+        remoteDataSource: AdminRemoteDataSource(
+          firestore: firestore,
+          storage: storage,
+        ),
+      ),
+    ),
     ProxyProvider<AuthRepository, AuthUseCases>(
       update: (context, repository, previous) => AuthUseCases(repository),
     ),
@@ -54,6 +68,9 @@ List<SingleChildWidget> buildAppProviders() {
     ),
     ProxyProvider<ProfileRepository, ProfileUseCases>(
       update: (context, repository, previous) => ProfileUseCases(repository),
+    ),
+    ProxyProvider<AdminRepository, AdminUseCases>(
+      update: (context, repository, previous) => AdminUseCases(repository),
     ),
   ];
 }

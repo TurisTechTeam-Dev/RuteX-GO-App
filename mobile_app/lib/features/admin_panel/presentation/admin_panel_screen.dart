@@ -4,8 +4,9 @@ import 'package:mobile_app/features/admin_panel/presentation/widgets/components/
 import 'package:mobile_app/features/admin_panel/presentation/widgets/components/admin_map_explorer.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/components/admin_sidebar.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/admin_navbar.dart';
-import 'package:mobile_app/features/admin_panel/data/admin_remote_datasource.dart';
+import 'package:mobile_app/features/admin_panel/domain/usecases/admin_use_cases.dart';
 import 'package:mobile_app/features/admin_panel/presentation/models/admin_editable_item.dart';
+import 'package:provider/provider.dart';
 
 class AdminPanelScreen extends StatefulWidget {
   const AdminPanelScreen({super.key});
@@ -15,7 +16,6 @@ class AdminPanelScreen extends StatefulWidget {
 }
 
 class _AdminPanelScreenState extends State<AdminPanelScreen> {
-  final AdminRemoteDataSource _dataSource = AdminRemoteDataSource();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   AdminNavTab? _currentTab;
@@ -24,6 +24,8 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final adminUseCases = context.read<AdminUseCases>();
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final isCompact = constraints.maxWidth < 900;
@@ -36,6 +38,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                   child: AdminSidebar(
                     key: ValueKey(_currentTab),
                     currentTab: _currentTab!,
+                    adminUseCases: adminUseCases,
                     onItemSelected: (item) {
                       Navigator.of(context).maybePop();
                       _selectItem(item);
@@ -59,7 +62,9 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                 },
               ),
               Expanded(
-                child: isCompact ? _buildCompactBody() : _buildDesktopBody(),
+                child: isCompact
+                    ? _buildCompactBody(adminUseCases)
+                    : _buildDesktopBody(adminUseCases),
               ),
               if (!isCompact) const AdminFooter(),
             ],
@@ -69,7 +74,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
     );
   }
 
-  Widget _buildDesktopBody() {
+  Widget _buildDesktopBody(AdminUseCases adminUseCases) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -82,32 +87,39 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
             child: AdminSidebar(
               key: ValueKey(_currentTab),
               currentTab: _currentTab!,
+              adminUseCases: adminUseCases,
               onItemSelected: _selectItem,
             ),
           ),
         Expanded(
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
-            child: _buildRightPanel(isCompact: false),
+            child: _buildRightPanel(
+              isCompact: false,
+              adminUseCases: adminUseCases,
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildCompactBody() {
+  Widget _buildCompactBody(AdminUseCases adminUseCases) {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
-      child: _buildRightPanel(isCompact: true),
+      child: _buildRightPanel(isCompact: true, adminUseCases: adminUseCases),
     );
   }
 
-  Widget _buildRightPanel({required bool isCompact}) {
+  Widget _buildRightPanel({
+    required bool isCompact,
+    required AdminUseCases adminUseCases,
+  }) {
     final tab = _currentTab;
     if (tab == null) {
       return Container(
         key: const ValueKey('welcome_map'),
-        child: AdminMapExplorer(dataSource: _dataSource),
+        child: const AdminMapExplorer(),
       );
     }
 
@@ -139,7 +151,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                     child: AdminFormRouter(
                       tab: tab,
                       itemToEdit: _itemToEdit,
-                      dataSource: _dataSource,
+                      adminUseCases: adminUseCases,
                       onSave: (saveItem) async {
                         try {
                           await saveItem();

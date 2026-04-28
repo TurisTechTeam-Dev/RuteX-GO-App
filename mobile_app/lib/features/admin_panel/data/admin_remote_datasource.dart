@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'dart:typed_data'; // Para Uint8List
+import 'dart:typed_data';
 
 import '../../../core/constants/firestore_contract.dart';
 import 'models/admin_models.dart';
@@ -28,7 +28,7 @@ class AdminRemoteDataSource {
         // Check whether the file already exists before choosing its final name.
         await ref.getMetadata();
 
-        // Si no lanza excepciÃ³n, es que ya existe. Generamos un nombre Ãºnico con timestamp.
+        // If metadata exists, generate a unique timestamped name.
         final timestamp = DateTime.now().millisecondsSinceEpoch;
         final dotIndex = fileName.lastIndexOf('.');
         final nameOnly = dotIndex != -1
@@ -39,11 +39,9 @@ class AdminRemoteDataSource {
         final uniqueFileName = '${nameOnly}_$timestamp$extension';
         ref = _storage.ref().child(folder).child(uniqueFileName);
       } catch (e) {
-        // Si llegamos aquÃ­ (probablemente error object-not-found),
-        // significa que el nombre original estÃ¡ libre. Lo usamos tal cual.
+        // The original name is available when metadata lookup fails.
       }
 
-      // En Web y mÃ³vil, putData funciona perfectamente con bytes
       final uploadTask = ref.putData(fileBytes);
 
       final snapshot = await uploadTask;

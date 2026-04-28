@@ -2,24 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/admin_navbar.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/components/hierarchical_city_selector.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/admin_flat_list.dart';
-import 'package:mobile_app/features/admin_panel/data/admin_remote_datasource.dart';
 import 'package:mobile_app/features/admin_panel/data/models/admin_models.dart';
+import 'package:mobile_app/features/admin_panel/domain/usecases/admin_use_cases.dart';
 import 'package:mobile_app/features/admin_panel/presentation/models/admin_editable_item.dart';
 
 class AdminSidebar extends StatelessWidget {
   final AdminNavTab currentTab;
+  final AdminUseCases adminUseCases;
   final ValueChanged<AdminEditableItem?> onItemSelected;
 
   const AdminSidebar({
     super.key,
     required this.currentTab,
+    required this.adminUseCases,
     required this.onItemSelected,
   });
 
   @override
   Widget build(BuildContext context) {
-    final dataSource = AdminRemoteDataSource();
-
     return DefaultTabController(
       length: 2,
       child: Column(
@@ -37,7 +37,7 @@ class AdminSidebar extends StatelessWidget {
             child: TabBarView(
               children: [
                 StreamBuilder<List<AdminCityModel>>(
-                  stream: dataSource.watchCities(),
+                  stream: adminUseCases.watchCities(),
                   builder: (context, citySnapshot) {
                     if (citySnapshot.hasError) {
                       return Center(
@@ -45,7 +45,7 @@ class AdminSidebar extends StatelessWidget {
                       );
                     }
                     return StreamBuilder<List<AdminRouteModel>>(
-                      stream: dataSource.watchRoutes(),
+                      stream: adminUseCases.watchRoutes(),
                       builder: (context, routeSnapshot) {
                         if (routeSnapshot.hasError) {
                           return Center(
@@ -53,7 +53,7 @@ class AdminSidebar extends StatelessWidget {
                           );
                         }
                         return StreamBuilder<List<AdminPoiModel>>(
-                          stream: dataSource.watchPois(),
+                          stream: adminUseCases.watchPois(),
                           builder: (context, pointSnapshot) {
                             if (pointSnapshot.hasError) {
                               return Center(
@@ -64,7 +64,7 @@ class AdminSidebar extends StatelessWidget {
                             }
 
                             return StreamBuilder<List<AdminMissionModel>>(
-                              stream: dataSource.watchMissions(),
+                              stream: adminUseCases.watchMissions(),
                               builder: (context, missionSnapshot) {
                                 if (missionSnapshot.hasError) {
                                   return Center(
@@ -97,13 +97,13 @@ class AdminSidebar extends StatelessWidget {
                                   onEditMission: (mission) =>
                                       onItemSelected(AdminMissionItem(mission)),
                                   onDeleteCity: (item) =>
-                                      dataSource.deleteCity(item.id!),
+                                      adminUseCases.deleteCity(item.id!),
                                   onDeleteRoute: (item) =>
-                                      dataSource.deleteRoute(item.id!),
+                                      adminUseCases.deleteRoute(item.id!),
                                   onDeletePoi: (item) =>
-                                      dataSource.deletePoi(item.id!),
+                                      adminUseCases.deletePoi(item.id!),
                                   onDeleteMission: (item) =>
-                                      dataSource.deleteMission(item.id!),
+                                      adminUseCases.deleteMission(item.id!),
                                   onNewCity: () => onItemSelected(null),
                                 );
                               },
@@ -117,6 +117,7 @@ class AdminSidebar extends StatelessWidget {
 
                 AdminFlatList(
                   currentTab: currentTab,
+                  adminUseCases: adminUseCases,
                   onItemSelected: onItemSelected,
                 ),
               ],

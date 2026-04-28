@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:typed_data';
 
 import 'package:mobile_app/features/admin_panel/data/models/admin_models.dart';
-import 'package:mobile_app/features/admin_panel/data/admin_remote_datasource.dart';
+import 'package:mobile_app/features/admin_panel/domain/usecases/admin_use_cases.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/admin_navbar.dart';
 
 import 'package:mobile_app/features/admin_panel/presentation/widgets/route_form.dart';
@@ -14,7 +14,7 @@ import 'package:mobile_app/features/admin_panel/presentation/models/admin_editab
 class AdminFormRouter extends StatelessWidget {
   final AdminNavTab tab;
   final AdminEditableItem? itemToEdit;
-  final AdminRemoteDataSource dataSource;
+  final AdminUseCases adminUseCases;
   final Future<void> Function(Future<void> Function()) onSave;
   final VoidCallback onResetSelection;
 
@@ -22,7 +22,7 @@ class AdminFormRouter extends StatelessWidget {
     super.key,
     required this.tab,
     required this.itemToEdit,
-    required this.dataSource,
+    required this.adminUseCases,
     required this.onSave,
     required this.onResetSelection,
   });
@@ -39,10 +39,14 @@ class AdminFormRouter extends StatelessWidget {
           city: itemToEdit is AdminCityItem
               ? (itemToEdit as AdminCityItem).city
               : null,
-          onSave: (city) => onSave(() => dataSource.saveCity(city)),
+          onSave: (city) => onSave(() => adminUseCases.saveCity(city)),
           onCancel: onResetSelection,
           onUploadImage: (Uint8List bytes, String name) =>
-              dataSource.uploadFile(bytes, 'Contenido/Ciudades', name),
+              adminUseCases.uploadFile(
+                fileBytes: bytes,
+                folder: 'Contenido/Ciudades',
+                fileName: name,
+              ),
         );
       case AdminNavTab.routes:
         return _buildRouteFormWithData(uniqueKey);
@@ -56,13 +60,13 @@ class AdminFormRouter extends StatelessWidget {
   // Routes form
   Widget _buildRouteFormWithData(Key key) {
     return StreamBuilder<List<AdminCityModel>>(
-      stream: dataSource.watchCities(),
+      stream: adminUseCases.watchCities(),
       builder: (context, citySnapshot) {
         return StreamBuilder<List<AdminPoiModel>>(
-          stream: dataSource.watchPois(),
+          stream: adminUseCases.watchPois(),
           builder: (context, pointSnapshot) {
             return StreamBuilder<List<AdminMissionModel>>(
-              stream: dataSource.watchMissions(),
+              stream: adminUseCases.watchMissions(),
               builder: (context, missionSnapshot) {
                 if (!citySnapshot.hasData ||
                     !pointSnapshot.hasData ||
@@ -77,9 +81,14 @@ class AdminFormRouter extends StatelessWidget {
                   availableCities: citySnapshot.data!,
                   availablePoints: pointSnapshot.data!,
                   availableMissions: missionSnapshot.data!,
-                  onSave: (route) => onSave(() => dataSource.saveRoute(route)),
+                  onSave: (route) =>
+                      onSave(() => adminUseCases.saveRoute(route)),
                   onUploadImage: (Uint8List bytes, String name) =>
-                      dataSource.uploadFile(bytes, 'Contenido/Rutas', name),
+                      adminUseCases.uploadFile(
+                        fileBytes: bytes,
+                        folder: 'Contenido/Rutas',
+                        fileName: name,
+                      ),
                 );
               },
             );
@@ -92,7 +101,7 @@ class AdminFormRouter extends StatelessWidget {
   // --- 3. FORMULARIO DE PUNTOS DE INTERÉS ---
   Widget _buildPointFormWithData(Key key) {
     return StreamBuilder<List<AdminCityModel>>(
-      stream: dataSource.watchCities(),
+      stream: adminUseCases.watchCities(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
@@ -104,9 +113,13 @@ class AdminFormRouter extends StatelessWidget {
               ? (itemToEdit as AdminPoiItem).point
               : null,
           cities: snapshot.data!,
-          onSave: (point) => onSave(() => dataSource.savePoi(point)),
+          onSave: (point) => onSave(() => adminUseCases.savePoi(point)),
           onUploadImage: (Uint8List bytes, String name) =>
-              dataSource.uploadFile(bytes, 'Contenido/Puntos de Interes', name),
+              adminUseCases.uploadFile(
+                fileBytes: bytes,
+                folder: 'Contenido/Puntos de Interes',
+                fileName: name,
+              ),
         );
       },
     );
@@ -115,16 +128,16 @@ class AdminFormRouter extends StatelessWidget {
   // Missions form
   Widget _buildMissionFormWithData(Key key) {
     return StreamBuilder<List<AdminCityModel>>(
-      stream: dataSource.watchCities(),
+      stream: adminUseCases.watchCities(),
       builder: (context, citySnapshot) {
         return StreamBuilder<List<AdminPoiModel>>(
-          stream: dataSource.watchPois(),
+          stream: adminUseCases.watchPois(),
           builder: (context, pointSnapshot) {
             return StreamBuilder<List<AdminRouteModel>>(
-              stream: dataSource.watchRoutes(),
+              stream: adminUseCases.watchRoutes(),
               builder: (context, routeSnapshot) {
                 return StreamBuilder<List<AdminMissionModel>>(
-                  stream: dataSource.watchMissions(),
+                  stream: adminUseCases.watchMissions(),
                   builder: (context, missionSnapshot) {
                     if (!citySnapshot.hasData ||
                         !pointSnapshot.hasData ||
@@ -143,7 +156,7 @@ class AdminFormRouter extends StatelessWidget {
                       cities: citySnapshot.data!,
                       routes: routeSnapshot.data!,
                       onSave: (mission) =>
-                          onSave(() => dataSource.saveMission(mission)),
+                          onSave(() => adminUseCases.saveMission(mission)),
                     );
                   },
                 );
