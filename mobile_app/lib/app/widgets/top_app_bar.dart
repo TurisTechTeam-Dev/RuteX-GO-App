@@ -19,7 +19,7 @@ class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
         ? theme.colorScheme.onSurface
         : AppColors.negroTexto;
     final logo = isDark
-        ? 'assets/Logo_Color_Rutexgo.png'
+        ? 'assets/logos finales rutexgo blanco1.1.png'
         : 'assets/Logo_Negro_Rutexgo.png';
 
     return AppBar(
