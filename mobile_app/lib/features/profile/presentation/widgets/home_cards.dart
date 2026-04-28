@@ -168,11 +168,20 @@ class HomeStatsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Rutas completadas: $completedRoutes"),
+          Text(
+            "Rutas completadas: $completedRoutes",
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 6),
-          Text("Misiones completadas: $completedMissions/$totalMissions"),
+          Text(
+            "Misiones completadas: $completedMissions/$totalMissions",
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 6),
-          Text("Puntos totales: $totalPoints"),
+          Text(
+            "Puntos totales: $totalPoints",
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
         ],
       ),
     );

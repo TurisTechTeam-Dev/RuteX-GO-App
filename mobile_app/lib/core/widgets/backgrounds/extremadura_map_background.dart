@@ -9,11 +9,17 @@ class ExtremaduraMapBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.blancoPuro,
+        color: isDark ? AppColors.negroFondo : AppColors.blancoPuro,
         image: DecorationImage(
-          image: const AssetImage('assets/Mapa_fondo_Extremadura.png'),
+          image: AssetImage(
+            isDark
+                ? 'assets/Mapa_fondo_Extremadura.png'
+                : 'assets/Mapa_Fondo_Extremadura.jpeg',
+          ),
           opacity: opacity,
           fit: BoxFit.contain,
         ),

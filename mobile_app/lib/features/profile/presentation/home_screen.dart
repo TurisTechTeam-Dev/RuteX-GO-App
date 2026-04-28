@@ -73,12 +73,37 @@ class _HomeScreenState extends State<HomeScreen> {
       extendBodyBehindAppBar: true,
       appBar: const TopAppBar(),
       endDrawer: const CustomDrawer(),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.verdePrincipal,
-        onPressed: () {
-          Navigator.pushNamed(context, AppRoutes.citySelection);
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: FutureBuilder<HomeData>(
+        future: homeFuture,
+        builder: (context, snapshot) {
+          final data = snapshot.data;
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (data != null)
+                  AudioGuideWidget(
+                    text: _buildAudioGuideText(data),
+                    autoRead: autoRead,
+                    iconColor: AppColors.verdePrincipal,
+                  )
+                else
+                  const SizedBox(width: 56, height: 56),
+                FloatingActionButton(
+                  heroTag: "fab_explorar",
+                  backgroundColor: AppColors.verdePrincipal,
+                  onPressed: () {
+                    Navigator.pushNamed(context, AppRoutes.citySelection);
+                  },
+                  child: const Icon(Icons.explore, color: Colors.white),
+                ),
+              ],
+            ),
+          );
         },
-        child: const Icon(Icons.explore, color: Colors.white),
       ),
       body: FutureBuilder<HomeData>(
         future: homeFuture,
@@ -122,20 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           final data = snapshot.data!;
 
-          return Stack(
-            children: [
-              HomeContent(data: data),
-              Positioned(
-                left: 16,
-                bottom: 16,
-                child: AudioGuideWidget(
-                  text: _buildAudioGuideText(data),
-                  autoRead: autoRead,
-                  iconColor: AppColors.verdePrincipal,
-                ),
-              ),
-            ],
-          );
+          return HomeContent(data: data);
         },
       ),
     );
