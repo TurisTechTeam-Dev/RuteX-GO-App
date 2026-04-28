@@ -15,11 +15,7 @@ class ExtremaduraMapBackground extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? AppColors.negroFondo : AppColors.blancoPuro,
         image: DecorationImage(
-          image: AssetImage(
-            isDark
-                ? 'assets/Mapa_fondo_Extremadura.png'
-                : 'assets/Mapa_Fondo_Extremadura.jpeg',
-          ),
+          image: const AssetImage('assets/Mapa_fondo_Extremadura.png'),
           opacity: opacity,
           fit: BoxFit.contain,
         ),
