@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
@@ -40,17 +41,13 @@ class StorageAwareImage extends StatelessWidget {
     }
 
     if (_isHttpUrl(normalizedSource)) {
-      return Image.network(
-        normalizedSource,
+      return _CachedStorageImage(
+        imageUrl: normalizedSource,
         width: width,
         height: height,
         fit: fit,
-        webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return placeholder ?? const _DefaultLoadingState();
-        },
-        errorBuilder: (context, error, stackTrace) => fallback,
+        placeholder: placeholder,
+        fallback: fallback,
       );
     }
 
@@ -66,17 +63,13 @@ class StorageAwareImage extends StatelessWidget {
           return fallback;
         }
 
-        return Image.network(
-          resolvedUrl,
+        return _CachedStorageImage(
+          imageUrl: resolvedUrl,
           width: width,
           height: height,
           fit: fit,
-          webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return placeholder ?? const _DefaultLoadingState();
-          },
-          errorBuilder: (context, error, stackTrace) => fallback,
+          placeholder: placeholder,
+          fallback: fallback,
         );
       },
     );
@@ -91,12 +84,42 @@ class StorageAwareImage extends StatelessWidget {
   }
 }
 
+class _CachedStorageImage extends StatelessWidget {
+  final String imageUrl;
+  final BoxFit fit;
+  final Widget fallback;
+  final Widget? placeholder;
+  final double? width;
+  final double? height;
+
+  const _CachedStorageImage({
+    required this.imageUrl,
+    required this.fallback,
+    required this.fit,
+    this.placeholder,
+    this.width,
+    this.height,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CachedNetworkImage(
+      imageUrl: imageUrl,
+      width: width,
+      height: height,
+      fit: fit,
+      placeholder: (context, url) => placeholder ?? const _DefaultLoadingState(),
+      errorWidget: (context, url, error) => fallback,
+    );
+  }
+}
+
 class StorageImageUrlCache {
   static final Map<String, Future<String?>> _pending = {};
   static final Map<String, String?> _resolved = {};
 
   static Future<String?> resolve(String value) {
-    if (_resolved[value] != null) {
+    if (_resolved.containsKey(value)) {
       return Future.value(_resolved[value]);
     }
 
@@ -121,10 +144,10 @@ class StorageImageUrlCache {
                     .refFromURL(candidate)
                     .getDownloadURL()
               : await FirebaseStorage.instance.ref(candidate).getDownloadURL();
-          final resolved = _withCacheBuster(resolvedUrl);
-          _resolved[value] = resolved;
+
+          _resolved[value] = resolvedUrl;
           debugPrint('Storage preview resolved: "$candidate"');
-          return resolved;
+          return resolvedUrl;
         } catch (error) {
           debugPrint('Storage preview failed for "$candidate": $error');
           continue;
@@ -132,6 +155,7 @@ class StorageImageUrlCache {
       }
 
       debugPrint('Storage preview unresolved for "$value"');
+      _resolved[value] = null;
       return null;
     } finally {
       _pending.remove(value);
@@ -153,7 +177,7 @@ class StorageImageUrlCache {
       'Contenido/Ciudades/$value',
       'Contenido/Rutas/$value',
       'Contenido/Puntos de Interes/$value',
-      'Contenido/Puntos de Interés/$value',
+      'Contenido/Puntos de Inter\u00E9s/$value',
     ];
 
     return baseCandidates.expand(_withImageExtensionFallbacks).toSet().toList();
@@ -165,13 +189,7 @@ class StorageImageUrlCache {
     final hasExtension = dotIndex > slashIndex;
 
     if (!hasExtension) {
-      return [
-        path,
-        '$path.jpg',
-        '$path.jpeg',
-        '$path.png',
-        '$path.webp',
-      ];
+      return [path, '$path.jpg', '$path.jpeg', '$path.png', '$path.webp'];
     }
 
     final basePath = path.substring(0, dotIndex);
@@ -182,11 +200,6 @@ class StorageImageUrlCache {
       '$basePath.png',
       '$basePath.webp',
     ];
-  }
-
-  static String _withCacheBuster(String url) {
-    final separator = url.contains('?') ? '&' : '?';
-    return '$url${separator}preview=${DateTime.now().millisecondsSinceEpoch}';
   }
 }
 
