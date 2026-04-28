@@ -74,7 +74,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
 
       if (mounted) {
-        Navigator.pushReplacementNamed(context, AppRoutes.home);
+        Navigator.pushReplacementNamed(
+          context,
+          AppRoutes.home,
+          arguments: const {AppRoutes.showInfoOnHomeStartArg: true},
+        );
       }
     } catch (e) {
       if (mounted) {

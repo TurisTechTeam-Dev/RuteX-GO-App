@@ -7,4 +7,5 @@ abstract class RoutesRepository {
   Stream<List<TouristRoute>> getRoutesByCity(String cityId);
   Stream<List<TouristRoute>> getRoutesByCityKeys(Set<String> cityKeys);
   Future<Set<String>> getPointIdsWithMission(List<String> pointIds);
+  Future<Map<String, String>> getPointNamesByIds(List<String> pointIds);
 }

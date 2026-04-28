@@ -66,6 +66,11 @@ class _FakeRoutesRepository implements RoutesRepository {
   }
 
   @override
+  Future<Map<String, String>> getPointNamesByIds(List<String> pointIds) async {
+    return const <String, String>{};
+  }
+
+  @override
   Stream<List<City>> getCities() {
     throw UnimplementedError();
   }

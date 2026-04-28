@@ -34,6 +34,7 @@ class AppRoutes {
   static const String citySelection = '/city_selection';
   static const String routeSelection = '/route_selection';
   static const String adminPanel = '/admin_panel';
+  static const String showInfoOnHomeStartArg = 'showInfoOnStart';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -76,7 +77,10 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const RegisterScreen());
 
       case home:
-        return MaterialPageRoute(builder: (_) => const HomeScreen());
+        final showInfoOnStart = _showInfoOnStart(settings.arguments);
+        return MaterialPageRoute(
+          builder: (_) => HomeScreen(showInfoOnStart: showInfoOnStart),
+        );
 
       case profile:
         return MaterialPageRoute(builder: (_) => const ProfileScreen());
@@ -111,5 +115,13 @@ class AppRoutes {
           ),
         );
     }
+  }
+
+  static bool _showInfoOnStart(Object? arguments) {
+    if (arguments is Map) {
+      return arguments[showInfoOnHomeStartArg] == true;
+    }
+
+    return false;
   }
 }

@@ -79,13 +79,13 @@ class _RouteList extends StatelessWidget {
           );
         }
 
-        return FutureBuilder<Map<String, bool>>(
-          future: routesUseCases.executeGetRouteAvailability(routes),
-          builder: (context, availabilitySnapshot) {
-            final availability =
-                availabilitySnapshot.data ?? const <String, bool>{};
+        return FutureBuilder<_RouteListData>(
+          future: _loadRouteListData(routes),
+          builder: (context, routeDataSnapshot) {
+            final routeData =
+                routeDataSnapshot.data ?? const _RouteListData.empty();
             final isCheckingAvailability =
-                availabilitySnapshot.connectionState != ConnectionState.done;
+                routeDataSnapshot.connectionState != ConnectionState.done;
 
             return ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -94,11 +94,12 @@ class _RouteList extends StatelessWidget {
                 final route = routes[index];
                 final canStart =
                     !isCheckingAvailability &&
-                    (availability[route.id] ?? false);
+                    (routeData.availability[route.id] ?? false);
 
                 return RouteCard(
                   route: route,
                   canStart: canStart,
+                  pointNames: routeData.pointNames[route.id] ?? const [],
                   isCheckingAvailability: isCheckingAvailability,
                 );
               },
@@ -108,4 +109,27 @@ class _RouteList extends StatelessWidget {
       },
     );
   }
+
+  Future<_RouteListData> _loadRouteListData(List<TouristRoute> routes) async {
+    final availability = await routesUseCases.executeGetRouteAvailability(
+      routes,
+    );
+    final pointNames = await routesUseCases.executeGetRoutePointNames(routes);
+
+    return _RouteListData(availability: availability, pointNames: pointNames);
+  }
+}
+
+class _RouteListData {
+  final Map<String, bool> availability;
+  final Map<String, List<String>> pointNames;
+
+  const _RouteListData({
+    required this.availability,
+    required this.pointNames,
+  });
+
+  const _RouteListData.empty()
+    : availability = const <String, bool>{},
+      pointNames = const <String, List<String>>{};
 }

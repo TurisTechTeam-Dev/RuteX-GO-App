@@ -9,12 +9,14 @@ import '../../domain/entities/tourist_route.dart';
 class RouteCard extends StatelessWidget {
   final TouristRoute route;
   final bool canStart;
+  final List<String> pointNames;
   final bool isCheckingAvailability;
 
   const RouteCard({
     super.key,
     required this.route,
     required this.canStart,
+    this.pointNames = const [],
     this.isCheckingAvailability = false,
   });
 
@@ -38,6 +40,11 @@ class RouteCard extends StatelessWidget {
       const SizedBox(height: 12),
       _RouteTitle(title: route.title),
     ];
+
+    if (pointNames.isNotEmpty) {
+      content.add(const SizedBox(height: 8));
+      content.add(_RoutePointNames(pointNames: pointNames));
+    }
 
     final description = route.description.trim();
     if (description.isNotEmpty) {
@@ -70,6 +77,40 @@ class RouteCard extends StatelessWidget {
     );
 
     return content;
+  }
+}
+
+class _RoutePointNames extends StatelessWidget {
+  final List<String> pointNames;
+
+  const _RoutePointNames({required this.pointNames});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text.rich(
+      TextSpan(
+        children: [
+          const WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: Padding(
+              padding: EdgeInsets.only(right: 3),
+              child: Icon(
+                Icons.location_on_outlined,
+                color: AppColors.verdePrincipal,
+                size: 16,
+              ),
+            ),
+          ),
+          TextSpan(text: pointNames.join(', ')),
+        ],
+      ),
+      textAlign: TextAlign.center,
+      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+        color: AppColors.grisSombra,
+        fontWeight: FontWeight.w600,
+        height: 1.25,
+      ),
+    );
   }
 }
 

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../app/navigation/app_routes.dart';
+import '../../../app/widgets/app_info_dialog.dart';
 import '../../../app/widgets/custom_drawer.dart';
 import '../../../app/widgets/top_app_bar.dart';
 import '../../auth/domain/usecases/auth_use_cases.dart';
@@ -11,7 +12,9 @@ import '../domain/usecases/profile_use_cases.dart';
 import 'widgets/home_content.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final bool showInfoOnStart;
+
+  const HomeScreen({super.key, this.showInfoOnStart = false});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -19,6 +22,13 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final Future<HomeData> homeFuture = _loadHomeData();
+  bool _infoDialogShown = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _showInfoDialogIfNeeded();
+  }
 
   Future<HomeData> _loadHomeData() async {
     final user = context.read<AuthUseCases>().getCurrentUser();
@@ -27,6 +37,23 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return context.read<ProfileUseCases>().getHomeData(user.uid);
+  }
+
+  void _showInfoDialogIfNeeded() {
+    if (!widget.showInfoOnStart || _infoDialogShown) {
+      return;
+    }
+
+    _infoDialogShown = true;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      showDialog(
+        context: context,
+        builder: (_) => const AppInfoDialog(),
+      );
+    });
   }
 
   @override

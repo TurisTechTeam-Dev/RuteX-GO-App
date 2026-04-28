@@ -94,6 +94,28 @@ class RoutesRepositoryImpl implements RoutesRepository {
     return pointIdsWithMission;
   }
 
+  @override
+  Future<Map<String, String>> getPointNamesByIds(List<String> pointIds) async {
+    if (pointIds.isEmpty) return const <String, String>{};
+
+    final pointNamesById = <String, String>{};
+
+    for (var i = 0; i < pointIds.length; i += _firestoreWhereInLimit) {
+      final chunk = pointIds.skip(i).take(_firestoreWhereInLimit).toList();
+      final snapshot = await remoteDataSource.getPointsByIds(chunk);
+
+      for (final doc in snapshot.docs) {
+        final name = doc.data()[PointInterestFields.nombre]?.toString().trim();
+
+        if (name != null && name.isNotEmpty) {
+          pointNamesById[doc.id] = name;
+        }
+      }
+    }
+
+    return pointNamesById;
+  }
+
   List<City> _citiesFromSnapshot(QuerySnapshot<Map<String, dynamic>> snapshot) {
     final cities = <City>[];
 

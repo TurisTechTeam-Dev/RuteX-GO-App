@@ -35,6 +35,29 @@ class RoutesUseCases {
     return _buildAvailabilityByRoute(routes, pointIdsWithMission);
   }
 
+  Future<Map<String, List<String>>> executeGetRoutePointNames(
+    List<TouristRoute> routes,
+  ) async {
+    final allPointIds = _collectUniquePointIds(routes);
+    final pointNamesById = await repository.getPointNamesByIds(allPointIds);
+    final pointNamesByRoute = <String, List<String>>{};
+
+    for (final route in routes) {
+      final names = <String>[];
+
+      for (final pointId in route.pointIds) {
+        final name = pointNamesById[pointId.trim()]?.trim();
+        if (name != null && name.isNotEmpty) {
+          names.add(name);
+        }
+      }
+
+      pointNamesByRoute[route.id] = names;
+    }
+
+    return pointNamesByRoute;
+  }
+
   List<String> _collectUniquePointIds(List<TouristRoute> routes) {
     final uniquePointIds = <String>{};
 

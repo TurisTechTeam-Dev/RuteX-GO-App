@@ -15,6 +15,15 @@ class RoutesRemoteDataSource {
     return firestore.collection(FirestoreCollections.rutas).snapshots();
   }
 
+  Future<QuerySnapshot<Map<String, dynamic>>> getPointsByIds(
+    List<String> pointIds,
+  ) {
+    return firestore
+        .collection(FirestoreCollections.puntosInteres)
+        .where(FieldPath.documentId, whereIn: pointIds)
+        .get();
+  }
+
   Future<QuerySnapshot<Map<String, dynamic>>> getMissionsByPointIds(
     List<String> pointIds,
   ) {
