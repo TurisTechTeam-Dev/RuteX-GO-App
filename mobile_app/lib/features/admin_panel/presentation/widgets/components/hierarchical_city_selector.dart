@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mobile_app/core/utils/text_normalizer.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/admin_navbar.dart';
 import 'package:mobile_app/features/admin_panel/data/models/admin_models.dart';
+import 'package:mobile_app/features/admin_panel/presentation/widgets/components/admin_delete_confirmation.dart';
+import 'package:mobile_app/features/admin_panel/presentation/widgets/components/admin_empty_state.dart';
 
 class HierarchicalCitySelector extends StatefulWidget {
   final List<AdminCityModel> allCities;
@@ -173,10 +175,11 @@ class _HierarchicalCitySelectorState extends State<HierarchicalCitySelector> {
                                   size: 18,
                                   color: Colors.redAccent,
                                 ),
-                                onPressed: () => _confirmDelete(
-                                  context,
-                                  city.name,
-                                  () => widget.onDeleteCity(city),
+                                onPressed: () => showAdminDeleteConfirmation(
+                                  context: context,
+                                  itemName: city.name,
+                                  warnCannotUndo: true,
+                                  onConfirm: () => widget.onDeleteCity(city),
                                 ),
                               ),
                             ],
@@ -302,20 +305,10 @@ class _HierarchicalCitySelectorState extends State<HierarchicalCitySelector> {
         .toList();
 
     if (filteredRoutes.isEmpty) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.info_outline, size: 48, color: Colors.grey),
-          const SizedBox(height: 16),
-          const Text(
-            "No hay rutas registradas en esta ciudad",
-            style: TextStyle(color: Colors.grey),
-          ),
-          TextButton(
-            onPressed: () => setState(() => _selectedCity = null),
-            child: const Text("Volver"),
-          ),
-        ],
+      return AdminEmptyState(
+        message: "No hay rutas registradas en esta ciudad",
+        iconSize: 48,
+        onBack: () => setState(() => _selectedCity = null),
       );
     }
 
@@ -340,10 +333,11 @@ class _HierarchicalCitySelectorState extends State<HierarchicalCitySelector> {
                   size: 18,
                   color: Colors.redAccent,
                 ),
-                onPressed: () => _confirmDelete(
-                  context,
-                  route.name,
-                  () => widget.onDeleteRoute(route),
+                onPressed: () => showAdminDeleteConfirmation(
+                  context: context,
+                  itemName: route.name,
+                  warnCannotUndo: true,
+                  onConfirm: () => widget.onDeleteRoute(route),
                 ),
               ),
             ],
@@ -366,20 +360,10 @@ class _HierarchicalCitySelectorState extends State<HierarchicalCitySelector> {
         .toList();
 
     if (filteredPois.isEmpty) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.info_outline, size: 48, color: Colors.grey),
-          const SizedBox(height: 16),
-          const Text(
-            "Esta ruta no tiene puntos de interés asociados",
-            style: TextStyle(color: Colors.grey),
-          ),
-          TextButton(
-            onPressed: () => setState(() => _selectedCity = null),
-            child: const Text("Volver"),
-          ),
-        ],
+      return AdminEmptyState(
+        message: "Esta ruta no tiene puntos de interés asociados",
+        iconSize: 48,
+        onBack: () => setState(() => _selectedCity = null),
       );
     }
 
@@ -468,7 +452,7 @@ class _HierarchicalCitySelectorState extends State<HierarchicalCitySelector> {
     }
   }
 
-  Widget _buildSearchList<T>(
+  Widget _buildSearchList<T extends Object>(
     List<T> items,
     String Function(T) title,
     String Function(T) subtitle,
@@ -481,7 +465,7 @@ class _HierarchicalCitySelectorState extends State<HierarchicalCitySelector> {
         child: Padding(
           padding: EdgeInsets.all(20),
           child: Text(
-            "No se encontraron results",
+            "No se encontraron resultados",
             style: TextStyle(color: Colors.grey),
           ),
         ),
@@ -516,12 +500,12 @@ class _HierarchicalCitySelectorState extends State<HierarchicalCitySelector> {
                   size: 18,
                   color: Colors.redAccent,
                 ),
-                onPressed: () => _confirmDelete(context, title(item), () {
-                  if (item is AdminCityModel) widget.onDeleteCity(item);
-                  if (item is AdminRouteModel) widget.onDeleteRoute(item);
-                  if (item is AdminPoiModel) widget.onDeletePoi(item);
-                  if (item is AdminMissionModel) widget.onDeleteMission(item);
-                }),
+                onPressed: () => showAdminDeleteConfirmation(
+                  context: context,
+                  itemName: title(item),
+                  warnCannotUndo: true,
+                  onConfirm: () => _deleteSearchResult(item),
+                ),
               ),
             ],
           ),
@@ -531,32 +515,11 @@ class _HierarchicalCitySelectorState extends State<HierarchicalCitySelector> {
     );
   }
 
-  Future<void> _confirmDelete(
-    BuildContext context,
-    String nombre,
-    VoidCallback onConfirm,
-  ) async {
-    final bool? result = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Confirmar borrado"),
-        content: Text(
-          "¿Estás seguro de que quieres eliminar '$nombre'? Esta acción no se puede deshacer.",
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text("CANCELAR"),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text("ELIMINAR"),
-          ),
-        ],
-      ),
-    );
-    if (result == true) onConfirm();
+  void _deleteSearchResult(Object item) {
+    if (item is AdminCityModel) widget.onDeleteCity(item);
+    if (item is AdminRouteModel) widget.onDeleteRoute(item);
+    if (item is AdminPoiModel) widget.onDeletePoi(item);
+    if (item is AdminMissionModel) widget.onDeleteMission(item);
   }
 
   Widget _buildCityPointList(AdminCityModel city) {
@@ -575,20 +538,10 @@ class _HierarchicalCitySelectorState extends State<HierarchicalCitySelector> {
         .toList();
 
     if (filteredPois.isEmpty) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.info_outline, size: 48, color: Colors.grey),
-          const SizedBox(height: 16),
-          const Text(
-            "No hay puntos de interés registrados en esta ciudad",
-            style: TextStyle(color: Colors.grey),
-          ),
-          TextButton(
-            onPressed: () => setState(() => _selectedCity = null),
-            child: const Text("Volver"),
-          ),
-        ],
+      return AdminEmptyState(
+        message: "No hay puntos de interés registrados en esta ciudad",
+        iconSize: 48,
+        onBack: () => setState(() => _selectedCity = null),
       );
     }
 
@@ -625,9 +578,9 @@ class _HierarchicalCitySelectorState extends State<HierarchicalCitySelector> {
         .toList();
 
     if (missions.isEmpty) {
-      return _buildEmptyListMessage(
-        "No hay misiones registradas en esta ciudad",
-        () => setState(() => _selectedCity = null),
+      return AdminEmptyState(
+        message: "No hay misiones registradas en esta ciudad",
+        onBack: () => setState(() => _selectedCity = null),
       );
     }
 
@@ -659,9 +612,9 @@ class _HierarchicalCitySelectorState extends State<HierarchicalCitySelector> {
         .toList();
 
     if (missions.isEmpty) {
-      return _buildEmptyListMessage(
-        "No hay misiones registradas en este punto",
-        () => setState(() => _selectedPoint = null),
+      return AdminEmptyState(
+        message: "No hay misiones registradas en este punto",
+        onBack: () => setState(() => _selectedPoint = null),
       );
     }
 
@@ -696,18 +649,6 @@ class _HierarchicalCitySelectorState extends State<HierarchicalCitySelector> {
           style: const TextStyle(color: Colors.grey),
         ),
       ),
-    );
-  }
-
-  Widget _buildEmptyListMessage(String text, VoidCallback onBack) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Icon(Icons.info_outline, size: 42, color: Colors.grey),
-        const SizedBox(height: 12),
-        Text(text, style: const TextStyle(color: Colors.grey)),
-        TextButton(onPressed: onBack, child: const Text("Volver")),
-      ],
     );
   }
 

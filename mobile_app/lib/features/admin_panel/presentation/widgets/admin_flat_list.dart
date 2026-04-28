@@ -3,6 +3,7 @@ import 'package:mobile_app/features/admin_panel/presentation/widgets/admin_navba
 import 'package:mobile_app/features/admin_panel/data/admin_remote_datasource.dart';
 import 'package:mobile_app/features/admin_panel/data/models/admin_models.dart';
 import 'package:mobile_app/features/admin_panel/presentation/models/admin_editable_item.dart';
+import 'package:mobile_app/features/admin_panel/presentation/widgets/components/admin_delete_confirmation.dart';
 
 class AdminFlatList extends StatelessWidget {
   final AdminNavTab currentTab;
@@ -86,9 +87,11 @@ class AdminFlatList extends StatelessWidget {
                     ),
                     trailing: IconButton(
                       icon: const Icon(Icons.delete, color: Colors.redAccent),
-                      onPressed: () => _confirmDelete(context, displayText, () {
-                        _deleteItem(dataSource, item);
-                      }),
+                      onPressed: () => showAdminDeleteConfirmation(
+                        context: context,
+                        itemName: displayText,
+                        onConfirm: () => _deleteItem(dataSource, item),
+                      ),
                     ),
                     onTap: () => onItemSelected(item),
                   );
@@ -99,32 +102,6 @@ class AdminFlatList extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  Future<void> _confirmDelete(
-    BuildContext context,
-    String nombre,
-    VoidCallback onConfirm,
-  ) async {
-    final bool? result = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Confirmar borrado"),
-        content: Text("¿Estás seguro de que quieres eliminar '$nombre'?"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text("CANCELAR"),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text("ELIMINAR"),
-          ),
-        ],
-      ),
-    );
-    if (result == true) onConfirm();
   }
 
   Stream<List<Object>> _getStream(AdminRemoteDataSource ds) {
