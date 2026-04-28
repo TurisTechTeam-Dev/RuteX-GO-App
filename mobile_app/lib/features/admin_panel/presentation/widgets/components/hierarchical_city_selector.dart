@@ -1,49 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_app/core/utils/text_normalizer.dart';
-import 'package:mobile_app/core/widgets/nav_web/navegacion_web.dart';
+import 'package:mobile_app/features/admin_panel/presentation/widgets/admin_navbar.dart';
 import 'package:mobile_app/features/admin_panel/data/models/admin_models.dart';
 
-class SelectorCiudadesJerarquico extends StatefulWidget {
-  final List<AdminCityModel> todasLasCiudades;
-  final List<AdminRouteModel> todasLasRutas;
-  final List<AdminPoiModel> todasLasPois;
-  final List<AdminMissionModel> todasLasMisiones;
-  final NavTab currentTab;
-  final Function(AdminCityModel) onEditarCiudad;
-  final Function(AdminRouteModel) onEditarRuta;
-  final Function(AdminPoiModel) onEditarPoi;
-  final Function(AdminMissionModel) onEditarMision;
-  final Function(AdminCityModel) onEliminarCiudad;
-  final Function(AdminRouteModel) onEliminarRuta;
-  final Function(AdminPoiModel) onEliminarPoi;
-  final Function(AdminMissionModel) onEliminarMision;
-  final VoidCallback onNuevaCiudad;
+class HierarchicalCitySelector extends StatefulWidget {
+  final List<AdminCityModel> allCities;
+  final List<AdminRouteModel> allRoutes;
+  final List<AdminPoiModel> allPois;
+  final List<AdminMissionModel> allMissions;
+  final AdminNavTab currentTab;
+  final Function(AdminCityModel) onEditCity;
+  final Function(AdminRouteModel) onEditRoute;
+  final Function(AdminPoiModel) onEditPoi;
+  final Function(AdminMissionModel) onEditMission;
+  final Function(AdminCityModel) onDeleteCity;
+  final Function(AdminRouteModel) onDeleteRoute;
+  final Function(AdminPoiModel) onDeletePoi;
+  final Function(AdminMissionModel) onDeleteMission;
+  final VoidCallback onNewCity;
 
-  const SelectorCiudadesJerarquico({
+  const HierarchicalCitySelector({
     super.key,
-    required this.todasLasCiudades,
-    required this.todasLasRutas,
-    required this.todasLasPois,
-    required this.todasLasMisiones,
+    required this.allCities,
+    required this.allRoutes,
+    required this.allPois,
+    required this.allMissions,
     required this.currentTab,
-    required this.onEditarCiudad,
-    required this.onEditarRuta,
-    required this.onEditarPoi,
-    required this.onEditarMision,
-    required this.onEliminarCiudad,
-    required this.onEliminarRuta,
-    required this.onEliminarPoi,
-    required this.onEliminarMision,
-    required this.onNuevaCiudad,
+    required this.onEditCity,
+    required this.onEditRoute,
+    required this.onEditPoi,
+    required this.onEditMission,
+    required this.onDeleteCity,
+    required this.onDeleteRoute,
+    required this.onDeletePoi,
+    required this.onDeleteMission,
+    required this.onNewCity,
   });
 
   @override
-  State<SelectorCiudadesJerarquico> createState() =>
-      _SelectorCiudadesJerarquicoState();
+  State<HierarchicalCitySelector> createState() =>
+      _HierarchicalCitySelectorState();
 }
 
-class _SelectorCiudadesJerarquicoState
-    extends State<SelectorCiudadesJerarquico> {
+class _HierarchicalCitySelectorState extends State<HierarchicalCitySelector> {
   AdminCityModel? _selectedCity;
   AdminPoiModel? _selectedPoint;
   final TextEditingController _searchCtrl = TextEditingController();
@@ -57,8 +56,8 @@ class _SelectorCiudadesJerarquicoState
 
   @override
   Widget build(BuildContext context) {
-    // Obtenemos las provincias de la base de datos
-    final provinciasDb = widget.todasLasCiudades
+    // Build the province list from Firestore data
+    final provinceNamesFromDb = widget.allCities
         .where(
           (c) =>
               c.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
@@ -69,9 +68,9 @@ class _SelectorCiudadesJerarquicoState
         .toSet()
         .toList();
 
-    final provincias = provinciasDb.isEmpty && _searchQuery.isEmpty
+    final provinceNames = provinceNamesFromDb.isEmpty && _searchQuery.isEmpty
         ? ['Cáceres', 'Badajoz']
-        : provinciasDb;
+        : provinceNamesFromDb;
 
     return Column(
       children: [
@@ -80,26 +79,26 @@ class _SelectorCiudadesJerarquicoState
           _buildBreadcrumb(),
           const Divider(height: 1),
         ],
-        Expanded(child: _buildExplorerBody(provincias)),
+        Expanded(child: _buildExplorerBody(provinceNames)),
       ],
     );
   }
 
-  Widget _buildExplorerBody(List<String> provincias) {
-    // NUEVO: Si hay búsqueda, mostrar resultados planos globales
+  Widget _buildExplorerBody(List<String> provinceNames) {
+    // When searching, show flat global results
     if (_searchQuery.isNotEmpty) {
       return _buildSearchResults();
     }
 
     if (_selectedCity != null) {
       switch (widget.currentTab) {
-        case NavTab.cities:
+        case AdminNavTab.cities:
           return _buildSelectedCityMessage(_selectedCity!);
-        case NavTab.routes:
+        case AdminNavTab.routes:
           return _buildRouteList(_selectedCity!);
-        case NavTab.pointsOfInterest:
+        case AdminNavTab.pointsOfInterest:
           return _buildCityPointList(_selectedCity!);
-        case NavTab.missions:
+        case AdminNavTab.missions:
           if (_selectedPoint != null) {
             return _buildPointMissionList(_selectedPoint!);
           }
@@ -107,16 +106,16 @@ class _SelectorCiudadesJerarquicoState
       }
     }
 
-    // SI ESTAMOS EN LA VISTA INICIAL, MOSTRAR ACORDEÓN DE PROVINCIAS
+    // Initial view: show province accordion
     return ListView.builder(
-      itemCount: provincias.length,
+      itemCount: provinceNames.length,
       itemBuilder: (context, index) {
-        final prov = provincias[index];
-        final ciudadesDeProv = widget.todasLasCiudades
+        final provinceName = provinceNames[index];
+        final provinceCities = widget.allCities
             .where(
               (c) =>
                   TextNormalizer.toAsciiSlug(c.province) ==
-                  TextNormalizer.toAsciiSlug(prov),
+                  TextNormalizer.toAsciiSlug(provinceName),
             )
             .toList();
 
@@ -128,32 +127,32 @@ class _SelectorCiudadesJerarquicoState
             side: BorderSide(color: Colors.grey.shade300),
           ),
           child: ExpansionTile(
-            key: PageStorageKey(prov),
+            key: PageStorageKey(provinceName),
             leading: const Icon(Icons.map, color: Color(0xFF6B7249)),
             title: Text(
-              prov.toUpperCase(),
+              provinceName.toUpperCase(),
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 13,
                 letterSpacing: 1.1,
               ),
             ),
-            children: ciudadesDeProv.isEmpty
+            children: provinceCities.isEmpty
                 ? [const ListTile(title: Text("No hay ciudades registrados"))]
-                : ciudadesDeProv
+                : provinceCities
                       .where(
                         (c) => c.name.toLowerCase().contains(
                           _searchQuery.toLowerCase(),
                         ),
                       )
-                      .map((ciudad) {
+                      .map((city) {
                         return ListTile(
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 14,
                           ),
                           dense: true,
                           visualDensity: VisualDensity.compact,
-                          title: Text(ciudad.name),
+                          title: Text(city.name),
                           leading: const Icon(
                             Icons.location_city,
                             size: 20,
@@ -165,7 +164,7 @@ class _SelectorCiudadesJerarquicoState
                               IconButton(
                                 visualDensity: VisualDensity.compact,
                                 icon: const Icon(Icons.edit, size: 18),
-                                onPressed: () => widget.onEditarCiudad(ciudad),
+                                onPressed: () => widget.onEditCity(city),
                               ),
                               IconButton(
                                 visualDensity: VisualDensity.compact,
@@ -176,13 +175,13 @@ class _SelectorCiudadesJerarquicoState
                                 ),
                                 onPressed: () => _confirmDelete(
                                   context,
-                                  ciudad.name,
-                                  () => widget.onEliminarCiudad(ciudad),
+                                  city.name,
+                                  () => widget.onDeleteCity(city),
                                 ),
                               ),
                             ],
                           ),
-                          onTap: () => _selectCity(ciudad),
+                          onTap: () => _selectCity(city),
                         );
                       })
                       .toList(),
@@ -293,16 +292,16 @@ class _SelectorCiudadesJerarquicoState
     );
   }
 
-  Widget _buildRouteList(AdminCityModel ciudad) {
-    final rutasFiltradas = widget.todasLasRutas
+  Widget _buildRouteList(AdminCityModel city) {
+    final filteredRoutes = widget.allRoutes
         .where(
           (r) =>
-              _belongsToCity(r.cityId, ciudad) &&
+              _belongsToCity(r.cityId, city) &&
               r.name.toLowerCase().contains(_searchQuery.toLowerCase()),
         )
         .toList();
 
-    if (rutasFiltradas.isEmpty) {
+    if (filteredRoutes.isEmpty) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -321,19 +320,19 @@ class _SelectorCiudadesJerarquicoState
     }
 
     return ListView.builder(
-      itemCount: rutasFiltradas.length,
+      itemCount: filteredRoutes.length,
       itemBuilder: (context, index) {
-        final ruta = rutasFiltradas[index];
+        final route = filteredRoutes[index];
         return ListTile(
           leading: const Icon(Icons.directions_run, color: Colors.orange),
-          title: Text(ruta.name),
-          subtitle: Text('${ruta.duration} - ${ruta.difficulty}'),
+          title: Text(route.name),
+          subtitle: Text('${route.duration} - ${route.difficulty}'),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
                 icon: const Icon(Icons.edit, size: 18),
-                onPressed: () => widget.onEditarRuta(ruta),
+                onPressed: () => widget.onEditRoute(route),
               ),
               IconButton(
                 icon: const Icon(
@@ -343,30 +342,30 @@ class _SelectorCiudadesJerarquicoState
                 ),
                 onPressed: () => _confirmDelete(
                   context,
-                  ruta.name,
-                  () => widget.onEliminarRuta(ruta),
+                  route.name,
+                  () => widget.onDeleteRoute(route),
                 ),
               ),
             ],
           ),
-          onTap: () => widget.onEditarRuta(ruta),
+          onTap: () => widget.onEditRoute(route),
         );
       },
     );
   }
 
   // ignore: unused_element
-  Widget _buildPointList(AdminRouteModel ruta) {
-    final poisIds = ruta.pointIds.toSet();
-    final poisFiltradas = widget.todasLasPois
+  Widget _buildPointList(AdminRouteModel route) {
+    final poiIds = route.pointIds.toSet();
+    final filteredPois = widget.allPois
         .where(
           (p) =>
-              poisIds.contains(p.id) &&
+              poiIds.contains(p.id) &&
               p.name.toLowerCase().contains(_searchQuery.toLowerCase()),
         )
         .toList();
 
-    if (poisFiltradas.isEmpty) {
+    if (filteredPois.isEmpty) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -385,9 +384,9 @@ class _SelectorCiudadesJerarquicoState
     }
 
     return ListView.builder(
-      itemCount: poisFiltradas.length,
+      itemCount: filteredPois.length,
       itemBuilder: (context, index) {
-        final poi = poisFiltradas[index];
+        final poi = filteredPois[index];
         return ListTile(
           leading: const Icon(Icons.location_on, color: Colors.redAccent),
           title: Text(poi.name),
@@ -398,7 +397,7 @@ class _SelectorCiudadesJerarquicoState
           ),
           trailing: IconButton(
             icon: const Icon(Icons.edit, size: 18),
-            onPressed: () => widget.onEditarPoi(poi),
+            onPressed: () => widget.onEditPoi(poi),
           ),
         );
       },
@@ -409,16 +408,16 @@ class _SelectorCiudadesJerarquicoState
     final query = _searchQuery.toLowerCase();
 
     switch (widget.currentTab) {
-      case NavTab.cities:
-        final resultados = widget.todasLasCiudades
+      case AdminNavTab.cities:
+        final results = widget.allCities
             .where((c) => c.name.toLowerCase().contains(query))
             .toList();
         return _buildSearchList(
-          resultados,
+          results,
           (item) => item.name,
           (item) => item.province,
           Icons.location_city,
-          (item) => widget.onEditarCiudad(item),
+          (item) => widget.onEditCity(item),
           (item) {
             setState(() {
               _selectedCity = item;
@@ -428,43 +427,43 @@ class _SelectorCiudadesJerarquicoState
           },
         );
 
-      case NavTab.routes:
-        final resultados = widget.todasLasRutas
+      case AdminNavTab.routes:
+        final results = widget.allRoutes
             .where((r) => r.name.toLowerCase().contains(query))
             .toList();
         return _buildSearchList(
-          resultados,
+          results,
           (item) => item.name,
           (item) => item.duration,
           Icons.directions_run,
-          (item) => widget.onEditarRuta(item),
-          (item) => widget.onEditarRuta(item),
+          (item) => widget.onEditRoute(item),
+          (item) => widget.onEditRoute(item),
         );
 
-      case NavTab.pointsOfInterest:
-        final resultados = widget.todasLasPois
+      case AdminNavTab.pointsOfInterest:
+        final results = widget.allPois
             .where((p) => p.name.toLowerCase().contains(query))
             .toList();
         return _buildSearchList(
-          resultados,
+          results,
           (item) => item.name,
           (item) => item.description,
           Icons.location_on,
-          (item) => widget.onEditarPoi(item),
-          (item) {}, // No drill-down para POIs
+          (item) => widget.onEditPoi(item),
+          (item) {}, // No drill-down for POIs
         );
 
-      case NavTab.missions:
-        final resultados = widget.todasLasMisiones
+      case AdminNavTab.missions:
+        final results = widget.allMissions
             .where((mission) => mission.title.toLowerCase().contains(query))
             .toList();
         return _buildSearchList(
-          resultados,
+          results,
           (item) => item.title,
           (item) => _pointNameForMission(item),
           Icons.assignment,
-          (item) => widget.onEditarMision(item),
-          (item) => widget.onEditarMision(item),
+          (item) => widget.onEditMission(item),
+          (item) => widget.onEditMission(item),
         );
     }
   }
@@ -482,7 +481,7 @@ class _SelectorCiudadesJerarquicoState
         child: Padding(
           padding: EdgeInsets.all(20),
           child: Text(
-            "No se encontraron resultados",
+            "No se encontraron results",
             style: TextStyle(color: Colors.grey),
           ),
         ),
@@ -518,10 +517,10 @@ class _SelectorCiudadesJerarquicoState
                   color: Colors.redAccent,
                 ),
                 onPressed: () => _confirmDelete(context, title(item), () {
-                  if (item is AdminCityModel) widget.onEliminarCiudad(item);
-                  if (item is AdminRouteModel) widget.onEliminarRuta(item);
-                  if (item is AdminPoiModel) widget.onEliminarPoi(item);
-                  if (item is AdminMissionModel) widget.onEliminarMision(item);
+                  if (item is AdminCityModel) widget.onDeleteCity(item);
+                  if (item is AdminRouteModel) widget.onDeleteRoute(item);
+                  if (item is AdminPoiModel) widget.onDeletePoi(item);
+                  if (item is AdminMissionModel) widget.onDeleteMission(item);
                 }),
               ),
             ],
@@ -560,22 +559,22 @@ class _SelectorCiudadesJerarquicoState
     if (result == true) onConfirm();
   }
 
-  Widget _buildCityPointList(AdminCityModel ciudad) {
-    final routePoiIds = widget.todasLasRutas
-        .where((route) => _belongsToCity(route.cityId, ciudad))
+  Widget _buildCityPointList(AdminCityModel city) {
+    final routePoiIds = widget.allRoutes
+        .where((route) => _belongsToCity(route.cityId, city))
         .expand((route) => route.pointIds)
         .toSet();
 
-    final poisFiltradas = widget.todasLasPois
+    final filteredPois = widget.allPois
         .where(
           (p) =>
-              (_belongsToCity(p.cityId, ciudad) ||
+              (_belongsToCity(p.cityId, city) ||
                   (p.id != null && routePoiIds.contains(p.id))) &&
               p.name.toLowerCase().contains(_searchQuery.toLowerCase()),
         )
         .toList();
 
-    if (poisFiltradas.isEmpty) {
+    if (filteredPois.isEmpty) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -594,10 +593,10 @@ class _SelectorCiudadesJerarquicoState
     }
 
     return ListView.builder(
-      itemCount: poisFiltradas.length,
+      itemCount: filteredPois.length,
       itemBuilder: (context, index) {
-        final poi = poisFiltradas[index];
-        final isMissionTab = widget.currentTab == NavTab.missions;
+        final poi = filteredPois[index];
+        final isMissionTab = widget.currentTab == AdminNavTab.missions;
         return ListTile(
           leading: const Icon(Icons.location_on, color: Colors.redAccent),
           title: Text(poi.name),
@@ -608,20 +607,20 @@ class _SelectorCiudadesJerarquicoState
           ),
           trailing: IconButton(
             icon: const Icon(Icons.edit, size: 18),
-            onPressed: () => widget.onEditarPoi(poi),
+            onPressed: () => widget.onEditPoi(poi),
           ),
           onTap: isMissionTab
               ? () => setState(() => _selectedPoint = poi)
-              : () => widget.onEditarPoi(poi),
+              : () => widget.onEditPoi(poi),
         );
       },
     );
   }
 
   // ignore: unused_element
-  Widget _buildCityMissionList(AdminCityModel ciudad) {
-    final poiIds = _pointIdsForCity(ciudad);
-    final missions = widget.todasLasMisiones
+  Widget _buildCityMissionList(AdminCityModel city) {
+    final poiIds = _pointIdsForCity(city);
+    final missions = widget.allMissions
         .where((mission) => poiIds.contains(mission.pointId))
         .toList();
 
@@ -645,9 +644,9 @@ class _SelectorCiudadesJerarquicoState
           trailing: IconButton(
             visualDensity: VisualDensity.compact,
             icon: const Icon(Icons.edit, size: 18),
-            onPressed: () => widget.onEditarMision(mission),
+            onPressed: () => widget.onEditMission(mission),
           ),
-          onTap: () => widget.onEditarMision(mission),
+          onTap: () => widget.onEditMission(mission),
         );
       },
     );
@@ -655,7 +654,7 @@ class _SelectorCiudadesJerarquicoState
 
   Widget _buildPointMissionList(AdminPoiModel point) {
     final pointId = point.id ?? '';
-    final missions = widget.todasLasMisiones
+    final missions = widget.allMissions
         .where((mission) => mission.pointId == pointId)
         .toList();
 
@@ -679,9 +678,9 @@ class _SelectorCiudadesJerarquicoState
           trailing: IconButton(
             visualDensity: VisualDensity.compact,
             icon: const Icon(Icons.edit, size: 18),
-            onPressed: () => widget.onEditarMision(mission),
+            onPressed: () => widget.onEditMission(mission),
           ),
-          onTap: () => widget.onEditarMision(mission),
+          onTap: () => widget.onEditMission(mission),
         );
       },
     );
@@ -713,8 +712,8 @@ class _SelectorCiudadesJerarquicoState
   }
 
   void _selectCity(AdminCityModel city) {
-    if (widget.currentTab == NavTab.cities) {
-      widget.onEditarCiudad(city);
+    if (widget.currentTab == AdminNavTab.cities) {
+      widget.onEditCity(city);
       return;
     }
 
@@ -727,11 +726,11 @@ class _SelectorCiudadesJerarquicoState
   }
 
   Set<String> _pointIdsForCity(AdminCityModel city) {
-    final routePoiIds = widget.todasLasRutas
+    final routePoiIds = widget.allRoutes
         .where((route) => _belongsToCity(route.cityId, city))
         .expand((route) => route.pointIds);
 
-    final directPoiIds = widget.todasLasPois
+    final directPoiIds = widget.allPois
         .where((poi) => _belongsToCity(poi.cityId, city))
         .map((poi) => poi.id ?? '')
         .where((id) => id.isNotEmpty);
@@ -740,7 +739,7 @@ class _SelectorCiudadesJerarquicoState
   }
 
   String _pointNameForMission(AdminMissionModel mission) {
-    for (final poi in widget.todasLasPois) {
+    for (final poi in widget.allPois) {
       if (poi.id == mission.pointId) {
         return poi.name;
       }

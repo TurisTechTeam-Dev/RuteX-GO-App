@@ -5,7 +5,7 @@ import 'package:latlong2/latlong.dart';
 
 import 'package:mobile_app/core/widgets/buttons/custom_button.dart';
 import 'package:mobile_app/core/widgets/cards/custom_cards.dart';
-import 'package:mobile_app/core/widgets/nav_web/componentes_extras/image_picker_box.dart';
+import 'package:mobile_app/features/admin_panel/presentation/widgets/components/image_picker_box.dart';
 import 'package:mobile_app/features/admin_panel/data/models/admin_models.dart';
 
 class PointInterestForm extends StatefulWidget {
@@ -57,7 +57,7 @@ class _PointInterestFormState extends State<PointInterestForm> {
       text: widget.point?.longitude?.toString() ?? '',
     );
     _selectedCityId = widget.point?.cityId;
-    // Validar que el ID exista en la lista para evitar error de Dropdown
+    // Keep dropdown values valid after data refresh.
     if (_selectedCityId != null &&
         (_selectedCityId!.isEmpty ||
             !widget.cities.any((c) => c.id == _selectedCityId))) {
@@ -101,7 +101,7 @@ class _PointInterestFormState extends State<PointInterestForm> {
     _longitudeController.text = widget.point?.longitude?.toString() ?? '';
     _selectedCityId = widget.point?.cityId;
 
-    // Validar que el ID exista en la lista para evitar error de Dropdown
+    // Keep dropdown values valid after data refresh.
     if (_selectedCityId != null &&
         (_selectedCityId!.isEmpty ||
             !widget.cities.any((c) => c.id == _selectedCityId))) {
@@ -144,7 +144,6 @@ class _PointInterestFormState extends State<PointInterestForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // FILA 1: Nombre e Imagen (Cambiado de sitio)
               Row(
                 children: [
                   SizedBox(
@@ -255,7 +254,7 @@ class _PointInterestFormState extends State<PointInterestForm> {
               ),
               const SizedBox(height: 10),
 
-              // El mapa se queda en el centro como en tu código
+              // Keep the map centered while editing coordinates
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: SizedBox(
@@ -374,7 +373,6 @@ class _PointInterestFormState extends State<PointInterestForm> {
               ),
               const SizedBox(height: 24),
 
-              // Botón original intacto
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

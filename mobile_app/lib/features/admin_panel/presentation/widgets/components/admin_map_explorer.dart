@@ -9,24 +9,21 @@ class AdminMapExplorer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent, // Para que tome el color del panel
+      backgroundColor: Colors.transparent,
       body: Center(
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // 1. Imagen del Mapa de Fondo (Extremadura)
             Opacity(
-              opacity:
-                  0.70, // Ajusta esto para que no distraiga de los formularios
+              opacity: 0.70, // Keep the background subtle behind the forms.
               child: Image.asset(
                 'assets/Mapa_fondo_Extremadura.png',
                 fit: BoxFit.contain,
-                // Si la imagen es muy grande, puedes limitarla con un Container o SizedBox
+
                 height: MediaQuery.of(context).size.height * 0.7,
               ),
             ),
 
-            // 2. Logo de la Empresa (Frontal)
             Image.asset(
               'assets/Logo_Color_Rutexgo.png',
               width: 300, // Ajusta el tamaño según tu logo

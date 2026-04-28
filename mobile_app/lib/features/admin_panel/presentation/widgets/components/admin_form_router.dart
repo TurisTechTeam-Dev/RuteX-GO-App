@@ -1,21 +1,17 @@
 import 'package:flutter/material.dart';
 import 'dart:typed_data';
 
-// Infraestructura y Modelos
 import 'package:mobile_app/features/admin_panel/data/models/admin_models.dart';
 import 'package:mobile_app/features/admin_panel/data/admin_remote_datasource.dart';
-import 'package:mobile_app/core/widgets/nav_web/navegacion_web.dart';
+import 'package:mobile_app/features/admin_panel/presentation/widgets/admin_navbar.dart';
 
-// Componentes de navegación y selectores
-
-// Formularios (Ajusta estas rutas si tus archivos se llaman distinto)
-import 'package:mobile_app/core/widgets/nav_web/formulario_ruta.dart';
-import 'package:mobile_app/core/widgets/nav_web/formularios/formulario_ciudades.dart';
-import 'package:mobile_app/core/widgets/nav_web/formularios/formulario_mision.dart'; // Verifica si es formulario_mision.dart
-import 'package:mobile_app/core/widgets/nav_web/formularios/formulario_punto_interes.dart';
+import 'package:mobile_app/features/admin_panel/presentation/widgets/route_form.dart';
+import 'package:mobile_app/features/admin_panel/presentation/widgets/forms/city_form.dart';
+import 'package:mobile_app/features/admin_panel/presentation/widgets/forms/mission_form.dart';
+import 'package:mobile_app/features/admin_panel/presentation/widgets/forms/point_interest_form.dart';
 
 class AdminFormRouter extends StatelessWidget {
-  final NavTab tab;
+  final AdminNavTab tab;
   final dynamic itemToEdit;
   final AdminRemoteDataSource dataSource;
   final Function(dynamic, Future<void> Function(dynamic)) onSave;
@@ -34,12 +30,11 @@ class AdminFormRouter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // La key única asegura que el formulario se resetee al cambiar de item
     final uniqueKey = ValueKey('${tab.index}_${itemToEdit?.id ?? 'nuevo'}');
 
-    // SIEMPRE MOSTRAR EL FORMULARIO CORRESPONDIENTE AL TAB ACTUAL
+    // Always show the form for the active tab.
     switch (tab) {
-      case NavTab.cities:
+      case AdminNavTab.cities:
         return CityForm(
           key: uniqueKey,
           city: itemToEdit is AdminCityModel ? itemToEdit : null,
@@ -49,16 +44,16 @@ class AdminFormRouter extends StatelessWidget {
           onUploadImage: (Uint8List bytes, String name) =>
               dataSource.uploadFile(bytes, 'Contenido/Ciudades', name),
         );
-      case NavTab.routes:
+      case AdminNavTab.routes:
         return _buildRouteFormWithData(uniqueKey);
-      case NavTab.pointsOfInterest:
+      case AdminNavTab.pointsOfInterest:
         return _buildPointFormWithData(uniqueKey);
-      case NavTab.missions:
+      case AdminNavTab.missions:
         return _buildMissionFormWithData(uniqueKey);
     }
   }
 
-  // --- 2. FORMULARIO DE RUTAS ---
+  // Routes form
   Widget _buildRouteFormWithData(Key key) {
     return StreamBuilder<List<AdminCityModel>>(
       stream: dataSource.watchCities(),
@@ -121,7 +116,7 @@ class AdminFormRouter extends StatelessWidget {
     );
   }
 
-  // --- 4. FORMULARIO DE MISIONES ---
+  // Missions form
   Widget _buildMissionFormWithData(Key key) {
     return StreamBuilder<List<AdminCityModel>>(
       stream: dataSource.watchCities(),

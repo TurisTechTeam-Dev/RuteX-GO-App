@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_app/core/widgets/nav_web/admin_footer.dart';
-import 'package:mobile_app/core/widgets/nav_web/componentes_extras/admin_form_router.dart';
-import 'package:mobile_app/core/widgets/nav_web/componentes_extras/admin_map_explorer.dart';
-import 'package:mobile_app/core/widgets/nav_web/componentes_extras/admin_sidebar.dart';
-import 'package:mobile_app/core/widgets/nav_web/navegacion_web.dart';
+import 'package:mobile_app/features/admin_panel/presentation/widgets/admin_footer.dart';
+import 'package:mobile_app/features/admin_panel/presentation/widgets/components/admin_form_router.dart';
+import 'package:mobile_app/features/admin_panel/presentation/widgets/components/admin_map_explorer.dart';
+import 'package:mobile_app/features/admin_panel/presentation/widgets/components/admin_sidebar.dart';
+import 'package:mobile_app/features/admin_panel/presentation/widgets/admin_navbar.dart';
 import 'package:mobile_app/features/admin_panel/data/admin_remote_datasource.dart';
 import 'package:mobile_app/features/admin_panel/data/models/admin_models.dart';
 
@@ -18,7 +18,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
   final AdminRemoteDataSource _dataSource = AdminRemoteDataSource();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  NavTab? _currentTab;
+  AdminNavTab? _currentTab;
   dynamic _itemToEdit;
   int _formResetVersion = 0;
 
@@ -45,7 +45,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
               : null,
           body: Column(
             children: [
-              MainNavbar(
+              AdminNavbar(
                 activeTab: _currentTab,
                 onMenuPressed: isCompact && _currentTab != null
                     ? () => _scaffoldKey.currentState?.openDrawer()
@@ -181,16 +181,16 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
       _itemToEdit = item;
 
       if (item is AdminCityModel) {
-        _currentTab = NavTab.cities;
+        _currentTab = AdminNavTab.cities;
       }
       if (item is AdminRouteModel) {
-        _currentTab = NavTab.routes;
+        _currentTab = AdminNavTab.routes;
       }
       if (item is AdminPoiModel) {
-        _currentTab = NavTab.pointsOfInterest;
+        _currentTab = AdminNavTab.pointsOfInterest;
       }
       if (item is AdminMissionModel) {
-        _currentTab = NavTab.missions;
+        _currentTab = AdminNavTab.missions;
       }
     });
   }
@@ -202,15 +202,15 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
     });
   }
 
-  String _titleForTab(NavTab tab) {
+  String _titleForTab(AdminNavTab tab) {
     switch (tab) {
-      case NavTab.cities:
+      case AdminNavTab.cities:
         return 'Ciudades';
-      case NavTab.routes:
+      case AdminNavTab.routes:
         return 'Rutas';
-      case NavTab.pointsOfInterest:
+      case AdminNavTab.pointsOfInterest:
         return 'Puntos de interés';
-      case NavTab.missions:
+      case AdminNavTab.missions:
         return 'Misiones';
     }
   }

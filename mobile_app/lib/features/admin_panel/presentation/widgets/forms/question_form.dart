@@ -104,7 +104,6 @@ class _QuestionFormState extends State<QuestionForm> {
     );
   }
 
-  // Helper para los títulos de los campos
   Widget _buildLabel(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
@@ -115,16 +114,12 @@ class _QuestionFormState extends State<QuestionForm> {
     );
   }
 
-  // Helper para los inputs con el estilo de tus imágenes anteriores
   Widget _buildTextField(TextEditingController controller, {String? hint}) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF2F1E6), // Fondo crema
+        color: const Color(0xFFF2F1E6),
         borderRadius: BorderRadius.circular(15),
-        border: Border.all(
-          color: const Color(0xFF6B7249),
-          width: 1,
-        ), // Borde verde oliva
+        border: Border.all(color: const Color(0xFF6B7249), width: 1),
       ),
       child: TextField(
         controller: controller,

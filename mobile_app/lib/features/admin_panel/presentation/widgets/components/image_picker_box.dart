@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
 
-import '../../images/storage_aware_image.dart';
+import 'package:mobile_app/core/widgets/images/storage_aware_image.dart';
 
 class ImagePickerBox extends StatefulWidget {
   final String? imageUrl;
@@ -81,7 +81,6 @@ class _ImagePickerBoxState extends State<ImagePickerBox> {
             borderRadius: BorderRadius.circular(8),
             child: Stack(
               children: [
-                // Imagen de fondo
                 if (hasImage)
                   Positioned.fill(
                     child: _localBytes != null
@@ -93,7 +92,6 @@ class _ImagePickerBoxState extends State<ImagePickerBox> {
                           ),
                   ),
 
-                // Overlay si hay imagen para que el texto sea legible o simplemente para indicar interactividad
                 if (hasImage)
                   Positioned.fill(
                     child: Container(
@@ -110,7 +108,6 @@ class _ImagePickerBoxState extends State<ImagePickerBox> {
                     ),
                   ),
 
-                // Contenido central (si no hay imagen o durante carga)
                 if (!hasImage && !widget.isUploading)
                   Center(
                     child: Column(
@@ -153,7 +150,6 @@ class _ImagePickerBoxState extends State<ImagePickerBox> {
                     ),
                   ),
 
-                // Indicador de carga
                 if (widget.isUploading)
                   Container(
                     color: Colors.black.withValues(alpha: 0.4),
@@ -178,7 +174,6 @@ class _ImagePickerBoxState extends State<ImagePickerBox> {
                     ),
                   ),
 
-                // Botón de editar flotante si ya hay imagen
                 if (hasImage && !widget.isUploading)
                   Positioned(
                     top: 12,

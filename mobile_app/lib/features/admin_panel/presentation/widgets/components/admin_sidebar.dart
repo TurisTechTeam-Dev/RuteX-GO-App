@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_app/core/widgets/nav_web/navegacion_web.dart';
-import 'package:mobile_app/core/widgets/nav_web/componentes_extras/selector_ciudades_jerarquico.dart';
-import 'package:mobile_app/core/widgets/nav_web/tarjeta_lista.dart';
+import 'package:mobile_app/features/admin_panel/presentation/widgets/admin_navbar.dart';
+import 'package:mobile_app/features/admin_panel/presentation/widgets/components/hierarchical_city_selector.dart';
+import 'package:mobile_app/features/admin_panel/presentation/widgets/admin_flat_list.dart';
 import 'package:mobile_app/features/admin_panel/data/admin_remote_datasource.dart';
 import 'package:mobile_app/features/admin_panel/data/models/admin_models.dart';
 
 class AdminSidebar extends StatelessWidget {
-  final NavTab currentTab;
+  final AdminNavTab currentTab;
   final Function(dynamic) onItemSelected;
 
   const AdminSidebar({
@@ -35,7 +35,6 @@ class AdminSidebar extends StatelessWidget {
           Expanded(
             child: TabBarView(
               children: [
-                // TAB 1: EXPLORADOR JERÁRQUICO
                 StreamBuilder<List<AdminCityModel>>(
                   stream: dataSource.watchCities(),
                   builder: (context, citySnapshot) {
@@ -82,25 +81,25 @@ class AdminSidebar extends StatelessWidget {
                                     child: CircularProgressIndicator(),
                                   );
                                 }
-                                return SelectorCiudadesJerarquico(
-                                  todasLasCiudades: citySnapshot.data!,
-                                  todasLasRutas: routeSnapshot.data!,
-                                  todasLasPois: pointSnapshot.data!,
-                                  todasLasMisiones: missionSnapshot.data!,
+                                return HierarchicalCitySelector(
+                                  allCities: citySnapshot.data!,
+                                  allRoutes: routeSnapshot.data!,
+                                  allPois: pointSnapshot.data!,
+                                  allMissions: missionSnapshot.data!,
                                   currentTab: currentTab,
-                                  onEditarCiudad: onItemSelected,
-                                  onEditarRuta: onItemSelected,
-                                  onEditarPoi: onItemSelected,
-                                  onEditarMision: onItemSelected,
-                                  onEliminarCiudad: (item) =>
+                                  onEditCity: onItemSelected,
+                                  onEditRoute: onItemSelected,
+                                  onEditPoi: onItemSelected,
+                                  onEditMission: onItemSelected,
+                                  onDeleteCity: (item) =>
                                       dataSource.deleteCity(item.id!),
-                                  onEliminarRuta: (item) =>
+                                  onDeleteRoute: (item) =>
                                       dataSource.deleteRoute(item.id!),
-                                  onEliminarPoi: (item) =>
+                                  onDeletePoi: (item) =>
                                       dataSource.deletePoi(item.id!),
-                                  onEliminarMision: (item) =>
+                                  onDeleteMission: (item) =>
                                       dataSource.deleteMission(item.id!),
-                                  onNuevaCiudad: () => onItemSelected(null),
+                                  onNewCity: () => onItemSelected(null),
                                 );
                               },
                             );
@@ -110,7 +109,7 @@ class AdminSidebar extends StatelessWidget {
                     );
                   },
                 ),
-                // TAB 2: LISTA PLANA
+
                 AdminFlatList(
                   currentTab: currentTab,
                   onItemSelected: onItemSelected,

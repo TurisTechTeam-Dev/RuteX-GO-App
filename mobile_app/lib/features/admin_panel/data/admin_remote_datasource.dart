@@ -15,7 +15,7 @@ class AdminRemoteDataSource {
   final FirebaseFirestore _firestore;
   final FirebaseStorage _storage;
 
-  /// Sube los bytes de una imagen a Firebase Storage y devuelve la URL de descarga.
+  /// Uploads image bytes to Firebase Storage and returns the stored path.
   Future<String> uploadFile(
     Uint8List fileBytes,
     String folder,
@@ -25,7 +25,7 @@ class AdminRemoteDataSource {
       Reference ref = _storage.ref().child(folder).child(fileName);
 
       try {
-        // Comprobamos si el archivo ya existe intentando obtener sus metadatos
+        // Check whether the file already exists before choosing its final name.
         await ref.getMetadata();
 
         // Si no lanza excepciÃ³n, es que ya existe. Generamos un nombre Ãºnico con timestamp.

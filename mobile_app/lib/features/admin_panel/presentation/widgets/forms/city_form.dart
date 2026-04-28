@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:mobile_app/core/widgets/buttons/custom_button.dart';
 import 'package:mobile_app/core/widgets/cards/custom_cards.dart';
 import 'package:mobile_app/features/admin_panel/data/models/admin_models.dart';
-import 'package:mobile_app/core/widgets/nav_web/componentes_extras/image_picker_box.dart';
+import 'package:mobile_app/features/admin_panel/presentation/widgets/components/image_picker_box.dart';
 
 class CityForm extends StatefulWidget {
   final AdminCityModel? city;
@@ -88,7 +88,6 @@ class _CityFormState extends State<CityForm> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Columna Izquierda: Datos
                   SizedBox(
                     width: 420,
                     child: Column(
@@ -118,7 +117,6 @@ class _CityFormState extends State<CityForm> {
 
                   const SizedBox(width: 24),
 
-                  // Columna Derecha: Imagen
                   SizedBox(
                     width: 300,
                     child: Column(

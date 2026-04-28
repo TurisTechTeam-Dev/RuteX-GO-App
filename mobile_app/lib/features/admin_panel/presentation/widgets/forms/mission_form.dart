@@ -27,7 +27,7 @@ class MissionForm extends StatefulWidget {
 }
 
 class _MissionFormState extends State<MissionForm> {
-  late final TextEditingController _tituloCtrl;
+  late final TextEditingController _titleController;
   late final TextEditingController _questionOneController;
   late final TextEditingController _questionTwoController;
   late final TextEditingController _questionThreeController;
@@ -42,7 +42,7 @@ class _MissionFormState extends State<MissionForm> {
     final questionsData =
         widget.mission?.questions ?? const <AdminMissionQuestion>[];
 
-    _tituloCtrl = TextEditingController(text: widget.mission?.title);
+    _titleController = TextEditingController(text: widget.mission?.title);
     _questionOneController = TextEditingController(
       text: questionsData.isNotEmpty ? questionsData[0].text : '',
     );
@@ -55,12 +55,12 @@ class _MissionFormState extends State<MissionForm> {
     _answerControllers = List.generate(9, (index) {
       final questionIndex = index ~/ 3;
       final answerIndex = index % 3;
-      final respuestas = questionIndex < questionsData.length
+      final answers = questionIndex < questionsData.length
           ? questionsData[questionIndex].answers
           : null;
       return TextEditingController(
-        text: respuestas != null && answerIndex < respuestas.length
-            ? respuestas[answerIndex]
+        text: answers != null && answerIndex < answers.length
+            ? answers[answerIndex]
             : '',
       );
     });
@@ -77,7 +77,7 @@ class _MissionFormState extends State<MissionForm> {
 
   @override
   void dispose() {
-    _tituloCtrl.dispose();
+    _titleController.dispose();
     _questionOneController.dispose();
     _questionTwoController.dispose();
     _questionThreeController.dispose();
@@ -90,8 +90,8 @@ class _MissionFormState extends State<MissionForm> {
   @override
   Widget build(BuildContext context) {
     final usedPointIds = widget.existingMissions
-        .where((mision) => mision.id != widget.mission?.id)
-        .map((mision) => mision.pointId)
+        .where((mission) => mission.id != widget.mission?.id)
+        .map((mission) => mission.pointId)
         .where((id) => id.isNotEmpty)
         .map(TextNormalizer.toAsciiSlug)
         .toSet();
@@ -99,13 +99,13 @@ class _MissionFormState extends State<MissionForm> {
     final pointIdsForSelectedCity = _pointIdsForSelectedCity();
 
     final availablePoints = widget.availablePoints
-        .where((punto) => punto.id != null)
+        .where((point) => point.id != null)
         .where(
-          (punto) =>
+          (point) =>
               pointIdsForSelectedCity.contains(
-                TextNormalizer.toAsciiSlug(punto.id!),
+                TextNormalizer.toAsciiSlug(point.id!),
               ) ||
-              _belongsToSelectedCity(punto),
+              _belongsToSelectedCity(point),
         )
         .toList();
 
@@ -122,7 +122,7 @@ class _MissionFormState extends State<MissionForm> {
               ),
               const SizedBox(height: 16),
               _buildLabel('Título de la Misión'),
-              SizedBox(width: 420, child: _buildTextField(_tituloCtrl)),
+              SizedBox(width: 420, child: _buildTextField(_titleController)),
               const SizedBox(height: 24),
               _buildLabel('Ciudad'),
               const SizedBox(height: 8),
@@ -170,10 +170,10 @@ class _MissionFormState extends State<MissionForm> {
                   decoration: _inputDecoration(),
                   items: availablePoints
                       .map(
-                        (punto) => DropdownMenuItem<String>(
-                          value: punto.id!,
+                        (point) => DropdownMenuItem<String>(
+                          value: point.id!,
                           child: Text(
-                            '${punto.name} (${_cityNameForPoint(punto)})',
+                            '${point.name} (${_cityNameForPoint(point)})',
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -186,23 +186,23 @@ class _MissionFormState extends State<MissionForm> {
               ),
               const SizedBox(height: 30),
 
-              // SECCIÓN DE PREGUNTAS DESPLEGABLES
+              // Question accordion
               _buildQuestionAccordion(
-                numero: 1,
-                preguntaController: _questionOneController,
-                respuestasOffset: 0,
+                number: 1,
+                questionController: _questionOneController,
+                answersOffset: 0,
               ),
               const SizedBox(height: 12),
               _buildQuestionAccordion(
-                numero: 2,
-                preguntaController: _questionTwoController,
-                respuestasOffset: 3,
+                number: 2,
+                questionController: _questionTwoController,
+                answersOffset: 3,
               ),
               const SizedBox(height: 12),
               _buildQuestionAccordion(
-                numero: 3,
-                preguntaController: _questionThreeController,
-                respuestasOffset: 6,
+                number: 3,
+                questionController: _questionThreeController,
+                answersOffset: 6,
               ),
 
               const SizedBox(height: 26),
@@ -224,7 +224,7 @@ class _MissionFormState extends State<MissionForm> {
                           AdminMissionModel(
                             id: widget.mission?.id,
                             pointId: _selectedPointId ?? '',
-                            title: _tituloCtrl.text.trim(),
+                            title: _titleController.text.trim(),
                             questions: _buildQuestions(),
                           ),
                         );
@@ -241,9 +241,9 @@ class _MissionFormState extends State<MissionForm> {
   }
 
   Widget _buildQuestionAccordion({
-    required int numero,
-    required TextEditingController preguntaController,
-    required int respuestasOffset,
+    required int number,
+    required TextEditingController questionController,
+    required int answersOffset,
   }) {
     return SizedBox(
       width: 520,
@@ -255,10 +255,10 @@ class _MissionFormState extends State<MissionForm> {
           ),
         ),
         child: ExpansionTile(
-          shape: const Border(), // Quita bordes extra al expandir
+          shape: const Border(),
           collapsedShape: const Border(),
           title: Text(
-            'Configurar Pregunta $numero',
+            'Configurar Pregunta $number',
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               color: Color(0xFF6B7249),
@@ -268,16 +268,14 @@ class _MissionFormState extends State<MissionForm> {
           children: [
             _buildLabel('Enunciado de la pregunta'),
             const SizedBox(height: 8),
-            SizedBox(width: 460, child: _buildTextField(preguntaController)),
+            SizedBox(width: 460, child: _buildTextField(questionController)),
             const SizedBox(height: 16),
             for (var i = 0; i < 3; i++) ...[
               _buildLabel('Respuesta ${i + 1}'),
               const SizedBox(height: 8),
               SizedBox(
                 width: 460,
-                child: _buildTextField(
-                  _answerControllers[respuestasOffset + i],
-                ),
+                child: _buildTextField(_answerControllers[answersOffset + i]),
               ),
               const SizedBox(height: 12),
             ],
@@ -286,7 +284,7 @@ class _MissionFormState extends State<MissionForm> {
             SizedBox(
               width: 220,
               child: DropdownButtonFormField<int>(
-                initialValue: _correctAnswers[numero - 1],
+                initialValue: _correctAnswers[number - 1],
                 decoration: _inputDecoration(),
                 items: const [
                   DropdownMenuItem(value: 0, child: Text('Respuesta 1')),
@@ -294,7 +292,7 @@ class _MissionFormState extends State<MissionForm> {
                   DropdownMenuItem(value: 2, child: Text('Respuesta 3')),
                 ],
                 onChanged: (value) {
-                  setState(() => _correctAnswers[numero - 1] = value ?? 0);
+                  setState(() => _correctAnswers[number - 1] = value ?? 0);
                 },
               ),
             ),
@@ -352,7 +350,7 @@ class _MissionFormState extends State<MissionForm> {
   }
 
   String? _validate(Set<String> usedPointIds) {
-    if (_tituloCtrl.text.trim().isEmpty) {
+    if (_titleController.text.trim().isEmpty) {
       return 'Introduce el título de la misión';
     }
     if (_selectedCityId == null || _selectedCityId!.isEmpty) {
@@ -397,7 +395,9 @@ class _MissionFormState extends State<MissionForm> {
     if (selectedCityId == null || pointId == null) return directCityName;
 
     final pointIdsForSelectedCity = _pointIdsForSelectedCity();
-    if (!pointIdsForSelectedCity.contains(TextNormalizer.toAsciiSlug(pointId))) {
+    if (!pointIdsForSelectedCity.contains(
+      TextNormalizer.toAsciiSlug(pointId),
+    )) {
       return directCityName;
     }
 

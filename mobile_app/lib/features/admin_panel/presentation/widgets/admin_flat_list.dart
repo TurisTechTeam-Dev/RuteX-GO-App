@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_app/core/widgets/nav_web/navegacion_web.dart';
+import 'package:mobile_app/features/admin_panel/presentation/widgets/admin_navbar.dart';
 import 'package:mobile_app/features/admin_panel/data/admin_remote_datasource.dart';
 import 'package:mobile_app/features/admin_panel/data/models/admin_models.dart';
 
 class AdminFlatList extends StatelessWidget {
-  final NavTab currentTab;
+  final AdminNavTab currentTab;
   final Function(dynamic) onItemSelected;
 
   const AdminFlatList({
@@ -19,7 +19,6 @@ class AdminFlatList extends StatelessWidget {
 
     return Column(
       children: [
-        // Botón superior para añadir nuevo (envía null para abrir formulario vacío)
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: ElevatedButton.icon(
@@ -38,7 +37,6 @@ class AdminFlatList extends StatelessWidget {
         ),
         const Divider(height: 1),
 
-        // Lista dinámica de elementos
         Expanded(
           child: StreamBuilder(
             stream: _getStream(dataSource),
@@ -70,13 +68,11 @@ class AdminFlatList extends StatelessWidget {
                 itemBuilder: (context, i) {
                   final item = items[i];
 
-                  // LÓGICA DE CORRECCIÓN DE NOMBRE/TÍTULO
-                  String textoAMostrar = "";
+                  String displayText = "";
                   if (item is AdminMissionModel) {
-                    textoAMostrar = item.title; // Usamos titulo para misiones
+                    displayText = item.title;
                   } else {
-                    // Usamos dynamic para acceder a 'nombre' en Ciudades, Rutas y Puntos
-                    textoAMostrar = (item as dynamic).name ?? "Sin nombre";
+                    displayText = (item as dynamic).name ?? "Sin nombre";
                   }
 
                   return ListTile(
@@ -85,7 +81,7 @@ class AdminFlatList extends StatelessWidget {
                       vertical: 5,
                     ),
                     title: Text(
-                      textoAMostrar,
+                      displayText,
                       style: const TextStyle(
                         fontWeight: FontWeight.w500,
                         fontSize: 14,
@@ -93,21 +89,20 @@ class AdminFlatList extends StatelessWidget {
                     ),
                     trailing: IconButton(
                       icon: const Icon(Icons.delete, color: Colors.redAccent),
-                      onPressed: () =>
-                          _confirmDelete(context, textoAMostrar, () {
-                            if (item is AdminCityModel) {
-                              dataSource.deleteCity(item.id!);
-                            }
-                            if (item is AdminRouteModel) {
-                              dataSource.deleteRoute(item.id!);
-                            }
-                            if (item is AdminPoiModel) {
-                              dataSource.deletePoi(item.id!);
-                            }
-                            if (item is AdminMissionModel) {
-                              dataSource.deleteMission(item.id!);
-                            }
-                          }),
+                      onPressed: () => _confirmDelete(context, displayText, () {
+                        if (item is AdminCityModel) {
+                          dataSource.deleteCity(item.id!);
+                        }
+                        if (item is AdminRouteModel) {
+                          dataSource.deleteRoute(item.id!);
+                        }
+                        if (item is AdminPoiModel) {
+                          dataSource.deletePoi(item.id!);
+                        }
+                        if (item is AdminMissionModel) {
+                          dataSource.deleteMission(item.id!);
+                        }
+                      }),
                     ),
                     onTap: () => onItemSelected(item),
                   );
@@ -146,30 +141,28 @@ class AdminFlatList extends StatelessWidget {
     if (result == true) onConfirm();
   }
 
-  // Helper para seleccionar el Stream correcto según la pestaña
   Stream _getStream(AdminRemoteDataSource ds) {
     switch (currentTab) {
-      case NavTab.cities:
+      case AdminNavTab.cities:
         return ds.watchCities();
-      case NavTab.routes:
+      case AdminNavTab.routes:
         return ds.watchRoutes();
-      case NavTab.pointsOfInterest:
+      case AdminNavTab.pointsOfInterest:
         return ds.watchPois();
-      case NavTab.missions:
+      case AdminNavTab.missions:
         return ds.watchMissions();
     }
   }
 
-  // Helper para el texto del botón
   String _getSingularName() {
     switch (currentTab) {
-      case NavTab.cities:
+      case AdminNavTab.cities:
         return "Ciudad";
-      case NavTab.routes:
+      case AdminNavTab.routes:
         return "Ruta";
-      case NavTab.pointsOfInterest:
+      case AdminNavTab.pointsOfInterest:
         return "Punto de Interés";
-      case NavTab.missions:
+      case AdminNavTab.missions:
         return "Misión";
     }
   }

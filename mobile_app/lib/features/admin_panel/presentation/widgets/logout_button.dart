@@ -43,10 +43,9 @@ class LogoutButton extends StatelessWidget {
                 await FirebaseAuth.instance.signOut();
                 if (context.mounted) {
                   Navigator.pop(dialogContext);
-                  Navigator.of(context).pushNamedAndRemoveUntil(
-                    '/login',
-                    (route) => false,
-                  );
+                  Navigator.of(
+                    context,
+                  ).pushNamedAndRemoveUntil('/login', (route) => false);
                 }
               },
               child: const Text('Salir', style: TextStyle(color: Colors.red)),

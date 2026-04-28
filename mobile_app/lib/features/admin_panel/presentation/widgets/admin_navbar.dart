@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_app/core/constants/app_colors.dart';
-import 'package:mobile_app/core/widgets/nav_web/button_close_session.dart';
+import 'package:mobile_app/features/admin_panel/presentation/widgets/logout_button.dart';
 
-enum NavTab { routes, cities, missions, pointsOfInterest }
+enum AdminNavTab { routes, cities, missions, pointsOfInterest }
 
-class MainNavbar extends StatelessWidget {
-  final NavTab? activeTab;
-  final ValueChanged<NavTab> onTabChanged;
+class AdminNavbar extends StatelessWidget {
+  final AdminNavTab? activeTab;
+  final ValueChanged<AdminNavTab> onTabChanged;
   final VoidCallback? onMenuPressed;
 
-  const MainNavbar({
+  const AdminNavbar({
     super.key,
     required this.activeTab,
     required this.onTabChanged,
@@ -45,10 +45,13 @@ class MainNavbar extends StatelessWidget {
             child: Wrap(
               spacing: 8,
               children: [
-                _buildNavButton(NavTab.cities, 'Ciudades'),
-                _buildNavButton(NavTab.routes, 'Rutas'),
-                _buildNavButton(NavTab.pointsOfInterest, 'Puntos de interés'),
-                _buildNavButton(NavTab.missions, 'Misiones'),
+                _buildNavButton(AdminNavTab.cities, 'Ciudades'),
+                _buildNavButton(AdminNavTab.routes, 'Rutas'),
+                _buildNavButton(
+                  AdminNavTab.pointsOfInterest,
+                  'Puntos de interés',
+                ),
+                _buildNavButton(AdminNavTab.missions, 'Misiones'),
               ],
             ),
           ),
@@ -82,13 +85,16 @@ class MainNavbar extends StatelessWidget {
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: [
-              _buildNavButton(NavTab.cities, 'Ciudades'),
+              _buildNavButton(AdminNavTab.cities, 'Ciudades'),
               const SizedBox(width: 8),
-              _buildNavButton(NavTab.routes, 'Rutas'),
+              _buildNavButton(AdminNavTab.routes, 'Rutas'),
               const SizedBox(width: 8),
-              _buildNavButton(NavTab.pointsOfInterest, 'Puntos de interés'),
+              _buildNavButton(
+                AdminNavTab.pointsOfInterest,
+                'Puntos de interés',
+              ),
               const SizedBox(width: 8),
-              _buildNavButton(NavTab.missions, 'Misiones'),
+              _buildNavButton(AdminNavTab.missions, 'Misiones'),
             ],
           ),
         ),
@@ -96,7 +102,7 @@ class MainNavbar extends StatelessWidget {
     );
   }
 
-  Widget _buildNavButton(NavTab tab, String label) {
+  Widget _buildNavButton(AdminNavTab tab, String label) {
     final isActive = tab == activeTab;
 
     return OutlinedButton(

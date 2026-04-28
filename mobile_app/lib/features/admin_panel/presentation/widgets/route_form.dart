@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:mobile_app/core/widgets/buttons/custom_button.dart';
 import 'package:mobile_app/core/widgets/cards/custom_cards.dart';
 import 'package:mobile_app/features/admin_panel/data/models/admin_models.dart';
-import 'package:mobile_app/core/widgets/nav_web/componentes_extras/image_picker_box.dart';
+import 'package:mobile_app/features/admin_panel/presentation/widgets/components/image_picker_box.dart';
 import 'package:mobile_app/core/utils/text_normalizer.dart';
 
 class RouteForm extends StatefulWidget {
@@ -103,7 +103,6 @@ class _RouteFormState extends State<RouteForm> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // COLUMNA IZQUIERDA
                   SizedBox(
                     width: 380,
                     child: Column(
@@ -201,11 +200,11 @@ class _RouteFormState extends State<RouteForm> {
                               : null,
                           decoration: _inputDecoration(),
                           items: widget.availableCities
-                              .where((ciudad) => ciudad.id != null)
+                              .where((city) => city.id != null)
                               .map(
-                                (ciudad) => DropdownMenuItem<String>(
-                                  value: ciudad.id!,
-                                  child: Text(ciudad.name),
+                                (city) => DropdownMenuItem<String>(
+                                  value: city.id!,
+                                  child: Text(city.name),
                                 ),
                               )
                               .toList(),
@@ -334,8 +333,8 @@ class _RouteFormState extends State<RouteForm> {
   List<AdminPoiModel> _filteredPoints() {
     if (_selectedCity == null || _selectedCity!.isEmpty) return [];
 
-    // Buscamos la ciudad seleccionada para tener su nombre
-    final ciudad = widget.availableCities.firstWhere(
+    // Find the selected city so matching works with id or name
+    final selectedCity = widget.availableCities.firstWhere(
       (c) => c.id == _selectedCity || c.name == _selectedCity,
       orElse: () => const AdminCityModel(
         id: '',
@@ -347,10 +346,10 @@ class _RouteFormState extends State<RouteForm> {
     );
 
     return widget.availablePoints.where((poi) {
-      // Si el punto ya está en la ruta, lo mostramos sí o sí para que no "desaparezca" al editar
+      // Keep already selected points visible while editing
       if (poi.id != null && _selectedPointIds.contains(poi.id)) return true;
 
-      return _belongsToCity(poi.cityId, ciudad);
+      return _belongsToCity(poi.cityId, selectedCity);
     }).toList();
   }
 

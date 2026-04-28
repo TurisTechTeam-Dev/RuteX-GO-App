@@ -92,7 +92,8 @@ class AdminPoiModel {
     return AdminPoiModel(
       id: id,
       name: name,
-      description: _firstTextValue(data, const [
+      description:
+          _firstTextValue(data, const [
             PointInterestFields.descripcion,
             'descripci\u00F3n',
             'description',

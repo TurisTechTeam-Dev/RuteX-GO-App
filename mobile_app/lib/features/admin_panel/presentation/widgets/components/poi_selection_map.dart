@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
-class MapaSeleccionPoi extends StatelessWidget {
+class PoiSelectionMap extends StatelessWidget {
   final MapController mapController;
-  final LatLng centro;
-  final LatLng? seleccionado;
+  final LatLng center;
+  final LatLng? selectedPosition;
   final Function(LatLng) onTap;
 
-  const MapaSeleccionPoi({
+  const PoiSelectionMap({
     super.key,
     required this.mapController,
-    required this.centro,
-    this.seleccionado,
+    required this.center,
+    this.selectedPosition,
     required this.onTap,
   });
 
@@ -25,8 +25,8 @@ class MapaSeleccionPoi extends StatelessWidget {
         child: FlutterMap(
           mapController: mapController,
           options: MapOptions(
-            initialCenter: seleccionado ?? centro,
-            initialZoom: seleccionado == null ? 13 : 16,
+            initialCenter: selectedPosition ?? center,
+            initialZoom: selectedPosition == null ? 13 : 16,
             onTap: (_, latLng) => onTap(latLng),
           ),
           children: [
@@ -34,11 +34,11 @@ class MapaSeleccionPoi extends StatelessWidget {
               urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
               userAgentPackageName: 'com.rutexgo.mobile_app',
             ),
-            if (seleccionado != null)
+            if (selectedPosition != null)
               MarkerLayer(
                 markers: [
                   Marker(
-                    point: seleccionado!,
+                    point: selectedPosition!,
                     width: 44,
                     height: 44,
                     child: const Icon(
