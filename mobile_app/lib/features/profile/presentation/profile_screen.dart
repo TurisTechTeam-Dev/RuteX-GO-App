@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../../../app/navigation/app_routes.dart';
 import '../../../app/widgets/custom_drawer.dart';
 import '../../../app/widgets/top_app_bar.dart';
 import '../../../core/constants/app_colors.dart';
@@ -211,77 +212,89 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const TopAppBar(showBack: false),
-      endDrawer: const CustomDrawer(),
-      body: Stack(
-        children: [
-          const ExtremaduraMapBackground(),
-          SafeArea(
-            child: FutureBuilder<HomeData>(
-              future: _profileFuture,
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return ProfileError(message: snapshot.error.toString());
-                }
+    final canReturnToPreviousRoute = Navigator.of(context).canPop();
 
-                if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+    return PopScope(
+      canPop: canReturnToPreviousRoute,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
 
-                final data = snapshot.data!;
-                _initializeForm(data.user);
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil(AppRoutes.home, (route) => false);
+      },
+      child: Scaffold(
+        appBar: const TopAppBar(showBack: true),
+        endDrawer: const CustomDrawer(),
+        body: Stack(
+          children: [
+            const ExtremaduraMapBackground(),
+            SafeArea(
+              child: FutureBuilder<HomeData>(
+                future: _profileFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return ProfileError(message: snapshot.error.toString());
+                  }
 
-                return ProfileContent(
-                  user: data.user,
-                  usernameFormKey: _usernameFormKey,
-                  emailFormKey: _emailFormKey,
-                  passwordFormKey: _passwordFormKey,
-                  usernameController: _usernameController,
-                  emailController: _emailController,
-                  currentPasswordController: _currentPasswordController,
-                  passwordController: _passwordController,
-                  confirmPasswordController: _confirmPasswordController,
-                  isEditingUsername: _isEditingUsername,
-                  isEditingEmail: _isEditingEmail,
-                  isEditingPassword: _isEditingPassword,
-                  isSavingUsername: _isSavingUsername,
-                  isSavingEmail: _isSavingEmail,
-                  isSavingPassword: _isSavingPassword,
-                  isUploadingAvatar: _isUploadingAvatar,
-                  onEditUsername: () =>
-                      setState(() => _isEditingUsername = true),
-                  onCancelUsername: () {
-                    _usernameController.text = data.user.username.isNotEmpty
-                        ? data.user.username
-                        : data.user.name;
-                    setState(() => _isEditingUsername = false);
-                  },
-                  onSaveUsername: _updateUsername,
-                  onChangeAvatar: _changeAvatar,
-                  onEditEmail: () => setState(() => _isEditingEmail = true),
-                  onCancelEmail: () {
-                    final authEmail = _authUseCases.getCurrentUser()?.email;
-                    _emailController.text = authEmail?.isNotEmpty == true
-                        ? authEmail!
-                        : data.user.email;
-                    setState(() => _isEditingEmail = false);
-                  },
-                  onSaveEmail: _requestEmailChange,
-                  onEditPassword: () =>
-                      setState(() => _isEditingPassword = true),
-                  onCancelPassword: () {
-                    _currentPasswordController.clear();
-                    _passwordController.clear();
-                    _confirmPasswordController.clear();
-                    setState(() => _isEditingPassword = false);
-                  },
-                  onSavePassword: _updatePassword,
-                );
-              },
+                  if (!snapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final data = snapshot.data!;
+                  _initializeForm(data.user);
+
+                  return ProfileContent(
+                    user: data.user,
+                    usernameFormKey: _usernameFormKey,
+                    emailFormKey: _emailFormKey,
+                    passwordFormKey: _passwordFormKey,
+                    usernameController: _usernameController,
+                    emailController: _emailController,
+                    currentPasswordController: _currentPasswordController,
+                    passwordController: _passwordController,
+                    confirmPasswordController: _confirmPasswordController,
+                    isEditingUsername: _isEditingUsername,
+                    isEditingEmail: _isEditingEmail,
+                    isEditingPassword: _isEditingPassword,
+                    isSavingUsername: _isSavingUsername,
+                    isSavingEmail: _isSavingEmail,
+                    isSavingPassword: _isSavingPassword,
+                    isUploadingAvatar: _isUploadingAvatar,
+                    onEditUsername: () =>
+                        setState(() => _isEditingUsername = true),
+                    onCancelUsername: () {
+                      _usernameController.text = data.user.username.isNotEmpty
+                          ? data.user.username
+                          : data.user.name;
+                      setState(() => _isEditingUsername = false);
+                    },
+                    onSaveUsername: _updateUsername,
+                    onChangeAvatar: _changeAvatar,
+                    onEditEmail: () => setState(() => _isEditingEmail = true),
+                    onCancelEmail: () {
+                      final authEmail = _authUseCases.getCurrentUser()?.email;
+                      _emailController.text = authEmail?.isNotEmpty == true
+                          ? authEmail!
+                          : data.user.email;
+                      setState(() => _isEditingEmail = false);
+                    },
+                    onSaveEmail: _requestEmailChange,
+                    onEditPassword: () =>
+                        setState(() => _isEditingPassword = true),
+                    onCancelPassword: () {
+                      _currentPasswordController.clear();
+                      _passwordController.clear();
+                      _confirmPasswordController.clear();
+                      setState(() => _isEditingPassword = false);
+                    },
+                    onSavePassword: _updatePassword,
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
