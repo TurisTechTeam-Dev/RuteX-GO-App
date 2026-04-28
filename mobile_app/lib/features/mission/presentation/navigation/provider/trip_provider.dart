@@ -20,6 +20,7 @@ class TripSimulationProvider extends ChangeNotifier {
   final DateTime _startedAt = DateTime.now();
   LatLng? _lastRoutedPosition;
   int _routeCalculationVersion = 0;
+  bool _isDisposed = false;
 
   // --- State ---
   List<PointOfInterest> _pointsOfInterest = [];
@@ -79,15 +80,17 @@ class TripSimulationProvider extends ChangeNotifier {
   Future<void> _initializeTrip() async {
     try {
       _isLoading = true;
-      notifyListeners();
+      _notifyListeners();
 
       debugPrint("[DB] Loading points for route: $routeId");
       _pointsOfInterest = await missionUseCases.executeGetPointsForRoute(
         routeId,
       );
+      if (_isDisposed) return;
       debugPrint("[DB] Loaded ${_pointsOfInterest.length} points.");
 
       await _initGpsTracking();
+      if (_isDisposed) return;
 
       // Start with the closest pending point to the current position.
       _selectNearestTargetPoi();
@@ -95,8 +98,10 @@ class TripSimulationProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint("[TRIP_PROVIDER] Critical initialization error: $e");
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (!_isDisposed) {
+        _isLoading = false;
+        _notifyListeners();
+      }
     }
   }
 
@@ -129,7 +134,7 @@ class TripSimulationProvider extends ChangeNotifier {
       _routePoints = [];
       _navigationSteps = [];
       _currentStepIndex = 0;
-      notifyListeners();
+      _notifyListeners();
       return;
     }
 
@@ -140,7 +145,7 @@ class TripSimulationProvider extends ChangeNotifier {
     _routePoints = [];
     _navigationSteps = [];
     _currentStepIndex = 0;
-    notifyListeners();
+    _notifyListeners();
 
     final target = _pointsOfInterest[targetIndex].location;
     debugPrint(
@@ -153,10 +158,12 @@ class TripSimulationProvider extends ChangeNotifier {
         _currentPosition,
         target,
       );
+      if (_isDisposed) return;
       nextRoute = route.points.isNotEmpty
           ? route
           : NavigationRoute(points: [_currentPosition, target]);
     } catch (e) {
+      if (_isDisposed) return;
       debugPrint("[OSRM] Connection error. Falling back to a straight line.");
       nextRoute = NavigationRoute(points: [_currentPosition, target]);
     }
@@ -167,7 +174,7 @@ class TripSimulationProvider extends ChangeNotifier {
     if (isStaleCalculation) {
       if (calculationVersion == _routeCalculationVersion) {
         _isCalculatingRoute = false;
-        notifyListeners();
+        _notifyListeners();
       }
       return;
     }
@@ -178,7 +185,7 @@ class TripSimulationProvider extends ChangeNotifier {
     _updateCurrentNavigationStep();
     _lastRoutedPosition = _currentPosition;
     _isCalculatingRoute = false;
-    notifyListeners();
+    _notifyListeners();
   }
 
   /// Marks the current point as visited and recalculates the closest target.
@@ -201,7 +208,7 @@ class TripSimulationProvider extends ChangeNotifier {
     if (!_allPoisCompleted) {
       unawaited(_calculateStreetRoute());
     }
-    notifyListeners();
+    _notifyListeners();
     return _allPoisCompleted;
   }
 
@@ -210,11 +217,14 @@ class TripSimulationProvider extends ChangeNotifier {
   Future<void> _initGpsTracking() async {
     debugPrint("[GPS] Configuring position stream.");
     LocationPermission permission = await Geolocator.checkPermission();
+    if (_isDisposed) return;
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
+      if (_isDisposed) return;
     }
 
     Position pos = await Geolocator.getCurrentPosition();
+    if (_isDisposed) return;
     _currentPosition = LatLng(pos.latitude, pos.longitude);
 
     _positionStream =
@@ -224,12 +234,13 @@ class TripSimulationProvider extends ChangeNotifier {
             distanceFilter: 10,
           ),
         ).listen((Position pos) {
+          if (_isDisposed) return;
           if (!_isSimulating) {
             _currentPosition = LatLng(pos.latitude, pos.longitude);
             _checkArrivalProximity(_currentPosition);
             _updateCurrentNavigationStep();
             _refreshStreetRouteIfNeeded();
-            notifyListeners();
+            _notifyListeners();
           }
         });
   }
@@ -269,7 +280,7 @@ class TripSimulationProvider extends ChangeNotifier {
       );
       _hasReachedDestination = true;
       _isSimulating = false;
-      notifyListeners();
+      _notifyListeners();
     }
   }
 
@@ -281,6 +292,7 @@ class TripSimulationProvider extends ChangeNotifier {
 
     if (_routePoints.isEmpty) {
       await _calculateStreetRoute();
+      if (_isDisposed) return;
       if (_routePoints.isEmpty || _allPoisCompleted || _currentPoiIndex == -1) {
         return;
       }
@@ -293,13 +305,15 @@ class TripSimulationProvider extends ChangeNotifier {
     _hasReachedDestination = false;
 
     for (var point in _routePoints) {
-      if (!_isSimulating) break;
+      if (_isDisposed || !_isSimulating) break;
       _currentPosition = point;
       _checkArrivalProximity(_currentPosition);
       _updateCurrentNavigationStep();
-      notifyListeners();
+      _notifyListeners();
       await Future.delayed(_simulationStepDelay);
     }
+    if (_isDisposed) return;
+
     if (_isSimulating && !_hasReachedDestination) {
       final target = _pointsOfInterest[_currentPoiIndex];
       final finalDistance = NavigationDistanceUtils.metersBetween(
@@ -318,7 +332,7 @@ class TripSimulationProvider extends ChangeNotifier {
     }
 
     _isSimulating = false;
-    notifyListeners();
+    _notifyListeners();
   }
 
   // --- UI helpers ---
@@ -443,9 +457,17 @@ class TripSimulationProvider extends ChangeNotifier {
     return names;
   }
 
+  void _notifyListeners() {
+    if (_isDisposed) return;
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     debugPrint("[TRIP_PROVIDER] Disposing GPS stream.");
+    _isDisposed = true;
+    _isSimulating = false;
+    _routeCalculationVersion++;
     _positionStream?.cancel();
     super.dispose();
   }
