@@ -9,14 +9,14 @@ import 'package:mobile_app/features/admin_panel/presentation/widgets/route_form.
 import 'package:mobile_app/features/admin_panel/presentation/widgets/forms/city_form.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/forms/mission_form.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/forms/point_interest_form.dart';
+import 'package:mobile_app/features/admin_panel/presentation/models/admin_editable_item.dart';
 
 class AdminFormRouter extends StatelessWidget {
   final AdminNavTab tab;
-  final dynamic itemToEdit;
+  final AdminEditableItem? itemToEdit;
   final AdminRemoteDataSource dataSource;
-  final Function(dynamic, Future<void> Function(dynamic)) onSave;
+  final Future<void> Function(Future<void> Function()) onSave;
   final VoidCallback onResetSelection;
-  final Function(dynamic) onItemSelected;
 
   const AdminFormRouter({
     super.key,
@@ -25,7 +25,6 @@ class AdminFormRouter extends StatelessWidget {
     required this.dataSource,
     required this.onSave,
     required this.onResetSelection,
-    required this.onItemSelected,
   });
 
   @override
@@ -37,9 +36,10 @@ class AdminFormRouter extends StatelessWidget {
       case AdminNavTab.cities:
         return CityForm(
           key: uniqueKey,
-          city: itemToEdit is AdminCityModel ? itemToEdit : null,
-          onSave: (data) =>
-              onSave(data, (val) => dataSource.saveCity(val as AdminCityModel)),
+          city: itemToEdit is AdminCityItem
+              ? (itemToEdit as AdminCityItem).city
+              : null,
+          onSave: (city) => onSave(() => dataSource.saveCity(city)),
           onCancel: onResetSelection,
           onUploadImage: (Uint8List bytes, String name) =>
               dataSource.uploadFile(bytes, 'Contenido/Ciudades', name),
@@ -71,16 +71,13 @@ class AdminFormRouter extends StatelessWidget {
                 }
                 return RouteForm(
                   key: key,
-                  route: itemToEdit is AdminRouteModel
-                      ? itemToEdit as AdminRouteModel
+                  route: itemToEdit is AdminRouteItem
+                      ? (itemToEdit as AdminRouteItem).route
                       : null,
                   availableCities: citySnapshot.data!,
                   availablePoints: pointSnapshot.data!,
                   availableMissions: missionSnapshot.data!,
-                  onSave: (data) => onSave(
-                    data,
-                    (val) => dataSource.saveRoute(val as AdminRouteModel),
-                  ),
+                  onSave: (route) => onSave(() => dataSource.saveRoute(route)),
                   onUploadImage: (Uint8List bytes, String name) =>
                       dataSource.uploadFile(bytes, 'Contenido/Rutas', name),
                 );
@@ -103,12 +100,11 @@ class AdminFormRouter extends StatelessWidget {
 
         return PointInterestForm(
           key: key,
-          point: itemToEdit is AdminPoiModel
-              ? itemToEdit as AdminPoiModel
+          point: itemToEdit is AdminPoiItem
+              ? (itemToEdit as AdminPoiItem).point
               : null,
           cities: snapshot.data!,
-          onSave: (data) =>
-              onSave(data, (val) => dataSource.savePoi(val as AdminPoiModel)),
+          onSave: (point) => onSave(() => dataSource.savePoi(point)),
           onUploadImage: (Uint8List bytes, String name) =>
               dataSource.uploadFile(bytes, 'Contenido/Puntos de Interes', name),
         );
@@ -139,18 +135,15 @@ class AdminFormRouter extends StatelessWidget {
 
                     return MissionForm(
                       key: key,
-                      mission: itemToEdit is AdminMissionModel
-                          ? itemToEdit as AdminMissionModel
+                      mission: itemToEdit is AdminMissionItem
+                          ? (itemToEdit as AdminMissionItem).mission
                           : null,
                       availablePoints: pointSnapshot.data!,
                       existingMissions: missionSnapshot.data!,
                       cities: citySnapshot.data!,
                       routes: routeSnapshot.data!,
-                      onSave: (data) => onSave(
-                        data,
-                        (val) =>
-                            dataSource.saveMission(val as AdminMissionModel),
-                      ),
+                      onSave: (mission) =>
+                          onSave(() => dataSource.saveMission(mission)),
                     );
                   },
                 );

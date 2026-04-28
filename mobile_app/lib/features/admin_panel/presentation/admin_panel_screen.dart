@@ -5,7 +5,7 @@ import 'package:mobile_app/features/admin_panel/presentation/widgets/components/
 import 'package:mobile_app/features/admin_panel/presentation/widgets/components/admin_sidebar.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/admin_navbar.dart';
 import 'package:mobile_app/features/admin_panel/data/admin_remote_datasource.dart';
-import 'package:mobile_app/features/admin_panel/data/models/admin_models.dart';
+import 'package:mobile_app/features/admin_panel/presentation/models/admin_editable_item.dart';
 
 class AdminPanelScreen extends StatefulWidget {
   const AdminPanelScreen({super.key});
@@ -19,7 +19,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   AdminNavTab? _currentTab;
-  dynamic _itemToEdit;
+  AdminEditableItem? _itemToEdit;
   int _formResetVersion = 0;
 
   @override
@@ -140,10 +140,9 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                       tab: tab,
                       itemToEdit: _itemToEdit,
                       dataSource: _dataSource,
-                      onItemSelected: _selectItem,
-                      onSave: (data, saveFn) async {
+                      onSave: (saveItem) async {
                         try {
-                          await saveFn(data);
+                          await saveItem();
                           if (!mounted) return;
 
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -176,22 +175,10 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
     );
   }
 
-  void _selectItem(dynamic item) {
+  void _selectItem(AdminEditableItem? item) {
     setState(() {
       _itemToEdit = item;
-
-      if (item is AdminCityModel) {
-        _currentTab = AdminNavTab.cities;
-      }
-      if (item is AdminRouteModel) {
-        _currentTab = AdminNavTab.routes;
-      }
-      if (item is AdminPoiModel) {
-        _currentTab = AdminNavTab.pointsOfInterest;
-      }
-      if (item is AdminMissionModel) {
-        _currentTab = AdminNavTab.missions;
-      }
+      _currentTab = item?.tab ?? _currentTab;
     });
   }
 

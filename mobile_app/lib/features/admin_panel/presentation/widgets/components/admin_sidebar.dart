@@ -4,10 +4,11 @@ import 'package:mobile_app/features/admin_panel/presentation/widgets/components/
 import 'package:mobile_app/features/admin_panel/presentation/widgets/admin_flat_list.dart';
 import 'package:mobile_app/features/admin_panel/data/admin_remote_datasource.dart';
 import 'package:mobile_app/features/admin_panel/data/models/admin_models.dart';
+import 'package:mobile_app/features/admin_panel/presentation/models/admin_editable_item.dart';
 
 class AdminSidebar extends StatelessWidget {
   final AdminNavTab currentTab;
-  final Function(dynamic) onItemSelected;
+  final ValueChanged<AdminEditableItem?> onItemSelected;
 
   const AdminSidebar({
     super.key,
@@ -87,10 +88,14 @@ class AdminSidebar extends StatelessWidget {
                                   allPois: pointSnapshot.data!,
                                   allMissions: missionSnapshot.data!,
                                   currentTab: currentTab,
-                                  onEditCity: onItemSelected,
-                                  onEditRoute: onItemSelected,
-                                  onEditPoi: onItemSelected,
-                                  onEditMission: onItemSelected,
+                                  onEditCity: (city) =>
+                                      onItemSelected(AdminCityItem(city)),
+                                  onEditRoute: (route) =>
+                                      onItemSelected(AdminRouteItem(route)),
+                                  onEditPoi: (point) =>
+                                      onItemSelected(AdminPoiItem(point)),
+                                  onEditMission: (mission) =>
+                                      onItemSelected(AdminMissionItem(mission)),
                                   onDeleteCity: (item) =>
                                       dataSource.deleteCity(item.id!),
                                   onDeleteRoute: (item) =>

@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/admin_navbar.dart';
 import 'package:mobile_app/features/admin_panel/data/admin_remote_datasource.dart';
 import 'package:mobile_app/features/admin_panel/data/models/admin_models.dart';
+import 'package:mobile_app/features/admin_panel/presentation/models/admin_editable_item.dart';
 
 class AdminFlatList extends StatelessWidget {
   final AdminNavTab currentTab;
-  final Function(dynamic) onItemSelected;
+  final ValueChanged<AdminEditableItem?> onItemSelected;
 
   const AdminFlatList({
     super.key,
@@ -50,7 +51,7 @@ class AdminFlatList extends StatelessWidget {
                 );
               }
 
-              final items = snapshot.data as List;
+              final items = _editableItemsFrom(snapshot.data);
 
               if (items.isEmpty) {
                 return Center(
@@ -67,13 +68,9 @@ class AdminFlatList extends StatelessWidget {
                     const Divider(height: 1, indent: 15, endIndent: 15),
                 itemBuilder: (context, i) {
                   final item = items[i];
-
-                  String displayText = "";
-                  if (item is AdminMissionModel) {
-                    displayText = item.title;
-                  } else {
-                    displayText = (item as dynamic).name ?? "Sin nombre";
-                  }
+                  final displayText = item.displayName.isEmpty
+                      ? "Sin nombre"
+                      : item.displayName;
 
                   return ListTile(
                     contentPadding: const EdgeInsets.symmetric(
@@ -90,18 +87,7 @@ class AdminFlatList extends StatelessWidget {
                     trailing: IconButton(
                       icon: const Icon(Icons.delete, color: Colors.redAccent),
                       onPressed: () => _confirmDelete(context, displayText, () {
-                        if (item is AdminCityModel) {
-                          dataSource.deleteCity(item.id!);
-                        }
-                        if (item is AdminRouteModel) {
-                          dataSource.deleteRoute(item.id!);
-                        }
-                        if (item is AdminPoiModel) {
-                          dataSource.deletePoi(item.id!);
-                        }
-                        if (item is AdminMissionModel) {
-                          dataSource.deleteMission(item.id!);
-                        }
+                        _deleteItem(dataSource, item);
                       }),
                     ),
                     onTap: () => onItemSelected(item),
@@ -141,7 +127,7 @@ class AdminFlatList extends StatelessWidget {
     if (result == true) onConfirm();
   }
 
-  Stream _getStream(AdminRemoteDataSource ds) {
+  Stream<List<Object>> _getStream(AdminRemoteDataSource ds) {
     switch (currentTab) {
       case AdminNavTab.cities:
         return ds.watchCities();
@@ -151,6 +137,35 @@ class AdminFlatList extends StatelessWidget {
         return ds.watchPois();
       case AdminNavTab.missions:
         return ds.watchMissions();
+    }
+  }
+
+  List<AdminEditableItem> _editableItemsFrom(Object? data) {
+    if (data is List<AdminCityModel>) {
+      return data.map(AdminCityItem.new).toList();
+    }
+    if (data is List<AdminRouteModel>) {
+      return data.map(AdminRouteItem.new).toList();
+    }
+    if (data is List<AdminPoiModel>) {
+      return data.map(AdminPoiItem.new).toList();
+    }
+    if (data is List<AdminMissionModel>) {
+      return data.map(AdminMissionItem.new).toList();
+    }
+    return const <AdminEditableItem>[];
+  }
+
+  void _deleteItem(AdminRemoteDataSource dataSource, AdminEditableItem item) {
+    switch (item) {
+      case AdminCityItem(:final city):
+        dataSource.deleteCity(city.id!);
+      case AdminRouteItem(:final route):
+        dataSource.deleteRoute(route.id!);
+      case AdminPoiItem(:final point):
+        dataSource.deletePoi(point.id!);
+      case AdminMissionItem(:final mission):
+        dataSource.deleteMission(mission.id!);
     }
   }
 
