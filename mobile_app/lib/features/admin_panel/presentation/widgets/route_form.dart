@@ -29,6 +29,12 @@ class RouteForm extends StatefulWidget {
 }
 
 class _RouteFormState extends State<RouteForm> {
+  static const double _singleLineFieldHeight = 60;
+  static const EdgeInsets _fieldContentPadding = EdgeInsets.symmetric(
+    horizontal: 12,
+    vertical: 14,
+  );
+
   late final TextEditingController _nameController;
   late final TextEditingController _descriptionController;
   late final TextEditingController _difficultyController;
@@ -183,25 +189,29 @@ class _RouteFormState extends State<RouteForm> {
                       children: [
                         _buildLabel('Ciudad'),
                         const SizedBox(height: 8),
-                        DropdownButtonFormField<String>(
-                          initialValue:
-                              widget.availableCities.any(
-                                (c) => c.id == _selectedCity,
-                              )
-                              ? _selectedCity
-                              : null,
-                          decoration: _inputDecoration(),
-                          items: widget.availableCities
-                              .where((city) => city.id != null)
-                              .map(
-                                (city) => DropdownMenuItem<String>(
-                                  value: city.id!,
-                                  child: Text(city.name),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (value) =>
-                              setState(() => _selectedCity = value),
+                        SizedBox(
+                          height: _singleLineFieldHeight,
+                          child: DropdownButtonFormField<String>(
+                            initialValue:
+                                widget.availableCities.any(
+                                  (c) => c.id == _selectedCity,
+                                )
+                                ? _selectedCity
+                                : null,
+                            isExpanded: true,
+                            decoration: _inputDecoration(),
+                            items: widget.availableCities
+                                .where((city) => city.id != null)
+                                .map(
+                                  (city) => DropdownMenuItem<String>(
+                                    value: city.id!,
+                                    child: Text(city.name),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) =>
+                                setState(() => _selectedCity = value),
+                          ),
                         ),
                         const SizedBox(height: 24),
 
@@ -364,11 +374,16 @@ class _RouteFormState extends State<RouteForm> {
   }
 
   Widget _buildTextField(TextEditingController controller, {int maxLines = 1}) {
-    return TextField(
+    final textField = TextField(
       controller: controller,
       maxLines: maxLines,
+      textAlignVertical: maxLines == 1 ? TextAlignVertical.center : null,
       decoration: _inputDecoration(),
     );
+
+    if (maxLines > 1) return textField;
+
+    return SizedBox(height: _singleLineFieldHeight, child: textField);
   }
 
   InputDecoration _inputDecoration() {
@@ -383,7 +398,8 @@ class _RouteFormState extends State<RouteForm> {
         borderRadius: BorderRadius.circular(8),
         borderSide: const BorderSide(color: Color(0xFF6B7249)),
       ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      isDense: true,
+      contentPadding: _fieldContentPadding,
     );
   }
 
