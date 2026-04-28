@@ -46,12 +46,12 @@ class AdminNavbar extends StatelessWidget {
               spacing: 8,
               children: [
                 _buildNavButton(AdminNavTab.cities, 'Ciudades'),
-                _buildNavButton(AdminNavTab.routes, 'Rutas'),
                 _buildNavButton(
                   AdminNavTab.pointsOfInterest,
                   'Puntos de interés',
                 ),
                 _buildNavButton(AdminNavTab.missions, 'Misiones'),
+                _buildNavButton(AdminNavTab.routes, 'Rutas'),
               ],
             ),
           ),
@@ -87,14 +87,14 @@ class AdminNavbar extends StatelessWidget {
             children: [
               _buildNavButton(AdminNavTab.cities, 'Ciudades'),
               const SizedBox(width: 8),
-              _buildNavButton(AdminNavTab.routes, 'Rutas'),
-              const SizedBox(width: 8),
               _buildNavButton(
                 AdminNavTab.pointsOfInterest,
                 'Puntos de interés',
               ),
               const SizedBox(width: 8),
               _buildNavButton(AdminNavTab.missions, 'Misiones'),
+              const SizedBox(width: 8),
+              _buildNavButton(AdminNavTab.routes, 'Rutas'),
             ],
           ),
         ),
