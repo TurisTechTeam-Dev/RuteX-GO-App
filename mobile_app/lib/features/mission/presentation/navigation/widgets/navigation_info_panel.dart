@@ -3,11 +3,15 @@ import 'package:flutter/material.dart';
 class NavigationInfoPanel extends StatelessWidget {
   final String nextStopName;
   final double distanceToNextStop;
+  final String? navigationInstruction;
+  final double? distanceToInstruction;
 
   const NavigationInfoPanel({
     super.key,
     required this.nextStopName,
     required this.distanceToNextStop,
+    this.navigationInstruction,
+    this.distanceToInstruction,
   });
 
   @override
@@ -37,12 +41,19 @@ class NavigationInfoPanel extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  _formatDistance(distanceToNextStop),
+                  navigationInstruction ?? _formatDistance(distanceToNextStop),
                   style: const TextStyle(
-                    fontSize: 20,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
+                if (navigationInstruction != null)
+                  Text(
+                    _instructionDistanceLabel(),
+                    style: const TextStyle(fontSize: 13, color: Colors.grey),
+                  ),
               ],
             ),
           ),
@@ -57,5 +68,14 @@ class NavigationInfoPanel extends StatelessWidget {
     }
 
     return '${distance.toStringAsFixed(0)} m';
+  }
+
+  String _instructionDistanceLabel() {
+    final distance = distanceToInstruction;
+    if (distance == null) {
+      return 'Destino a ${_formatDistance(distanceToNextStop)}';
+    }
+
+    return 'En ${_formatDistance(distance)} - destino a ${_formatDistance(distanceToNextStop)}';
   }
 }

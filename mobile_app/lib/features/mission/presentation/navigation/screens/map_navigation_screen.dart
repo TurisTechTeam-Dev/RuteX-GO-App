@@ -85,6 +85,10 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
                       .pointsOfInterest[tripProvider.currentPoiIndex]
                       .name,
                   distanceToNextStop: tripProvider.distanceToNextPoi,
+                  navigationInstruction:
+                      tripProvider.currentNavigationStep?.instruction,
+                  distanceToInstruction:
+                      tripProvider.distanceToCurrentNavigationStep,
                 ),
               ),
             Positioned(

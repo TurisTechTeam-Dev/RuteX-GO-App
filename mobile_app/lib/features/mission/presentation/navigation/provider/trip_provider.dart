@@ -30,6 +30,17 @@ class TripSimulationProvider extends ChangeNotifier {
   List<LatLng> _routePoints = [];
   List<LatLng> get routePoints => _routePoints;
 
+  List<NavigationStep> _navigationSteps = [];
+  int _currentStepIndex = 0;
+  NavigationStep? get currentNavigationStep {
+    if (_navigationSteps.isEmpty ||
+        _currentStepIndex >= _navigationSteps.length) {
+      return null;
+    }
+
+    return _navigationSteps[_currentStepIndex];
+  }
+
   LatLng _currentPosition = const LatLng(
     38.9161,
     -6.3437,
@@ -115,6 +126,8 @@ class TripSimulationProvider extends ChangeNotifier {
   Future<void> _calculateStreetRoute() async {
     if (_allPoisCompleted || _currentPoiIndex == -1) {
       _routePoints = [];
+      _navigationSteps = [];
+      _currentStepIndex = 0;
       notifyListeners();
       return;
     }
@@ -124,6 +137,8 @@ class TripSimulationProvider extends ChangeNotifier {
 
     _isCalculatingRoute = true;
     _routePoints = [];
+    _navigationSteps = [];
+    _currentStepIndex = 0;
     notifyListeners();
 
     final target = _pointsOfInterest[targetIndex].location;
@@ -131,13 +146,18 @@ class TripSimulationProvider extends ChangeNotifier {
       "[OSRM] Building route to: ${_pointsOfInterest[targetIndex].name}",
     );
 
-    late final List<LatLng> nextRoutePoints;
+    late final NavigationRoute nextRoute;
     try {
-      final points = await _routingService.getRoute(_currentPosition, target);
-      nextRoutePoints = points.isNotEmpty ? points : [_currentPosition, target];
+      final route = await _routingService.getNavigationRoute(
+        _currentPosition,
+        target,
+      );
+      nextRoute = route.points.isNotEmpty
+          ? route
+          : NavigationRoute(points: [_currentPosition, target]);
     } catch (e) {
       debugPrint("[OSRM] Connection error. Falling back to a straight line.");
-      nextRoutePoints = [_currentPosition, target];
+      nextRoute = NavigationRoute(points: [_currentPosition, target]);
     }
 
     final isStaleCalculation =
@@ -151,7 +171,10 @@ class TripSimulationProvider extends ChangeNotifier {
       return;
     }
 
-    _routePoints = nextRoutePoints;
+    _routePoints = nextRoute.points;
+    _navigationSteps = nextRoute.steps;
+    _currentStepIndex = 0;
+    _updateCurrentNavigationStep();
     _lastRoutedPosition = _currentPosition;
     _isCalculatingRoute = false;
     notifyListeners();
@@ -203,6 +226,7 @@ class TripSimulationProvider extends ChangeNotifier {
           if (!_isSimulating) {
             _currentPosition = LatLng(pos.latitude, pos.longitude);
             _checkArrivalProximity(_currentPosition);
+            _updateCurrentNavigationStep();
             _refreshStreetRouteIfNeeded();
             notifyListeners();
           }
@@ -271,6 +295,7 @@ class TripSimulationProvider extends ChangeNotifier {
       if (!_isSimulating) break;
       _currentPosition = point;
       _checkArrivalProximity(_currentPosition);
+      _updateCurrentNavigationStep();
       notifyListeners();
       await Future.delayed(const Duration(milliseconds: 90));
     }
@@ -303,6 +328,39 @@ class TripSimulationProvider extends ChangeNotifier {
       _currentPosition,
       _pointsOfInterest[_currentPoiIndex].location,
     );
+  }
+
+  double? get distanceToCurrentNavigationStep {
+    final step = currentNavigationStep;
+    if (step == null) return null;
+
+    return NavigationDistanceUtils.metersBetween(
+      _currentPosition,
+      step.maneuverLocation,
+    );
+  }
+
+  void _updateCurrentNavigationStep() {
+    if (_navigationSteps.length <= 1 ||
+        _currentStepIndex >= _navigationSteps.length - 1) {
+      return;
+    }
+
+    var currentStep = _navigationSteps[_currentStepIndex];
+    var distanceToStep = NavigationDistanceUtils.metersBetween(
+      _currentPosition,
+      currentStep.maneuverLocation,
+    );
+
+    while (distanceToStep <= 20 &&
+        _currentStepIndex < _navigationSteps.length - 1) {
+      _currentStepIndex++;
+      currentStep = _navigationSteps[_currentStepIndex];
+      distanceToStep = NavigationDistanceUtils.metersBetween(
+        _currentPosition,
+        currentStep.maneuverLocation,
+      );
+    }
   }
 
   Future<RouteCompletionSummary> finishRoute() async {
