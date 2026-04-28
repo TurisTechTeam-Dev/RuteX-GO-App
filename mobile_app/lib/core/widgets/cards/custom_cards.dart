@@ -18,23 +18,18 @@ class CustomCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Container(
       width: width,
       height: height,
       padding: padding ?? const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: AppColors.blancoTarjeta,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: colorScheme.onSurface.withValues(alpha: 0.85),
-          width: 2,
-        ),
+        border: Border.all(color: AppColors.negroTexto, width: 2),
 
         boxShadow: [
           BoxShadow(
-            color: AppColors.sombraSuave,
+            color: Colors.black,
             offset: const Offset(0, 4),
             blurRadius: 4,
             spreadRadius: 0,

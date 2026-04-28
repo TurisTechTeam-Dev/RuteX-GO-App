@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/constants/app_colors.dart';
 import '../../core/theme/theme_provider.dart';
 import '../../core/theme/theme_selector_button.dart';
 import '../navigation/app_routes.dart';
@@ -13,6 +14,7 @@ class CustomDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final colorScheme = theme.colorScheme;
     final themeProvider = context.watch<ThemeProvider>();
 
@@ -23,16 +25,20 @@ class CustomDrawer extends StatelessWidget {
           child: Column(
             children: [
               DrawerHeader(
-                decoration: BoxDecoration(color: colorScheme.primary),
+                decoration: BoxDecoration(
+                  color: isDark ? colorScheme.primary : AppColors.verdePrincipal,
+                ),
                 child: SizedBox(
                   width: double.infinity,
                   child: Align(
                     alignment: Alignment.center,
                     child: Text(
-                      'Menu',
+                      'Menú',
                       textAlign: TextAlign.center,
                       style: theme.textTheme.titleLarge?.copyWith(
-                        color: colorScheme.onPrimary,
+                        color: isDark
+                            ? colorScheme.onPrimary
+                            : AppColors.blancoTarjeta,
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
@@ -72,7 +78,7 @@ class CustomDrawer extends StatelessWidget {
               ListTile(
                 leading: Icon(Icons.exit_to_app, color: colorScheme.error),
                 title: Text(
-                  'Cerrar sesion',
+                  'Cerrar sesión',
                   style: TextStyle(color: colorScheme.error),
                 ),
                 onTap: () {

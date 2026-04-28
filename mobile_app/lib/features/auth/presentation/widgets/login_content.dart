@@ -34,18 +34,16 @@ class LoginContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return SafeArea(
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         curve: Curves.easeOut,
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
+        decoration: const BoxDecoration(
+          color: Colors.white,
           image: DecorationImage(
-            image: const AssetImage('assets/Mapa_fondo_Extremadura.png'),
-            opacity: theme.brightness == Brightness.dark ? 0.12 : 0.4,
+            image: AssetImage('assets/Mapa_fondo_Extremadura.png'),
+            opacity: 0.4,
             fit: BoxFit.contain,
           ),
         ),
@@ -65,11 +63,11 @@ class LoginContent extends StatelessWidget {
                     child: Text(
                       '"Descubre rutas culturales, aprende y juega recorriendo la historia de Extremadura."',
                       textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyLarge?.copyWith(
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                         height: 1.2,
-                        color: colorScheme.onSurface,
+                        color: AppColors.negroTexto,
                       ),
                     ),
                   ),
@@ -98,10 +96,11 @@ class LoginContent extends StatelessWidget {
                           style: TextButton.styleFrom(padding: EdgeInsets.zero),
                           child: Text(
                             "¿Has olvidado tu contraseña?",
-                            style: theme.textTheme.labelMedium?.copyWith(
-                              fontSize: 11,
-                              color: colorScheme.onSurface,
-                            ),
+                            style: Theme.of(context).textTheme.labelMedium
+                                ?.copyWith(
+                                  fontSize: 11,
+                                  color: AppColors.grisSombra,
+                                ),
                           ),
                         ),
                       ),
@@ -111,7 +110,7 @@ class LoginContent extends StatelessWidget {
                         children: [
                           Text(
                             "¿No tienes cuenta?  ",
-                            style: theme.textTheme.bodyMedium
+                            style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(fontWeight: FontWeight.w700),
                           ),
                           GestureDetector(
@@ -198,11 +197,8 @@ class _GoogleSignInButton extends StatelessWidget {
           textAlign: TextAlign.center,
         ),
         style: OutlinedButton.styleFrom(
-          foregroundColor: Theme.of(context).colorScheme.onSurface,
-          side: BorderSide(
-            color: Theme.of(context).colorScheme.primary,
-            width: 1.5,
-          ),
+          foregroundColor: AppColors.negroTexto,
+          side: const BorderSide(color: AppColors.verdeBorde, width: 1.5),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       ),

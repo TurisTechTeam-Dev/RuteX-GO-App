@@ -41,18 +41,16 @@ class RegisterContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return SafeArea(
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         curve: Curves.easeOut,
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
+        decoration: const BoxDecoration(
+          color: Colors.white,
           image: DecorationImage(
-            image: const AssetImage('assets/Mapa_fondo_Extremadura.png'),
-            opacity: theme.brightness == Brightness.dark ? 0.1 : 0.3,
+            image: AssetImage('assets/Mapa_fondo_Extremadura.png'),
+            opacity: 0.3,
             fit: BoxFit.contain,
           ),
         ),
@@ -136,8 +134,6 @@ class _RegisterForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Form(
       key: formKey,
       child: Column(
@@ -185,7 +181,7 @@ class _RegisterForm extends StatelessWidget {
               children: [
                 Checkbox(
                   value: acceptedTerms,
-                  activeColor: colorScheme.primary,
+                  activeColor: AppColors.verdePrincipal,
                   visualDensity: VisualDensity.compact,
                   onChanged: (value) => onAcceptedTermsChanged(value ?? false),
                 ),
@@ -193,7 +189,7 @@ class _RegisterForm extends StatelessWidget {
                   "Acepto términos y condiciones",
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     fontSize: 12,
-                    color: colorScheme.onSurface,
+                    color: AppColors.negroTexto,
                   ),
                 ),
               ],

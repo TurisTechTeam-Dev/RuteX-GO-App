@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../constants/app_colors.dart';
 
 class CustomInput extends StatelessWidget {
   final String label;
@@ -20,8 +21,6 @@ class CustomInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -29,7 +28,7 @@ class CustomInput extends StatelessWidget {
           label,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w700,
-            color: colorScheme.onSurface,
+            color: AppColors.negroTexto,
           ),
         ),
         const SizedBox(height: 10),
@@ -48,7 +47,7 @@ class CustomInput extends StatelessWidget {
           decoration: InputDecoration(
             hintText: hint,
             filled: true,
-            fillColor: Theme.of(context).inputDecorationTheme.fillColor,
+            fillColor: AppColors.cremaInput,
 
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 10,
@@ -59,8 +58,8 @@ class CustomInput extends StatelessWidget {
             // Borde base
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(
-                color: colorScheme.primary,
+              borderSide: const BorderSide(
+                color: AppColors.verdeBorde,
                 width: 2,
               ),
             ),
@@ -68,8 +67,8 @@ class CustomInput extends StatelessWidget {
             // Borde cuando no está seleccionado
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(
-                color: colorScheme.primary.withValues(alpha: 0.8),
+              borderSide: const BorderSide(
+                color: AppColors.verdeBorde,
                 width: 2,
               ),
             ),
@@ -77,8 +76,8 @@ class CustomInput extends StatelessWidget {
             // Borde cuando el usuario hace clic
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(
-                color: colorScheme.primary,
+              borderSide: const BorderSide(
+                color: AppColors.verdePrincipal,
                 width: 2.5,
               ),
             ),
@@ -86,7 +85,7 @@ class CustomInput extends StatelessWidget {
             // Borde cuando salta error
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: colorScheme.error, width: 2),
+              borderSide: const BorderSide(color: AppColors.error, width: 2),
             ),
           ),
         ),

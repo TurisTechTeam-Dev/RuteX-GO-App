@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/constants/app_colors.dart';
 import '../navigation/app_routes.dart';
 
 class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -10,19 +11,25 @@ class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final logo = theme.brightness == Brightness.dark
+    final isDark = theme.brightness == Brightness.dark;
+    final backgroundColor = isDark
+        ? theme.colorScheme.surface
+        : AppColors.blancoPuro;
+    final foregroundColor = isDark
+        ? theme.colorScheme.onSurface
+        : AppColors.negroTexto;
+    final logo = isDark
         ? 'assets/Logo_Color_Rutexgo.png'
         : 'assets/Logo_Negro_Rutexgo.png';
 
     return AppBar(
       automaticallyImplyLeading: false,
-      backgroundColor: colorScheme.surface,
+      backgroundColor: backgroundColor,
       elevation: 0,
       centerTitle: true,
       leading: showBack
           ? IconButton(
-              icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
+              icon: Icon(Icons.arrow_back, color: foregroundColor),
               onPressed: () {
                 if (Navigator.of(context).canPop()) {
                   Navigator.of(context).pop();
@@ -40,7 +47,7 @@ class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
         Builder(
           builder: (context) {
             return IconButton(
-              icon: Icon(Icons.menu, color: colorScheme.onSurface),
+              icon: Icon(Icons.menu, color: foregroundColor),
               onPressed: () => Scaffold.of(context).openEndDrawer(),
             );
           },
@@ -50,9 +57,11 @@ class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
         preferredSize: const Size.fromHeight(2),
         child: SizedBox(
           width: double.infinity,
-          height: 1,
+          height: 2,
           child: ColoredBox(
-            color: colorScheme.onSurface.withValues(alpha: 0.2),
+            color: isDark
+                ? theme.colorScheme.onSurface.withValues(alpha: 0.35)
+                : AppColors.negroTexto,
           ),
         ),
       ),

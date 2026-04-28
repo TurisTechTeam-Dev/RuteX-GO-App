@@ -68,13 +68,18 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final autoRead = MediaQuery.of(context).accessibleNavigation;
-    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: const TopAppBar(),
       endDrawer: const CustomDrawer(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.verdePrincipal,
+        onPressed: () {
+          Navigator.pushNamed(context, AppRoutes.citySelection);
+        },
+        child: const Icon(Icons.explore, color: Colors.white),
+      ),
       body: FutureBuilder<HomeData>(
         future: homeFuture,
         builder: (context, snapshot) {
@@ -122,26 +127,11 @@ class _HomeScreenState extends State<HomeScreen> {
               HomeContent(data: data),
               Positioned(
                 left: 16,
-                right: 16,
                 bottom: 16,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    AudioGuideWidget(
-                      text: _buildAudioGuideText(data),
-                      autoRead: autoRead,
-                      iconColor: colorScheme.primary,
-                    ),
-                    FloatingActionButton(
-                      heroTag: "fab_explorar",
-                      backgroundColor: colorScheme.primary,
-                      foregroundColor: colorScheme.onPrimary,
-                      onPressed: () {
-                        Navigator.pushNamed(context, AppRoutes.citySelection);
-                      },
-                      child: const Icon(Icons.explore),
-                    ),
-                  ],
+                child: AudioGuideWidget(
+                  text: _buildAudioGuideText(data),
+                  autoRead: autoRead,
+                  iconColor: AppColors.verdePrincipal,
                 ),
               ),
             ],
