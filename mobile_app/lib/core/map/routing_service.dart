@@ -5,7 +5,8 @@ import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 
 class RoutingService {
-  static const _walkingProfiles = ['foot'];
+  static const _valhallaRouteUrl = 'https://valhalla1.openstreetmap.de/route';
+  static const _osrmWalkingProfiles = ['foot'];
 
   Future<List<LatLng>> getRoute(LatLng start, LatLng end) async {
     final route = await getNavigationRoute(start, end);
@@ -17,7 +18,128 @@ class RoutingService {
       return NavigationRoute(points: [start, end]);
     }
 
-    for (final profile in _walkingProfiles) {
+    final pedestrianRoute = await _getValhallaPedestrianRoute(start, end);
+    if (pedestrianRoute.points.isNotEmpty) return pedestrianRoute;
+
+    final osrmRoute = await _getOsrmFallbackRoute(start, end);
+    if (osrmRoute.points.isNotEmpty) return osrmRoute;
+
+    debugPrint('Plan B: linea recta al no poder calcular ruta peatonal');
+    return NavigationRoute(points: [start, end]);
+  }
+
+  Future<NavigationRoute> _getValhallaPedestrianRoute(
+    LatLng start,
+    LatLng end,
+  ) async {
+    final url = Uri.parse(_valhallaRouteUrl);
+    final body = jsonEncode({
+      'locations': [
+        {'lat': start.latitude, 'lon': start.longitude},
+        {'lat': end.latitude, 'lon': end.longitude},
+      ],
+      'costing': 'pedestrian',
+      'directions_options': {'units': 'kilometers', 'language': 'es-ES'},
+    });
+
+    try {
+      final response = await http
+          .post(
+            url,
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              'User-Agent': 'RutexGo_App_Demo',
+            },
+            body: body,
+          )
+          .timeout(const Duration(seconds: 12));
+
+      if (response.statusCode != 200) {
+        debugPrint('Valhalla devolvio ${response.statusCode}');
+        return const NavigationRoute(points: []);
+      }
+
+      final data = json.decode(response.body);
+      final trip = data['trip'];
+      if (trip is! Map) return const NavigationRoute(points: []);
+
+      final rawLegs = trip['legs'];
+      if (rawLegs is! List || rawLegs.isEmpty) {
+        return const NavigationRoute(points: []);
+      }
+
+      final points = <LatLng>[];
+      final steps = <NavigationStep>[];
+
+      for (final rawLeg in rawLegs) {
+        if (rawLeg is! Map) continue;
+
+        final shape = rawLeg['shape']?.toString();
+        if (shape == null || shape.isEmpty) continue;
+
+        final legPoints = _decodePolyline(shape, precision: 6);
+        points.addAll(legPoints);
+        steps.addAll(_valhallaStepsFromLeg(rawLeg, legPoints));
+      }
+
+      debugPrint(
+        'Ruta peatonal calculada con Valhalla: '
+        '${points.length} puntos, ${steps.length} pasos',
+      );
+      return NavigationRoute(points: points, steps: steps);
+    } catch (e) {
+      debugPrint('Fallo calculando ruta peatonal con Valhalla: $e');
+      return const NavigationRoute(points: []);
+    }
+  }
+
+  List<NavigationStep> _valhallaStepsFromLeg(
+    Map rawLeg,
+    List<LatLng> legPoints,
+  ) {
+    final rawManeuvers = rawLeg['maneuvers'];
+    if (rawManeuvers is! List || legPoints.isEmpty) return [];
+
+    final steps = <NavigationStep>[];
+    for (final rawManeuver in rawManeuvers) {
+      if (rawManeuver is! Map) continue;
+
+      final beginIndex =
+          (rawManeuver['begin_shape_index'] as num?)?.toInt() ?? 0;
+      final safeIndex = beginIndex.clamp(0, legPoints.length - 1);
+      final streetNames = rawManeuver['street_names'];
+      final roadName = streetNames is List && streetNames.isNotEmpty
+          ? streetNames.first.toString()
+          : '';
+      final instruction =
+          rawManeuver['instruction']?.toString() ??
+          _instructionFor(type: '', modifier: null, roadName: roadName);
+      final lengthKm = (rawManeuver['length'] as num?)?.toDouble() ?? 0;
+      final duration = (rawManeuver['time'] as num?)?.toDouble() ?? 0;
+      final type = rawManeuver['type']?.toString() ?? '';
+
+      steps.add(
+        NavigationStep(
+          instruction: instruction,
+          maneuverLocation: legPoints[safeIndex],
+          distance: lengthKm * 1000,
+          duration: duration,
+          maneuverType: type,
+          modifier: null,
+          roadName: roadName,
+        ),
+      );
+    }
+
+    return steps;
+  }
+
+  Future<NavigationRoute> _getOsrmFallbackRoute(
+    LatLng start,
+    LatLng end,
+  ) async {
+    for (final profile in _osrmWalkingProfiles) {
       final url = Uri.parse(
         'https://router.project-osrm.org/route/v1/$profile/'
         '${start.longitude},${start.latitude};${end.longitude},${end.latitude}'
@@ -41,9 +163,9 @@ class RoutingService {
             final route = data['routes'][0] as Map<String, dynamic>;
             final encodedPolyline = route['geometry'] as String;
             final points = _decodePolyline(encodedPolyline);
-            final steps = _stepsFromRoute(route);
+            final steps = _osrmStepsFromRoute(route);
             debugPrint(
-              'Ruta peatonal calculada con perfil $profile: '
+              'Ruta fallback OSRM con perfil $profile: '
               '${points.length} puntos, ${steps.length} pasos',
             );
             return NavigationRoute(points: points, steps: steps);
@@ -54,15 +176,14 @@ class RoutingService {
           );
         }
       } catch (e) {
-        debugPrint('Fallo con perfil peatonal $profile: $e');
+        debugPrint('Fallo con fallback OSRM $profile: $e');
       }
     }
 
-    debugPrint('Plan B: linea recta al no poder calcular ruta peatonal');
-    return NavigationRoute(points: [start, end]);
+    return const NavigationRoute(points: []);
   }
 
-  List<NavigationStep> _stepsFromRoute(Map<String, dynamic> route) {
+  List<NavigationStep> _osrmStepsFromRoute(Map<String, dynamic> route) {
     final rawLegs = route['legs'];
     if (rawLegs is! List) return [];
 
@@ -173,12 +294,13 @@ class RoutingService {
     }
   }
 
-  List<LatLng> _decodePolyline(String encoded) {
+  List<LatLng> _decodePolyline(String encoded, {int precision = 5}) {
     final poly = <LatLng>[];
     var index = 0;
     final len = encoded.length;
     var lat = 0;
     var lng = 0;
+    final factor = precision == 6 ? 1E6 : 1E5;
 
     while (index < len) {
       var shift = 0;
@@ -202,7 +324,7 @@ class RoutingService {
       } while (b >= 0x20);
       final dlng = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
       lng += dlng;
-      poly.add(LatLng(lat / 1E5, lng / 1E5));
+      poly.add(LatLng(lat / factor, lng / factor));
     }
 
     return poly;
