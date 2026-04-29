@@ -379,9 +379,27 @@ class _HierarchicalCitySelectorState extends State<HierarchicalCitySelector> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          trailing: IconButton(
-            icon: const Icon(Icons.edit, size: 18),
-            onPressed: () => widget.onEditPoi(poi),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.edit, size: 18),
+                onPressed: () => widget.onEditPoi(poi),
+              ),
+              IconButton(
+                icon: const Icon(
+                  Icons.delete,
+                  size: 18,
+                  color: Colors.redAccent,
+                ),
+                onPressed: () => showAdminDeleteConfirmation(
+                  context: context,
+                  itemName: poi.name,
+                  warnCannotUndo: true,
+                  onConfirm: () => widget.onDeletePoi(poi),
+                ),
+              ),
+            ],
           ),
         );
       },
@@ -558,9 +576,27 @@ class _HierarchicalCitySelectorState extends State<HierarchicalCitySelector> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          trailing: IconButton(
-            icon: const Icon(Icons.edit, size: 18),
-            onPressed: () => widget.onEditPoi(poi),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.edit, size: 18),
+                onPressed: () => widget.onEditPoi(poi),
+              ),
+              IconButton(
+                icon: const Icon(
+                  Icons.delete,
+                  size: 18,
+                  color: Colors.redAccent,
+                ),
+                onPressed: () => showAdminDeleteConfirmation(
+                  context: context,
+                  itemName: poi.name,
+                  warnCannotUndo: true,
+                  onConfirm: () => widget.onDeletePoi(poi),
+                ),
+              ),
+            ],
           ),
           onTap: isMissionTab
               ? () => setState(() => _selectedPoint = poi)
@@ -594,10 +630,29 @@ class _HierarchicalCitySelectorState extends State<HierarchicalCitySelector> {
           leading: const Icon(Icons.assignment, color: Color(0xFF6B7249)),
           title: Text(mission.title),
           subtitle: Text(_pointNameForMission(mission)),
-          trailing: IconButton(
-            visualDensity: VisualDensity.compact,
-            icon: const Icon(Icons.edit, size: 18),
-            onPressed: () => widget.onEditMission(mission),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                icon: const Icon(Icons.edit, size: 18),
+                onPressed: () => widget.onEditMission(mission),
+              ),
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                icon: const Icon(
+                  Icons.delete,
+                  size: 18,
+                  color: Colors.redAccent,
+                ),
+                onPressed: () => showAdminDeleteConfirmation(
+                  context: context,
+                  itemName: mission.title,
+                  warnCannotUndo: true,
+                  onConfirm: () => widget.onDeleteMission(mission),
+                ),
+              ),
+            ],
           ),
           onTap: () => widget.onEditMission(mission),
         );
@@ -628,10 +683,29 @@ class _HierarchicalCitySelectorState extends State<HierarchicalCitySelector> {
           leading: const Icon(Icons.assignment, color: Color(0xFF6B7249)),
           title: Text(mission.title),
           subtitle: Text(point.name),
-          trailing: IconButton(
-            visualDensity: VisualDensity.compact,
-            icon: const Icon(Icons.edit, size: 18),
-            onPressed: () => widget.onEditMission(mission),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                icon: const Icon(Icons.edit, size: 18),
+                onPressed: () => widget.onEditMission(mission),
+              ),
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                icon: const Icon(
+                  Icons.delete,
+                  size: 18,
+                  color: Colors.redAccent,
+                ),
+                onPressed: () => showAdminDeleteConfirmation(
+                  context: context,
+                  itemName: mission.title,
+                  warnCannotUndo: true,
+                  onConfirm: () => widget.onDeleteMission(mission),
+                ),
+              ),
+            ],
           ),
           onTap: () => widget.onEditMission(mission),
         );
