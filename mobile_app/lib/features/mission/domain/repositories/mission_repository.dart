@@ -1,6 +1,7 @@
 import '../entities/mission.dart';
 import '../entities/poi_entity.dart';
 import '../entities/route_progress_save_result.dart';
+import '../entities/route_result_record.dart';
 
 abstract class MissionRepository {
   Future<PointOfInterest?> getPointByQr(String qrCode);
@@ -22,4 +23,6 @@ abstract class MissionRepository {
     required int completedMissions,
     required List<PointOfInterest> skippedPois,
   });
+
+  Future<void> saveRouteResult(RouteResultRecord result);
 }

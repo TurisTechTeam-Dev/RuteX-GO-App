@@ -4,6 +4,10 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/cards/custom_cards.dart';
 import '../../../../core/widgets/images/storage_aware_image.dart';
 import '../../domain/entities/user_profile.dart';
+import '../../domain/entities/home_route.dart';
+import '../../domain/entities/home_route_result.dart';
+import '../../../mission/presentation/quiz/models/route_result_data.dart';
+import '../../../mission/presentation/quiz/widgets/route_result_panel.dart';
 
 class HomeUserCard extends StatelessWidget {
   final UserProfile user;
@@ -209,6 +213,7 @@ class HomeStatsCard extends StatelessWidget {
 }
 
 class HomeRouteCard extends StatelessWidget {
+  final HomeRoute route;
   final String title;
   final String missions;
   final String date;
@@ -217,6 +222,7 @@ class HomeRouteCard extends StatelessWidget {
 
   const HomeRouteCard({
     super.key,
+    required this.route,
     required this.title,
     required this.missions,
     required this.date,
@@ -228,54 +234,120 @@ class HomeRouteCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return CustomCard(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.check_circle, color: AppColors.verdePrincipal),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: theme.colorScheme.onSurface,
+    return GestureDetector(
+      onTap: () => _openResult(context),
+      child: CustomCard(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.check_circle, color: AppColors.verdePrincipal),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: theme.colorScheme.onSurface,
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              const Icon(Icons.track_changes, size: 18),
-              const SizedBox(width: 6),
-              Text("Misiones completadas: $missions"),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              const Icon(Icons.calendar_today, size: 18),
-              const SizedBox(width: 6),
-              Text(date),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              const Icon(Icons.emoji_events, size: 18),
-              const SizedBox(width: 6),
-              Text("Puntos obtenidos: $obtainedPoints / $totalPoints"),
-            ],
-          ),
-        ],
+                Icon(
+                  Icons.chevron_right,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.56),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.track_changes, size: 18),
+                const SizedBox(width: 6),
+                Text("Misiones completadas: $missions"),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                const Icon(Icons.calendar_today, size: 18),
+                const SizedBox(width: 6),
+                Text(date),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                const Icon(Icons.emoji_events, size: 18),
+                const SizedBox(width: 6),
+                Text("Puntos obtenidos: $obtainedPoints / $totalPoints"),
+              ],
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  void _openResult(BuildContext context) {
+    final result = route.result;
+    if (result == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Esta ruta todavia no tiene resultado guardado.'),
+        ),
+      );
+      return;
+    }
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return Dialog(
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 24,
+          ),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(18),
+            child: RouteResultPanel(
+              result: _routeResultData(result),
+              finishLabel: 'Cerrar',
+              onFinish: () => Navigator.pop(dialogContext),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  RouteResultData _routeResultData(HomeRouteResult result) {
+    return RouteResultData(
+      routeName: result.routeName,
+      previousBestScore: result.previousBestScore,
+      savedBestScore: result.savedBestScore,
+      attemptScore: result.attemptScore,
+      visitedMonuments: result.visitedPois,
+      totalPois: result.totalPois,
+      totalPossiblePoints: result.totalPossiblePoints,
+      correctAnswers: result.correctAnswers,
+      totalAnswers: result.totalAnswers,
+      time: result.time,
+      answerResults: result.answerResults.map(_answerResultData).toList(),
+      skippedPois: result.skippedPois,
+    );
+  }
+
+  AnswerResultData _answerResultData(HomeAnswerResult answer) {
+    return AnswerResultData(
+      monumentName: answer.monumentName,
+      question: answer.question,
+      selectedAnswer: answer.selectedAnswer,
+      correctAnswer: answer.correctAnswer,
+      isCorrect: answer.isCorrect,
     );
   }
 }

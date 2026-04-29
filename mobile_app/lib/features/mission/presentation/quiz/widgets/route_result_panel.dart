@@ -6,8 +6,15 @@ import 'question_results_sheet.dart';
 
 class RouteResultPanel extends StatelessWidget {
   final RouteResultData result;
+  final String finishLabel;
+  final VoidCallback? onFinish;
 
-  const RouteResultPanel({super.key, required this.result});
+  const RouteResultPanel({
+    super.key,
+    required this.result,
+    this.finishLabel = 'Finalizar ruta',
+    this.onFinish,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -52,11 +59,6 @@ class RouteResultPanel extends StatelessWidget {
             label: 'Puntuación del intento',
             value: '${result.attemptScore}/${result.totalPossiblePoints}',
           ),
-          if (result.hasNewBestScore)
-            _InfoRow(
-              label: 'Nueva mejor puntuación',
-              value: result.savedBestScoreLabel,
-            ),
           _InfoRow(
             label: 'Puntos de interés visitados',
             value: result.visitedPoisLabel,
@@ -81,18 +83,20 @@ class RouteResultPanel extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           _ActionButton(
-            label: 'Finalizar ruta',
+            label: finishLabel,
             color: const Color(0xFF007E35),
-            onPressed: () {
-              Navigator.pushNamedAndRemoveUntil(
-                context,
-                AppRoutes.home,
-                (route) => false,
-              );
-            },
+            onPressed: onFinish ?? () => _finishRoute(context),
           ),
         ],
       ),
+    );
+  }
+
+  void _finishRoute(BuildContext context) {
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      AppRoutes.home,
+      (route) => false,
     );
   }
 

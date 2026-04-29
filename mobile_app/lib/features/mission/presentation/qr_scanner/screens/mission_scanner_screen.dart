@@ -133,6 +133,8 @@ class _MissionScannerScreenState extends State<MissionScannerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
+
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Colors.black,
@@ -154,7 +156,7 @@ class _MissionScannerScreenState extends State<MissionScannerScreen> {
           ),
           Positioned(
             left: 16,
-            bottom: 24,
+            bottom: bottomPadding + 24,
             child: AudioGuideWidget(
               text:
                   'Escaner QR. Enfoca el codigo QR del punto de interes correcto dentro del recuadro. Puedes volver atras o activar la linterna si necesitas mas luz.',

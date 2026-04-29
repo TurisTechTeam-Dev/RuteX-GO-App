@@ -21,6 +21,7 @@ class HomeRouteList extends StatelessWidget {
           return Column(
             children: [
               HomeRouteCard(
+                route: route,
                 title: route.name,
                 missions: "${route.completedMissions}/${route.totalMissions}",
                 date: "Ruta completada",

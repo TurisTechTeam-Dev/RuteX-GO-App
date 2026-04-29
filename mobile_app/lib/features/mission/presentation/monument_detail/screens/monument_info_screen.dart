@@ -32,7 +32,7 @@ class _MonumentInfoScreenState extends State<MonumentInfoScreen> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: const TopAppBar(showBack: true),
-      drawer: const CustomDrawer(),
+      endDrawer: const CustomDrawer(),
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       floatingActionButton: AudioGuideWidget(
         text:

@@ -1,3 +1,5 @@
+import 'home_route_result.dart';
+
 class HomeRoute {
   final String id;
   final String name;
@@ -6,6 +8,7 @@ class HomeRoute {
   final int totalMissions;
   final int obtainedPoints;
   final int completedMissions;
+  final HomeRouteResult? result;
 
   const HomeRoute({
     required this.id,
@@ -15,5 +18,6 @@ class HomeRoute {
     required this.totalMissions,
     required this.obtainedPoints,
     required this.completedMissions,
+    this.result,
   });
 }

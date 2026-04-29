@@ -4,9 +4,11 @@ import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../../../../core/map/routing_service.dart';
 import '../../../domain/entities/poi_entity.dart';
+import '../../../domain/entities/route_result_record.dart';
 import '../../../domain/usecases/mission_use_cases.dart';
 import '../models/route_completion_summary.dart';
 import '../utils/navigation_distance_utils.dart';
+import '../utils/route_duration_formatter.dart';
 import '../utils/route_target_selector.dart';
 import '../../quiz/quiz_route_progress.dart';
 
@@ -402,6 +404,29 @@ class TripSimulationProvider extends ChangeNotifier {
     );
     final correctAnswers = _countCorrectAnswers(answers);
     final totalAnswers = answers.length;
+    final shouldSaveDetailedResult =
+        currentAttemptPoints >= saveResult.savedBestPoints;
+
+    if (shouldSaveDetailedResult) {
+      await missionUseCases.saveRouteResult(
+        RouteResultRecord(
+          routeId: routeId,
+          routeName: routeName,
+          previousBestScore: saveResult.previousBestPoints,
+          savedBestScore: saveResult.savedBestPoints,
+          attemptScore: currentAttemptPoints,
+          visitedPois: visitedPois,
+          completedMissions: completedMissions,
+          totalPois: _pointsOfInterest.length,
+          totalPossiblePoints: (_pointsOfInterest.length * 30) + 10,
+          elapsedTimeLabel: RouteDurationFormatter.format(elapsedTime),
+          correctAnswers: correctAnswers,
+          totalAnswers: totalAnswers,
+          answerResults: _answerRecords(answers),
+          skippedPois: _poiNames(skippedPois),
+        ),
+      );
+    }
 
     QuizRouteProgress.reset();
 
@@ -420,6 +445,24 @@ class TripSimulationProvider extends ChangeNotifier {
       answerResults: answers,
       skippedPoiNames: _poiNames(skippedPois),
     );
+  }
+
+  List<RouteAnswerResultRecord> _answerRecords(List<QuizAnswerResult> answers) {
+    final records = <RouteAnswerResultRecord>[];
+
+    for (final answer in answers) {
+      records.add(
+        RouteAnswerResultRecord(
+          monumentName: answer.monumentName,
+          question: answer.question,
+          selectedAnswer: answer.selectedAnswer,
+          correctAnswer: answer.correctAnswer,
+          isCorrect: answer.isCorrect,
+        ),
+      );
+    }
+
+    return records;
   }
 
   List<PointOfInterest> _skippedPois() {

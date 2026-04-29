@@ -76,6 +76,45 @@ class CompletedRouteFields {
   static const puntosInteresSaltados = 'puntos_interes_saltados';
 }
 
+class ResultFields {
+  static const idUsuario = 'id_usuario';
+  static const idRuta = 'id_ruta';
+  static const nombreRuta = 'nombre_ruta';
+  static const mejorPuntuacionAnterior = 'mejor_puntuacion_anterior';
+  static const mejorPuntuacionGuardada = 'mejor_puntuacion_guardada';
+  static const puntuacionIntento = 'puntuacion_intento';
+  static const puntosInteresVisitados = 'puntos_interes_visitados';
+  static const misionesCompletadas = 'misiones_completadas';
+  static const totalPuntosInteres = 'total_puntos_interes';
+  static const puntosTotalesPosibles = 'puntos_totales_posibles';
+  static const tiempoIntento = 'tiempo_intento';
+  static const respuestasCorrectas = 'respuestas_correctas';
+  static const totalRespuestas = 'total_respuestas';
+  static const respuestas = 'respuestas';
+  static const puntosInteresSaltados = 'puntos_interes_saltados';
+  static const fechaCreacion = 'fecha_creacion';
+}
+
+class ResultAnswerFields {
+  static const nombreMonumento = 'nombre_monumento';
+  static const pregunta = 'pregunta';
+  static const respuestaSeleccionada = 'respuesta_seleccionada';
+  static const respuestaCorrecta = 'respuesta_correcta';
+  static const esCorrecta = 'es_correcta';
+}
+
+class ResultDocIds {
+  const ResultDocIds._();
+
+  static String routeResult({required String uid, required String routeId}) {
+    return '${_safeSegment(uid)}_${_safeSegment(routeId)}';
+  }
+
+  static String _safeSegment(String value) {
+    return value.replaceAll('/', '_').trim();
+  }
+}
+
 class RankFields {
   static const rangos = 'rangos';
   static const logo = 'logo';

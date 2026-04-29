@@ -1,6 +1,7 @@
 import '../entities/mission_scan_result.dart';
 import '../entities/poi_entity.dart';
 import '../entities/route_progress_save_result.dart';
+import '../entities/route_result_record.dart';
 import '../repositories/mission_repository.dart';
 
 class MissionUseCases {
@@ -47,5 +48,9 @@ class MissionUseCases {
       completedMissions: completedMissions,
       skippedPois: skippedPois,
     );
+  }
+
+  Future<void> saveRouteResult(RouteResultRecord result) {
+    return repository.saveRouteResult(result);
   }
 }

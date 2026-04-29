@@ -57,6 +57,28 @@ class ProfileRemoteDataSource {
     });
   }
 
+  Future<Map<String, Map<String, dynamic>>> getRouteResultsByRouteIds({
+    required String uid,
+    required List<String> routeIds,
+  }) async {
+    final resultsByRouteId = <String, Map<String, dynamic>>{};
+
+    for (final routeId in routeIds) {
+      final resultId = ResultDocIds.routeResult(uid: uid, routeId: routeId);
+      final doc = await firestore
+          .collection(FirestoreCollections.resultado)
+          .doc(resultId)
+          .get();
+
+      final data = doc.data();
+      if (data != null) {
+        resultsByRouteId[routeId] = data;
+      }
+    }
+
+    return resultsByRouteId;
+  }
+
   Future<void> updateUsername({required String uid, required String username}) {
     return firestore.collection(FirestoreCollections.usuarios).doc(uid).update({
       UserFields.usuario: username,

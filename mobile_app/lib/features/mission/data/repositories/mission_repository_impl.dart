@@ -6,11 +6,13 @@ import '../../../../core/constants/firestore_contract.dart';
 import '../../domain/entities/mission.dart';
 import '../../domain/entities/poi_entity.dart';
 import '../../domain/entities/route_progress_save_result.dart';
+import '../../domain/entities/route_result_record.dart';
 import '../../domain/repositories/mission_repository.dart';
 import '../datasources/mission_remote_datasource.dart';
 import '../models/completed_route_progress_model.dart';
 import '../models/mission_model.dart';
 import '../models/poi_model.dart';
+import '../models/route_result_record_model.dart';
 
 class MissionRepositoryImpl implements MissionRepository {
   static const int _firestoreWhereInLimit = 10;
@@ -199,6 +201,25 @@ class MissionRepositoryImpl implements MissionRepository {
         savedBestPoints: currentAttemptPoints,
       );
     });
+  }
+
+  @override
+  Future<void> saveRouteResult(RouteResultRecord result) async {
+    final user = firebaseAuth.currentUser;
+    if (user == null) return;
+
+    final resultId = ResultDocIds.routeResult(
+      uid: user.uid,
+      routeId: result.routeId,
+    );
+
+    await firestore
+        .collection(FirestoreCollections.resultado)
+        .doc(resultId)
+        .set(
+          RouteResultRecordModel.toFirestore(uid: user.uid, result: result),
+          SetOptions(merge: true),
+        );
   }
 
   String _pointIdFromRouteValue(dynamic rawValue) {

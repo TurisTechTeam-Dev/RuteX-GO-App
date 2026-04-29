@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/constants/firestore_contract.dart';
 import '../domain/entities/home_data.dart';
 import '../domain/entities/home_route.dart';
+import '../domain/entities/home_route_result.dart';
 import '../domain/entities/profile_rank.dart';
 import '../domain/entities/user_profile.dart';
 import 'datasources/profile_remote_datasource.dart';
@@ -27,6 +28,10 @@ class HomeDataLoader {
 
     final routes = <HomeRoute>[];
     final routeDocs = await remoteDataSource.getRoutesByIds(routeIds);
+    final resultsByRouteId = await remoteDataSource.getRouteResultsByRouteIds(
+      uid: uid,
+      routeIds: routeIds,
+    );
     final validRouteIds = _routeIdsFromDocs(routeDocs);
     final normalizedRoutesProgress = _filterValidRoutesProgress(
       routesProgress,
@@ -72,6 +77,7 @@ class HomeDataLoader {
           totalMissions: totalMissions,
           obtainedPoints: obtainedPoints,
           completedMissions: completedMissions,
+          result: _resultFromData(resultsByRouteId[doc.id]),
         ),
       );
     }
@@ -249,6 +255,64 @@ class HomeDataLoader {
     if (value is String) return int.tryParse(value) ?? defaultValue;
 
     return defaultValue;
+  }
+
+  static HomeRouteResult? _resultFromData(Map<String, dynamic>? data) {
+    if (data == null) return null;
+
+    return HomeRouteResult(
+      routeName: data[ResultFields.nombreRuta]?.toString() ?? 'Ruta',
+      previousBestScore: _asInt(data[ResultFields.mejorPuntuacionAnterior]),
+      savedBestScore: _asInt(data[ResultFields.mejorPuntuacionGuardada]),
+      attemptScore: _asInt(data[ResultFields.puntuacionIntento]),
+      visitedPois: _asInt(data[ResultFields.puntosInteresVisitados]),
+      totalPois: _asInt(data[ResultFields.totalPuntosInteres]),
+      totalPossiblePoints: _asInt(
+        data[ResultFields.puntosTotalesPosibles],
+        defaultValue: 100,
+      ),
+      correctAnswers: _asInt(data[ResultFields.respuestasCorrectas]),
+      totalAnswers: _asInt(data[ResultFields.totalRespuestas]),
+      time: data[ResultFields.tiempoIntento]?.toString() ?? '--',
+      answerResults: _answerResultsFromData(data[ResultFields.respuestas]),
+      skippedPois: _stringList(data[ResultFields.puntosInteresSaltados]),
+    );
+  }
+
+  static List<HomeAnswerResult> _answerResultsFromData(dynamic rawAnswers) {
+    if (rawAnswers is! List) return const [];
+
+    final answers = <HomeAnswerResult>[];
+    for (final rawAnswer in rawAnswers) {
+      if (rawAnswer is! Map) continue;
+      final answer = Map<String, dynamic>.from(rawAnswer);
+
+      answers.add(
+        HomeAnswerResult(
+          monumentName:
+              answer[ResultAnswerFields.nombreMonumento]?.toString() ?? '',
+          question: answer[ResultAnswerFields.pregunta]?.toString() ?? '',
+          selectedAnswer:
+              answer[ResultAnswerFields.respuestaSeleccionada]?.toString() ?? '',
+          correctAnswer:
+              answer[ResultAnswerFields.respuestaCorrecta]?.toString() ?? '',
+          isCorrect: answer[ResultAnswerFields.esCorrecta] == true,
+        ),
+      );
+    }
+
+    return answers;
+  }
+
+  static List<String> _stringList(dynamic rawValues) {
+    if (rawValues is! List) return const [];
+
+    final values = <String>[];
+    for (final rawValue in rawValues) {
+      values.add(rawValue.toString());
+    }
+
+    return values;
   }
 
   static int _routeTotalPoints(int totalStops) {
