@@ -8,12 +8,14 @@ class RouteResultPanel extends StatelessWidget {
   final RouteResultData result;
   final String finishLabel;
   final VoidCallback? onFinish;
+  final bool showPreviousBestScore;
 
   const RouteResultPanel({
     super.key,
     required this.result,
     this.finishLabel = 'Finalizar ruta',
     this.onFinish,
+    this.showPreviousBestScore = true,
   });
 
   @override
@@ -51,10 +53,11 @@ class RouteResultPanel extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 28),
-          _InfoRow(
-            label: 'Mejor puntuación anterior',
-            value: result.previousBestScoreLabel,
-          ),
+          if (showPreviousBestScore)
+            _InfoRow(
+              label: 'Mejor puntuación anterior',
+              value: result.previousBestScoreLabel,
+            ),
           _InfoRow(
             label: 'Puntuación del intento',
             value: '${result.attemptScore}/${result.totalPossiblePoints}',

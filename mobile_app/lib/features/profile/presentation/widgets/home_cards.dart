@@ -316,6 +316,7 @@ class HomeRouteCard extends StatelessWidget {
             child: RouteResultPanel(
               result: _routeResultData(result),
               finishLabel: 'Cerrar',
+              showPreviousBestScore: false,
               onFinish: () => Navigator.pop(dialogContext),
             ),
           ),
