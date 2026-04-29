@@ -16,12 +16,24 @@ class NavigationInfoPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10)],
+        border: Border.all(
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.10),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(
+              alpha: theme.brightness == Brightness.dark ? 0.35 : 0.12,
+            ),
+            blurRadius: 10,
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -37,14 +49,18 @@ class NavigationInfoPanel extends StatelessWidget {
               children: [
                 Text(
                   'Siguiente parada: $nextStopName',
-                  style: const TextStyle(fontSize: 13, color: Colors.grey),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.68),
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   navigationInstruction ?? _formatDistance(distanceToNextStop),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -52,7 +68,12 @@ class NavigationInfoPanel extends StatelessWidget {
                 if (navigationInstruction != null)
                   Text(
                     _instructionDistanceLabel(),
-                    style: const TextStyle(fontSize: 13, color: Colors.grey),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: 0.68,
+                      ),
+                    ),
                   ),
               ],
             ),

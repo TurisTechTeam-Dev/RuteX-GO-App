@@ -140,30 +140,44 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions: const [ThemeSelectorButton()],
-      ),
-      body: RegisterContent(
-        formKey: _formKey,
-        usernameController: _usernameController,
-        nameController: _nameController,
-        emailController: _emailController,
-        passwordController: _passwordController,
-        confirmPasswordController: _confirmPasswordController,
-        acceptedTerms: _acceptedTerms,
-        isLoading: _isLoading,
-        isButtonEnabled: _isButtonEnabled,
-        onAcceptedTermsChanged: _updateAcceptedTerms,
-        onRegister: _handleRegister,
-        onOpenLogin: () => Navigator.pop(context),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-      floatingActionButton: AudioGuideWidget(
-        text: _audioGuideMessage ?? _defaultAudioGuideText,
-        autoRead: autoRead,
+      body: Stack(
+        children: [
+          RegisterContent(
+            formKey: _formKey,
+            usernameController: _usernameController,
+            nameController: _nameController,
+            emailController: _emailController,
+            passwordController: _passwordController,
+            confirmPasswordController: _confirmPasswordController,
+            acceptedTerms: _acceptedTerms,
+            isLoading: _isLoading,
+            isButtonEnabled: _isButtonEnabled,
+            onAcceptedTermsChanged: _updateAcceptedTerms,
+            onRegister: _handleRegister,
+            onOpenLogin: () => Navigator.pop(context),
+          ),
+          const SafeArea(
+            child: Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: EdgeInsets.only(top: 4, right: 8),
+                child: ThemeSelectorButton(),
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 4, left: 8),
+                child: AudioGuideWidget(
+                  text: _audioGuideMessage ?? _defaultAudioGuideText,
+                  autoRead: autoRead,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/widgets/audio_guide/audio_guide.dart';
 import '../../../../../core/widgets/backgrounds/extremadura_map_background.dart';
 import '../../../../../app/widgets/custom_drawer.dart';
 import '../../../../../app/widgets/top_app_bar.dart';
@@ -20,6 +21,11 @@ class RouteResultScreen extends StatelessWidget {
     return Scaffold(
       appBar: const TopAppBar(showBack: false),
       endDrawer: const CustomDrawer(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+      floatingActionButton: AudioGuideWidget(
+        text:
+            'Resultado de la ruta ${result.routeName}. Has conseguido ${result.attemptScore} puntos. Has visitado ${result.visitedMonuments} de ${result.totalPois} puntos de interes y has acertado ${result.correctAnswers} de ${result.totalAnswers} respuestas.',
+      ),
       body: Stack(
         children: [
           const ExtremaduraMapBackground(),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../constants/app_colors.dart';
 
 class CustomInput extends StatelessWidget {
@@ -21,14 +22,32 @@ class CustomInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final inputTheme = theme.inputDecorationTheme;
+    final enabledBorder =
+        inputTheme.enabledBorder ??
+        OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: AppColors.verdeBorde, width: 2),
+        );
+    final focusedBorder =
+        inputTheme.focusedBorder ??
+        OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(
+            color: AppColors.verdePrincipal,
+            width: 2.5,
+          ),
+        );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          style: theme.textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w700,
-            color: AppColors.negroTexto,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 10),
@@ -37,52 +56,23 @@ class CustomInput extends StatelessWidget {
           obscureText: isPassword,
           keyboardType: keyboardType,
           validator: validator,
-          scrollPadding: const EdgeInsets.only(
-            left: 24,
-            top: 24,
-            right: 24,
-            bottom: 24,
-          ),
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 15),
+          scrollPadding: const EdgeInsets.all(24),
+          style: theme.textTheme.bodyLarge?.copyWith(fontSize: 15),
           decoration: InputDecoration(
             hintText: hint,
             filled: true,
-            fillColor: AppColors.cremaInput,
-
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 10,
-              vertical: 10,
-            ),
+            fillColor: inputTheme.fillColor ?? AppColors.cremaInput,
+            contentPadding:
+                inputTheme.contentPadding ??
+                const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             isDense: true,
-
-            // Borde base
+            hintStyle: inputTheme.hintStyle,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(
-                color: AppColors.verdeBorde,
-                width: 2,
-              ),
+              borderSide: enabledBorder.borderSide,
             ),
-
-            // Borde cuando no está seleccionado
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(
-                color: AppColors.verdeBorde,
-                width: 2,
-              ),
-            ),
-
-            // Borde cuando el usuario hace clic
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(
-                color: AppColors.verdePrincipal,
-                width: 2.5,
-              ),
-            ),
-
-            // Borde cuando salta error
+            enabledBorder: enabledBorder,
+            focusedBorder: focusedBorder,
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: const BorderSide(color: AppColors.error, width: 2),

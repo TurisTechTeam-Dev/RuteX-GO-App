@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../../../core/constants/app_colors.dart';
+import '../../../../../core/widgets/audio_guide/audio_guide.dart';
 import '../../../../../app/navigation/app_routes.dart';
 import '../../../domain/usecases/mission_use_cases.dart';
 import '../../mission_flow_result.dart';
@@ -150,6 +151,14 @@ class _MissionScannerScreenState extends State<MissionScannerScreen> {
             flashOn: _flashOn,
             onBack: () => Navigator.pop(context),
             onToggleTorch: _toggleTorch,
+          ),
+          Positioned(
+            left: 16,
+            bottom: 24,
+            child: AudioGuideWidget(
+              text:
+                  'Escaner QR. Enfoca el codigo QR del punto de interes correcto dentro del recuadro. Puedes volver atras o activar la linterna si necesitas mas luz.',
+            ),
           ),
         ],
       ),

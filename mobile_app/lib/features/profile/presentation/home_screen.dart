@@ -58,10 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
 
-      showDialog(
-        context: context,
-        builder: (_) => const AppInfoDialog(),
-      );
+      showDialog(context: context, builder: (_) => const AppInfoDialog());
     });
   }
 
@@ -88,7 +85,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   AudioGuideWidget(
                     text: _buildAudioGuideText(data),
                     autoRead: autoRead,
-                    iconColor: AppColors.verdePrincipal,
                   )
                 else
                   const SizedBox(width: 56, height: 56),
@@ -121,12 +117,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: AppColors.verdePrincipal,
                     ),
                     const SizedBox(height: 12),
-                    const Text(
+                    Text(
                       "No se pudo cargar el home.",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: AppColors.negroTexto,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 8),

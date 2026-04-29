@@ -18,6 +18,19 @@ class QuizAnswerOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final selectedBackground = theme.brightness == Brightness.dark
+        ? AppColors.verdePrincipalOscuro.withValues(alpha: 0.22)
+        : const Color(0xFFE8F5E9);
+    final defaultBackground = theme.colorScheme.surface;
+    final defaultBorder = theme.colorScheme.onSurface.withValues(alpha: 0.18);
+    final avatarBackground = isSelected
+        ? theme.colorScheme.primary
+        : theme.colorScheme.onSurface.withValues(alpha: 0.10);
+    final avatarForeground = isSelected
+        ? Colors.white
+        : theme.colorScheme.onSurface;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: InkWell(
@@ -26,11 +39,9 @@ class QuizAnswerOption extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFFE8F5E9) : Colors.white,
+            color: isSelected ? selectedBackground : defaultBackground,
             border: Border.all(
-              color: isSelected
-                  ? AppColors.verdePrincipal
-                  : Colors.grey.shade300,
+              color: isSelected ? theme.colorScheme.primary : defaultBorder,
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(14),
@@ -39,13 +50,11 @@ class QuizAnswerOption extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 16,
-                backgroundColor: isSelected
-                    ? AppColors.verdePrincipal
-                    : Colors.grey.shade200,
+                backgroundColor: avatarBackground,
                 child: Text(
                   String.fromCharCode(65 + index),
                   style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.black,
+                    color: avatarForeground,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -59,6 +68,7 @@ class QuizAnswerOption extends StatelessWidget {
                     fontWeight: isSelected
                         ? FontWeight.bold
                         : FontWeight.normal,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
               ),

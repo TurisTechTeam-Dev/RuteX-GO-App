@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../app/navigation/app_routes.dart';
+import '../../../../../core/widgets/audio_guide/audio_guide.dart';
 import '../../mission_flow_result.dart';
 import '../../quiz/models/route_result_args.dart';
 import '../../quiz/quiz_route_progress.dart';
@@ -27,6 +28,7 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final tripProvider = context.watch<TripSimulationProvider>();
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
 
@@ -51,13 +53,16 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
         Navigator.pop(context);
       },
       child: Scaffold(
-        backgroundColor: Colors.grey[100],
+        backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
-          title: const Text(
+          title: Text(
             "Ruta RutexGo",
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: theme.colorScheme.onSurface,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          backgroundColor: Colors.white,
+          backgroundColor: theme.colorScheme.surface,
           elevation: 1,
           centerTitle: true,
         ),
@@ -70,7 +75,7 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
             ),
             if (tripProvider.isLoading)
               Container(
-                color: Colors.white.withValues(alpha: 0.8),
+                color: theme.scaffoldBackgroundColor.withValues(alpha: 0.82),
                 child: const Center(
                   child: CircularProgressIndicator(color: Colors.green),
                 ),
@@ -126,10 +131,41 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
                 ),
               ),
             ),
+            if (!tripProvider.isLoading)
+              Positioned(
+                left: 16,
+                bottom: bottomPadding + 128,
+                child: AudioGuideWidget(
+                  text: _navigationAudioText(tripProvider),
+                ),
+              ),
           ],
         ),
       ),
     );
+  }
+
+  String _navigationAudioText(TripSimulationProvider provider) {
+    if (provider.allPoisCompleted) {
+      return 'Ruta completada. Puedes revisar el resultado de tu recorrido.';
+    }
+
+    if (provider.currentPoiIndex == -1 || provider.pointsOfInterest.isEmpty) {
+      return 'Pantalla de navegacion. Estamos preparando la ruta.';
+    }
+
+    final nextStop = provider.pointsOfInterest[provider.currentPoiIndex].name;
+    final distance = provider.distanceToNextPoi.toInt();
+    final instruction = provider.currentNavigationStep?.instruction;
+    final simulationState = provider.isSimulating
+        ? 'La simulacion esta en marcha.'
+        : 'Pulsa comenzar o continuar ruta para simular el recorrido.';
+
+    if (instruction == null || instruction.isEmpty) {
+      return 'Pantalla de navegacion. El siguiente punto es $nextStop, a unos $distance metros. $simulationState';
+    }
+
+    return 'Pantalla de navegacion. El siguiente punto es $nextStop, a unos $distance metros. Indicacion actual: $instruction. $simulationState';
   }
 
   void _showArrivalBottomSheet(

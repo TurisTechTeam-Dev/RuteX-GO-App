@@ -23,6 +23,8 @@ class ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return CustomCard(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -43,10 +45,10 @@ class ProfileHeader extends StatelessWidget {
                     Expanded(
                       child: Text(
                         displayName,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.negroTexto,
+                          color: theme.colorScheme.onSurface,
                         ),
                       ),
                     ),
@@ -62,12 +64,16 @@ class ProfileHeader extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   user.name,
-                  style: const TextStyle(color: AppColors.grisNeutro),
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.68),
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   user.email,
-                  style: const TextStyle(color: AppColors.grisNeutro),
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.68),
+                  ),
                 ),
               ],
             ),

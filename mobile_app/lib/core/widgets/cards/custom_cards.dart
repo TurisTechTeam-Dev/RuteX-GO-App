@@ -18,18 +18,27 @@ class CustomCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final borderColor = isDark
+        ? AppColors.grisClaro.withValues(alpha: 0.55)
+        : AppColors.negroTexto;
+    final shadowColor = isDark
+        ? Colors.black.withValues(alpha: 0.45)
+        : Colors.black;
+
     return Container(
       width: width,
       height: height,
       padding: padding ?? const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.blancoTarjeta,
+        color: theme.cardTheme.color ?? theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.negroTexto, width: 2),
+        border: Border.all(color: borderColor, width: isDark ? 1.2 : 2),
 
         boxShadow: [
           BoxShadow(
-            color: Colors.black,
+            color: shadowColor,
             offset: const Offset(0, 4),
             blurRadius: 4,
             spreadRadius: 0,

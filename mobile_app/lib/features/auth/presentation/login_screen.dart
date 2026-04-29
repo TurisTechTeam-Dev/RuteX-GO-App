@@ -162,26 +162,40 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions: const [ThemeSelectorButton()],
-      ),
-      body: LoginContent(
-        formKey: _formKey,
-        emailController: _emailController,
-        passwordController: _passwordController,
-        isLoading: _isLoading,
-        onLogin: _handleLogin,
-        onGoogleLogin: _handleGoogleLogin,
-        onRecoverPassword: _recoverPassword,
-        onOpenRegister: _openRegister,
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-      floatingActionButton: AudioGuideWidget(
-        text: _audioGuideMessage ?? _defaultAudioGuideText,
-        autoRead: autoRead,
+      body: Stack(
+        children: [
+          LoginContent(
+            formKey: _formKey,
+            emailController: _emailController,
+            passwordController: _passwordController,
+            isLoading: _isLoading,
+            onLogin: _handleLogin,
+            onGoogleLogin: _handleGoogleLogin,
+            onRecoverPassword: _recoverPassword,
+            onOpenRegister: _openRegister,
+          ),
+          const SafeArea(
+            child: Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: EdgeInsets.only(top: 4, right: 8),
+                child: ThemeSelectorButton(),
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 4, left: 8),
+                child: AudioGuideWidget(
+                  text: _audioGuideMessage ?? _defaultAudioGuideText,
+                  autoRead: autoRead,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

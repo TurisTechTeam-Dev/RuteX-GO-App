@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/backgrounds/extremadura_map_background.dart';
 import '../../../../core/widgets/titles/stroke_title.dart';
 import '../../domain/entities/home_data.dart';
@@ -49,7 +48,10 @@ class HomeContent extends StatelessWidget {
                 ),
               ),
               Expanded(child: HomeRouteList(routes: data.routes)),
-              Container(height: 2, color: AppColors.negroTexto),
+              Container(
+                height: 2,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
               const SizedBox(height: 10),
             ],
           ),

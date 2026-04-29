@@ -235,13 +235,13 @@ class TripSimulationProvider extends ChangeNotifier {
           ),
         ).listen((Position pos) {
           if (_isDisposed) return;
-          if (!_isSimulating) {
-            _currentPosition = LatLng(pos.latitude, pos.longitude);
-            _checkArrivalProximity(_currentPosition);
-            _updateCurrentNavigationStep();
-            _refreshStreetRouteIfNeeded();
-            _notifyListeners();
-          }
+          if (_isSimulating || _hasReachedDestination) return;
+
+          _currentPosition = LatLng(pos.latitude, pos.longitude);
+          _checkArrivalProximity(_currentPosition);
+          _updateCurrentNavigationStep();
+          _refreshStreetRouteIfNeeded();
+          _notifyListeners();
         });
   }
 
@@ -278,6 +278,7 @@ class TripSimulationProvider extends ChangeNotifier {
       debugPrint(
         "[ARRIVAL] Reached ${target.name}. Distance: ${distance.toInt()}m",
       );
+      _currentPosition = target.location;
       _hasReachedDestination = true;
       _isSimulating = false;
       _notifyListeners();

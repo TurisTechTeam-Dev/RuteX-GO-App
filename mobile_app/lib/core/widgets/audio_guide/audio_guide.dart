@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
+import '../../constants/app_colors.dart';
+
 class AudioGuideWidget extends StatefulWidget {
   final String text;
   final double iconSize;
@@ -83,12 +85,10 @@ class _AudioGuideWidgetState extends State<AudioGuideWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return FloatingActionButton(
       heroTag: widget.heroTag,
-      backgroundColor: widget.backgroundColor ?? colorScheme.surface,
-      foregroundColor: widget.iconColor ?? colorScheme.primary,
+      backgroundColor: widget.backgroundColor ?? AppColors.verdePrincipal,
+      foregroundColor: widget.iconColor ?? AppColors.blancoPuro,
       elevation: 6,
       onPressed: _isPlaying ? _stop : _speak,
       child: Icon(

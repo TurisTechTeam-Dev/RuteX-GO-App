@@ -32,18 +32,20 @@ class LoginContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
     final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+    final backgroundOpacity = theme.brightness == Brightness.dark ? 0.18 : 0.4;
 
     return SafeArea(
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         curve: Curves.easeOut,
-        decoration: const BoxDecoration(
-          color: Colors.white,
+        decoration: BoxDecoration(
+          color: theme.scaffoldBackgroundColor,
           image: DecorationImage(
-            image: AssetImage('assets/Mapa_fondo_Extremadura.png'),
-            opacity: 0.4,
+            image: const AssetImage('assets/Mapa_fondo_Extremadura.png'),
+            opacity: backgroundOpacity,
             fit: BoxFit.contain,
           ),
         ),
@@ -67,7 +69,7 @@ class LoginContent extends StatelessWidget {
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                         height: 1.2,
-                        color: AppColors.negroTexto,
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
                   ),
@@ -99,7 +101,8 @@ class LoginContent extends StatelessWidget {
                             style: Theme.of(context).textTheme.labelMedium
                                 ?.copyWith(
                                   fontSize: 11,
-                                  color: AppColors.grisSombra,
+                                  color: theme.colorScheme.onSurface
+                                      .withValues(alpha: 0.72),
                                 ),
                           ),
                         ),
@@ -186,6 +189,8 @@ class _GoogleSignInButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return SizedBox(
       width: double.infinity,
       height: 46,
@@ -197,8 +202,8 @@ class _GoogleSignInButton extends StatelessWidget {
           textAlign: TextAlign.center,
         ),
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.negroTexto,
-          side: const BorderSide(color: AppColors.verdeBorde, width: 1.5),
+          foregroundColor: theme.colorScheme.onSurface,
+          side: BorderSide(color: theme.colorScheme.primary, width: 1.5),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       ),

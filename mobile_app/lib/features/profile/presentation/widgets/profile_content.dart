@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/user_profile.dart';
 import 'profile_forms.dart';
 import 'profile_header.dart';
@@ -149,7 +148,7 @@ class ProfileError extends StatelessWidget {
         child: Text(
           "No se pudo cargar el perfil.\n$message",
           textAlign: TextAlign.center,
-          style: const TextStyle(color: AppColors.negroTexto),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
       ),
     );

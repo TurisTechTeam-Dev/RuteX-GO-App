@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/constants/app_colors.dart';
+import '../../../../../core/widgets/audio_guide/audio_guide.dart';
 import '../../../../../core/widgets/cards/custom_cards.dart';
 import '../../../../../core/widgets/images/storage_aware_image.dart';
 import '../../../../../app/navigation/app_routes.dart';
@@ -24,13 +25,19 @@ class _MonumentInfoScreenState extends State<MonumentInfoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final point = widget.args.scanResult.point;
     final mission = widget.args.scanResult.mission;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: const TopAppBar(showBack: true),
       drawer: const CustomDrawer(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+      floatingActionButton: AudioGuideWidget(
+        text:
+            'Punto de interes: ${point.name}. ${point.description}. Cuando estes listo, pulsa empezar mision para responder las preguntas.',
+      ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,9 +45,12 @@ class _MonumentInfoScreenState extends State<MonumentInfoScreen> {
             Container(
               width: double.infinity,
               height: 220,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(color: AppColors.negroTexto, width: 2),
+                  bottom: BorderSide(
+                    color: theme.colorScheme.onSurface,
+                    width: 2,
+                  ),
                 ),
               ),
               child: point.image.isNotEmpty
@@ -73,10 +83,10 @@ class _MonumentInfoScreenState extends State<MonumentInfoScreen> {
                     child: Text(
                       point.name,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.negroTexto,
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
                   ),
@@ -92,10 +102,10 @@ class _MonumentInfoScreenState extends State<MonumentInfoScreen> {
                           overflow: expanded
                               ? TextOverflow.visible
                               : TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             height: 1.5,
-                            color: Colors.black87,
+                            color: theme.colorScheme.onSurface,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -169,10 +179,10 @@ class _MonumentInfoScreenState extends State<MonumentInfoScreen> {
       ),
       bottomNavigationBar: Container(
         height: 60,
-        decoration: const BoxDecoration(
-          color: Colors.white,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
           border: Border(
-            top: BorderSide(color: AppColors.negroTexto, width: 2),
+            top: BorderSide(color: theme.colorScheme.onSurface, width: 2),
           ),
         ),
         child: const SafeArea(child: SizedBox()),

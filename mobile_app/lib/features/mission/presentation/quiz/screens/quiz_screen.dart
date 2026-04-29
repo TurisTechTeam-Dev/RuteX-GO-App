@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../core/constants/app_colors.dart';
+import '../../../../../core/widgets/audio_guide/audio_guide.dart';
 import '../../../domain/usecases/mission_use_cases.dart';
 import '../../mission_flow_result.dart';
 import '../models/quiz_mission.dart';
@@ -39,6 +40,8 @@ class _QuizScreenState extends State<QuizScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     if (_mission.questions.isEmpty) {
       return const Scaffold(
         body: Center(
@@ -47,18 +50,20 @@ class _QuizScreenState extends State<QuizScreen> {
       );
     }
 
+    final question = _mission.questions[_currentIndex];
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           _mission.title,
-          style: const TextStyle(color: Colors.black),
+          style: TextStyle(color: theme.colorScheme.onSurface),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -77,7 +82,23 @@ class _QuizScreenState extends State<QuizScreen> {
                   ? null
                   : () => _continueQuiz(),
             ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+      floatingActionButton: AudioGuideWidget(text: _quizAudioText(question)),
     );
+  }
+
+  String _quizAudioText(QuizQuestion question) {
+    final buffer = StringBuffer()
+      ..write(
+        'Mision ${_mission.title}. Pregunta ${_currentIndex + 1} de ${_mission.questions.length}. ',
+      )
+      ..write(question.text);
+
+    for (var index = 0; index < question.answers.length; index++) {
+      buffer.write(' Respuesta ${index + 1}: ${question.answers[index]}.');
+    }
+
+    return buffer.toString();
   }
 
   Future<void> _continueQuiz() async {

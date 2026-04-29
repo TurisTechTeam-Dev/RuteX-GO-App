@@ -19,6 +19,7 @@ class HomeUserCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final explorerLabel = _explorerLabel(user.createdAt);
     final displayName = user.username.isNotEmpty ? user.username : user.name;
 
@@ -33,15 +34,17 @@ class HomeUserCard extends StatelessWidget {
             children: [
               Text(
                 displayName,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: AppColors.negroTexto,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 explorerLabel,
-                style: const TextStyle(color: AppColors.grisNeutro),
+                style: TextStyle(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.68),
+                ),
               ),
               const SizedBox(height: 4),
               _RankLine(rankName: rankName, rankLogo: rankLogo),
@@ -105,12 +108,20 @@ class _RankLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rankContent = _buildRankContent();
+    final rankContent = _buildRankContent(context);
 
     return Row(mainAxisSize: MainAxisSize.min, children: rankContent);
   }
 
-  List<Widget> _buildRankContent() {
+  List<Widget> _buildRankContent(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final badgeBackground = isDark
+        ? theme.colorScheme.onSurface.withValues(alpha: 0.82)
+        : Colors.transparent;
+    final badgeBorder = isDark
+        ? theme.colorScheme.onSurface.withValues(alpha: 0.70)
+        : AppColors.negroTexto;
     final content = <Widget>[
       const Text("Rango: ", style: TextStyle(color: AppColors.verdePrincipal)),
       Text(
@@ -125,17 +136,26 @@ class _RankLine extends StatelessWidget {
     if (rankLogo.isNotEmpty) {
       content.add(const SizedBox(width: 6));
       content.add(
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: StorageAwareImage(
-            source: rankLogo,
-            width: 22,
-            height: 22,
-            fit: BoxFit.contain,
-            fallback: const Icon(
-              Icons.emoji_events,
-              size: 20,
-              color: AppColors.verdePrincipal,
+        Container(
+          width: 30,
+          height: 30,
+          padding: const EdgeInsets.all(3),
+          decoration: BoxDecoration(
+            color: badgeBackground,
+            shape: BoxShape.circle,
+            border: Border.all(color: badgeBorder, width: 1.4),
+          ),
+          child: ClipOval(
+            child: StorageAwareImage(
+              source: rankLogo,
+              width: 22,
+              height: 22,
+              fit: BoxFit.contain,
+              fallback: const Icon(
+                Icons.emoji_events,
+                size: 20,
+                color: AppColors.verdePrincipal,
+              ),
             ),
           ),
         ),
@@ -206,6 +226,8 @@ class HomeRouteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return CustomCard(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -219,10 +241,10 @@ class HomeRouteCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
-                    color: AppColors.negroTexto,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
               ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/widgets/buttons/custom_button.dart';
 import '../models/quiz_question.dart';
 import 'quiz_answer_option.dart';
@@ -24,7 +23,7 @@ class QuizContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final question = questions[currentIndex];
-    final content = _buildQuestionContent(question);
+    final content = _buildQuestionContent(context, question);
 
     return SafeArea(
       child: Column(
@@ -41,7 +40,7 @@ class QuizContent extends StatelessWidget {
           Container(
             width: double.infinity,
             height: 2,
-            color: AppColors.negroTexto,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
           const SizedBox(height: 12),
         ],
@@ -49,20 +48,24 @@ class QuizContent extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildQuestionContent(QuizQuestion question) {
+  List<Widget> _buildQuestionContent(
+    BuildContext context,
+    QuizQuestion question,
+  ) {
+    final theme = Theme.of(context);
     final content = <Widget>[
       LinearProgressIndicator(
         value: (currentIndex + 1) / questions.length,
-        backgroundColor: Colors.grey[200],
-        color: AppColors.verdePrincipal,
+        backgroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.14),
+        color: theme.colorScheme.primary,
       ),
       const SizedBox(height: 20),
       Center(
         child: Text(
           "${currentIndex + 1} de ${questions.length}",
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.grey,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.68),
           ),
         ),
       ),
@@ -70,10 +73,11 @@ class QuizContent extends StatelessWidget {
       Text(
         question.text,
         textAlign: TextAlign.center,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 22,
           fontWeight: FontWeight.bold,
           height: 1.4,
+          color: theme.colorScheme.onSurface,
         ),
       ),
       const SizedBox(height: 40),

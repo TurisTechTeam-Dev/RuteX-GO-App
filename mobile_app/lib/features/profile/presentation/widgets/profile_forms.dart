@@ -276,10 +276,10 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w800,
-        color: AppColors.negroTexto,
+        color: Theme.of(context).colorScheme.onSurface,
       ),
     );
   }

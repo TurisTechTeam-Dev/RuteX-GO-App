@@ -106,7 +106,7 @@ class _RoutePointNames extends StatelessWidget {
       ),
       textAlign: TextAlign.center,
       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-        color: AppColors.grisSombra,
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.72),
         fontWeight: FontWeight.w600,
         height: 1.25,
       ),
@@ -121,6 +121,8 @@ class _RouteTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -134,9 +136,9 @@ class _RouteTitle extends StatelessWidget {
           child: Text(
             title,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: AppColors.negroTexto,
+              color: theme.colorScheme.onSurface,
             ),
           ),
         ),
@@ -200,23 +202,27 @@ class _RouteBlockedHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.blancoTarjeta.withValues(alpha: 0.85),
+        color: theme.colorScheme.onSurface.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: AppColors.grisNeutro.withValues(alpha: 0.6)),
+        border: Border.all(
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.18),
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(top: 1),
+          Padding(
+            padding: const EdgeInsets.only(top: 1),
             child: Icon(
               Icons.info_outline,
               size: 16,
-              color: AppColors.grisSombra,
+              color: theme.colorScheme.onSurface,
             ),
           ),
           const SizedBox(width: 8),
@@ -224,7 +230,7 @@ class _RouteBlockedHint extends StatelessWidget {
             child: Text(
               'Faltan misiones en uno o varios puntos de interés.',
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: AppColors.grisSombra,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
                 fontWeight: FontWeight.w600,
               ),
             ),

@@ -12,18 +12,21 @@ class QuestionResultsSheet extends StatelessWidget {
     final hasResults =
         result.groupedAnswers.isNotEmpty || result.skippedPois.isNotEmpty;
 
-    return SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const _ResultsHeader(),
-          Flexible(
-            child: hasResults
-                ? _ResultsList(result: result)
-                : const _EmptyResultsMessage(),
-          ),
-          const _CloseButton(),
-        ],
+    return ColoredBox(
+      color: Theme.of(context).colorScheme.surface,
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const _ResultsHeader(),
+            Flexible(
+              child: hasResults
+                  ? _ResultsList(result: result)
+                  : const _EmptyResultsMessage(),
+            ),
+            const _CloseButton(),
+          ],
+        ),
       ),
     );
   }
@@ -42,7 +45,11 @@ class _ResultsHeader extends StatelessWidget {
         children: [
           Text(
             'Resultados',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),
@@ -237,7 +244,9 @@ class _AnswerTile extends StatelessWidget {
     final question = AnswerTextSanitizer.clean(answer.question);
     final selectedAnswer = AnswerTextSanitizer.clean(answer.selectedAnswer);
     final correctAnswer = AnswerTextSanitizer.clean(answer.correctAnswer);
+    final theme = Theme.of(context);
     final answerTexts = _buildAnswerTexts(
+      context,
       question,
       selectedAnswer,
       correctAnswer,
@@ -247,9 +256,11 @@ class _AnswerTile extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.black12),
+        border: Border.all(
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.14),
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -272,19 +283,32 @@ class _AnswerTile extends StatelessWidget {
   }
 
   List<Widget> _buildAnswerTexts(
+    BuildContext context,
     String question,
     String selectedAnswer,
     String correctAnswer,
   ) {
     final texts = <Widget>[];
+    final theme = Theme.of(context);
 
     if (question.isNotEmpty) {
-      texts.add(Text(question, style: const TextStyle(fontSize: 13)));
+      texts.add(
+        Text(
+          question,
+          style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurface),
+        ),
+      );
       texts.add(const SizedBox(height: 6));
     }
 
     texts.add(
-      Text(selectedAnswer, style: const TextStyle(fontWeight: FontWeight.w700)),
+      Text(
+        selectedAnswer,
+        style: TextStyle(
+          color: theme.colorScheme.onSurface,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
     );
 
     final shouldShowCorrectAnswer =

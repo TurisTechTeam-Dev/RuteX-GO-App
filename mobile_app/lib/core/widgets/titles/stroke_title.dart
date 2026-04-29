@@ -25,10 +25,10 @@ class StrokeTitle extends StatelessWidget {
           ),
           Text(
             text,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: AppColors.negroTexto,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ],

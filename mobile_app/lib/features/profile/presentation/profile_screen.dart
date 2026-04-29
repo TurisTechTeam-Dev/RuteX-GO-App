@@ -7,6 +7,7 @@ import '../../../app/widgets/custom_drawer.dart';
 import '../../../app/widgets/top_app_bar.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/backgrounds/extremadura_map_background.dart';
+import '../../../core/widgets/audio_guide/audio_guide.dart';
 import '../../auth/domain/usecases/auth_use_cases.dart';
 import '../domain/entities/home_data.dart';
 import '../domain/entities/user_profile.dart';
@@ -226,6 +227,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Scaffold(
         appBar: const TopAppBar(showBack: true),
         endDrawer: const CustomDrawer(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+        floatingActionButton: const AudioGuideWidget(
+          text:
+              'Pantalla de perfil. Aqui puedes ver tus datos, cambiar tu foto, editar usuario, solicitar cambio de email o actualizar tu contrasena.',
+        ),
         body: Stack(
           children: [
             const ExtremaduraMapBackground(),

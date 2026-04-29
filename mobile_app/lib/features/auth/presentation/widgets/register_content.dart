@@ -39,18 +39,20 @@ class RegisterContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
     final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+    final backgroundOpacity = theme.brightness == Brightness.dark ? 0.18 : 0.3;
 
     return SafeArea(
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         curve: Curves.easeOut,
-        decoration: const BoxDecoration(
-          color: Colors.white,
+        decoration: BoxDecoration(
+          color: theme.scaffoldBackgroundColor,
           image: DecorationImage(
-            image: AssetImage('assets/Mapa_fondo_Extremadura.png'),
-            opacity: 0.3,
+            image: const AssetImage('assets/Mapa_fondo_Extremadura.png'),
+            opacity: backgroundOpacity,
             fit: BoxFit.contain,
           ),
         ),
@@ -86,7 +88,11 @@ class RegisterContent extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text("¿Ya tienes cuenta?  "),
+                          Text(
+                            "¿Ya tienes cuenta?  ",
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(fontWeight: FontWeight.w700),
+                          ),
                           GestureDetector(
                             onTap: onOpenLogin,
                             child: const Text(
@@ -134,6 +140,8 @@ class _RegisterForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Form(
       key: formKey,
       child: Column(
@@ -189,7 +197,7 @@ class _RegisterForm extends StatelessWidget {
                   "Acepto términos y condiciones",
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     fontSize: 12,
-                    color: AppColors.negroTexto,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
               ],

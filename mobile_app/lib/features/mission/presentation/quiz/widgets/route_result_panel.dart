@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/constants/app_colors.dart';
 import '../../../../../app/navigation/app_routes.dart';
 import '../models/route_result_data.dart';
 import 'question_results_sheet.dart';
@@ -12,12 +11,19 @@ class RouteResultPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final panelBorder = theme.colorScheme.onSurface.withValues(
+      alpha: theme.brightness == Brightness.dark ? 0.55 : 1,
+    );
+
     return Container(
       constraints: const BoxConstraints(maxWidth: 360),
       padding: const EdgeInsets.fromLTRB(22, 28, 22, 28),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.84),
-        border: Border.all(color: AppColors.negroTexto, width: 2),
+        color: theme.colorScheme.surface.withValues(
+          alpha: theme.brightness == Brightness.dark ? 0.92 : 0.84,
+        ),
+        border: Border.all(color: panelBorder, width: 2),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -28,10 +34,12 @@ class RouteResultPanel extends StatelessWidget {
           Text(
             '${result.routeName}\nCompletada',
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF214B2E),
+              color: theme.brightness == Brightness.dark
+                  ? theme.colorScheme.onSurface
+                  : const Color(0xFF214B2E),
               height: 1.15,
             ),
           ),
@@ -111,17 +119,25 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        border: Border.all(color: AppColors.negroTexto),
+        border: Border.all(
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
+        ),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
         '$label: $value',
-        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: theme.colorScheme.onSurface,
+        ),
       ),
     );
   }

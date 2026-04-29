@@ -137,10 +137,10 @@ class _StrokeCityTitle extends StatelessWidget {
         ),
         Text(
           text,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: AppColors.negroTexto,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
       ],
