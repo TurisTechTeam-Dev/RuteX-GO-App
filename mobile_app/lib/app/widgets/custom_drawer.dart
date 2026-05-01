@@ -1,3 +1,12 @@
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -26,7 +35,9 @@ class CustomDrawer extends StatelessWidget {
             children: [
               DrawerHeader(
                 decoration: BoxDecoration(
-                  color: isDark ? colorScheme.primary : AppColors.verdePrincipal,
+                  color: isDark
+                      ? colorScheme.primary
+                      : AppColors.verdePrincipal,
                 ),
                 child: SizedBox(
                   width: double.infinity,

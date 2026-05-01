@@ -1,3 +1,12 @@
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
@@ -9,6 +18,9 @@ import 'auth_card.dart';
 import 'auth_logo.dart';
 
 class LoginContent extends StatelessWidget {
+  static const _slogan =
+      'Descubre rutas culturales, aprende y juega recorriendo la historia de Extremadura.';
+
   final GlobalKey<FormState> formKey;
   final TextEditingController emailController;
   final TextEditingController passwordController;
@@ -62,14 +74,20 @@ class LoginContent extends StatelessWidget {
                   const SizedBox(height: 20),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      '"Descubre rutas culturales, aprende y juega recorriendo la historia de Extremadura."',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        height: 1.2,
-                        color: theme.colorScheme.onSurface,
+                    child: Semantics(
+                      label: _slogan,
+                      child: ExcludeSemantics(
+                        child: Text(
+                          '"$_slogan"',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                height: 1.2,
+                                color: theme.colorScheme.onSurface,
+                              ),
+                        ),
                       ),
                     ),
                   ),
@@ -101,8 +119,9 @@ class LoginContent extends StatelessWidget {
                             style: Theme.of(context).textTheme.labelMedium
                                 ?.copyWith(
                                   fontSize: 11,
-                                  color: theme.colorScheme.onSurface
-                                      .withValues(alpha: 0.72),
+                                  color: theme.colorScheme.onSurface.withValues(
+                                    alpha: 0.72,
+                                  ),
                                 ),
                           ),
                         ),
@@ -162,7 +181,7 @@ class _LoginForm extends StatelessWidget {
             label: 'Email',
             hint: 'Introduce tu email',
             controller: emailController,
-            keyboardType: TextInputType.text,
+            keyboardType: TextInputType.emailAddress,
             validator: Validators.validateEmail,
           ),
           CustomInput(
@@ -182,10 +201,7 @@ class _GoogleSignInButton extends StatelessWidget {
   final bool isLoading;
   final VoidCallback onPressed;
 
-  const _GoogleSignInButton({
-    required this.isLoading,
-    required this.onPressed,
-  });
+  const _GoogleSignInButton({required this.isLoading, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -197,10 +213,7 @@ class _GoogleSignInButton extends StatelessWidget {
       child: OutlinedButton.icon(
         onPressed: isLoading ? null : onPressed,
         icon: const _GoogleLogo(),
-        label: const Text(
-          "Continuar con Google",
-          textAlign: TextAlign.center,
-        ),
+        label: const Text("Continuar con Google", textAlign: TextAlign.center),
         style: OutlinedButton.styleFrom(
           foregroundColor: theme.colorScheme.onSurface,
           side: BorderSide(color: theme.colorScheme.primary, width: 1.5),
@@ -230,7 +243,8 @@ class _GoogleLogoPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final stroke = size.width * 0.16;
-    final rect = Offset(stroke / 2, stroke / 2) &
+    final rect =
+        Offset(stroke / 2, stroke / 2) &
         Size(size.width - stroke, size.height - stroke);
     final paint = Paint()
       ..style = PaintingStyle.stroke

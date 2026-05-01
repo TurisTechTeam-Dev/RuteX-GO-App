@@ -1,3 +1,12 @@
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -44,8 +53,16 @@ class _HomeScreenState extends State<HomeScreen> {
   String _buildAudioGuideText(HomeData data) {
     final summary = HomeSummary.fromHomeData(data);
     final name = data.user.name.trim().isEmpty ? 'explorador' : data.user.name;
+    final routesText = data.routes.isEmpty
+        ? 'Aún no tienes rutas completadas.'
+        : data.routes
+              .map(
+                (route) =>
+                    '${route.name}: ${route.completedMissions} de ${route.totalMissions} misiones completadas.',
+              )
+              .join(' ');
 
-    return 'Hola $name. Tu rango actual es ${summary.rankName}. Tienes ${summary.totalPoints} puntos y has completado ${summary.completedRoutes} rutas. Pulsa explorar para descubrir nuevas rutas culturales.';
+    return 'Hola $name. Estás en la pantalla principal. Tu rango actual es ${summary.rankName}. Tienes ${summary.totalPoints} puntos y has completado ${summary.completedRoutes} rutas. $routesText En la esquina inferior derecha tienes el botón explorar para descubrir nuevas rutas culturales.';
   }
 
   void _showInfoDialogIfNeeded() {
@@ -85,6 +102,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   AudioGuideWidget(
                     text: _buildAudioGuideText(data),
                     autoRead: autoRead,
+                    semanticLabel:
+                        'Botón de audioguía. Pulsa para escuchar el resumen de tu perfil y la descripción de la pantalla.',
                   )
                 else
                   const SizedBox(width: 56, height: 56),

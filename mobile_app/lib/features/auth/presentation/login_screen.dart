@@ -1,3 +1,12 @@
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -30,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _audioGuideMessage;
 
   String get _defaultAudioGuideText =>
-      'Pantalla de inicio de sesion. Introduce tu email y contrasena. Puedes iniciar sesion, continuar con Google, recuperar tu contrasena o registrarte si aun no tienes cuenta.';
+      'Pantalla de inicio de sesión. Introduce tu email y contraseña. Pulsa iniciar sesión, continúa con Google, recupera tu contraseña si la has olvidado o regístrate si aún no tienes cuenta.';
 
   @override
   void initState() {
@@ -94,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final emailError = Validators.validateEmail(_emailController.text);
     if (emailError != null) {
       _setAudioGuideMessage(
-        "Introduce un email valido arriba para recuperar tu contrasena",
+        "Introduce un email válido arriba para recuperar tu contraseña",
       );
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -112,7 +121,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await _authUseCases.recoverPassword(_emailController.text.trim());
       if (mounted) {
-        _setAudioGuideMessage("Correo de recuperacion enviado.");
+        _setAudioGuideMessage("Correo de recuperación enviado.");
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Correo de recuperación enviado."),
@@ -191,6 +200,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: AudioGuideWidget(
                   text: _audioGuideMessage ?? _defaultAudioGuideText,
                   autoRead: autoRead,
+                  semanticLabel:
+                      'Botón de audioguía. Pulsa para escuchar las instrucciones de inicio de sesión.',
                 ),
               ),
             ),

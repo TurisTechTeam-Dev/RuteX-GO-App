@@ -1,3 +1,12 @@
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
@@ -134,6 +143,7 @@ class _MissionScannerScreenState extends State<MissionScannerScreen> {
   @override
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
+    final autoRead = MediaQuery.of(context).accessibleNavigation;
 
     return Scaffold(
       key: _scaffoldKey,
@@ -159,7 +169,10 @@ class _MissionScannerScreenState extends State<MissionScannerScreen> {
             bottom: bottomPadding + 24,
             child: AudioGuideWidget(
               text:
-                  'Escaner QR. Enfoca el codigo QR del punto de interes correcto dentro del recuadro. Puedes volver atras o activar la linterna si necesitas mas luz.',
+                  'Escáner QR. Enfoca el código QR del punto de interés correcto dentro del recuadro. Puedes volver atrás o activar la linterna si necesitas más luz.',
+              autoRead: autoRead,
+              semanticLabel:
+                  'Botón de audioguía. Pulsa para escuchar las instrucciones del escáner QR.',
             ),
           ),
         ],

@@ -1,3 +1,12 @@
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/
 import 'package:flutter/material.dart';
 
 import '../../../app/widgets/custom_drawer.dart';
@@ -18,6 +27,8 @@ class RouteSelectionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final autoRead = MediaQuery.of(context).accessibleNavigation;
+
     return Scaffold(
       appBar: const TopAppBar(showBack: true),
       endDrawer: const CustomDrawer(),
@@ -26,9 +37,12 @@ class RouteSelectionScreen extends StatelessWidget {
         cityKeys: cityKeys,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-      floatingActionButton: const AudioGuideWidget(
+      floatingActionButton: AudioGuideWidget(
         text:
-            'Pantalla de rutas disponibles. Revisa cada ruta, su dificultad, duracion, puntos totales y puntos de interes. Pulsa comenzar ruta para iniciar la navegacion.',
+            'Estás en la pantalla de rutas disponibles. Revisa cada ruta, su dificultad, duración, puntos totales y puntos de interés. Pulsa comenzar ruta para iniciar la navegación.',
+        autoRead: autoRead,
+        semanticLabel:
+            'Botón de audioguía. Pulsa para escuchar la descripción de las rutas disponibles.',
       ),
       bottomNavigationBar: Container(
         height: 60,

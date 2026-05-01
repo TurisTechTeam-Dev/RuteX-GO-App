@@ -1,3 +1,12 @@
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -250,11 +259,11 @@ class RoutingService {
       case 'turn':
         return 'Gira $direction$roadSuffix';
       case 'new name':
-        return 'Continua $direction$roadSuffix';
+        return 'Continúa $direction$roadSuffix';
       case 'continue':
-        return 'Continua$roadSuffix';
+        return 'Continúa$roadSuffix';
       case 'merge':
-        return 'Incorporate $direction$roadSuffix';
+        return 'Incorpórate $direction$roadSuffix';
       case 'on ramp':
         return 'Toma la entrada $direction$roadSuffix';
       case 'off ramp':
@@ -263,11 +272,11 @@ class RoutingService {
         return 'Mantente $direction$roadSuffix';
       case 'roundabout':
       case 'rotary':
-        return 'En la rotonda, continua $direction$roadSuffix';
+        return 'En la rotonda, continúa $direction$roadSuffix';
       case 'end of road':
-        return 'Al final de la via, gira $direction$roadSuffix';
+        return 'Al final de la vía, gira $direction$roadSuffix';
       default:
-        return 'Continua$roadSuffix';
+        return 'Continúa$roadSuffix';
     }
   }
 

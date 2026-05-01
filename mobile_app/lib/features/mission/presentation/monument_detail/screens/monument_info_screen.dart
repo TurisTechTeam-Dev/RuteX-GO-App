@@ -1,3 +1,12 @@
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/
 import 'package:flutter/material.dart';
 
 import '../../../../../core/constants/app_colors.dart';
@@ -26,6 +35,7 @@ class _MonumentInfoScreenState extends State<MonumentInfoScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final autoRead = MediaQuery.of(context).accessibleNavigation;
     final point = widget.args.scanResult.point;
     final mission = widget.args.scanResult.mission;
 
@@ -36,7 +46,10 @@ class _MonumentInfoScreenState extends State<MonumentInfoScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       floatingActionButton: AudioGuideWidget(
         text:
-            'Punto de interes: ${point.name}. ${point.description}. Cuando estes listo, pulsa empezar mision para responder las preguntas.',
+            'Punto de interés: ${point.name}. ${point.description}. Cuando estés listo, pulsa empezar misión para responder las preguntas.',
+        autoRead: autoRead,
+        semanticLabel:
+            'Botón de audioguía. Pulsa para escuchar la descripción del punto de interés.',
       ),
       body: SingleChildScrollView(
         child: Column(

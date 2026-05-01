@@ -1,3 +1,12 @@
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -28,7 +37,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String? _audioGuideMessage;
 
   String get _defaultAudioGuideText =>
-      'Pantalla de registro. Escribe tu usuario, nombre, email y contrasena. Acepta los terminos y pulsa crear cuenta.';
+      'Pantalla de registro. Introduce tu usuario, nombre, email y contraseña. Acepta los términos y pulsa crear cuenta. Si ya tienes cuenta, vuelve a iniciar sesión.';
 
   late final AuthUseCases _authUseCases;
 
@@ -61,7 +70,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
 
     if (!_acceptedTerms) {
-      _setAudioGuideMessage("Debes aceptar los terminos y condiciones.");
+      _setAudioGuideMessage("Debes aceptar los términos y condiciones.");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Debes aceptar los términos y condiciones."),
@@ -173,6 +182,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: AudioGuideWidget(
                   text: _audioGuideMessage ?? _defaultAudioGuideText,
                   autoRead: autoRead,
+                  semanticLabel:
+                      'Botón de audioguía. Pulsa para escuchar las instrucciones de registro.',
                 ),
               ),
             ),

@@ -1,3 +1,14 @@
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
@@ -9,7 +20,9 @@ class AudioGuideWidget extends StatefulWidget {
   final Color? iconColor;
   final Color? backgroundColor;
   final bool autoRead;
+  final Duration autoReadDelay;
   final Object heroTag;
+  final String? semanticLabel;
 
   const AudioGuideWidget({
     super.key,
@@ -18,7 +31,9 @@ class AudioGuideWidget extends StatefulWidget {
     this.iconColor,
     this.backgroundColor,
     this.autoRead = false,
+    this.autoReadDelay = const Duration(milliseconds: 2200),
     this.heroTag = 'fab_audioguia',
+    this.semanticLabel,
   });
 
   @override
@@ -27,6 +42,7 @@ class AudioGuideWidget extends StatefulWidget {
 
 class _AudioGuideWidgetState extends State<AudioGuideWidget> {
   final FlutterTts _flutterTts = FlutterTts();
+  Timer? _autoReadTimer;
   bool _isPlaying = false;
 
   @override
@@ -37,23 +53,49 @@ class _AudioGuideWidgetState extends State<AudioGuideWidget> {
     _flutterTts.setCancelHandler(_markStopped);
     _flutterTts.setErrorHandler((message) => _markStopped());
 
-    if (widget.autoRead && widget.text.trim().isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _speak());
-    }
+    _scheduleAutoRead();
   }
 
   @override
   void didUpdateWidget(covariant AudioGuideWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.autoRead &&
-        widget.text != oldWidget.text &&
-        widget.text.trim().isNotEmpty) {
-      _speak();
+    final shouldReschedule =
+        widget.autoRead &&
+        (widget.text != oldWidget.text ||
+            widget.autoRead != oldWidget.autoRead ||
+            widget.autoReadDelay != oldWidget.autoReadDelay);
+
+    if (shouldReschedule) {
+      _scheduleAutoRead();
+    } else if (!widget.autoRead) {
+      _cancelAutoRead();
     }
   }
 
+  void _scheduleAutoRead() {
+    _cancelAutoRead();
+
+    if (!widget.autoRead || widget.text.trim().isEmpty) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !widget.autoRead || widget.text.trim().isEmpty) return;
+
+      _autoReadTimer = Timer(widget.autoReadDelay, () {
+        if (!mounted || !widget.autoRead) return;
+        _speak();
+      });
+    });
+  }
+
+  void _cancelAutoRead() {
+    _autoReadTimer?.cancel();
+    _autoReadTimer = null;
+  }
+
   Future<void> _speak() async {
+    _cancelAutoRead();
+
     final text = widget.text.trim();
     if (text.isEmpty) return;
 
@@ -79,21 +121,30 @@ class _AudioGuideWidgetState extends State<AudioGuideWidget> {
 
   @override
   void dispose() {
+    _cancelAutoRead();
     _flutterTts.stop();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FloatingActionButton(
-      heroTag: widget.heroTag,
-      backgroundColor: widget.backgroundColor ?? AppColors.verdePrincipal,
-      foregroundColor: widget.iconColor ?? AppColors.blancoPuro,
-      elevation: 6,
-      onPressed: _isPlaying ? _stop : _speak,
-      child: Icon(
-        _isPlaying ? Icons.stop : Icons.volume_up,
-        size: widget.iconSize,
+    final action = _isPlaying ? 'Detener audioguía' : 'Reproducir audioguía';
+
+    return Semantics(
+      label: widget.semanticLabel ?? action,
+      button: true,
+      enabled: widget.text.trim().isNotEmpty,
+      child: FloatingActionButton(
+        heroTag: widget.heroTag,
+        tooltip: action,
+        backgroundColor: widget.backgroundColor ?? AppColors.verdePrincipal,
+        foregroundColor: widget.iconColor ?? AppColors.blancoPuro,
+        elevation: 6,
+        onPressed: _isPlaying ? _stop : _speak,
+        child: Icon(
+          _isPlaying ? Icons.stop : Icons.volume_up,
+          size: widget.iconSize,
+        ),
       ),
     );
   }

@@ -1,3 +1,12 @@
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../core/constants/firestore_contract.dart';
@@ -293,7 +302,8 @@ class HomeDataLoader {
               answer[ResultAnswerFields.nombreMonumento]?.toString() ?? '',
           question: answer[ResultAnswerFields.pregunta]?.toString() ?? '',
           selectedAnswer:
-              answer[ResultAnswerFields.respuestaSeleccionada]?.toString() ?? '',
+              answer[ResultAnswerFields.respuestaSeleccionada]?.toString() ??
+              '',
           correctAnswer:
               answer[ResultAnswerFields.respuestaCorrecta]?.toString() ?? '',
           isCorrect: answer[ResultAnswerFields.esCorrecta] == true,

@@ -1,3 +1,12 @@
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/
 import 'package:flutter/material.dart';
 
 import '../../../../../core/widgets/audio_guide/audio_guide.dart';
@@ -13,6 +22,7 @@ class RouteResultScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final autoRead = MediaQuery.of(context).accessibleNavigation;
     final args = ModalRoute.of(context)?.settings.arguments;
     final result = args is RouteResultArgs
         ? RouteResultData.fromArgs(args)
@@ -24,7 +34,10 @@ class RouteResultScreen extends StatelessWidget {
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       floatingActionButton: AudioGuideWidget(
         text:
-            'Resultado de la ruta ${result.routeName}. Has conseguido ${result.attemptScore} puntos. Has visitado ${result.visitedMonuments} de ${result.totalPois} puntos de interes y has acertado ${result.correctAnswers} de ${result.totalAnswers} respuestas.',
+            'Resultado de la ruta ${result.routeName}. Has conseguido ${result.attemptScore} puntos. Has visitado ${result.visitedMonuments} de ${result.totalPois} puntos de interés y has acertado ${result.correctAnswers} de ${result.totalAnswers} respuestas.',
+        autoRead: autoRead,
+        semanticLabel:
+            'Botón de audioguía. Pulsa para escuchar el resultado de la ruta.',
       ),
       body: Stack(
         children: [

@@ -1,3 +1,12 @@
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 
@@ -124,10 +133,7 @@ class _RouteListData {
   final Map<String, bool> availability;
   final Map<String, List<String>> pointNames;
 
-  const _RouteListData({
-    required this.availability,
-    required this.pointNames,
-  });
+  const _RouteListData({required this.availability, required this.pointNames});
 
   const _RouteListData.empty()
     : availability = const <String, bool>{},

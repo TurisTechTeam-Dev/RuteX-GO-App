@@ -1,3 +1,12 @@
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -43,6 +52,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isSavingEmail = false;
   bool _isSavingPassword = false;
   bool _isUploadingAvatar = false;
+
+  String _buildProfileAudioGuideText(HomeData data) {
+    final user = data.user;
+    final displayName = user.username.isNotEmpty ? user.username : user.name;
+
+    return 'Hola $displayName. Estás en la pantalla de perfil. Aquí puedes ver tu foto actual, tu nombre de usuario y tu correo ${user.email}. Puedes cambiar tu foto pulsando la cámara, editar tu usuario, solicitar un cambio de email o actualizar tu contraseña en las secciones inferiores.';
+  }
 
   @override
   void initState() {
@@ -228,9 +244,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
         appBar: const TopAppBar(showBack: true),
         endDrawer: const CustomDrawer(),
         floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-        floatingActionButton: const AudioGuideWidget(
-          text:
-              'Pantalla de perfil. Aqui puedes ver tus datos, cambiar tu foto, editar usuario, solicitar cambio de email o actualizar tu contrasena.',
+        floatingActionButton: FutureBuilder<HomeData>(
+          future: _profileFuture,
+          builder: (context, snapshot) {
+            return AudioGuideWidget(
+              text: snapshot.hasData
+                  ? _buildProfileAudioGuideText(snapshot.data!)
+                  : 'Pantalla de perfil. Aquí puedes ver tus datos, cambiar tu foto, editar usuario, solicitar cambio de email o actualizar tu contraseña.',
+              autoRead: MediaQuery.of(context).accessibleNavigation,
+              semanticLabel:
+                  'Botón de audioguía. Pulsa para escuchar la descripción de tu perfil.',
+            );
+          },
         ),
         body: Stack(
           children: [

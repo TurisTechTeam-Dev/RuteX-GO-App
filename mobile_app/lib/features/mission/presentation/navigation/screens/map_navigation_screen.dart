@@ -1,3 +1,12 @@
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -31,6 +40,7 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
     final theme = Theme.of(context);
     final tripProvider = context.watch<TripSimulationProvider>();
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
+    final autoRead = MediaQuery.of(context).accessibleNavigation;
 
     if (tripProvider.hasReachedDestination &&
         !_isDialogOpen &&
@@ -137,6 +147,9 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
                 bottom: bottomPadding + 128,
                 child: AudioGuideWidget(
                   text: _navigationAudioText(tripProvider),
+                  autoRead: autoRead,
+                  semanticLabel:
+                      'Botón de audioguía. Pulsa para escuchar las indicaciones de navegación.',
                 ),
               ),
           ],
@@ -151,21 +164,21 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
     }
 
     if (provider.currentPoiIndex == -1 || provider.pointsOfInterest.isEmpty) {
-      return 'Pantalla de navegacion. Estamos preparando la ruta.';
+      return 'Pantalla de navegación. Estamos preparando la ruta.';
     }
 
     final nextStop = provider.pointsOfInterest[provider.currentPoiIndex].name;
     final distance = provider.distanceToNextPoi.toInt();
     final instruction = provider.currentNavigationStep?.instruction;
     final simulationState = provider.isSimulating
-        ? 'La simulacion esta en marcha.'
+        ? 'La simulación está en marcha.'
         : 'Pulsa comenzar o continuar ruta para simular el recorrido.';
 
     if (instruction == null || instruction.isEmpty) {
-      return 'Pantalla de navegacion. El siguiente punto es $nextStop, a unos $distance metros. $simulationState';
+      return 'Pantalla de navegación. El siguiente punto es $nextStop, a unos $distance metros. $simulationState';
     }
 
-    return 'Pantalla de navegacion. El siguiente punto es $nextStop, a unos $distance metros. Indicacion actual: $instruction. $simulationState';
+    return 'Pantalla de navegación. El siguiente punto es $nextStop, a unos $distance metros. Indicación actual: $instruction. $simulationState';
   }
 
   void _showArrivalBottomSheet(

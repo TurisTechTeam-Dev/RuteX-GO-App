@@ -1,3 +1,12 @@
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -41,6 +50,7 @@ class _QuizScreenState extends State<QuizScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final autoRead = MediaQuery.of(context).accessibleNavigation;
 
     if (_mission.questions.isEmpty) {
       return const Scaffold(
@@ -83,14 +93,19 @@ class _QuizScreenState extends State<QuizScreen> {
                   : () => _continueQuiz(),
             ),
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-      floatingActionButton: AudioGuideWidget(text: _quizAudioText(question)),
+      floatingActionButton: AudioGuideWidget(
+        text: _quizAudioText(question),
+        autoRead: autoRead,
+        semanticLabel:
+            'Botón de audioguía. Pulsa para escuchar la pregunta y sus respuestas.',
+      ),
     );
   }
 
   String _quizAudioText(QuizQuestion question) {
     final buffer = StringBuffer()
       ..write(
-        'Mision ${_mission.title}. Pregunta ${_currentIndex + 1} de ${_mission.questions.length}. ',
+        'Misión ${_mission.title}. Pregunta ${_currentIndex + 1} de ${_mission.questions.length}. ',
       )
       ..write(question.text);
 
