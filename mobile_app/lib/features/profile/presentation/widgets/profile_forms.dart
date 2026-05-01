@@ -14,6 +14,68 @@ import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/cards/custom_cards.dart';
 import '../../../../core/widgets/inputs/custom_inputs.dart';
 
+class ExplorerDiaryCard extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const ExplorerDiaryCard({super.key, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Semantics(
+      button: true,
+      label:
+          'Mi Diario de Explorador. Crea tu libro de recuerdos de Extremadura.',
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: onTap,
+        child: CustomCard(
+          width: double.infinity,
+          padding: const EdgeInsets.all(18),
+          child: Row(
+            children: [
+              const Icon(Icons.bookmark, color: Color(0xFF42A5F5), size: 30),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Mi Diario de Explorador',
+                      style: TextStyle(
+                        fontSize: 16,
+                        height: 1.2,
+                        fontWeight: FontWeight.w800,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Crea tu libro de recuerdos de Extremadura',
+                      style: TextStyle(
+                        fontSize: 13,
+                        height: 1.25,
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.62,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class UsernameFormCard extends StatelessWidget {
   final GlobalKey<FormState> formKey;
   final TextEditingController controller;

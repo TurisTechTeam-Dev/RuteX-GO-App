@@ -34,6 +34,7 @@ class ProfileContent extends StatelessWidget {
   final VoidCallback onCancelUsername;
   final VoidCallback onSaveUsername;
   final VoidCallback onChangeAvatar;
+  final VoidCallback onOpenDiary;
   final VoidCallback onEditEmail;
   final VoidCallback onCancelEmail;
   final VoidCallback onSaveEmail;
@@ -63,6 +64,7 @@ class ProfileContent extends StatelessWidget {
     required this.onCancelUsername,
     required this.onSaveUsername,
     required this.onChangeAvatar,
+    required this.onOpenDiary,
     required this.onEditEmail,
     required this.onCancelEmail,
     required this.onSaveEmail,
@@ -111,6 +113,9 @@ class ProfileContent extends StatelessWidget {
         ),
       );
     }
+
+    sections.add(const SizedBox(height: 18));
+    sections.add(ExplorerDiaryCard(onTap: onOpenDiary));
 
     sections.add(const SizedBox(height: 18));
     sections.add(

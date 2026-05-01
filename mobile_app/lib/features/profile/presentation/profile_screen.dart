@@ -302,6 +302,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     },
                     onSaveUsername: _updateUsername,
                     onChangeAvatar: _changeAvatar,
+                    onOpenDiary: () =>
+                        Navigator.pushNamed(context, AppRoutes.explorerDiary),
                     onEditEmail: () => setState(() => _isEditingEmail = true),
                     onCancelEmail: () {
                       final authEmail = _authUseCases.getCurrentUser()?.email;

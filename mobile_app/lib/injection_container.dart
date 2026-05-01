@@ -21,6 +21,10 @@ import 'features/admin_panel/domain/usecases/admin_use_cases.dart';
 import 'features/auth/data/repositories/auth_repository_impl.dart';
 import 'features/auth/domain/repositories/auth_repository.dart';
 import 'features/auth/domain/usecases/auth_use_cases.dart';
+import 'features/explorer_diary/data/datasources/diary_remote_datasource.dart';
+import 'features/explorer_diary/data/repositories/diary_repository_impl.dart';
+import 'features/explorer_diary/domain/repositories/diary_repository.dart';
+import 'features/explorer_diary/domain/usecases/diary_use_cases.dart';
 import 'features/mission/data/repositories/mission_repository_impl.dart';
 import 'features/mission/domain/repositories/mission_repository.dart';
 import 'features/mission/domain/usecases/mission_use_cases.dart';
@@ -68,6 +72,14 @@ List<SingleChildWidget> buildAppProviders() {
         ),
       ),
     ),
+    ProxyProvider2<FirebaseFirestore, FirebaseStorage, DiaryRepository>(
+      update: (context, firestore, storage, previous) => DiaryRepositoryImpl(
+        remoteDataSource: DiaryRemoteDatasource(
+          firestore: firestore,
+          storage: storage,
+        ),
+      ),
+    ),
     ProxyProvider<AuthRepository, AuthUseCases>(
       update: (context, repository, previous) => AuthUseCases(repository),
     ),
@@ -82,6 +94,10 @@ List<SingleChildWidget> buildAppProviders() {
     ),
     ProxyProvider<AdminRepository, AdminUseCases>(
       update: (context, repository, previous) => AdminUseCases(repository),
+    ),
+    ProxyProvider<DiaryRepository, DiaryUseCases>(
+      update: (context, repository, previous) =>
+          DiaryUseCases(diaryRepository: repository),
     ),
   ];
 }

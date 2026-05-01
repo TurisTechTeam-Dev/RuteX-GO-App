@@ -13,6 +13,7 @@ import 'package:provider/provider.dart';
 import '../../features/admin_panel/presentation/admin_panel_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
+import '../../features/explorer_diary/presentation/explorer_diary_screen.dart';
 import '../../features/mission/domain/usecases/mission_use_cases.dart';
 import '../../features/mission/presentation/monument_detail/models/monument_info_args.dart';
 import '../../features/mission/presentation/monument_detail/screens/monument_info_screen.dart';
@@ -43,6 +44,7 @@ class AppRoutes {
   static const String citySelection = '/city_selection';
   static const String routeSelection = '/route_selection';
   static const String adminPanel = '/admin_panel';
+  static const String explorerDiary = '/explorer_diary';
   static const String showInfoOnHomeStartArg = 'showInfoOnStart';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -93,6 +95,9 @@ class AppRoutes {
 
       case profile:
         return MaterialPageRoute(builder: (_) => const ProfileScreen());
+
+      case explorerDiary:
+        return MaterialPageRoute(builder: (_) => const ExplorerDiaryScreen());
 
       case missionQrScanner:
         final args = settings.arguments as MissionScannerArgs?;
