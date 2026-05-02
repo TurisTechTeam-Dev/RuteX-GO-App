@@ -6,6 +6,7 @@ import 'package:mobile_app/core/widgets/images/storage_aware_image.dart';
 
 class ImagePickerBox extends StatefulWidget {
   final String? imageUrl;
+  final List<String> alternateImageSources;
   final bool isUploading;
   final void Function(Uint8List bytes, String fileName) onImageSelected;
   final String label;
@@ -13,6 +14,7 @@ class ImagePickerBox extends StatefulWidget {
   const ImagePickerBox({
     super.key,
     this.imageUrl,
+    this.alternateImageSources = const [],
     this.isUploading = false,
     required this.onImageSelected,
     this.label = 'Añadir Imagen',
@@ -87,6 +89,7 @@ class _ImagePickerBoxState extends State<ImagePickerBox> {
                         ? Image.memory(_localBytes!, fit: BoxFit.cover)
                         : StorageAwareImage(
                             source: widget.imageUrl,
+                            alternateSources: widget.alternateImageSources,
                             fit: BoxFit.cover,
                             fallback: const _ImageFallback(),
                           ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:typed_data';
 import 'package:mobile_app/core/widgets/buttons/custom_button.dart';
 import 'package:mobile_app/core/widgets/cards/custom_cards.dart';
+import 'package:mobile_app/core/utils/text_normalizer.dart';
 import 'package:mobile_app/features/admin_panel/data/models/admin_models.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/components/image_picker_box.dart';
 
@@ -24,6 +25,8 @@ class CityForm extends StatefulWidget {
 }
 
 class _CityFormState extends State<CityForm> {
+  final ScrollController _scrollController = ScrollController();
+
   late final TextEditingController _nameController;
   late final TextEditingController _provinceController;
   late final TextEditingController _imageController;
@@ -60,6 +63,7 @@ class _CityFormState extends State<CityForm> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _nameController.dispose();
     _provinceController.dispose();
     _imageController.dispose();
@@ -69,10 +73,16 @@ class _CityFormState extends State<CityForm> {
   @override
   Widget build(BuildContext context) {
     return CustomCard(
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Column(
+      child: Scrollbar(
+        controller: _scrollController,
+        thumbVisibility: true,
+        trackVisibility: true,
+        interactive: true,
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
@@ -130,6 +140,13 @@ class _CityFormState extends State<CityForm> {
                         const SizedBox(height: 8),
                         ImagePickerBox(
                           imageUrl: _imageController.text,
+                          alternateImageSources: [
+                            if (widget.city?.id != null)
+                              'assets/images_selection/${widget.city!.id}.jpg',
+                            'assets/images_selection/${TextNormalizer.toAsciiSlug(_nameController.text)}.jpg',
+                            _nameController.text,
+                            if (widget.city != null) widget.city!.name,
+                          ],
                           isUploading: _isUploading,
                           onImageSelected: (bytes, name) {
                             setState(() {
@@ -181,6 +198,7 @@ class _CityFormState extends State<CityForm> {
                 ),
               ),
             ],
+            ),
           ),
         ),
       ),

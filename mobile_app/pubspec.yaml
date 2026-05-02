@@ -34,6 +34,7 @@ dependencies:
   printing: ^5.14.3
   path_provider: ^2.1.5
   share_plus: ^12.0.0
+  web: ^1.1.1
 
 dev_dependencies:
   flutter_test:
@@ -70,6 +71,8 @@ flutter:
     - assets/merida_monumental.png
     - assets/merida_vidafe.jpg
     - assets/Mapa_fondo_Extremadura.png
+    - assets/Sello_Monumental_Romana.png
+    - assets/Sello_ruta_monumental_romana.png
 
   # Configuración de la familia de fuente Montserrat
   fonts:

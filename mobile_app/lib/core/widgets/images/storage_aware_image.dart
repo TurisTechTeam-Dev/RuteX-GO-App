@@ -7,14 +7,16 @@
   Año: 2026
   -----------------------------------------------------------------------------
 */
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
 import '../../constants/app_colors.dart';
+import 'storage_network_image.dart';
 
 class StorageAwareImage extends StatelessWidget {
   final String? source;
+  final List<String> alternateSources;
   final BoxFit fit;
   final Widget fallback;
   final Widget? placeholder;
@@ -24,6 +26,7 @@ class StorageAwareImage extends StatelessWidget {
   const StorageAwareImage({
     super.key,
     required this.source,
+    this.alternateSources = const [],
     required this.fallback,
     this.fit = BoxFit.cover,
     this.placeholder,
@@ -34,8 +37,16 @@ class StorageAwareImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final normalizedSource = source?.trim() ?? '';
+    final normalizedAlternates = alternateSources
+        .map((value) => value.trim())
+        .where((value) => value.isNotEmpty)
+        .toList();
+    final assetFallbackSource = _firstAssetPath([
+      normalizedSource,
+      ...normalizedAlternates,
+    ]);
 
-    if (normalizedSource.isEmpty) {
+    if (normalizedSource.isEmpty && normalizedAlternates.isEmpty) {
       return fallback;
     }
 
@@ -61,7 +72,10 @@ class StorageAwareImage extends StatelessWidget {
     }
 
     return FutureBuilder<String?>(
-      future: StorageImageUrlCache.resolve(normalizedSource),
+      future: StorageImageUrlCache.resolveAny([
+        normalizedSource,
+        ...normalizedAlternates,
+      ]),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return placeholder ?? const _DefaultLoadingState();
@@ -69,7 +83,15 @@ class StorageAwareImage extends StatelessWidget {
 
         final resolvedUrl = snapshot.data;
         if (resolvedUrl == null || resolvedUrl.isEmpty) {
-          return fallback;
+          return assetFallbackSource == null
+              ? fallback
+              : Image.asset(
+                  assetFallbackSource,
+                  width: width,
+                  height: height,
+                  fit: fit,
+                  errorBuilder: (context, error, stackTrace) => fallback,
+                );
         }
 
         return _CachedStorageImage(
@@ -90,6 +112,14 @@ class StorageAwareImage extends StatelessWidget {
 
   bool _isHttpUrl(String value) {
     return value.startsWith('http://') || value.startsWith('https://');
+  }
+
+  String? _firstAssetPath(List<String> values) {
+    for (final value in values) {
+      if (_isAssetPath(value)) return value;
+    }
+
+    return null;
   }
 }
 
@@ -112,14 +142,13 @@ class _CachedStorageImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CachedNetworkImage(
+    return buildResolvedStorageNetworkImage(
       imageUrl: imageUrl,
       width: width,
       height: height,
       fit: fit,
-      placeholder: (context, url) =>
-          placeholder ?? const _DefaultLoadingState(),
-      errorWidget: (context, url, error) => fallback,
+      placeholder: placeholder ?? const _DefaultLoadingState(),
+      fallback: fallback,
     );
   }
 }
@@ -127,6 +156,18 @@ class _CachedStorageImage extends StatelessWidget {
 class StorageImageUrlCache {
   static final Map<String, Future<String?>> _pending = {};
   static final Map<String, String?> _resolved = {};
+
+  static Future<String?> resolveAny(List<String> values) async {
+    for (final value in values) {
+      final normalizedValue = value.trim();
+      if (normalizedValue.isEmpty) continue;
+
+      final resolvedUrl = await resolve(normalizedValue);
+      if (resolvedUrl != null && resolvedUrl.isNotEmpty) return resolvedUrl;
+    }
+
+    return null;
+  }
 
   static Future<String?> resolve(String value) {
     if (_resolved.containsKey(value)) {
@@ -149,11 +190,7 @@ class StorageImageUrlCache {
 
       for (final candidate in candidates) {
         try {
-          final resolvedUrl = candidate.startsWith('gs://')
-              ? await FirebaseStorage.instance
-                    .refFromURL(candidate)
-                    .getDownloadURL()
-              : await FirebaseStorage.instance.ref(candidate).getDownloadURL();
+          final resolvedUrl = await _downloadUrlForCandidate(candidate);
 
           _resolved[value] = resolvedUrl;
           debugPrint('Storage preview resolved: "$candidate"');
@@ -173,24 +210,108 @@ class StorageImageUrlCache {
   }
 
   static List<String> _storagePathCandidates(String rawValue) {
-    final value = rawValue.trim().replaceAll(RegExp(r'^/+'), '');
-    if (value.isEmpty || value.startsWith('gs://')) {
-      return [value];
+    final normalizedValues = _decodedStorageValues(rawValue);
+    final candidates = <String>[];
+    final bucket = Firebase.app().options.storageBucket;
+
+    for (final rawCandidate in normalizedValues) {
+      final value = rawCandidate.trim().replaceAll(RegExp(r'^/+'), '');
+      if (value.isEmpty || value.startsWith('gs://')) {
+        candidates.add(value);
+        continue;
+      }
+
+      if (value.contains('/')) {
+        candidates.addAll(_withImageExtensionFallbacks(value));
+        candidates.addAll(_withImageExtensionFallbacks(_swapInterestAccent(value)));
+        candidates.addAll(_withImageExtensionFallbacks(_titleCaseFileName(value)));
+        continue;
+      }
+
+      final baseCandidates = [
+        value,
+        _titleCaseFileName(value),
+        'Contenido/Ciudades/$value',
+        'Contenido/Ciudades/${_titleCaseFileName(value)}',
+        'Contenido/Rutas/$value',
+        'Contenido/Rutas/${_titleCaseFileName(value)}',
+        'Contenido/Puntos de Interes/$value',
+        'Contenido/Puntos de Interes/${_titleCaseFileName(value)}',
+        'Contenido/Puntos de Inter\u00E9s/$value',
+        'Contenido/Puntos de Inter\u00E9s/${_titleCaseFileName(value)}',
+      ];
+
+      candidates.addAll(baseCandidates.expand(_withImageExtensionFallbacks));
     }
 
-    if (value.contains('/')) {
-      return _withImageExtensionFallbacks(value);
+    final expandedCandidates = <String>[];
+    for (final candidate in candidates) {
+      if (candidate.isEmpty) continue;
+      expandedCandidates.add(candidate);
+      if (bucket != null &&
+          bucket.isNotEmpty &&
+          !candidate.startsWith('gs://') &&
+          !_isAssetCandidate(candidate)) {
+        expandedCandidates.add('gs://$bucket/$candidate');
+      }
     }
 
-    final baseCandidates = [
-      value,
-      'Contenido/Ciudades/$value',
-      'Contenido/Rutas/$value',
-      'Contenido/Puntos de Interes/$value',
-      'Contenido/Puntos de Inter\u00E9s/$value',
-    ];
+    return expandedCandidates.toSet().toList();
+  }
 
-    return baseCandidates.expand(_withImageExtensionFallbacks).toSet().toList();
+  static Future<String> _downloadUrlForCandidate(String candidate) {
+    if (candidate.startsWith('gs://')) {
+      return FirebaseStorage.instance.refFromURL(candidate).getDownloadURL();
+    }
+
+    return FirebaseStorage.instance.ref(candidate).getDownloadURL();
+  }
+
+  static bool _isAssetCandidate(String value) {
+    return value.startsWith('assets/');
+  }
+
+  static List<String> _decodedStorageValues(String rawValue) {
+    final values = <String>{rawValue.trim()};
+
+    for (final decoder in [Uri.decodeFull, Uri.decodeComponent]) {
+      try {
+        values.add(decoder(rawValue.trim()));
+      } catch (_) {
+        // Keep the original value when it is not valid URI-encoded text.
+      }
+    }
+
+    return values.toList();
+  }
+
+  static String _swapInterestAccent(String value) {
+    if (value.contains('Puntos de Inter\u00E9s')) {
+      return value.replaceAll('Puntos de Inter\u00E9s', 'Puntos de Interes');
+    }
+
+    return value.replaceAll('Puntos de Interes', 'Puntos de Inter\u00E9s');
+  }
+
+  static String _titleCaseFileName(String value) {
+    final slashIndex = value.lastIndexOf('/');
+    final prefix = slashIndex == -1 ? '' : '${value.substring(0, slashIndex)}/';
+    final fileName = slashIndex == -1 ? value : value.substring(slashIndex + 1);
+    if (fileName.isEmpty) return value;
+
+    final dotIndex = fileName.lastIndexOf('.');
+    final stem = dotIndex == -1 ? fileName : fileName.substring(0, dotIndex);
+    final extension = dotIndex == -1 ? '' : fileName.substring(dotIndex);
+
+    final titledStem = stem
+        .split(RegExp(r'([ _-])'))
+        .map((part) {
+          if (part.isEmpty || RegExp(r'^[ _-]$').hasMatch(part)) return part;
+          return part[0].toUpperCase() + part.substring(1);
+        })
+        .join();
+
+    return '$prefix$titledStem$extension';
   }
 
   static List<String> _withImageExtensionFallbacks(String path) {

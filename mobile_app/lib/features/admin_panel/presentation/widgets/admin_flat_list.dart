@@ -5,7 +5,7 @@ import 'package:mobile_app/features/admin_panel/domain/usecases/admin_use_cases.
 import 'package:mobile_app/features/admin_panel/presentation/models/admin_editable_item.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/components/admin_delete_confirmation.dart';
 
-class AdminFlatList extends StatelessWidget {
+class AdminFlatList extends StatefulWidget {
   final AdminNavTab currentTab;
   final AdminUseCases adminUseCases;
   final ValueChanged<AdminEditableItem?> onItemSelected;
@@ -16,6 +16,19 @@ class AdminFlatList extends StatelessWidget {
     required this.adminUseCases,
     required this.onItemSelected,
   });
+
+  @override
+  State<AdminFlatList> createState() => _AdminFlatListState();
+}
+
+class _AdminFlatListState extends State<AdminFlatList> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +45,7 @@ class AdminFlatList extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            onPressed: () => onItemSelected(null),
+            onPressed: () => widget.onItemSelected(null),
             icon: const Icon(Icons.add),
             label: Text("Añadir ${_getSingularName()}"),
           ),
@@ -63,39 +76,46 @@ class AdminFlatList extends StatelessWidget {
                 );
               }
 
-              return ListView.separated(
-                itemCount: items.length,
-                separatorBuilder: (context, index) =>
-                    const Divider(height: 1, indent: 15, endIndent: 15),
-                itemBuilder: (context, i) {
-                  final item = items[i];
-                  final displayText = item.displayName.isEmpty
-                      ? "Sin nombre"
-                      : item.displayName;
+              return Scrollbar(
+                controller: _scrollController,
+                thumbVisibility: true,
+                trackVisibility: true,
+                interactive: true,
+                child: ListView.separated(
+                  controller: _scrollController,
+                  itemCount: items.length,
+                  separatorBuilder: (context, index) =>
+                      const Divider(height: 1, indent: 15, endIndent: 15),
+                  itemBuilder: (context, i) {
+                    final item = items[i];
+                    final displayText = item.displayName.isEmpty
+                        ? "Sin nombre"
+                        : item.displayName;
 
-                  return ListTile(
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 5,
-                    ),
-                    title: Text(
-                      displayText,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14,
+                    return ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 5,
                       ),
-                    ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.redAccent),
-                      onPressed: () => showAdminDeleteConfirmation(
-                        context: context,
-                        itemName: displayText,
-                        onConfirm: () => _deleteItem(item),
+                      title: Text(
+                        displayText,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                        ),
                       ),
-                    ),
-                    onTap: () => onItemSelected(item),
-                  );
-                },
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.redAccent),
+                        onPressed: () => showAdminDeleteConfirmation(
+                          context: context,
+                          itemName: displayText,
+                          onConfirm: () => _deleteItem(item),
+                        ),
+                      ),
+                      onTap: () => widget.onItemSelected(item),
+                    );
+                  },
+                ),
               );
             },
           ),
@@ -105,15 +125,15 @@ class AdminFlatList extends StatelessWidget {
   }
 
   Stream<List<Object>> _getStream() {
-    switch (currentTab) {
+    switch (widget.currentTab) {
       case AdminNavTab.cities:
-        return adminUseCases.watchCities();
+        return widget.adminUseCases.watchCities();
       case AdminNavTab.routes:
-        return adminUseCases.watchRoutes();
+        return widget.adminUseCases.watchRoutes();
       case AdminNavTab.pointsOfInterest:
-        return adminUseCases.watchPois();
+        return widget.adminUseCases.watchPois();
       case AdminNavTab.missions:
-        return adminUseCases.watchMissions();
+        return widget.adminUseCases.watchMissions();
     }
   }
 
@@ -136,18 +156,18 @@ class AdminFlatList extends StatelessWidget {
   void _deleteItem(AdminEditableItem item) {
     switch (item) {
       case AdminCityItem(:final city):
-        adminUseCases.deleteCity(city.id!);
+        widget.adminUseCases.deleteCity(city.id!);
       case AdminRouteItem(:final route):
-        adminUseCases.deleteRoute(route.id!);
+        widget.adminUseCases.deleteRoute(route.id!);
       case AdminPoiItem(:final point):
-        adminUseCases.deletePoi(point.id!);
+        widget.adminUseCases.deletePoi(point.id!);
       case AdminMissionItem(:final mission):
-        adminUseCases.deleteMission(mission.id!);
+        widget.adminUseCases.deleteMission(mission.id!);
     }
   }
 
   String _getSingularName() {
-    switch (currentTab) {
+    switch (widget.currentTab) {
       case AdminNavTab.cities:
         return "Ciudad";
       case AdminNavTab.routes:

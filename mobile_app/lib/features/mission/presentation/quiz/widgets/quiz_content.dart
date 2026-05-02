@@ -32,18 +32,30 @@ class QuizContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final question = questions[currentIndex];
-    final content = _buildQuestionContent(context, question);
 
     return SafeArea(
       child: Column(
         children: [
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: content,
-              ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final content = _buildQuestionContent(context, question);
+
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
+                    ),
+                    child: IntrinsicHeight(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: content,
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
           Container(

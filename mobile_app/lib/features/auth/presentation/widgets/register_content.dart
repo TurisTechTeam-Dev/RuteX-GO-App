@@ -9,6 +9,7 @@
 */
 import 'package:flutter/material.dart';
 
+import '../../../../app/widgets/terms_conditions_dialog.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/buttons/custom_button.dart';
@@ -195,6 +196,7 @@ class _RegisterForm extends StatelessWidget {
           Transform.translate(
             offset: const Offset(-8, 0),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Checkbox(
                   value: acceptedTerms,
@@ -202,11 +204,40 @@ class _RegisterForm extends StatelessWidget {
                   visualDensity: VisualDensity.compact,
                   onChanged: (value) => onAcceptedTermsChanged(value ?? false),
                 ),
-                Text(
-                  "Acepto términos y condiciones",
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    fontSize: 12,
-                    color: theme.colorScheme.onSurface,
+                Expanded(
+                  child: Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        "Acepto ",
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
+                              fontSize: 12,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                      ),
+                      Semantics(
+                        button: true,
+                        label: 'Abrir términos y condiciones',
+                        child: GestureDetector(
+                          onTap: () => showDialog<void>(
+                            context: context,
+                            builder: (_) => const TermsConditionsDialog(),
+                          ),
+                          child: Text(
+                            "términos y condiciones",
+                            style: Theme.of(context).textTheme.labelMedium
+                                ?.copyWith(
+                                  fontSize: 12,
+                                  color: AppColors.verdePrincipal,
+                                  fontWeight: FontWeight.w800,
+                                  decoration: TextDecoration.underline,
+                                  decorationColor: AppColors.verdePrincipal,
+                                ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],

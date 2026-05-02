@@ -27,6 +27,8 @@ class MissionForm extends StatefulWidget {
 }
 
 class _MissionFormState extends State<MissionForm> {
+  final ScrollController _scrollController = ScrollController();
+
   late final TextEditingController _titleController;
   late final TextEditingController _questionOneController;
   late final TextEditingController _questionTwoController;
@@ -77,6 +79,7 @@ class _MissionFormState extends State<MissionForm> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _titleController.dispose();
     _questionOneController.dispose();
     _questionTwoController.dispose();
@@ -110,10 +113,16 @@ class _MissionFormState extends State<MissionForm> {
         .toList();
 
     return CustomCard(
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Column(
+      child: Scrollbar(
+        controller: _scrollController,
+        thumbVisibility: true,
+        trackVisibility: true,
+        interactive: true,
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
@@ -234,6 +243,7 @@ class _MissionFormState extends State<MissionForm> {
                 ],
               ),
             ],
+            ),
           ),
         ),
       ),

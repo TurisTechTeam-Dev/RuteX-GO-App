@@ -29,6 +29,8 @@ class PointInterestForm extends StatefulWidget {
 class _PointInterestFormState extends State<PointInterestForm> {
   static const LatLng _meridaCentro = LatLng(38.9161, -6.3437);
 
+  final ScrollController _scrollController = ScrollController();
+
   late final TextEditingController _nameController;
   late final TextEditingController _imageController;
   late final TextEditingController _qrController;
@@ -128,6 +130,7 @@ class _PointInterestFormState extends State<PointInterestForm> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _nameController.dispose();
     _imageController.dispose();
     _qrController.dispose();
@@ -142,10 +145,16 @@ class _PointInterestFormState extends State<PointInterestForm> {
     final mapCenter = _selectedCoordinates ?? _meridaCentro;
 
     return CustomCard(
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Column(
+      child: Scrollbar(
+        controller: _scrollController,
+        thumbVisibility: true,
+        trackVisibility: true,
+        interactive: true,
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
@@ -179,6 +188,12 @@ class _PointInterestFormState extends State<PointInterestForm> {
                 width: 520,
                 child: ImagePickerBox(
                   imageUrl: _imageController.text,
+                  alternateImageSources: [
+                    _qrController.text,
+                    _nameController.text,
+                    if (widget.point != null) widget.point!.qrCode,
+                    if (widget.point != null) widget.point!.name,
+                  ],
                   isUploading: _isUploading,
                   onImageSelected: (bytes, name) {
                     setState(() {
@@ -405,6 +420,7 @@ class _PointInterestFormState extends State<PointInterestForm> {
                 ],
               ),
             ],
+            ),
           ),
         ),
       ),

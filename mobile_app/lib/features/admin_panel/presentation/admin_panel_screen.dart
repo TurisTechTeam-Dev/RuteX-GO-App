@@ -17,10 +17,17 @@ class AdminPanelScreen extends StatefulWidget {
 
 class _AdminPanelScreenState extends State<AdminPanelScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final ScrollController _formHorizontalScrollController = ScrollController();
 
   AdminNavTab? _currentTab;
   AdminEditableItem? _itemToEdit;
   int _formResetVersion = 0;
+
+  @override
+  void dispose() {
+    _formHorizontalScrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -144,11 +151,17 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
               ),
               const SizedBox(height: 16),
               Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: SizedBox(
-                    width: isCompact ? 860 : 820,
-                    child: AdminFormRouter(
+                child: Scrollbar(
+                  controller: _formHorizontalScrollController,
+                  thumbVisibility: true,
+                  trackVisibility: true,
+                  interactive: true,
+                  child: SingleChildScrollView(
+                    controller: _formHorizontalScrollController,
+                    scrollDirection: Axis.horizontal,
+                    child: SizedBox(
+                      width: isCompact ? 860 : 820,
+                      child: AdminFormRouter(
                       tab: tab,
                       itemToEdit: _itemToEdit,
                       adminUseCases: adminUseCases,
@@ -176,6 +189,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                         }
                       },
                       onResetSelection: _resetForm,
+                      ),
                     ),
                   ),
                 ),

@@ -35,6 +35,8 @@ class _RouteFormState extends State<RouteForm> {
     vertical: 14,
   );
 
+  final ScrollController _scrollController = ScrollController();
+
   late final TextEditingController _nameController;
   late final TextEditingController _descriptionController;
   late final TextEditingController _difficultyController;
@@ -92,6 +94,7 @@ class _RouteFormState extends State<RouteForm> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _nameController.dispose();
     _descriptionController.dispose();
     _difficultyController.dispose();
@@ -104,10 +107,16 @@ class _RouteFormState extends State<RouteForm> {
   @override
   Widget build(BuildContext context) {
     return CustomCard(
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Column(
+      child: Scrollbar(
+        controller: _scrollController,
+        thumbVisibility: true,
+        trackVisibility: true,
+        interactive: true,
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
@@ -155,6 +164,11 @@ class _RouteFormState extends State<RouteForm> {
                         const SizedBox(height: 8),
                         ImagePickerBox(
                           imageUrl: _imageController.text,
+                          alternateImageSources: [
+                            'assets/merida_monumental.png',
+                            _nameController.text,
+                            if (widget.route != null) widget.route!.name,
+                          ],
                           isUploading: _isUploading,
                           onImageSelected: (bytes, name) {
                             setState(() {
@@ -328,6 +342,7 @@ class _RouteFormState extends State<RouteForm> {
                 ],
               ),
             ],
+            ),
           ),
         ),
       ),

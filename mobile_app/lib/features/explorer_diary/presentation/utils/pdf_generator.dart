@@ -2,9 +2,9 @@
   -----------------------------------------------------------------------------
   Proyecto: RuteX Go
   Desarrollado por: TurisTechTeam
-  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
-  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
-  Año: 2026
+  Descripcion: Esta aplicacion y su codigo fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribucion o uso no autorizado.
+  Anio: 2026
   -----------------------------------------------------------------------------
 */
 import 'package:flutter/material.dart' as flutter;
@@ -17,32 +17,28 @@ import '../../domain/entities/diary_entry.dart';
 
 class PdfGenerator {
   static const int _maxPhotosPerRoute = 4;
+  static final PdfPageFormat _pageFormat = PdfPageFormat.a4.landscape;
 
   static Future<void> generateExplorerBook({
     required flutter.BuildContext context,
     required List<DiaryEntry> allRoutes,
     required String userName,
-    required String userRank,
   }) async {
     final pdf = pw.Document();
-    final logoBytes = await rootBundle.load('assets/Logo_Color_Rutexgo.png');
-    final logoImage = pw.MemoryImage(logoBytes.buffer.asUint8List());
-    final extremaduraBytes = await rootBundle.load(
+    final logoImage = await _loadImage('assets/Logo_Color_Rutexgo.png');
+    final sealImage = await _loadImage('assets/Sello_ruta_monumental_romana.png');
+    final extremaduraImage = await _loadImage(
       'assets/Mapa_fondo_Extremadura.png',
-    );
-    final extremaduraImage = pw.MemoryImage(
-      extremaduraBytes.buffer.asUint8List(),
     );
 
     try {
       pdf.addPage(
         pw.Page(
-          pageFormat: PdfPageFormat.a4,
-          margin: const pw.EdgeInsets.all(32),
+          pageFormat: _pageFormat,
+          margin: pw.EdgeInsets.zero,
           build: (context) => _buildCover(
             logoImage: logoImage,
             userName: userName,
-            userRank: userRank,
           ),
         ),
       );
@@ -50,59 +46,71 @@ class PdfGenerator {
       for (final entry in allRoutes) {
         pdf.addPage(
           pw.Page(
-            pageFormat: PdfPageFormat.a4,
-            margin: const pw.EdgeInsets.all(32),
+            pageFormat: _pageFormat,
+            margin: pw.EdgeInsets.zero,
             build: (context) => _buildRoutePage(
               entry: entry,
+              logoImage: logoImage,
               extremaduraImage: extremaduraImage,
-              userName: userName,
-              userRank: userRank,
+              sealImage: sealImage,
             ),
           ),
         );
       }
 
+      pdf.addPage(
+        pw.Page(
+          pageFormat: _pageFormat,
+          margin: pw.EdgeInsets.zero,
+          build: (context) => _buildFinalPage(logoImage),
+        ),
+      );
+
       await Printing.layoutPdf(
         onLayout: (PdfPageFormat format) async => pdf.save(),
         name: 'diario_explorador_rutexgo.pdf',
-        format: PdfPageFormat.a4,
+        format: _pageFormat,
         dynamicLayout: false,
       );
-    } catch (e) {
-      flutter.debugPrint("Error PDF: $e");
+    } catch (error) {
+      flutter.debugPrint('Error PDF: $error');
     }
+  }
+
+  static Future<pw.MemoryImage> _loadImage(String assetPath) async {
+    final bytes = await rootBundle.load(assetPath);
+    return pw.MemoryImage(bytes.buffer.asUint8List());
   }
 
   static pw.Widget _buildCover({
     required pw.MemoryImage logoImage,
     required String userName,
-    required String userRank,
   }) {
-    return _sheet(
+    return _page(
       child: pw.Column(
         mainAxisAlignment: pw.MainAxisAlignment.center,
         children: [
-          pw.Image(logoImage, height: 86),
-          pw.SizedBox(height: 40),
+          pw.Image(logoImage, height: 138),
+          pw.SizedBox(height: 34),
           pw.Text(
-            'MI DIARIO DE\nEXPLORADOR',
+            'MI DIARIO DEL EXPLORADOR',
             textAlign: pw.TextAlign.center,
-            style: pw.TextStyle(fontSize: 34, fontWeight: pw.FontWeight.bold),
+            style: pw.TextStyle(fontSize: 31, fontWeight: pw.FontWeight.bold),
           ),
-          pw.SizedBox(height: 24),
-          pw.Divider(indent: 60, endIndent: 60, color: PdfColors.grey700),
-          pw.SizedBox(height: 16),
+          pw.SizedBox(height: 18),
+          pw.Container(width: 280, height: 1.5, color: PdfColors.grey700),
+          pw.SizedBox(height: 18),
           pw.Text(
             userName,
-            style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
+            textAlign: pw.TextAlign.center,
+            style: pw.TextStyle(fontSize: 21, fontWeight: pw.FontWeight.bold),
           ),
-          pw.SizedBox(height: 4),
-          pw.Text('Rango: $userRank', style: const pw.TextStyle(fontSize: 14)),
-          pw.SizedBox(height: 48),
+          pw.SizedBox(height: 32),
           pw.Text(
             'Extremadura en tus manos',
+            textAlign: pw.TextAlign.center,
             style: pw.TextStyle(
-              fontSize: 13,
+              fontSize: 15,
               color: PdfColors.grey700,
               fontStyle: pw.FontStyle.italic,
             ),
@@ -114,11 +122,11 @@ class PdfGenerator {
 
   static pw.Widget _buildRoutePage({
     required DiaryEntry entry,
+    required pw.MemoryImage logoImage,
     required pw.MemoryImage extremaduraImage,
-    required String userName,
-    required String userRank,
+    required pw.MemoryImage sealImage,
   }) {
-    return _sheet(
+    return _page(
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.stretch,
         children: [
@@ -126,113 +134,158 @@ class PdfGenerator {
             children: [
               pw.Image(extremaduraImage, height: 38),
               pw.SizedBox(width: 12),
-              pw.Text(
-                'DIARIO DEL\nEXPLORADOR',
-                style: pw.TextStyle(
-                  fontSize: 22,
-                  fontWeight: pw.FontWeight.bold,
+              pw.Expanded(
+                child: pw.Text(
+                  'DIARIO DEL EXPLORADOR',
+                  style: pw.TextStyle(
+                    fontSize: 24,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
                 ),
               ),
+              pw.Image(logoImage, height: 52),
             ],
           ),
-          pw.SizedBox(height: 24),
-          pw.Text(
-            'Datos del Explorador',
-            style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
-          ),
-          pw.SizedBox(height: 5),
-          pw.Text('Nombre: $userName'),
-          pw.Text('Rango: $userRank'),
-          pw.SizedBox(height: 18),
-          pw.Center(child: _buildMedal(entry.routeName)),
-          if (entry.monuments.isNotEmpty) ...[
-            pw.SizedBox(height: 14),
-            pw.Text(
-              entry.monuments.take(4).join(' · '),
-              maxLines: 2,
-              style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+          pw.SizedBox(height: 26),
+          pw.Expanded(
+            child: pw.Row(
+              crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+              children: [
+                pw.Expanded(
+                  flex: 4,
+                  child: _buildRouteStory(entry, sealImage),
+                ),
+                pw.SizedBox(width: 30),
+                pw.Expanded(
+                  flex: 5,
+                  child: _buildMemories(entry),
+                ),
+              ],
             ),
-          ],
-          pw.SizedBox(height: 24),
-          pw.Text(
-            'MIS RECUERDOS',
-            textAlign: pw.TextAlign.center,
-            style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
           ),
-          pw.SizedBox(height: 12),
-          pw.Expanded(child: _buildMemories(entry)),
         ],
       ),
     );
   }
 
-  static pw.Widget _sheet({required pw.Widget child}) {
+  static pw.Widget _page({required pw.Widget child}) {
     return pw.Container(
-      padding: const pw.EdgeInsets.all(28),
-      decoration: pw.BoxDecoration(
-        color: PdfColors.amber50,
-        border: pw.Border.all(color: PdfColors.grey300, width: 1),
-      ),
+      width: double.infinity,
+      height: double.infinity,
+      padding: const pw.EdgeInsets.all(44),
+      color: PdfColors.amber50,
       child: child,
     );
   }
 
-  static pw.Widget _buildMedal(String routeName) {
-    return pw.Container(
-      width: 128,
-      height: 128,
-      decoration: pw.BoxDecoration(
-        shape: pw.BoxShape.circle,
-        color: PdfColors.amber100,
-        border: pw.Border.all(color: PdfColors.amber800, width: 4),
-      ),
-      child: pw.Center(
-        child: pw.Column(
-          mainAxisAlignment: pw.MainAxisAlignment.center,
-          children: [
-            pw.Text(
-              'RUTA',
-              style: pw.TextStyle(
-                fontSize: 12,
-                color: PdfColors.amber900,
-                fontWeight: pw.FontWeight.bold,
-              ),
-            ),
-            pw.Text('★', style: const pw.TextStyle(fontSize: 32)),
-            pw.Text(
-              'COMPLETADA',
-              style: pw.TextStyle(
-                fontSize: 12,
-                color: PdfColors.amber900,
-                fontWeight: pw.FontWeight.bold,
-              ),
-            ),
-            pw.SizedBox(height: 4),
-            pw.Text(
-              routeName.toUpperCase(),
-              textAlign: pw.TextAlign.center,
-              maxLines: 1,
-              style: const pw.TextStyle(fontSize: 7, color: PdfColors.amber900),
-            ),
-          ],
+  static pw.Widget _buildRouteStory(
+    DiaryEntry entry,
+    pw.MemoryImage sealImage,
+  ) {
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.center,
+      children: [
+        pw.Text(
+          'Puntos de interés de la ruta',
+          textAlign: pw.TextAlign.center,
+          style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
         ),
-      ),
+        pw.SizedBox(height: 12),
+        if (entry.monuments.isNotEmpty)
+          pw.Text(
+            entry.monuments.take(5).join(' · '),
+            textAlign: pw.TextAlign.center,
+            maxLines: 3,
+            style: const pw.TextStyle(fontSize: 15, color: PdfColors.grey700),
+          ),
+        pw.Spacer(),
+        _buildMedal(entry.routeName, sealImage),
+        pw.Spacer(),
+      ],
+    );
+  }
+
+  static pw.Widget _buildMedal(String routeName, pw.MemoryImage sealImage) {
+    return pw.Column(
+      mainAxisSize: pw.MainAxisSize.min,
+      children: [
+        pw.Image(sealImage, width: 178, height: 178, fit: pw.BoxFit.contain),
+        pw.SizedBox(height: 8),
+        pw.Text(
+          routeName.toUpperCase(),
+          textAlign: pw.TextAlign.center,
+          maxLines: 1,
+          style: const pw.TextStyle(fontSize: 10, color: PdfColors.brown700),
+        ),
+      ],
     );
   }
 
   static pw.Widget _buildMemories(DiaryEntry entry) {
     final photos = entry.photos.take(_maxPhotosPerRoute).toList();
 
-    return pw.GridView(
-      crossAxisCount: 2,
-      childAspectRatio: 0.86,
-      crossAxisSpacing: 12,
-      mainAxisSpacing: 12,
-      children: List.generate(_maxPhotosPerRoute, (index) {
-        final photo = index < photos.length ? photos[index] : null;
-        return _buildMemoryTile(photo, index);
-      }),
+    return pw.Stack(
+      children: [
+        pw.Positioned.fill(child: _romanPhotoFrame()),
+        pw.Padding(
+          padding: const pw.EdgeInsets.symmetric(horizontal: 22, vertical: 16),
+          child: pw.Column(
+            children: [
+              pw.Expanded(
+                child: pw.Row(
+                  children: [
+                    pw.Expanded(child: _buildMemoryTile(_photoAt(photos, 0), 0)),
+                    pw.SizedBox(width: 14),
+                    pw.Expanded(child: _buildMemoryTile(_photoAt(photos, 1), 1)),
+                  ],
+                ),
+              ),
+              pw.SizedBox(height: 14),
+              pw.Expanded(
+                child: pw.Row(
+                  children: [
+                    pw.Expanded(child: _buildMemoryTile(_photoAt(photos, 2), 2)),
+                    pw.SizedBox(width: 14),
+                    pw.Expanded(child: _buildMemoryTile(_photoAt(photos, 3), 3)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
+  }
+
+  static pw.Widget _romanPhotoFrame() {
+    return pw.Container(
+      decoration: pw.BoxDecoration(
+        border: pw.Border.symmetric(
+          horizontal: pw.BorderSide(color: PdfColors.amber300, width: 1.4),
+        ),
+      ),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          _romanColumn(),
+          _romanColumn(),
+        ],
+      ),
+    );
+  }
+
+  static pw.Widget _romanColumn() {
+    return pw.Container(
+      width: 15,
+      margin: const pw.EdgeInsets.symmetric(vertical: 34),
+      decoration: pw.BoxDecoration(
+        border: pw.Border.all(color: PdfColors.amber300, width: 1.2),
+      ),
+    );
+  }
+
+  static dynamic _photoAt(List<dynamic> photos, int index) {
+    return index < photos.length ? photos[index] : null;
   }
 
   static pw.Widget _buildMemoryTile(dynamic photo, int index) {
@@ -241,7 +294,7 @@ class PdfGenerator {
             color: PdfColors.grey200,
             child: pw.Center(
               child: pw.Text(
-                'Recuerdo ${index + 1}',
+                index == 0 ? 'Añadir fotos' : 'Recuerdo ${index + 1}',
                 style: const pw.TextStyle(color: PdfColors.grey600),
               ),
             ),
@@ -251,22 +304,58 @@ class PdfGenerator {
             fit: pw.BoxFit.cover,
           );
 
-    return pw.Container(
-      padding: const pw.EdgeInsets.all(6),
-      decoration: pw.BoxDecoration(
-        color: PdfColors.white,
-        border: pw.Border.all(color: PdfColors.grey300),
+    return pw.Transform.rotate(
+      angle: _photoTilts[index],
+      child: pw.Container(
+        padding: const pw.EdgeInsets.all(7),
+        decoration: pw.BoxDecoration(
+          color: PdfColors.white,
+          border: pw.Border.all(color: PdfColors.amber200),
+        ),
+        child: pw.Stack(
+          children: [
+            pw.Positioned.fill(child: image),
+            pw.Positioned(left: 8, top: 7, child: _tapeStrip()),
+          ],
+        ),
       ),
-      child: pw.Column(
-        children: [
-          pw.Expanded(child: image),
-          pw.SizedBox(height: 5),
-          pw.Text(
-            photo == null ? 'Recuerdo ${index + 1}' : 'Foto ${index + 1}',
-            textAlign: pw.TextAlign.center,
-            style: const pw.TextStyle(fontSize: 9),
-          ),
-        ],
+    );
+  }
+
+  static pw.Widget _tapeStrip() {
+    return pw.Container(
+      width: 42,
+      height: 12,
+      decoration: pw.BoxDecoration(
+        color: PdfColors.yellow100,
+        border: pw.Border.all(color: PdfColors.amber200, width: 0.5),
+      ),
+    );
+  }
+
+  static const List<double> _photoTilts = [-0.025, 0.018, 0.022, -0.018];
+
+  static pw.Widget _buildFinalPage(pw.MemoryImage logoImage) {
+    return _page(
+      child: pw.Center(
+        child: pw.Column(
+          mainAxisSize: pw.MainAxisSize.min,
+          children: [
+            pw.Image(logoImage, height: 112),
+            pw.SizedBox(height: 34),
+            pw.Text(
+              'Cada ruta que completas deja una huella en tu historia.',
+              textAlign: pw.TextAlign.center,
+              style: pw.TextStyle(fontSize: 27, fontWeight: pw.FontWeight.bold),
+            ),
+            pw.SizedBox(height: 14),
+            pw.Text(
+              'Sigue explorando, observando y descubriendo Extremadura.',
+              textAlign: pw.TextAlign.center,
+              style: const pw.TextStyle(fontSize: 14, color: PdfColors.grey700),
+            ),
+          ],
+        ),
       ),
     );
   }

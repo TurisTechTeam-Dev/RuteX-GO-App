@@ -7,6 +7,7 @@
   Año: 2026
   -----------------------------------------------------------------------------
 */
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -43,7 +44,7 @@ class AuthWrapper extends StatelessWidget {
               }
 
               final isAdmin = adminSnapshot.data ?? false;
-              if (isAdmin) {
+              if (kIsWeb && isAdmin) {
                 return const AdminRedirector();
               }
 
