@@ -43,3 +43,12 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Al final de tu .gitignore añade esto:
+!android/app/google-services.json
+.env
+
+# Archivos locales de agentes y caches generadas
+.agents/
+skills-lock.json
+.firebase/

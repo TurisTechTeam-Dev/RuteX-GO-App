@@ -1,0 +1,62 @@
+{
+  "project_info": {
+    "project_number": "711545941492",
+    "project_id": "rutexgo-2dama",
+    "storage_bucket": "rutexgo-2dama.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:711545941492:android:69abe8c325bcb01c041da1",
+        "android_client_info": {
+          "package_name": "com.rutexgo.mobile_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "711545941492-scu5al49eoes35p4mgh3vu448r08aenp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rutexgo.mobile_app",
+            "certificate_hash": "bc7668dcb394bb573981b87cf7ab339ca25391c2"
+          }
+        },
+        {
+          "client_id": "711545941492-ulirvksuub2nhgl2skuud68blltve26f.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rutexgo.mobile_app",
+            "certificate_hash": "b2889697edbd6f4d9e99e624206d9c059517ca21"
+          }
+        },
+        {
+          "client_id": "711545941492-nuddtmbq9uv6tcooodtm6ei699reoq56.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCLMF2UVlLLnzi20qdSCnGQD39IcDQIK6I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "711545941492-nuddtmbq9uv6tcooodtm6ei699reoq56.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "711545941492-qu30v5922ijt5m3m8oe667pup405ov8g.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.rutexgo.mobileApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
