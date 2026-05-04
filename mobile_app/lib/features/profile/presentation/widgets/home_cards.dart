@@ -22,12 +22,14 @@ class HomeUserCard extends StatelessWidget {
   final UserProfile user;
   final String rankName;
   final String rankLogo;
+  final bool preferOfflineFallback;
 
   const HomeUserCard({
     super.key,
     required this.user,
     required this.rankName,
     required this.rankLogo,
+    this.preferOfflineFallback = false,
   });
 
   @override
@@ -40,7 +42,10 @@ class HomeUserCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          _UserAvatar(avatarUrl: user.avatarUrl),
+          _UserAvatar(
+            avatarUrl: user.avatarUrl,
+            preferOfflineFallback: preferOfflineFallback,
+          ),
           const SizedBox(width: 16),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,7 +65,11 @@ class HomeUserCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 4),
-              _RankLine(rankName: rankName, rankLogo: rankLogo),
+              _RankLine(
+                rankName: rankName,
+                rankLogo: rankLogo,
+                preferOfflineFallback: preferOfflineFallback,
+              ),
             ],
           ),
         ],
@@ -84,17 +93,24 @@ class HomeUserCard extends StatelessWidget {
 
 class _UserAvatar extends StatelessWidget {
   final String avatarUrl;
+  final bool preferOfflineFallback;
 
-  const _UserAvatar({required this.avatarUrl});
+  const _UserAvatar({
+    required this.avatarUrl,
+    required this.preferOfflineFallback,
+  });
 
   @override
   Widget build(BuildContext context) {
-    if (avatarUrl.isEmpty) {
-      return const CircleAvatar(
-        radius: 30,
-        backgroundColor: AppColors.verdePrincipal,
-        child: Icon(Icons.person, color: AppColors.blancoPuro),
-      );
+    const fallback = CircleAvatar(
+      radius: 30,
+      backgroundColor: AppColors.verdePrincipal,
+      child: Icon(Icons.person, color: AppColors.blancoPuro),
+    );
+
+    if (avatarUrl.isEmpty ||
+        (preferOfflineFallback && !_isAssetPath(avatarUrl))) {
+      return fallback;
     }
 
     return ClipOval(
@@ -103,21 +119,26 @@ class _UserAvatar extends StatelessWidget {
         width: 60,
         height: 60,
         fit: BoxFit.cover,
-        fallback: const CircleAvatar(
-          radius: 30,
-          backgroundColor: AppColors.verdePrincipal,
-          child: Icon(Icons.person, color: AppColors.blancoPuro),
-        ),
+        fallback: fallback,
       ),
     );
+  }
+
+  bool _isAssetPath(String value) {
+    return value.trim().startsWith('assets/');
   }
 }
 
 class _RankLine extends StatelessWidget {
   final String rankName;
   final String rankLogo;
+  final bool preferOfflineFallback;
 
-  const _RankLine({required this.rankName, required this.rankLogo});
+  const _RankLine({
+    required this.rankName,
+    required this.rankLogo,
+    required this.preferOfflineFallback,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -146,7 +167,11 @@ class _RankLine extends StatelessWidget {
       ),
     ];
 
-    if (rankLogo.isNotEmpty) {
+    final canShowRankLogo =
+        rankLogo.isNotEmpty &&
+        (!preferOfflineFallback || _isAssetPath(rankLogo));
+
+    if (canShowRankLogo) {
       content.add(const SizedBox(width: 6));
       content.add(
         Container(
@@ -164,11 +189,7 @@ class _RankLine extends StatelessWidget {
               width: 22,
               height: 22,
               fit: BoxFit.contain,
-              fallback: const Icon(
-                Icons.emoji_events,
-                size: 20,
-                color: AppColors.verdePrincipal,
-              ),
+              fallback: const SizedBox.shrink(),
             ),
           ),
         ),
@@ -176,6 +197,10 @@ class _RankLine extends StatelessWidget {
     }
 
     return content;
+  }
+
+  bool _isAssetPath(String value) {
+    return value.trim().startsWith('assets/');
   }
 }
 

@@ -17,6 +17,7 @@ import '../../../app/widgets/custom_drawer.dart';
 import '../../../app/widgets/top_app_bar.dart';
 import '../../../core/widgets/audio_guide/audio_guide.dart';
 import '../../auth/domain/usecases/auth_use_cases.dart';
+import '../data/cache/home_data_cache.dart';
 import '../domain/entities/home_data.dart';
 import '../domain/usecases/profile_use_cases.dart';
 import 'models/home_summary.dart';
@@ -32,7 +33,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late final Future<HomeData> homeFuture = _loadHomeData();
+  late final Future<_HomeLoadResult> homeFuture = _loadHomeData();
+  final HomeDataCache _homeDataCache = const HomeDataCache();
   bool _infoDialogShown = false;
 
   @override
@@ -41,13 +43,29 @@ class _HomeScreenState extends State<HomeScreen> {
     _showInfoDialogIfNeeded();
   }
 
-  Future<HomeData> _loadHomeData() async {
+  Future<_HomeLoadResult> _loadHomeData() async {
     final user = context.read<AuthUseCases>().getCurrentUser();
     if (user == null) {
       throw Exception("No hay sesión activa.");
     }
 
-    return context.read<ProfileUseCases>().getHomeData(user.uid);
+    final profileUseCases = context.read<ProfileUseCases>();
+
+    try {
+      final data = await profileUseCases
+          .getHomeData(user.uid)
+          .timeout(const Duration(seconds: 6));
+      await _homeDataCache.save(user.uid, data);
+
+      return _HomeLoadResult(data: data, isOffline: false);
+    } catch (_) {
+      final cachedData = await _homeDataCache.read(user.uid);
+      if (cachedData != null) {
+        return _HomeLoadResult(data: cachedData, isOffline: true);
+      }
+
+      rethrow;
+    }
   }
 
   String _buildAudioGuideText(HomeData data) {
@@ -88,10 +106,10 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: const TopAppBar(),
       endDrawer: const CustomDrawer(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FutureBuilder<HomeData>(
+      floatingActionButton: FutureBuilder<_HomeLoadResult>(
         future: homeFuture,
         builder: (context, snapshot) {
-          final data = snapshot.data;
+          final data = snapshot.data?.data;
 
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -120,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
       ),
-      body: FutureBuilder<HomeData>(
+      body: FutureBuilder<_HomeLoadResult>(
         future: homeFuture,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
@@ -160,11 +178,21 @@ class _HomeScreenState extends State<HomeScreen> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final data = snapshot.data!;
+          final result = snapshot.data!;
 
-          return HomeContent(data: data);
+          return HomeContent(
+            data: result.data,
+            showOfflineBanner: result.isOffline,
+          );
         },
       ),
     );
   }
+}
+
+class _HomeLoadResult {
+  final HomeData data;
+  final bool isOffline;
+
+  const _HomeLoadResult({required this.data, required this.isOffline});
 }

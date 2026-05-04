@@ -9,6 +9,7 @@
 */
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/backgrounds/extremadura_map_background.dart';
 import '../../../../core/widgets/titles/stroke_title.dart';
 import '../../domain/entities/home_data.dart';
@@ -18,8 +19,13 @@ import 'home_route_list.dart';
 
 class HomeContent extends StatelessWidget {
   final HomeData data;
+  final bool showOfflineBanner;
 
-  const HomeContent({super.key, required this.data});
+  const HomeContent({
+    super.key,
+    required this.data,
+    this.showOfflineBanner = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -37,10 +43,15 @@ class HomeContent extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (showOfflineBanner) ...[
+                      const _InlineOfflineBanner(),
+                      const SizedBox(height: 12),
+                    ],
                     HomeUserCard(
                       user: data.user,
                       rankName: summary.rankName,
                       rankLogo: summary.rankLogo,
+                      preferOfflineFallback: showOfflineBanner,
                     ),
                     const SizedBox(height: 20),
                     const StrokeTitle(text: "Estadísticas"),
@@ -66,6 +77,51 @@ class HomeContent extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _InlineOfflineBanner extends StatelessWidget {
+  const _InlineOfflineBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      liveRegion: true,
+      label: 'Modo sin conexión. Mostrando datos guardados.',
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: AppColors.verdePrincipal,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 6,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: const Row(
+          children: [
+            Icon(Icons.wifi_off, color: Colors.white, size: 18),
+            SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Modo sin conexión',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
