@@ -1,4 +1,12 @@
-import 'package:flutter/foundation.dart';
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/import 'package:flutter/foundation.dart';
 
 class AdminFormController extends ChangeNotifier {
   bool _hasChanges = false;
