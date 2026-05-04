@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import '../../domain/repositories/admin_repository.dart';
-import '../admin_remote_datasource.dart';
+import '../datasources/admin_remote_datasource.dart';
 import '../models/admin_models.dart';
 
 class AdminRepositoryImpl implements AdminRepository {

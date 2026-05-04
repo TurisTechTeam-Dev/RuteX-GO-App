@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:typed_data';
 
-import '../../../core/constants/firestore_contract.dart';
-import 'models/admin_models.dart';
+import '../../../../core/constants/firestore_contract.dart';
+import '../models/admin_models.dart';
 
 class AdminRemoteDataSource {
   AdminRemoteDataSource({

@@ -185,23 +185,18 @@ class StorageImageUrlCache {
   static Future<String?> _resolveInternal(String value) async {
     try {
       final candidates = _storagePathCandidates(value);
-      debugPrint('Storage preview source: "$value"');
-      debugPrint('Storage preview candidates: $candidates');
 
       for (final candidate in candidates) {
         try {
           final resolvedUrl = await _downloadUrlForCandidate(candidate);
 
           _resolved[value] = resolvedUrl;
-          debugPrint('Storage preview resolved: "$candidate"');
           return resolvedUrl;
         } catch (error) {
-          debugPrint('Storage preview failed for "$candidate": $error');
           continue;
         }
       }
 
-      debugPrint('Storage preview unresolved for "$value"');
       _resolved[value] = null;
       return null;
     } finally {

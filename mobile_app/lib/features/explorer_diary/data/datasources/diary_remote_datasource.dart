@@ -11,11 +11,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 
-class DiaryRemoteDatasource {
+class DiaryRemoteDataSource {
   final FirebaseFirestore firestore;
   final FirebaseStorage storage;
 
-  DiaryRemoteDatasource({
+  DiaryRemoteDataSource({
     required this.firestore,
     required this.storage,
   });
