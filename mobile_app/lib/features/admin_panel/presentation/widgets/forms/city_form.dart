@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:typed_data';
-import 'package:mobile_app/core/widgets/buttons/custom_button.dart';
 import 'package:mobile_app/core/widgets/cards/custom_cards.dart';
 import 'package:mobile_app/core/utils/text_normalizer.dart';
 import 'package:mobile_app/features/admin_panel/data/models/admin_models.dart';
+import 'package:mobile_app/features/admin_panel/presentation/models/admin_form_controller.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/components/image_picker_box.dart';
 
 class CityForm extends StatefulWidget {
@@ -11,6 +11,7 @@ class CityForm extends StatefulWidget {
   final ValueChanged<AdminCityModel> onSave;
   final VoidCallback onCancel;
   final Future<String> Function(Uint8List bytes, String fileName) onUploadImage;
+  final AdminFormController? formController;
 
   const CityForm({
     super.key,
@@ -18,6 +19,7 @@ class CityForm extends StatefulWidget {
     required this.onSave,
     required this.onCancel,
     required this.onUploadImage,
+    this.formController,
   });
 
   @override
@@ -34,6 +36,7 @@ class _CityFormState extends State<CityForm> {
   bool _isUploading = false;
   Uint8List? _pendingImageBytes;
   String? _pendingImageName;
+  Object? _formControllerToken;
 
   @override
   void initState() {
@@ -42,6 +45,8 @@ class _CityFormState extends State<CityForm> {
     _provinceController = TextEditingController(text: widget.city?.province);
     _imageController = TextEditingController(text: widget.city?.imageUrl);
     isActive = widget.city?.isActive ?? false;
+    _attachChangeListeners();
+    _registerFormController();
   }
 
   @override
@@ -58,6 +63,8 @@ class _CityFormState extends State<CityForm> {
       setState(() {
         isActive = widget.city?.isActive ?? false;
       });
+      widget.formController?.markClean();
+      _registerFormController();
     }
   }
 
@@ -67,6 +74,7 @@ class _CityFormState extends State<CityForm> {
     _nameController.dispose();
     _provinceController.dispose();
     _imageController.dispose();
+    _unregisterFormController();
     super.dispose();
   }
 
@@ -123,7 +131,10 @@ class _CityFormState extends State<CityForm> {
                           ),
                           value: isActive,
                           activeThumbColor: const Color(0xFF6B7249),
-                          onChanged: (val) => setState(() => isActive = val),
+                          onChanged: (val) {
+                            setState(() => isActive = val);
+                            widget.formController?.markChanged();
+                          },
                         ),
                       ],
                     ),
@@ -153,49 +164,13 @@ class _CityFormState extends State<CityForm> {
                               _pendingImageBytes = bytes;
                               _pendingImageName = name;
                             });
+                            widget.formController?.markChanged();
                           },
                         ),
                       ],
                     ),
                   ),
                 ],
-              ),
-
-              const SizedBox(height: 26),
-              Center(
-                child: SizedBox(
-                  width: 220,
-                  child: CustomButton(
-                    text: _isUploading ? 'SUBIENDO...' : 'GUARDAR CAMBIOS',
-                    onPressed: _isUploading
-                        ? null
-                        : () async {
-                            if (_nameController.text.trim().isEmpty ||
-                                _provinceController.text.trim().isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Por favor, rellena los campos obligatorios (Nombre y Provincia)',
-                                  ),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
-                              return;
-                            }
-                            final imageUrl = await _uploadPendingImage();
-                            if (imageUrl == null) return;
-                            widget.onSave(
-                              AdminCityModel(
-                                id: widget.city?.id,
-                                name: _nameController.text.trim(),
-                                province: _provinceController.text.trim(),
-                                imageUrl: imageUrl,
-                                isActive: isActive,
-                              ),
-                            );
-                          },
-                  ),
-                ),
               ),
             ],
             ),
@@ -253,5 +228,55 @@ class _CityFormState extends State<CityForm> {
     } finally {
       if (mounted) setState(() => _isUploading = false);
     }
+  }
+
+  void _attachChangeListeners() {
+    _nameController.addListener(_markChanged);
+    _provinceController.addListener(_markChanged);
+    _imageController.addListener(_markChanged);
+  }
+
+  void _markChanged() {
+    widget.formController?.markChanged();
+  }
+
+  void _registerFormController() {
+    _unregisterFormController();
+    _formControllerToken = widget.formController?.registerSaveAction(_save);
+  }
+
+  void _unregisterFormController() {
+    final token = _formControllerToken;
+    if (token == null) return;
+
+    widget.formController?.unregisterSaveAction(token);
+    _formControllerToken = null;
+  }
+
+  Future<void> _save() async {
+    if (_isUploading) return;
+    if (_nameController.text.trim().isEmpty ||
+        _provinceController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Por favor, rellena los campos obligatorios (Nombre y Provincia)',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    final imageUrl = await _uploadPendingImage();
+    if (imageUrl == null) return;
+    widget.onSave(
+      AdminCityModel(
+        id: widget.city?.id,
+        name: _nameController.text.trim(),
+        province: _provinceController.text.trim(),
+        imageUrl: imageUrl,
+        isActive: isActive,
+      ),
+    );
   }
 }

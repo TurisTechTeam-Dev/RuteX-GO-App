@@ -53,9 +53,11 @@ class _ImagePickerBoxState extends State<ImagePickerBox> {
 
   @override
   Widget build(BuildContext context) {
+    final hasRemoteSource =
+        (widget.imageUrl != null && widget.imageUrl!.trim().isNotEmpty) ||
+        widget.alternateImageSources.any((source) => source.trim().isNotEmpty);
     final hasImage =
-        (widget.imageUrl != null && widget.imageUrl!.isNotEmpty) ||
-        _localBytes != null;
+        hasRemoteSource || _localBytes != null;
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,
@@ -91,6 +93,7 @@ class _ImagePickerBoxState extends State<ImagePickerBox> {
                             source: widget.imageUrl,
                             alternateSources: widget.alternateImageSources,
                             fit: BoxFit.cover,
+                            placeholder: const _ImageLoadingState(),
                             fallback: const _ImageFallback(),
                           ),
                   ),
@@ -225,6 +228,24 @@ class _ImageFallback extends StatelessWidget {
             style: TextStyle(fontSize: 10, color: Colors.grey),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ImageLoadingState extends StatelessWidget {
+  const _ImageLoadingState();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: SizedBox(
+        width: 26,
+        height: 26,
+        child: CircularProgressIndicator(
+          strokeWidth: 2.6,
+          color: Color(0xFF6B7249),
+        ),
       ),
     );
   }

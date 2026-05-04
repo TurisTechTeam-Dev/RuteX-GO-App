@@ -36,9 +36,16 @@ class PdfGenerator {
         pw.Page(
           pageFormat: _pageFormat,
           margin: pw.EdgeInsets.zero,
-          build: (context) => _buildCover(
-            logoImage: logoImage,
-            userName: userName,
+          build: (context) => pw.Row(
+            children: [
+              pw.Expanded(child: _buildFinalPage(logoImage)),
+              pw.Expanded(
+                child: _buildCover(
+                  logoImage: logoImage,
+                  userName: userName,
+                ),
+              ),
+            ],
           ),
         ),
       );
@@ -57,14 +64,6 @@ class PdfGenerator {
           ),
         );
       }
-
-      pdf.addPage(
-        pw.Page(
-          pageFormat: _pageFormat,
-          margin: pw.EdgeInsets.zero,
-          build: (context) => _buildFinalPage(logoImage),
-        ),
-      );
 
       await Printing.layoutPdf(
         onLayout: (PdfPageFormat format) async => pdf.save(),

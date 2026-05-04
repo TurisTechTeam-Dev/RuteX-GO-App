@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:mobile_app/core/utils/text_normalizer.dart';
-import 'package:mobile_app/core/widgets/buttons/custom_button.dart';
 import 'package:mobile_app/core/widgets/cards/custom_cards.dart';
 import 'package:mobile_app/features/admin_panel/data/models/admin_models.dart';
+import 'package:mobile_app/features/admin_panel/presentation/models/admin_form_controller.dart';
 
 class MissionForm extends StatefulWidget {
   final AdminMissionModel? mission;
@@ -10,6 +10,7 @@ class MissionForm extends StatefulWidget {
   final List<AdminMissionModel> existingMissions;
   final List<AdminCityModel> cities;
   final List<AdminRouteModel> routes;
+  final AdminFormController formController;
   final ValueChanged<AdminMissionModel> onSave;
 
   const MissionForm({
@@ -19,6 +20,7 @@ class MissionForm extends StatefulWidget {
     required this.existingMissions,
     required this.cities,
     required this.routes,
+    required this.formController,
     required this.onSave,
   });
 
@@ -37,6 +39,7 @@ class _MissionFormState extends State<MissionForm> {
   late String? _selectedPointId;
   late String? _selectedCityId;
   late final List<int> _correctAnswers;
+  Object? _formControllerToken;
 
   @override
   void initState() {
@@ -75,6 +78,8 @@ class _MissionFormState extends State<MissionForm> {
         ? widget.mission!.pointId
         : null;
     _selectedCityId = _cityIdForSelectedPoint();
+    _attachChangeListeners();
+    _registerFormController();
   }
 
   @override
@@ -87,18 +92,12 @@ class _MissionFormState extends State<MissionForm> {
     for (final controller in _answerControllers) {
       controller.dispose();
     }
+    _unregisterFormController();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final usedPointIds = widget.existingMissions
-        .where((mission) => mission.id != widget.mission?.id)
-        .map((mission) => mission.pointId)
-        .where((id) => id.isNotEmpty)
-        .map(TextNormalizer.toAsciiSlug)
-        .toSet();
-
     final pointIdsForSelectedCity = _pointIdsForSelectedCity();
 
     final availablePoints = widget.availablePoints
@@ -161,6 +160,7 @@ class _MissionFormState extends State<MissionForm> {
                       _selectedCityId = value;
                       _selectedPointId = null;
                     });
+                    widget.formController.markChanged();
                   },
                 ),
               ),
@@ -190,7 +190,10 @@ class _MissionFormState extends State<MissionForm> {
                       .toList(),
                   onChanged: _selectedCityId == null || availablePoints.isEmpty
                       ? null
-                      : (value) => setState(() => _selectedPointId = value),
+                      : (value) {
+                          setState(() => _selectedPointId = value);
+                          widget.formController.markChanged();
+                        },
                 ),
               ),
               const SizedBox(height: 30),
@@ -214,34 +217,6 @@ class _MissionFormState extends State<MissionForm> {
                 answersOffset: 6,
               ),
 
-              const SizedBox(height: 26),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 220,
-                    child: CustomButton(
-                      text: 'GUARDAR MISIÓN',
-                      onPressed: () {
-                        final error = _validate(usedPointIds);
-                        if (error != null) {
-                          _showMessage(error);
-                          return;
-                        }
-
-                        widget.onSave(
-                          AdminMissionModel(
-                            id: widget.mission?.id,
-                            pointId: _selectedPointId ?? '',
-                            title: _titleController.text.trim(),
-                            questions: _buildQuestions(),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
             ],
             ),
           ),
@@ -303,6 +278,7 @@ class _MissionFormState extends State<MissionForm> {
                 ],
                 onChanged: (value) {
                   setState(() => _correctAnswers[number - 1] = value ?? 0);
+                  widget.formController.markChanged();
                 },
               ),
             ),
@@ -497,6 +473,59 @@ class _MissionFormState extends State<MissionForm> {
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
+  }
+
+  void _attachChangeListeners() {
+    _titleController.addListener(_markChanged);
+    _questionOneController.addListener(_markChanged);
+    _questionTwoController.addListener(_markChanged);
+    _questionThreeController.addListener(_markChanged);
+    for (final controller in _answerControllers) {
+      controller.addListener(_markChanged);
+    }
+  }
+
+  void _markChanged() {
+    widget.formController.markChanged();
+  }
+
+  void _registerFormController() {
+    _unregisterFormController();
+    _formControllerToken = widget.formController.registerSaveAction(() async {
+      final usedPointIds = widget.existingMissions
+          .where((mission) => mission.id != widget.mission?.id)
+          .map((mission) => mission.pointId)
+          .where((id) => id.isNotEmpty)
+          .map(TextNormalizer.toAsciiSlug)
+          .toSet();
+
+      _save(usedPointIds);
+    });
+  }
+
+  void _unregisterFormController() {
+    final token = _formControllerToken;
+    if (token == null) return;
+
+    widget.formController.unregisterSaveAction(token);
+    _formControllerToken = null;
+  }
+
+  void _save(Set<String> usedPointIds) {
+    final error = _validate(usedPointIds);
+    if (error != null) {
+      _showMessage(error);
+      return;
+    }
+
+    widget.onSave(
+      AdminMissionModel(
+        id: widget.mission?.id,
+        pointId: _selectedPointId ?? '',
+        title: _titleController.text.trim(),
+        questions: _buildQuestions(),
+      ),
     );
   }
 }

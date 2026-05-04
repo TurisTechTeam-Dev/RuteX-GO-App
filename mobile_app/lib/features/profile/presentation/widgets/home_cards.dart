@@ -119,6 +119,7 @@ class _UserAvatar extends StatelessWidget {
         width: 60,
         height: 60,
         fit: BoxFit.cover,
+        placeholder: const _AvatarLoadingState(),
         fallback: fallback,
       ),
     );
@@ -126,6 +127,28 @@ class _UserAvatar extends StatelessWidget {
 
   bool _isAssetPath(String value) {
     return value.trim().startsWith('assets/');
+  }
+}
+
+class _AvatarLoadingState extends StatelessWidget {
+  const _AvatarLoadingState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 60,
+      height: 60,
+      color: AppColors.blancoTarjeta,
+      alignment: Alignment.center,
+      child: const SizedBox(
+        width: 22,
+        height: 22,
+        child: CircularProgressIndicator(
+          strokeWidth: 2.4,
+          color: AppColors.verdePrincipal,
+        ),
+      ),
+    );
   }
 }
 

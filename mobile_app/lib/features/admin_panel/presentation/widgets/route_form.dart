@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:typed_data';
-import 'package:mobile_app/core/widgets/buttons/custom_button.dart';
 import 'package:mobile_app/core/widgets/cards/custom_cards.dart';
 import 'package:mobile_app/features/admin_panel/data/models/admin_models.dart';
+import 'package:mobile_app/features/admin_panel/presentation/models/admin_form_controller.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/components/image_picker_box.dart';
 import 'package:mobile_app/core/utils/text_normalizer.dart';
 
@@ -13,6 +13,7 @@ class RouteForm extends StatefulWidget {
     required this.availableCities,
     required this.availablePoints,
     required this.availableMissions,
+    required this.formController,
     required this.onSave,
     required this.onUploadImage,
   });
@@ -21,6 +22,7 @@ class RouteForm extends StatefulWidget {
   final List<AdminCityModel> availableCities;
   final List<AdminPoiModel> availablePoints;
   final List<AdminMissionModel> availableMissions;
+  final AdminFormController formController;
   final ValueChanged<AdminRouteModel> onSave;
   final Future<String> Function(Uint8List bytes, String fileName) onUploadImage;
 
@@ -50,6 +52,7 @@ class _RouteFormState extends State<RouteForm> {
   bool _isUploading = false;
   Uint8List? _pendingImageBytes;
   String? _pendingImageName;
+  Object? _formControllerToken;
 
   @override
   void initState() {
@@ -69,6 +72,8 @@ class _RouteFormState extends State<RouteForm> {
     _selectedCity = widget.route?.cityId;
     _selectedPointIds = List<String>.from(widget.route?.pointIds ?? []);
     _isActive = widget.route?.isActive ?? false;
+    _attachChangeListeners();
+    _registerFormController();
   }
 
   @override
@@ -89,6 +94,8 @@ class _RouteFormState extends State<RouteForm> {
         _selectedPointIds = List<String>.from(widget.route?.pointIds ?? []);
         _isActive = widget.route?.isActive ?? false;
       });
+      widget.formController.markClean();
+      _registerFormController();
     }
   }
 
@@ -101,6 +108,7 @@ class _RouteFormState extends State<RouteForm> {
     _durationController.dispose();
     _totalPointsController.dispose();
     _imageController.dispose();
+    _unregisterFormController();
     super.dispose();
   }
 
@@ -175,6 +183,7 @@ class _RouteFormState extends State<RouteForm> {
                               _pendingImageBytes = bytes;
                               _pendingImageName = name;
                             });
+                            widget.formController.markChanged();
                           },
                         ),
                         const SizedBox(height: 16),
@@ -189,7 +198,10 @@ class _RouteFormState extends State<RouteForm> {
                           ),
                           value: _isActive,
                           activeThumbColor: const Color(0xFF6B7249),
-                          onChanged: (val) => setState(() => _isActive = val),
+                          onChanged: (val) {
+                            setState(() => _isActive = val);
+                            widget.formController.markChanged();
+                          },
                         ),
                       ],
                     ),
@@ -223,8 +235,10 @@ class _RouteFormState extends State<RouteForm> {
                                   ),
                                 )
                                 .toList(),
-                            onChanged: (value) =>
-                                setState(() => _selectedCity = value),
+                            onChanged: (value) {
+                              setState(() => _selectedCity = value);
+                              widget.formController.markChanged();
+                            },
                           ),
                         ),
                         const SizedBox(height: 24),
@@ -284,59 +298,13 @@ class _RouteFormState extends State<RouteForm> {
                                             _selectedPointIds.remove(poi.id);
                                           }
                                         });
+                                        widget.formController.markChanged();
                                       },
                                     );
                                   },
                                 ),
                         ),
                       ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 26),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 220,
-                    child: CustomButton(
-                      text: _isUploading
-                          ? 'SUBIENDO IMAGEN...'
-                          : 'GUARDAR RUTA',
-                      onPressed: _isUploading
-                          ? null
-                          : () async {
-                              final error = _validate(
-                                _filteredPoints().map((p) => p.id!).toSet(),
-                              );
-                              if (error != null) {
-                                _showMessage(error);
-                                return;
-                              }
-                              final imagePath = await _uploadPendingImage();
-                              if (imagePath == null) return;
-
-                              widget.onSave(
-                                AdminRouteModel(
-                                  id: widget.route?.id,
-                                  name: _nameController.text.trim(),
-                                  description: _descriptionController.text
-                                      .trim(),
-                                  difficulty: _difficultyController.text.trim(),
-                                  duration: _durationController.text.trim(),
-                                  cityId: _selectedCity ?? '',
-                                  pointIds: _selectedPointIds.toSet().toList(),
-                                  imageAsset: imagePath,
-                                  isActive: _isActive,
-                                  totalPoints:
-                                      int.tryParse(
-                                        _totalPointsController.text.trim(),
-                                      ) ??
-                                      0,
-                                ),
-                              );
-                            },
                     ),
                   ),
                 ],
@@ -457,5 +425,57 @@ class _RouteFormState extends State<RouteForm> {
     } finally {
       if (mounted) setState(() => _isUploading = false);
     }
+  }
+
+  void _attachChangeListeners() {
+    _nameController.addListener(_markChanged);
+    _descriptionController.addListener(_markChanged);
+    _difficultyController.addListener(_markChanged);
+    _durationController.addListener(_markChanged);
+    _totalPointsController.addListener(_markChanged);
+    _imageController.addListener(_markChanged);
+  }
+
+  void _markChanged() {
+    widget.formController.markChanged();
+  }
+
+  void _registerFormController() {
+    _unregisterFormController();
+    _formControllerToken = widget.formController.registerSaveAction(_save);
+  }
+
+  void _unregisterFormController() {
+    final token = _formControllerToken;
+    if (token == null) return;
+
+    widget.formController.unregisterSaveAction(token);
+    _formControllerToken = null;
+  }
+
+  Future<void> _save() async {
+    if (_isUploading) return;
+    final error = _validate(_filteredPoints().map((p) => p.id!).toSet());
+    if (error != null) {
+      _showMessage(error);
+      return;
+    }
+    final imagePath = await _uploadPendingImage();
+    if (imagePath == null) return;
+
+    widget.onSave(
+      AdminRouteModel(
+        id: widget.route?.id,
+        name: _nameController.text.trim(),
+        description: _descriptionController.text.trim(),
+        difficulty: _difficultyController.text.trim(),
+        duration: _durationController.text.trim(),
+        cityId: _selectedCity ?? '',
+        pointIds: _selectedPointIds.toSet().toList(),
+        imageAsset: imagePath,
+        isActive: _isActive,
+        totalPoints: int.tryParse(_totalPointsController.text.trim()) ?? 0,
+      ),
+    );
   }
 }

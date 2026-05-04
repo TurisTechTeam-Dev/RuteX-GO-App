@@ -3,22 +3,24 @@ import 'dart:typed_data';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
-import 'package:mobile_app/core/widgets/buttons/custom_button.dart';
 import 'package:mobile_app/core/widgets/cards/custom_cards.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/components/image_picker_box.dart';
 import 'package:mobile_app/features/admin_panel/data/models/admin_models.dart';
+import 'package:mobile_app/features/admin_panel/presentation/models/admin_form_controller.dart';
 
 class PointInterestForm extends StatefulWidget {
   const PointInterestForm({
     super.key,
     this.point,
     required this.cities,
+    required this.formController,
     required this.onSave,
     required this.onUploadImage,
   });
 
   final AdminPoiModel? point;
   final List<AdminCityModel> cities;
+  final AdminFormController formController;
   final ValueChanged<AdminPoiModel> onSave;
   final Future<String> Function(Uint8List bytes, String fileName) onUploadImage;
 
@@ -42,6 +44,7 @@ class _PointInterestFormState extends State<PointInterestForm> {
   bool _isUploading = false;
   Uint8List? _pendingImageBytes;
   String? _pendingImageName;
+  Object? _formControllerToken;
 
   LatLng? _selectedCoordinates;
 
@@ -79,6 +82,8 @@ class _PointInterestFormState extends State<PointInterestForm> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _moveMapToSelection();
     });
+    _attachChangeListeners();
+    _registerFormController();
   }
 
   @override
@@ -126,6 +131,8 @@ class _PointInterestFormState extends State<PointInterestForm> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _moveMapToSelection();
     });
+    widget.formController.markClean();
+    _registerFormController();
   }
 
   @override
@@ -137,6 +144,7 @@ class _PointInterestFormState extends State<PointInterestForm> {
     _activationRadiusController.dispose();
     _latitudeController.dispose();
     _longitudeController.dispose();
+    _unregisterFormController();
     super.dispose();
   }
 
@@ -200,6 +208,7 @@ class _PointInterestFormState extends State<PointInterestForm> {
                       _pendingImageBytes = bytes;
                       _pendingImageName = name;
                     });
+                    widget.formController.markChanged();
                   },
                 ),
               ),
@@ -226,8 +235,10 @@ class _PointInterestFormState extends State<PointInterestForm> {
                                 ),
                               )
                               .toList(),
-                          onChanged: (val) =>
-                              setState(() => _selectedCityId = val),
+                          onChanged: (val) {
+                            setState(() => _selectedCityId = val);
+                            widget.formController.markChanged();
+                          },
                         ),
                       ],
                     ),
@@ -334,6 +345,7 @@ class _PointInterestFormState extends State<PointInterestForm> {
                           _latitudeController.clear();
                           _longitudeController.clear();
                         });
+                        widget.formController.markChanged();
                         _moveMapToSelection();
                       },
                 icon: const Icon(Icons.clear),
@@ -368,53 +380,6 @@ class _PointInterestFormState extends State<PointInterestForm> {
                           onChanged: (_) => _syncCoordinatesFromInputs(),
                         ),
                       ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 220,
-                    child: CustomButton(
-                      text: _isUploading ? 'SUBIENDO...' : 'GUARDAR PUNTO',
-                      onPressed: _isUploading
-                          ? null
-                          : () async {
-                              final error = _validate();
-                              if (error != null) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(error),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
-                                return;
-                              }
-                              final imageUrl = await _uploadPendingImage();
-                              if (imageUrl == null) return;
-
-                              widget.onSave(
-                                AdminPoiModel(
-                                  id: widget.point?.id,
-                                  name: _nameController.text.trim(),
-                                  description: '',
-                                  imageUrl: imageUrl,
-                                  qrCode: _qrController.text.trim(),
-                                  activationRadius:
-                                      int.tryParse(
-                                        _activationRadiusController.text.trim(),
-                                      ) ??
-                                      20,
-                                  cityId: _selectedCityId ?? '',
-                                  latitude: _selectedCoordinates?.latitude,
-                                  longitude: _selectedCoordinates?.longitude,
-                                ),
-                              );
-                            },
                     ),
                   ),
                 ],
@@ -494,6 +459,7 @@ class _PointInterestFormState extends State<PointInterestForm> {
       _latitudeController.text = latLng.latitude.toStringAsFixed(6);
       _longitudeController.text = latLng.longitude.toStringAsFixed(6);
     });
+    widget.formController.markChanged();
     _moveMapToSelection();
   }
 
@@ -506,6 +472,7 @@ class _PointInterestFormState extends State<PointInterestForm> {
     setState(() {
       _selectedCoordinates = LatLng(lat, lng);
     });
+    widget.formController.markChanged();
     _moveMapToSelection();
   }
 
@@ -547,6 +514,60 @@ class _PointInterestFormState extends State<PointInterestForm> {
     } finally {
       if (mounted) setState(() => _isUploading = false);
     }
+  }
+
+  void _attachChangeListeners() {
+    _nameController.addListener(_markChanged);
+    _imageController.addListener(_markChanged);
+    _qrController.addListener(_markChanged);
+    _activationRadiusController.addListener(_markChanged);
+    _latitudeController.addListener(_markChanged);
+    _longitudeController.addListener(_markChanged);
+  }
+
+  void _markChanged() {
+    widget.formController.markChanged();
+  }
+
+  void _registerFormController() {
+    _unregisterFormController();
+    _formControllerToken = widget.formController.registerSaveAction(_save);
+  }
+
+  void _unregisterFormController() {
+    final token = _formControllerToken;
+    if (token == null) return;
+
+    widget.formController.unregisterSaveAction(token);
+    _formControllerToken = null;
+  }
+
+  Future<void> _save() async {
+    if (_isUploading) return;
+    final error = _validate();
+    if (error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error), backgroundColor: Colors.red),
+      );
+      return;
+    }
+    final imageUrl = await _uploadPendingImage();
+    if (imageUrl == null) return;
+
+    widget.onSave(
+      AdminPoiModel(
+        id: widget.point?.id,
+        name: _nameController.text.trim(),
+        description: '',
+        imageUrl: imageUrl,
+        qrCode: _qrController.text.trim(),
+        activationRadius:
+            int.tryParse(_activationRadiusController.text.trim()) ?? 20,
+        cityId: _selectedCityId ?? '',
+        latitude: _selectedCoordinates?.latitude,
+        longitude: _selectedCoordinates?.longitude,
+      ),
+    );
   }
 }
 
