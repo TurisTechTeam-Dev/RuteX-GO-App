@@ -157,6 +157,8 @@ class StorageImageUrlCache {
   static final Map<String, Future<String?>> _pending = {};
   static final Map<String, String?> _resolved = {};
 
+  /// Prueba la ruta principal y sus alternativas en orden. Esto evita que el
+  /// avatar o una preview fallen por diferencias entre nombre, QR o ruta legacy.
   static Future<String?> resolveAny(List<String> values) async {
     for (final value in values) {
       final normalizedValue = value.trim();
@@ -177,6 +179,8 @@ class StorageImageUrlCache {
     final pending = _pending[value];
     if (pending != null) return pending;
 
+    // Reutilizamos la misma Future para que varios widgets no pidan la misma
+    // URL de Storage a la vez mientras se pinta la pantalla.
     final future = _resolveInternal(value);
     _pending[value] = future;
     return future;
@@ -205,6 +209,8 @@ class StorageImageUrlCache {
   }
 
   static List<String> _storagePathCandidates(String rawValue) {
+    // Firestore contiene rutas con acentos, sin acentos, nombres sin extensión
+    // e incluso solo nombres lógicos; aquí generamos candidatos compatibles.
     final normalizedValues = _decodedStorageValues(rawValue);
     final candidates = <String>[];
     final bucket = Firebase.app().options.storageBucket;
@@ -218,8 +224,12 @@ class StorageImageUrlCache {
 
       if (value.contains('/')) {
         candidates.addAll(_withImageExtensionFallbacks(value));
-        candidates.addAll(_withImageExtensionFallbacks(_swapInterestAccent(value)));
-        candidates.addAll(_withImageExtensionFallbacks(_titleCaseFileName(value)));
+        candidates.addAll(
+          _withImageExtensionFallbacks(_swapInterestAccent(value)),
+        );
+        candidates.addAll(
+          _withImageExtensionFallbacks(_titleCaseFileName(value)),
+        );
         continue;
       }
 
@@ -273,7 +283,7 @@ class StorageImageUrlCache {
       try {
         values.add(decoder(rawValue.trim()));
       } catch (_) {
-        // Keep the original value when it is not valid URI-encoded text.
+        // Si no es texto URI válido, mantenemos la ruta original de Storage.
       }
     }
 
@@ -298,13 +308,10 @@ class StorageImageUrlCache {
     final stem = dotIndex == -1 ? fileName : fileName.substring(0, dotIndex);
     final extension = dotIndex == -1 ? '' : fileName.substring(dotIndex);
 
-    final titledStem = stem
-        .split(RegExp(r'([ _-])'))
-        .map((part) {
-          if (part.isEmpty || RegExp(r'^[ _-]$').hasMatch(part)) return part;
-          return part[0].toUpperCase() + part.substring(1);
-        })
-        .join();
+    final titledStem = stem.split(RegExp(r'([ _-])')).map((part) {
+      if (part.isEmpty || RegExp(r'^[ _-]$').hasMatch(part)) return part;
+      return part[0].toUpperCase() + part.substring(1);
+    }).join();
 
     return '$prefix$titledStem$extension';
   }

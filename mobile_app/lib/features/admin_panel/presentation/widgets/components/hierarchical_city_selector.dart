@@ -6,7 +6,8 @@
   TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
   Año: 2026
   -----------------------------------------------------------------------------
-*/import 'package:flutter/material.dart';
+*/
+import 'package:flutter/material.dart';
 import 'package:mobile_app/core/utils/text_normalizer.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/admin_navbar.dart';
 import 'package:mobile_app/features/admin_panel/data/models/admin_models.dart';
@@ -66,7 +67,6 @@ class _HierarchicalCitySelectorState extends State<HierarchicalCitySelector> {
 
   @override
   Widget build(BuildContext context) {
-    // Build the province list from Firestore data
     final provinceNamesFromDb = widget.allCities
         .where(
           (c) =>
@@ -95,7 +95,6 @@ class _HierarchicalCitySelectorState extends State<HierarchicalCitySelector> {
   }
 
   Widget _buildExplorerBody(List<String> provinceNames) {
-    // When searching, show flat global results
     if (_searchQuery.isNotEmpty) {
       return _buildSearchResults();
     }
@@ -116,7 +115,6 @@ class _HierarchicalCitySelectorState extends State<HierarchicalCitySelector> {
       }
     }
 
-    // Initial view: show province accordion
     return ListView.builder(
       itemCount: provinceNames.length,
       itemBuilder: (context, index) {
@@ -460,7 +458,7 @@ class _HierarchicalCitySelectorState extends State<HierarchicalCitySelector> {
           (item) => item.description,
           Icons.location_on,
           (item) => widget.onEditPoi(item),
-          (item) {}, // No drill-down for POIs
+          (item) {},
         );
 
       case AdminNavTab.missions:

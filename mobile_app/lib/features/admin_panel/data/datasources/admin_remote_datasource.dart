@@ -6,7 +6,8 @@
   TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
   Año: 2026
   -----------------------------------------------------------------------------
-*/import 'package:cloud_firestore/cloud_firestore.dart';
+*/
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:typed_data';
 
@@ -23,7 +24,7 @@ class AdminRemoteDataSource {
   final FirebaseFirestore _firestore;
   final FirebaseStorage _storage;
 
-  /// Uploads image bytes to Firebase Storage and returns the stored path.
+  /// Sube una imagen a Storage y devuelve la ruta interna guardada en Firestore.
   Future<String> uploadFile(
     Uint8List fileBytes,
     String folder,
@@ -33,10 +34,9 @@ class AdminRemoteDataSource {
       Reference ref = _storage.ref().child(folder).child(fileName);
 
       try {
-        // Check whether the file already exists before choosing its final name.
         await ref.getMetadata();
 
-        // If metadata exists, generate a unique timestamped name.
+        // Storage sobrescribe por defecto; usamos sufijo solo si el nombre existe.
         final timestamp = DateTime.now().millisecondsSinceEpoch;
         final dotIndex = fileName.lastIndexOf('.');
         final nameOnly = dotIndex != -1
@@ -47,7 +47,7 @@ class AdminRemoteDataSource {
         final uniqueFileName = '${nameOnly}_$timestamp$extension';
         ref = _storage.ref().child(folder).child(uniqueFileName);
       } catch (e) {
-        // The original name is available when metadata lookup fails.
+        // Si no hay metadatos, el nombre original está libre.
       }
 
       final uploadTask = ref.putData(fileBytes);

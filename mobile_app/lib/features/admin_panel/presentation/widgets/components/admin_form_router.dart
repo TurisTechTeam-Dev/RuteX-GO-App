@@ -6,7 +6,8 @@
   TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
   Año: 2026
   -----------------------------------------------------------------------------
-*/import 'package:flutter/material.dart';
+*/
+import 'package:flutter/material.dart';
 import 'dart:typed_data';
 
 import 'package:mobile_app/features/admin_panel/data/models/admin_models.dart';
@@ -42,7 +43,6 @@ class AdminFormRouter extends StatelessWidget {
   Widget build(BuildContext context) {
     final uniqueKey = ValueKey('${tab.index}_${itemToEdit?.id ?? 'nuevo'}');
 
-    // Always show the form for the active tab.
     switch (tab) {
       case AdminNavTab.cities:
         return CityForm(
@@ -69,7 +69,6 @@ class AdminFormRouter extends StatelessWidget {
     }
   }
 
-  // Routes form
   Widget _buildRouteFormWithData(Key key) {
     return StreamBuilder<List<AdminCityModel>>(
       stream: adminUseCases.watchCities(),
@@ -111,7 +110,6 @@ class AdminFormRouter extends StatelessWidget {
     );
   }
 
-  // --- 3. FORMULARIO DE PUNTOS DE INTERÉS ---
   Widget _buildPointFormWithData(Key key) {
     return StreamBuilder<List<AdminCityModel>>(
       stream: adminUseCases.watchCities(),
@@ -139,7 +137,6 @@ class AdminFormRouter extends StatelessWidget {
     );
   }
 
-  // Missions form
   Widget _buildMissionFormWithData(Key key) {
     return StreamBuilder<List<AdminCityModel>>(
       stream: adminUseCases.watchCities(),

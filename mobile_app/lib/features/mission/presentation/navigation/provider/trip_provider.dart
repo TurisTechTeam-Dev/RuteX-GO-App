@@ -33,7 +33,6 @@ class TripSimulationProvider extends ChangeNotifier {
   int _routeCalculationVersion = 0;
   bool _isDisposed = false;
 
-  // --- State ---
   List<PointOfInterest> _pointsOfInterest = [];
   List<PointOfInterest> get pointsOfInterest => _pointsOfInterest;
 
@@ -54,10 +53,7 @@ class TripSimulationProvider extends ChangeNotifier {
     return _navigationSteps[_currentStepIndex];
   }
 
-  LatLng _currentPosition = const LatLng(
-    38.9161,
-    -6.3437,
-  ); // Default Merida position.
+  LatLng _currentPosition = const LatLng(38.9161, -6.3437);
   LatLng get currentPosition => _currentPosition;
 
   int _currentPoiIndex = -1;
@@ -103,7 +99,6 @@ class TripSimulationProvider extends ChangeNotifier {
       await _initGpsTracking();
       if (_isDisposed) return;
 
-      // Start with the closest pending point to the current position.
       _selectNearestTargetPoi();
       await _calculateStreetRoute();
     } catch (e) {
@@ -116,7 +111,7 @@ class TripSimulationProvider extends ChangeNotifier {
     }
   }
 
-  /// Selects the closest unvisited point to the user.
+  /// Selecciona el punto pendiente más cercano al usuario.
   void _selectNearestTargetPoi() {
     if (_pointsOfInterest.isEmpty) return;
 
@@ -139,7 +134,7 @@ class TripSimulationProvider extends ChangeNotifier {
     );
   }
 
-  /// Calculates the street route to the current target with OSRM.
+  /// Calcula una ruta de calle hacia el objetivo actual.
   Future<void> _calculateStreetRoute() async {
     if (_allPoisCompleted || _currentPoiIndex == -1) {
       _routePoints = [];
@@ -183,6 +178,8 @@ class TripSimulationProvider extends ChangeNotifier {
         calculationVersion != _routeCalculationVersion ||
         targetIndex != _currentPoiIndex;
     if (isStaleCalculation) {
+      // La posición GPS puede cambiar mientras llega la respuesta de ruta; si
+      // el objetivo ya cambió, descartamos el resultado para no pintar rutas viejas.
       if (calculationVersion == _routeCalculationVersion) {
         _isCalculatingRoute = false;
         _notifyListeners();
@@ -199,7 +196,7 @@ class TripSimulationProvider extends ChangeNotifier {
     _notifyListeners();
   }
 
-  /// Marks the current point as visited and recalculates the closest target.
+  /// Marca el punto actual y recalcula el siguiente objetivo por cercanía.
   bool markCurrentPoiAsCompleted() {
     if (_currentPoiIndex == -1) return _allPoisCompleted;
 
@@ -222,8 +219,6 @@ class TripSimulationProvider extends ChangeNotifier {
     _notifyListeners();
     return _allPoisCompleted;
   }
-
-  // --- GPS control ---
 
   Future<void> _initGpsTracking() async {
     debugPrint("[GPS] Configuring position stream.");
@@ -270,6 +265,8 @@ class TripSimulationProvider extends ChangeNotifier {
     );
 
     if (movedDistance >= 25) {
+      // Recalcular en cada posición consume mucho y hace parpadear el mapa;
+      // 25 metros mantiene la guía actualizada sin saturar el servicio externo.
       unawaited(_calculateStreetRoute());
     }
   }
@@ -295,8 +292,6 @@ class TripSimulationProvider extends ChangeNotifier {
       _notifyListeners();
     }
   }
-
-  // --- Test simulation ---
 
   Future<void> startSimulation() async {
     if (_allPoisCompleted || _currentPoiIndex == -1) return;
@@ -347,8 +342,6 @@ class TripSimulationProvider extends ChangeNotifier {
     _notifyListeners();
   }
 
-  // --- UI helpers ---
-
   double get distanceToNextPoi {
     if (_currentPoiIndex == -1 || _allPoisCompleted) return 0.0;
     return NavigationDistanceUtils.metersBetween(
@@ -391,6 +384,8 @@ class TripSimulationProvider extends ChangeNotifier {
   }
 
   Future<RouteCompletionSummary> finishRoute() async {
+    // Solo guardamos el detalle completo cuando la nueva puntuación iguala o
+    // supera la mejor marca; así el historial muestra el intento relevante.
     final completedAllMissions =
         QuizRouteProgress.visitedMonuments >= _pointsOfInterest.length;
     final currentAttemptPoints = completedAllMissions

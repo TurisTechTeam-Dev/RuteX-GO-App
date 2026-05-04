@@ -27,6 +27,9 @@ class RoutingService {
       return NavigationRoute(points: [start, end]);
     }
 
+    // Valhalla da mejores indicaciones peatonales; OSRM se mantiene como
+    // respaldo para que el mapa siga dibujando ruta cuando el primer servicio
+    // falla o no devuelve geometría.
     final pedestrianRoute = await _getValhallaPedestrianRoute(start, end);
     if (pedestrianRoute.points.isNotEmpty) return pedestrianRoute;
 
@@ -304,6 +307,8 @@ class RoutingService {
   }
 
   List<LatLng> _decodePolyline(String encoded, {int precision = 5}) {
+    // Valhalla usa precisión 6 y OSRM precisión 5; compartir decodificador
+    // evita dos implementaciones casi iguales y reduce errores de coordenadas.
     final poly = <LatLng>[];
     var index = 0;
     final len = encoded.length;
