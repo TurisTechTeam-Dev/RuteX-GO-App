@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // START: FlutterFire Configuration
@@ -8,18 +10,27 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+val dotenv = Properties()
+val dotenvFile = rootProject.file("../.env")
+if (dotenvFile.exists()) {
+    dotenvFile.inputStream().use { dotenv.load(it) }
+}
+val mapsApiKey: String = dotenv.getProperty("Maps_API_KEY")
+    ?: System.getenv("Maps_API_KEY")
+    ?: ""
+
 android {
     namespace = "com.rutexgo.mobile_app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+        jvmTarget = JavaVersion.VERSION_21.toString()
     }
 
 
@@ -36,6 +47,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        resValue("string", "Maps_API_KEY", mapsApiKey)
     }
 
     buildTypes {

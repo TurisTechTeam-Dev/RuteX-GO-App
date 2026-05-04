@@ -1,510 +1,198 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
-import '../../../core/routes/app_routes.dart';
-import '../../../core/widgets/Bars/toppAppBarr.dart';
-import '../../../core/widgets/cards/custom_cards.dart';
-
-class HomeData {
-  final Map<String, dynamic> user;
-  final List<Map<String, dynamic>> routes;
-  final List<dynamic> rangos;
-
-  HomeData({required this.user, required this.routes, required this.rangos});
-}
+import '../../../app/navigation/app_routes.dart';
+import '../../../app/widgets/app_info_dialog.dart';
+import '../../../app/widgets/custom_drawer.dart';
+import '../../../app/widgets/top_app_bar.dart';
+import '../../../core/widgets/audio_guide/audio_guide.dart';
+import '../../auth/domain/usecases/auth_use_cases.dart';
+import '../data/cache/home_data_cache.dart';
+import '../domain/entities/home_data.dart';
+import '../domain/usecases/profile_use_cases.dart';
+import 'models/home_summary.dart';
+import 'widgets/home_content.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final bool showInfoOnStart;
+
+  const HomeScreen({super.key, this.showInfoOnStart = false});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late final Future<HomeData> homeFuture = _loadHomeData();
+  late final Future<_HomeLoadResult> homeFuture = _loadHomeData();
+  final HomeDataCache _homeDataCache = const HomeDataCache();
+  bool _infoDialogShown = false;
 
-  Future<HomeData> _loadHomeData() async {
-    final uid = FirebaseAuth.instance.currentUser!.uid;
+  @override
+  void initState() {
+    super.initState();
+    _showInfoDialogIfNeeded();
+  }
 
-    final userDoc = await FirebaseFirestore.instance
-        .collection("usuarios")
-        .doc(uid)
-        .get();
+  Future<_HomeLoadResult> _loadHomeData() async {
+    final user = context.read<AuthUseCases>().getCurrentUser();
+    if (user == null) {
+      throw Exception("No hay sesión activa.");
+    }
 
-    final userData = userDoc.data() ?? {};
+    final profileUseCases = context.read<ProfileUseCases>();
 
-    final rangosDoc = await FirebaseFirestore.instance
-        .collection("config_rangos")
-        .doc("3CpvEa6pk5fvifbr73jW")
-        .get();
+    try {
+      final data = await profileUseCases
+          .getHomeData(user.uid)
+          .timeout(const Duration(seconds: 6));
+      await _homeDataCache.save(user.uid, data);
 
-    final rangos = rangosDoc.data()?["rangos"] ?? [];
-
-    final List<dynamic> rutasProgreso = List.from(
-      userData["rutas_completadas"] ?? [],
-    );
-
-    List<String> rutasIds = rutasProgreso
-        .map(_routeIdFromProgress)
-        .whereType<String>()
-        .toList();
-
-    rutasIds = rutasIds.toSet().toList();
-
-    List<Map<String, dynamic>> rutas = [];
-
-    if (rutasIds.isNotEmpty) {
-      final rutasQuery = await FirebaseFirestore.instance
-          .collection("rutas")
-          .where(FieldPath.documentId, whereIn: rutasIds)
-          .get();
-
-      for (var doc in rutasQuery.docs) {
-        final data = doc.data();
-        final puntosInteres = List.from(data["id_puntos_interes"] ?? []);
-        final misionesTotales = puntosInteres.length;
-        final puntosTotales = _asInt(
-          data["puntos_totales"],
-          defaultValue: misionesTotales * 30,
-        );
-
-        final progreso = _progressMapForRoute(rutasProgreso, doc.id);
-        final hasDetailedProgress = progreso.isNotEmpty;
-
-        final puntosObtenidos = _asInt(
-          progreso["puntos_obtenidos"] ?? progreso["puntos"],
-          defaultValue: hasDetailedProgress ? 0 : puntosTotales,
-        );
-        final misionesCompletadas = _asInt(
-          progreso["monumentos_visitados"] ??
-              progreso["misiones_completadas"],
-          defaultValue: misionesTotales,
-        );
-
-        rutas.add({
-          "id": doc.id,
-          "nombre": data["nombre"] ?? "Ruta",
-          "puntos_totales": puntosTotales,
-          "id_puntos_interes": puntosInteres,
-          "misiones_totales": misionesTotales,
-          "puntos_obtenidos": puntosObtenidos,
-          "misiones_completadas": misionesCompletadas,
-        });
+      return _HomeLoadResult(data: data, isOffline: false);
+    } catch (_) {
+      final cachedData = await _homeDataCache.read(user.uid);
+      if (cachedData != null) {
+        return _HomeLoadResult(data: cachedData, isOffline: true);
       }
-    }
 
-    return HomeData(user: userData, routes: rutas, rangos: rangos);
+      rethrow;
+    }
   }
 
-  static String? _routeIdFromProgress(dynamic progress) {
-    if (progress is String) return progress;
+  String _buildAudioGuideText(HomeData data) {
+    final summary = HomeSummary.fromHomeData(data);
+    final name = data.user.name.trim().isEmpty ? 'explorador' : data.user.name;
+    final routesText = data.routes.isEmpty
+        ? 'Aún no tienes rutas completadas.'
+        : data.routes
+              .map(
+                (route) =>
+                    '${route.name}: ${route.completedMissions} de ${route.totalMissions} misiones completadas.',
+              )
+              .join(' ');
 
-    if (progress is Map) {
-      final routeId = progress["rutaId"] ?? progress["id_ruta"] ?? progress["routeId"];
-      return routeId?.toString();
-    }
-
-    return null;
+    return 'Hola $name. Estás en la pantalla principal. Tu rango actual es ${summary.rankName}. Tienes ${summary.totalPoints} puntos y has completado ${summary.completedRoutes} rutas. $routesText En la esquina inferior derecha tienes el botón explorar para descubrir nuevas rutas culturales.';
   }
 
-  static Map<String, dynamic> _progressMapForRoute(
-    List<dynamic> routesProgress,
-    String routeId,
-  ) {
-    for (final progress in routesProgress) {
-      if (progress is Map && _routeIdFromProgress(progress) == routeId) {
-        return Map<String, dynamic>.from(progress);
-      }
+  void _showInfoDialogIfNeeded() {
+    if (!widget.showInfoOnStart || _infoDialogShown) {
+      return;
     }
 
-    return {};
-  }
+    _infoDialogShown = true;
 
-  static int _asInt(dynamic value, {int defaultValue = 0}) {
-    if (value is int) return value;
-    if (value is num) return value.toInt();
-    if (value is String) return int.tryParse(value) ?? defaultValue;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
 
-    return defaultValue;
-  }
-
-  String _calcularNombreRango(int puntos, List<dynamic> listaRangos) {
-    String nombre = "Esclavo";
-    int puntosMax = -1;
-
-    for (var rango in listaRangos) {
-      if (puntos >= rango['puntos_necesarios'] &&
-          rango['puntos_necesarios'] > puntosMax) {
-        puntosMax = rango['puntos_necesarios'];
-        nombre = rango['nombre'];
-      }
-    }
-
-    return nombre;
-  }
-
-  int _calcularMisionesCompletadas(List<Map<String, dynamic>> rutas) {
-    int total = 0;
-
-    for (var ruta in rutas) {
-      final misiones = ruta["misiones_completadas"];
-
-      if (misiones is int) {
-        total += misiones;
-      }
-    }
-
-    return total;
-  }
-
-  int _calcularMisionesTotales(List<Map<String, dynamic>> rutas) {
-    int total = 0;
-
-    for (var ruta in rutas) {
-      final misiones = ruta["misiones_totales"];
-
-      if (misiones is int) {
-        total += misiones;
-      }
-    }
-
-    return total;
-  }
-
-  int _calcularPuntos(List<Map<String, dynamic>> rutas) {
-    int total = 0;
-
-    for (var ruta in rutas) {
-      final puntos = ruta["puntos_obtenidos"];
-
-      if (puntos is int) {
-        total += puntos;
-      }
-    }
-
-    return total;
+      showDialog(context: context, builder: (_) => const AppInfoDialog());
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final autoRead = MediaQuery.of(context).accessibleNavigation;
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: const TopAppBar(),
       endDrawer: const CustomDrawer(),
-
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.verdePrincipal,
-        child: const Icon(Icons.explore, color: Colors.white),
-        onPressed: () {
-          Navigator.pushNamed(context, AppRoutes.citySelection);
-        },
-      ),
-
-      body: FutureBuilder<HomeData>(
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: FutureBuilder<_HomeLoadResult>(
         future: homeFuture,
         builder: (context, snapshot) {
+          final data = snapshot.data?.data;
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (data != null)
+                  AudioGuideWidget(
+                    text: _buildAudioGuideText(data),
+                    autoRead: autoRead,
+                    semanticLabel:
+                        'Botón de audioguía. Pulsa para escuchar el resumen de tu perfil y la descripción de la pantalla.',
+                  )
+                else
+                  const SizedBox(width: 56, height: 56),
+                FloatingActionButton(
+                  heroTag: "fab_explorar",
+                  backgroundColor: AppColors.verdePrincipal,
+                  onPressed: () {
+                    Navigator.pushNamed(context, AppRoutes.citySelection);
+                  },
+                  child: const Icon(Icons.explore, color: Colors.white),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+      body: FutureBuilder<_HomeLoadResult>(
+        future: homeFuture,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      size: 40,
+                      color: AppColors.verdePrincipal,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      "No se pudo cargar el home.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      snapshot.error.toString(),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: AppColors.grisNeutro),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final data = snapshot.data!;
+          final result = snapshot.data!;
 
-          final userData = data.user;
-          final rutas = data.routes;
-          final rangos = data.rangos;
-
-          final puntosTotales = _calcularPuntos(rutas);
-
-          final nombreRango = _calcularNombreRango(puntosTotales, rangos);
-
-          final misionesCompletadas = _calcularMisionesCompletadas(rutas);
-          final misionesTotales = _calcularMisionesTotales(rutas);
-
-          final rutasCompletadas = rutas.length;
-
-          return Stack(
-            children: [
-              Container(
-                decoration: const BoxDecoration(
-                  color: AppColors.blancoPuro,
-                  image: DecorationImage(
-                    image: AssetImage('assets/Mapa_fondo_Extremadura.png'),
-                    opacity: 0.4,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-
-              SafeArea(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(height: 2, color: AppColors.negroTexto),
-
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _userCard(userData, nombreRango),
-
-                          const SizedBox(height: 20),
-
-                          const StrokeTitle(text: "Estadísticas"),
-
-                          const SizedBox(height: 12),
-
-                          _statsCard(
-                            rutasCompletadas,
-                            misionesCompletadas,
-                            misionesTotales,
-                            puntosTotales,
-                          ),
-
-                          const SizedBox(height: 20),
-
-                          const StrokeTitle(text: "Rutas Completadas"),
-                        ],
-                      ),
-                    ),
-
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-
-                        child: ListView.builder(
-                          padding: const EdgeInsets.only(bottom: 40),
-                          itemCount: rutas.length,
-
-                          itemBuilder: (context, index) {
-                            final ruta = rutas[index];
-
-                            final nombre = ruta["nombre"];
-                            final puntosTotales = ruta["puntos_totales"];
-
-                            final puntosObtenidos = ruta["puntos_obtenidos"];
-
-                            final misionesTotales =
-                                ruta["misiones_totales"] ?? 0;
-                            final misionesCompletadas =
-                                ruta["misiones_completadas"] ?? 0;
-
-                            return Column(
-                              children: [
-                                _routeCard(
-                                  title: nombre,
-                                  missions:
-                                      "$misionesCompletadas/$misionesTotales",
-                                  date: "Ruta completada",
-                                  puntosObtenidos: puntosObtenidos,
-                                  puntosTotales: puntosTotales,
-                                ),
-
-                                const SizedBox(height: 12),
-                              ],
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-
-                    Container(height: 2, color: AppColors.negroTexto),
-
-                    const SizedBox(height: 10),
-                  ],
-                ),
-              ),
-            ],
+          return HomeContent(
+            data: result.data,
+            showOfflineBanner: result.isOffline,
           );
         },
       ),
     );
   }
-
-  static Widget _userCard(Map<String, dynamic> userData, String nombreRango) {
-    return CustomCard(
-      padding: const EdgeInsets.all(16),
-
-      child: Row(
-        children: [
-          const CircleAvatar(
-            radius: 30,
-            backgroundColor: AppColors.verdePrincipal,
-            child: Icon(Icons.person, color: AppColors.blancoPuro),
-          ),
-
-          const SizedBox(width: 16),
-
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                userData['nombre'] ?? 'Sin nombre',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.negroTexto,
-                ),
-              ),
-
-              const SizedBox(height: 4),
-
-              const Text(
-                "Explorador novato",
-                style: TextStyle(color: AppColors.grisNeutro),
-              ),
-
-              const SizedBox(height: 4),
-
-              Text(
-                "Rango: $nombreRango",
-                style: const TextStyle(color: AppColors.verdePrincipal),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  static Widget _statsCard(
-    int rutasCompletadas,
-    int misionesCompletadas,
-    int misionesTotales,
-    int puntosTotales,
-  ) {
-    return CustomCard(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("Rutas completadas: $rutasCompletadas"),
-
-          const SizedBox(height: 6),
-
-          Text("Misiones completadas: $misionesCompletadas/$misionesTotales"),
-
-          const SizedBox(height: 6),
-
-          Text("Puntos totales: $puntosTotales"),
-        ],
-      ),
-    );
-  }
-
-  static Widget _routeCard({
-    required String title,
-    required String missions,
-    required String date,
-    required int puntosObtenidos,
-    required int puntosTotales,
-  }) {
-    return CustomCard(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          /// TITULO
-          Row(
-            children: [
-              const Icon(Icons.check_circle, color: AppColors.verdePrincipal),
-
-              const SizedBox(width: 8),
-
-              Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: AppColors.negroTexto,
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 8),
-
-          /// MISIONES
-          Row(
-            children: [
-              const Icon(Icons.track_changes, size: 18),
-
-              const SizedBox(width: 6),
-
-              Text("Misiones completadas: $missions"),
-            ],
-          ),
-
-          const SizedBox(height: 6),
-
-          /// FECHA
-          Row(
-            children: [
-              const Icon(Icons.calendar_today, size: 18),
-
-              const SizedBox(width: 6),
-
-              Text(date),
-            ],
-          ),
-
-          const SizedBox(height: 6),
-
-          /// PUNTOS
-          Row(
-            children: [
-              const Icon(Icons.emoji_events, size: 18),
-
-              const SizedBox(width: 6),
-
-              Text("Puntos obtenidos: $puntosObtenidos / $puntosTotales"),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 }
 
-class StrokeTitle extends StatelessWidget {
-  final String text;
+class _HomeLoadResult {
+  final HomeData data;
+  final bool isOffline;
 
-  const StrokeTitle({super.key, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Stack(
-        children: [
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              foreground: Paint()
-                ..style = PaintingStyle.stroke
-                ..strokeWidth = 1.5
-                ..color = AppColors.verdePrincipal,
-            ),
-          ),
-
-          Text(
-            text,
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: AppColors.negroTexto,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  const _HomeLoadResult({required this.data, required this.isOffline});
 }

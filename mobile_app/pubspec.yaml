@@ -10,21 +10,31 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   cupertino_icons: ^1.0.8
   firebase_core: ^4.4.0
   firebase_auth: ^6.1.4
+  google_sign_in: ^6.3.0
   cloud_firestore: ^6.1.2
+  cached_network_image: ^3.4.1
+  firebase_storage: ^13.0.2
   intl: ^0.20.2
   mobile_scanner: ^7.2.0
+  image_picker: ^1.2.1
   provider: ^6.1.5
   latlong2: ^0.9.1
   http: ^1.6.0
-  flutter_map: ^7.0.2
   geolocator: ^14.0.2
-  flutter_dotenv: ^6.0.0
+  flutter_map: ^7.0.2
   google_maps_flutter: ^2.17.0
-  image_picker: ^1.2.1
+  flutter_tts: ^4.2.5
+  pdf: ^3.12.0
+  printing: ^5.14.3
+  path_provider: ^2.1.5
+  share_plus: ^12.0.0
+  web: ^1.1.1
 
 dev_dependencies:
   flutter_test:
@@ -52,6 +62,7 @@ flutter:
     - assets/Mapa_Fondo_Extremadura.jpeg
     - assets/Logo_Color_Rutexgo.png
     - assets/Logo_Negro_Rutexgo.png
+    - assets/logos finales rutexgo blanco1.1.png
     - assets/RutexGO_color.png
     - assets/RutexGO_grises.png
     - assets/images_selection/
@@ -60,6 +71,8 @@ flutter:
     - assets/merida_monumental.png
     - assets/merida_vidafe.jpg
     - assets/Mapa_fondo_Extremadura.png
+    - assets/Sello_Monumental_Romana.png
+    - assets/Sello_ruta_monumental_romana.png
 
   # Configuración de la familia de fuente Montserrat
   fonts:

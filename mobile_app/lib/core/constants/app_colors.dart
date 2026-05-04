@@ -1,3 +1,12 @@
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/
 import 'package:flutter/material.dart';
 
 class AppColors {
@@ -12,7 +21,7 @@ class AppColors {
 
   // --- SUPERFICIES Y FONDOS ---
   static const Color blancoPuro = Color(0xFFFFFFFF); // Fondo de la pantalla
-  static const Color blancoTarjeta = Color(0xFFFBFBFB); // El de la AuthCard
+  static const Color blancoTarjeta = Color(0xFFFBFBFB); // Superficie de tarjeta
   static const Color cremaInput = Color(
     0xFFF5F1E8,
   ); // El fondo de los campos de texto
@@ -40,24 +49,32 @@ class AppColors {
   static const Color verdePrincipalOscuro = Color(
     0xFF00B54F,
   ); // Más claro para mejor contraste
-  static const Color verdeClaroOscuro = Color(0xFF66BB6A); // Variación más clara
+  static const Color verdeClaroOscuro = Color(
+    0xFF66BB6A,
+  ); // Variación más clara
   static const Color verdeBordeOscuro = Color(
     0xFF7CB342,
   ); // Más visible en fondo oscuro
 
   // --- SUPERFICIES Y FONDOS (Modo Oscuro) ---
   static const Color negroFondo = Color(0xFF121212); // Fondo principal oscuro
-  static const Color negroTarjeta = Color(0xFF1E1E1E); // Tarjetas en modo oscuro
+  static const Color negroTarjeta = Color(
+    0xFF1E1E1E,
+  ); // Tarjetas en modo oscuro
   static const Color grisInput = Color(
     0xFF2A2A2A,
   ); // El fondo de los campos de texto oscuros
 
   // --- NEUTROS Y SOMBRAS (Modo Oscuro) ---
-  static const Color blancoTexto = Color(0xFFF5F5F5); // Títulos y textos fuertes
+  static const Color blancoTexto = Color(
+    0xFFF5F5F5,
+  ); // Títulos y textos fuertes
   static const Color grisClaro = Color(
     0xFFBDBDBD,
   ); // Color de sombras y texto secundario invertido
-  static const Color grisNeutroOscuro = Color(0xFF9E9E9E); // Textos suaves o iconos
+  static const Color grisNeutroOscuro = Color(
+    0xFF9E9E9E,
+  ); // Textos suaves o iconos
 
   // --- ESTADOS (Modo Oscuro) ---
   static const Color errorOscuro = Color(0xFFEF5350); // Rojo más visible

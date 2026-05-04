@@ -1,39 +1,29 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
-import 'core/routes/app_routes.dart';
-import 'features/auth/data/auth_repository_impl.dart';
-import 'features/auth/domain/usescases/auth_use_cases.dart';
-import 'features/auth/presentation/auht_wrapper.dart';
-import 'features/mission/data/repository/mission_repository_impl.dart';
-import 'features/mission/domain/usescases/mission_uses_cases.dart';
+import 'app/navigation/app_routes.dart';
+import 'app/auth_wrapper.dart';
+import 'core/theme/app_theme.dart';
+import 'core/theme/theme_provider.dart';
 import 'firebase_options.dart';
+import 'injection_container.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // 1. Inicializamos Repositorios
-  final missionRepo = MissionRepositoryImpl();
-  final authRepo = AuthRepositoryImpl(
-      FirebaseAuth.instance,
-      FirebaseFirestore.instance
-  );
-
-  // 2. Inicializamos UseCases
-  final missionUseCases = MissionUseCases(missionRepo);
-  final authUseCases = AuthUsesCases(authRepo);
-
   runApp(
-    MultiProvider(
-      providers: [
-        Provider<MissionUseCases>.value(value: missionUseCases),
-        Provider<AuthUsesCases>.value(value: authUseCases),
-      ],
-      child: const RutexApp(),
-    ),
+    MultiProvider(providers: buildAppProviders(), child: const RutexApp()),
   );
 }
 
@@ -42,13 +32,21 @@ class RutexApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeMode = context.watch<ThemeProvider>().themeMode;
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'RutexGo',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeMode,
+      locale: const Locale('es', 'ES'),
+      supportedLocales: const [Locale('es', 'ES')],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       onGenerateRoute: AppRoutes.onGenerateRoute,
       home: const AuthWrapper(),
     );

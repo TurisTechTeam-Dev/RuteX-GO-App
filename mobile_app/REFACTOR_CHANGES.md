@@ -1,0 +1,275 @@
+# REFACTOR Y CAMBIOS APLICADOS
+
+Este archivo resume solo lo que ya esta hecho en la app movil.
+La idea es que cualquier companero pueda abrirlo, entender el estado actual y saber donde tocar sin revisar todo el proyecto desde cero.
+
+## Validacion usada
+
+- `dart format` y `flutter analyze` si funcionan, pero desde Codex deben ejecutarse fuera del sandbox porque Dart/Flutter escribe telemetria/cache en `C:\Users\Diego\AppData\Roaming\.dart-tool\`.
+- Si se ejecutan dentro del sandbox pueden parecer colgados y dejar procesos `dart`/`dartvm` vivos.
+- Error raiz observado: `FileSystemException: Failed to set file modification time, path = 'C:\Users\Diego\AppData\Roaming\.dart-tool\dart-flutter-telemetry-session.json' (OS Error: Acceso denegado, errno = 5)`.
+- Comandos recomendados para Codex:
+  - `Stop-Process -Name dart,dartvm -Force` si hay procesos Dart colgados.
+  - `dart format lib` con permisos escalados.
+  - `flutter analyze --no-pub` con permisos escalados.
+  - `git diff --check` como comprobacion ligera adicional.
+- Ultima validacion correcta conocida:
+  - `dart format lib`: `Formatted 77 files (42 changed) in 0.45 seconds.`
+  - `flutter analyze --no-pub`: `No issues found.`
+
+## Estructura refactorizada
+
+### Panel administrador
+
+Archivos principales:
+
+- `lib/features/admin_panel/presentation/admin_panel_screen.dart`
+- `lib/features/admin_panel/data/admin_remote_datasource.dart`
+- `lib/features/admin_panel/data/models/admin_models.dart`
+- `lib/core/widgets/nav_web/navegacion_web.dart`
+- `lib/core/widgets/nav_web/componentes_extras/admin_sidebar.dart`
+- `lib/core/widgets/nav_web/componentes_extras/admin_form_router.dart`
+- `lib/core/widgets/nav_web/componentes_extras/image_picker_box.dart`
+- `lib/core/widgets/nav_web/formulario_ruta.dart`
+- `lib/core/widgets/nav_web/formularios/formulario_ciudades.dart`
+- `lib/core/widgets/nav_web/formularios/formulario_punto_interes.dart`
+- `lib/core/widgets/nav_web/formularios/formulario_mision.dart`
+
+Que hace ahora:
+
+- El panel admin fue traido de la rama `web` de forma selectiva, sin mezclar la rama completa sobre `codex`.
+- Permite gestionar ciudades, rutas, puntos de interes y misiones.
+- `AdminRemoteDataSource` concentra streams de Firestore y subidas a Firebase Storage.
+- `AdminCityModel`, `AdminRouteModel`, `AdminPoiModel` y `AdminMissionModel` parsean Firestore para la UI admin.
+- La UI visible del admin se mantiene en espanol.
+- El codigo interno nuevo usa nombres en ingles cuando no representa directamente campos Firestore.
+- El panel es desktop-first. En movil tiene navbar compacta, drawer para el lateral y scroll horizontal para evitar solapes, pero no es la experiencia ideal para administracion intensiva.
+- Si `usuarios.isAdmin == true`, la app redirige al panel admin tambien en movil. Para demo y uso habitual, se recomienda web/portatil.
+- El selector de Misiones obtiene puntos como la app movil: ciudad -> rutas por `id_ciudad` -> `id_puntos_interes` -> documentos de `puntos_interes`.
+- Las previews de imagen ya funcionan al subir archivo local y al leer rutas internas de Firebase Storage.
+- En Flutter Web, `StorageAwareImage` usa `WebHtmlElementStrategy.prefer` para renderizar URLs resueltas de Firebase Storage.
+
+### Home / Perfil
+
+Archivos principales:
+
+- `lib/features/profile/presentation/home_screen.dart`
+- `lib/features/profile/domain/entities/home_data.dart`
+- `lib/features/profile/domain/entities/home_route.dart`
+- `lib/features/profile/domain/entities/profile_rank.dart`
+- `lib/features/profile/domain/entities/user_profile.dart`
+- `lib/features/profile/data/factories/home_data_loader_factory.dart`
+- `lib/features/profile/data/home_data_loader.dart`
+- `lib/features/profile/data/home_summary.dart`
+- `lib/features/profile/presentation/widgets/home_content.dart`
+- `lib/features/profile/presentation/widgets/home_cards.dart`
+- `lib/features/profile/presentation/widgets/home_route_list.dart`
+
+Que hace ahora:
+
+- `home_screen.dart` actua como contenedor simple.
+- `home_data_loader.dart` carga usuario, rangos y rutas completadas a partir del uid recibido.
+- `home_data_loader_factory.dart` encapsula el wiring de Firestore para el Home.
+- `HomeData`, `HomeRoute`, `ProfileRank` y `UserProfile` tipan los datos visibles del Home.
+- `home_summary.dart` calcula el resumen visible del home usando entidades, no mapas.
+- `home_cards.dart` contiene las cards de usuario, estadisticas y rutas.
+- `home_route_list.dart` pinta la lista de rutas completadas.
+
+Comportamiento actual:
+
+- El rango visible y `Puntos totales` salen de `usuarios.puntos`.
+- Las rutas completadas siguen leyendo sus datos resumidos desde `usuarios.rutas_completadas`.
+- Al pulsar una ruta completada en Home se abre un bottom sheet con el ultimo intento persistido, si existe.
+
+### Auth
+
+Archivos principales:
+
+- `lib/features/auth/domain/entities/auth_user.dart`
+- `lib/features/auth/data/models/auth_user_model.dart`
+- `lib/features/auth/domain/repositories/auth_repository.dart`
+- `lib/features/auth/data/repositories/auth_repository_impl.dart`
+- `lib/features/auth/domain/usecases/auth_use_cases.dart`
+- `lib/features/auth/presentation/login_screen.dart`
+- `lib/features/auth/presentation/register_screen.dart`
+- `lib/features/auth/presentation/auth_wrapper.dart`
+- `lib/core/widgets/auth/auth_logo.dart`
+- `lib/core/widgets/auth/auth_snack_bar.dart`
+- `lib/core/widgets/inputs/custom_inputs.dart`
+
+Que hace ahora:
+
+- `AuthUser` evita que domain y presentation dependan directamente de `firebase_auth.User`.
+- `AuthRepository.login` devuelve `AuthUser`, por lo que Login ya no consulta `FirebaseAuth.instance.currentUser`.
+- Login, registro, splash y auth wrapper leen `AuthUseCases` desde `Provider`; la UI ya no crea repositorios ni inicializa Firebase directamente.
+- Login y registro usan fondo comun con mapa de Extremadura.
+- Se ajusto el comportamiento del teclado para evitar saltos raros del layout.
+- `CustomInput` tiene `scrollPadding` para mejorar el enfoque de campos.
+
+### Seleccion de ciudad y ruta
+
+Archivos principales:
+
+- `lib/features/routes/data/datasources/routes_remote_datasource.dart`
+- `lib/features/routes/data/models/city_model.dart`
+- `lib/features/routes/data/models/route_model.dart`
+- `lib/features/routes/domain/entities/city.dart`
+- `lib/features/routes/domain/entities/tourist_route.dart`
+- `lib/features/routes/domain/repositories/routes_repository.dart`
+- `lib/features/routes/presentation/city_selection_screen.dart`
+- `lib/features/routes/presentation/widgets/city_selection_content.dart`
+- `lib/features/routes/presentation/widgets/city_card.dart`
+- `lib/features/routes/presentation/route_selection_screen.dart`
+- `lib/features/routes/presentation/widgets/route_selection_content.dart`
+- `lib/features/routes/presentation/widgets/route_card.dart`
+
+Que hace ahora:
+
+- `routes` ya usa un patron mas limpio: datasource para Firestore, models para parseo, entities en domain y widgets sin `QuerySnapshot`.
+- `RoutesRepository` devuelve `Stream<List<City>>` y `Stream<List<TouristRoute>>`, no tipos de Firestore.
+- `RoutesRemoteDatasource` concentra las queries contra `ciudades`, `rutas` y `misiones`.
+- Las ciudades se ordenan primero por disponibilidad real de rutas y luego alfabeticamente.
+- Una ciudad puede mostrar `Explorar` si tiene rutas, aunque `isActive` no gobierne ese flujo.
+- Las rutas muestran `Tiempo estimado` y `Puntos totales`.
+- Las rutas leen la imagen desde `rutas.imagen` como campo principal.
+- `rutas.imagen_asset` queda como compatibilidad legacy si falta `imagen`.
+- `Comenzar ruta` solo se habilita si todos los puntos de interes de esa ruta tienen mision asociada.
+- Si faltan misiones, la card lo explica visualmente y el boton queda como `Ruta no disponible`.
+
+### Quiz, resultados y QR
+
+Archivos principales:
+
+- `lib/features/mission/data/datasources/mission_remote_datasource.dart`
+- `lib/features/mission/data/models/mission_model.dart`
+- `lib/features/mission/data/models/poi_model.dart`
+- `lib/features/mission/domain/entities/mission.dart`
+- `lib/features/mission/domain/entities/mission_scan_result.dart`
+- `lib/features/mission/data/repositories/mission_repository_impl.dart`
+- `lib/features/mission/domain/entities/poi_entity.dart`
+- `lib/features/mission/domain/repositories/mission_repository.dart`
+- `lib/features/mission/presentation/monument_detail/models/monument_info_args.dart`
+- `lib/features/mission/presentation/quiz/screens/quiz_screen.dart`
+- `lib/features/mission/presentation/quiz/screens/route_result_screen.dart`
+- `lib/features/mission/presentation/quiz/quiz_route_progress.dart`
+- `lib/features/mission/presentation/qr_scanner/screens/mission_scanner_screen.dart`
+- `lib/features/mission/presentation/qr_scanner/widgets/mission_scanner_overlay.dart`
+
+Que hace ahora:
+
+- `PointOfInterest` ya es una entidad de dominio pura y no importa Firestore.
+- `Mission` y `MissionQuestion` encapsulan la mision y sus preguntas en domain.
+- `MissionScanResult` tipa el resultado del escaneo QR.
+- `POIModel` concentra el parseo desde Firestore hacia `PointOfInterest`.
+- `MissionModel` concentra el parseo desde Firestore hacia `Mission`.
+- `MissionRemoteDatasource` concentra las queries de puntos, misiones y rutas usadas por el repositorio de misiones.
+- El flujo QR -> monumento -> quiz ya no pasa mapas con claves `punto`/`mision`; usa `MissionScanResult`, `MonumentInfoArgs` y `QuizMission`.
+- `QuizRouteProgress` centraliza el progreso temporal de ruta.
+- La pantalla de resultados se reorganizo visualmente y limpia mejor respuestas con saltos raros.
+- La card principal de resultados deja ver el mapa de fondo.
+- El QR tiene mas cooldown para evitar disparos demasiado rapidos.
+
+### Navegacion y mapas
+
+Archivos principales:
+
+- `lib/core/map/map_view.dart`
+- `lib/core/map/routing_service.dart`
+- `lib/features/mission/presentation/navigation/screens/map_navigation_screen.dart`
+- `android/app/build.gradle.kts`
+- `android/app/src/main/AndroidManifest.xml`
+- `.env`
+
+Que hace ahora:
+
+- `MapView` puede pintar con Google Maps o con el mapa anterior de `flutter_map`.
+- Por defecto no se crea `GoogleMap`; esto evita consumo de Google Maps durante pruebas normales.
+- Para probar Google Maps se debe arrancar con `--dart-define=USE_GOOGLE_MAPS=true`.
+- Android lee `Maps_API_KEY` desde `.env` en Gradle y la expone al manifest como `@string/Maps_API_KEY`.
+- `.env` queda ignorado por Git para no subir la key.
+- La ruta visual sigue usando los puntos calculados por `RoutingService`; el mapa solo pinta la polyline.
+
+Notas actuales:
+
+- Google Maps ya funciona como mapa embebido, pero no se usa Google Directions/Routes.
+- `RoutingService` usa OSRM para calcular la polyline. El servidor publico de OSRM puede devolver rutas con comportamiento parecido a coche aunque se intente usar perfil peatonal.
+- QR, quiz y resultados no consumen Google Maps; el consumo aparece al crear el widget `GoogleMap`.
+
+### Fondo e imagenes compartidas
+
+Archivos principales:
+
+- `lib/core/widgets/backgrounds/extremadura_map_background.dart`
+- `lib/core/widgets/titles/stroke_title.dart`
+- `lib/core/widgets/images/storage_aware_image.dart`
+
+Que hace ahora:
+
+- `ExtremaduraMapBackground` se reutiliza en varias pantallas.
+- `StrokeTitle` ya no vive duplicado en distintas vistas.
+- `StorageAwareImage` unifica la carga de imagenes desde assets, `https://`, `gs://` o rutas internas tipo `Contenido/...`.
+- `StorageAwareImage` prueba variantes de extension (`.jpg`, `.jpeg`, `.png`, `.webp`) cuando recibe rutas internas de Storage.
+- En web, las imagenes remotas usan estrategia HTML preferente para evitar fallos de render con Firebase Storage.
+
+## Firebase y persistencia
+
+### Imagenes en Firebase Storage
+
+Ya soportado en:
+
+- ciudades
+- rutas
+- punto de interes / detalle de monumento
+- logos de rangos
+
+Formato recomendado en Firestore:
+
+- `Contenido/Ciudades/badajoz.jpg`
+- `Contenido/Rutas/anfiteatro.jpg`
+- `Contenido/Puntos de Interes/teatro_romano.jpg`
+- `Contenido/Rangos/bronce.png`
+
+No hace falta guardar la URL publica larga si la app puede resolver la ruta interna.
+
+### Resultado de rutas
+
+Estado actual:
+
+- La mejor marca resumida por ruta se sigue guardando en `usuarios.rutas_completadas`.
+
+Archivos implicados:
+
+- `lib/features/mission/presentation/navigation/provider/trip_provider.dart`
+
+Comportamiento actual:
+
+- Si un usuario repite una ruta y mejora su mejor marca, se suma solo la diferencia positiva a `usuarios.puntos`.
+- Si hace peor resultado, no suma puntos globales.
+
+## Convenciones importantes
+
+- `usuarios.puntos` es la fuente de verdad para el rango visible y para `Puntos totales` en Home.
+- `usuarios.rutas_completadas` se usa como resumen por ruta, no como fuente de verdad para el total global del usuario.
+- El listado de rutas de una ciudad depende de `id_ciudad`.
+- El inicio de una ruta depende de que todos sus puntos de interes tengan mision.
+- En el panel admin, no asumir que `puntos_interes` tiene siempre `id_ciudad`; para saber los puntos de una ciudad se debe seguir la relacion desde `rutas.id_puntos_interes`, igual que hace la app movil.
+- El panel admin movil es acceso de contingencia. No convertirlo en referencia visual principal sin redisenar formularios especificos para movil.
+
+## Archivos especialmente sensibles
+
+Si se va a tocar comportamiento y no solo UI, revisar primero:
+
+- `lib/features/mission/presentation/navigation/provider/trip_provider.dart`
+- `lib/features/profile/data/home_data_loader.dart`
+- `lib/features/profile/data/home_summary.dart`
+- `lib/features/routes/data/routes_repository_impl.dart`
+- `lib/features/routes/domain/usecases/routes_use_cases.dart`
+- `lib/core/constants/firestore_contract.dart`
+- `lib/features/admin_panel/data/models/admin_models.dart`
+- `lib/core/widgets/images/storage_aware_image.dart`
+- `docs/base_datos_firestore.md`
+
+## Nota para el equipo
+
+Este archivo se ira actualizando solo con cambios ya aplicados y comprobados dentro del proyecto.
+No se esta usando como roadmap de futuro, sino como fotografia del estado real del codigo.

@@ -1,29 +1,64 @@
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:latlong2/latlong.dart' as osm;
-import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
+import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../../../../core/map/routing_service.dart';
-import '../../../domain/entity/poi_entity.dart';
-import '../../../domain/usescases/mission_uses_cases.dart';
+import '../../../domain/entities/poi_entity.dart';
+import '../../../domain/entities/route_result_record.dart';
+import '../../../domain/usecases/mission_use_cases.dart';
+import '../models/route_completion_summary.dart';
+import '../utils/navigation_distance_utils.dart';
+import '../utils/route_duration_formatter.dart';
+import '../utils/route_target_selector.dart';
+import '../../quiz/quiz_route_progress.dart';
 
 class TripSimulationProvider extends ChangeNotifier {
+  static const int _routeCompletionBonus = 10;
+  static const Duration _simulationStepDelay = Duration(milliseconds: 260);
+
   final MissionUseCases missionUseCases;
   final String routeId;
   final RoutingService _routingService = RoutingService();
+  final DateTime _startedAt = DateTime.now();
+  LatLng? _lastRoutedPosition;
+  int _routeCalculationVersion = 0;
+  bool _isDisposed = false;
 
-  // --- ESTADO ---
+  // --- State ---
   List<PointOfInterest> _pointsOfInterest = [];
   List<PointOfInterest> get pointsOfInterest => _pointsOfInterest;
 
   final List<int> _completedPoiIndices = [];
   List<int> get completedPoiIndices => _completedPoiIndices;
 
-  List<osm.LatLng> _routePoints = [];
-  List<osm.LatLng> get routePoints => _routePoints;
+  List<LatLng> _routePoints = [];
+  List<LatLng> get routePoints => _routePoints;
 
-  osm.LatLng _currentPosition = const osm.LatLng(38.9161, -6.3437); // Mérida por defecto
-  osm.LatLng get currentPosition => _currentPosition;
+  List<NavigationStep> _navigationSteps = [];
+  int _currentStepIndex = 0;
+  NavigationStep? get currentNavigationStep {
+    if (_navigationSteps.isEmpty ||
+        _currentStepIndex >= _navigationSteps.length) {
+      return null;
+    }
+
+    return _navigationSteps[_currentStepIndex];
+  }
+
+  LatLng _currentPosition = const LatLng(
+    38.9161,
+    -6.3437,
+  ); // Default Merida position.
+  LatLng get currentPosition => _currentPosition;
 
   int _currentPoiIndex = -1;
   int get currentPoiIndex => _currentPoiIndex;
@@ -34,6 +69,9 @@ class TripSimulationProvider extends ChangeNotifier {
   bool _isSimulating = false;
   bool get isSimulating => _isSimulating;
 
+  bool _isCalculatingRoute = false;
+  bool get isCalculatingRoute => _isCalculatingRoute;
+
   bool _hasReachedDestination = false;
   bool get hasReachedDestination => _hasReachedDestination;
 
@@ -42,196 +80,447 @@ class TripSimulationProvider extends ChangeNotifier {
 
   StreamSubscription<Position>? _positionStream;
 
-  TripSimulationProvider({required this.missionUseCases, required this.routeId}) {
-    debugPrint("🚀 [TRIP_PROVIDER] Inicializando Navegación Dinámica por Proximidad...");
+  TripSimulationProvider({
+    required this.missionUseCases,
+    required this.routeId,
+  }) {
+    debugPrint("[TRIP_PROVIDER] Initializing proximity-based navigation.");
     _initializeTrip();
   }
 
   Future<void> _initializeTrip() async {
     try {
       _isLoading = true;
-      notifyListeners();
+      _notifyListeners();
 
-      debugPrint("📡 [DB] Descargando puntos para la ruta: $routeId");
-      _pointsOfInterest = await missionUseCases.executeGetPointsForRoute(routeId);
-      debugPrint("✅ [DB] ${_pointsOfInterest.length} puntos cargados correctamente.");
+      debugPrint("[DB] Loading points for route: $routeId");
+      _pointsOfInterest = await missionUseCases.executeGetPointsForRoute(
+        routeId,
+      );
+      if (_isDisposed) return;
+      debugPrint("[DB] Loaded ${_pointsOfInterest.length} points.");
 
       await _initGpsTracking();
+      if (_isDisposed) return;
 
-      // Al iniciar, buscamos el más cercano a nuestra posición actual
+      // Start with the closest pending point to the current position.
       _selectNearestTargetPoi();
       await _calculateStreetRoute();
-
     } catch (e) {
-      debugPrint("❌ [TRIP_PROVIDER] Error crítico en inicialización: $e");
+      debugPrint("[TRIP_PROVIDER] Critical initialization error: $e");
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (!_isDisposed) {
+        _isLoading = false;
+        _notifyListeners();
+      }
     }
   }
 
-  /// LÓGICA DINÁMICA: Selecciona el monumento no visitado más cercano al usuario.
-  /// Esto resuelve el conflicto Teatro-Anfiteatro por exclusión.
+  /// Selects the closest unvisited point to the user.
   void _selectNearestTargetPoi() {
     if (_pointsOfInterest.isEmpty) return;
 
-    // Filtramos solo los que NO han sido completados
-    final pendingPois = _pointsOfInterest.where(
-            (poi) => !_completedPoiIndices.contains(_pointsOfInterest.indexOf(poi))
-    ).toList();
+    final nextPoiIndex = RouteTargetSelector.nearestPendingPoiIndex(
+      pointsOfInterest: _pointsOfInterest,
+      completedPoiIndices: _completedPoiIndices,
+      currentPosition: _currentPosition,
+    );
 
-    if (pendingPois.isEmpty) {
-      debugPrint("🏁 [LÓGICA] No quedan puntos pendientes. ¡Ruta finalizada!");
+    if (nextPoiIndex == -1) {
+      debugPrint("[ROUTE] No pending points left. Route completed.");
       _allPoisCompleted = true;
       _currentPoiIndex = -1;
       return;
     }
 
-    debugPrint("⚖️ [LÓGICA] Calculando proximidad entre ${pendingPois.length} monumentos restantes...");
-
-    // Ordenamos la lista de pendientes por distancia real al GPS actual
-    pendingPois.sort((a, b) {
-      double distA = const osm.Distance().as(osm.LengthUnit.Meter, _currentPosition, a.localizacion);
-      double distB = const osm.Distance().as(osm.LengthUnit.Meter, _currentPosition, b.localizacion);
-      return distA.compareTo(distB);
-    });
-
-    // El nuevo objetivo es el primero de la lista (el más cercano)
-    _currentPoiIndex = _pointsOfInterest.indexOf(pendingPois.first);
-    debugPrint("🎯 [DESTINO] Nuevo objetivo dinámico: ${_pointsOfInterest[_currentPoiIndex].nombre}");
+    _currentPoiIndex = nextPoiIndex;
+    debugPrint(
+      "[ROUTE] New dynamic target: ${_pointsOfInterest[_currentPoiIndex].name}",
+    );
   }
 
-  /// Calcula la ruta por calles usando OSRM hacia el objetivo actual
+  /// Calculates the street route to the current target with OSRM.
   Future<void> _calculateStreetRoute() async {
     if (_allPoisCompleted || _currentPoiIndex == -1) {
       _routePoints = [];
-      notifyListeners();
+      _navigationSteps = [];
+      _currentStepIndex = 0;
+      _notifyListeners();
       return;
     }
 
-    final target = _pointsOfInterest[_currentPoiIndex].localizacion;
-    debugPrint("🌐 [OSRM] Trazando camino hacia: ${_pointsOfInterest[_currentPoiIndex].nombre}");
+    final calculationVersion = ++_routeCalculationVersion;
+    final targetIndex = _currentPoiIndex;
 
+    _isCalculatingRoute = true;
+    _routePoints = [];
+    _navigationSteps = [];
+    _currentStepIndex = 0;
+    _notifyListeners();
+
+    final target = _pointsOfInterest[targetIndex].location;
+    debugPrint(
+      "[OSRM] Building route to: ${_pointsOfInterest[targetIndex].name}",
+    );
+
+    late final NavigationRoute nextRoute;
     try {
-      final points = await _routingService.getRoute(_currentPosition, target);
-      _routePoints = points.isNotEmpty ? points : [_currentPosition, target];
+      final route = await _routingService.getNavigationRoute(
+        _currentPosition,
+        target,
+      );
+      if (_isDisposed) return;
+      nextRoute = route.points.isNotEmpty
+          ? route
+          : NavigationRoute(points: [_currentPosition, target]);
     } catch (e) {
-      debugPrint("⚠️ [OSRM] Error de conexión. Usando línea recta temporal.");
-      _routePoints = [_currentPosition, target];
+      if (_isDisposed) return;
+      debugPrint("[OSRM] Connection error. Falling back to a straight line.");
+      nextRoute = NavigationRoute(points: [_currentPosition, target]);
     }
-    notifyListeners();
+
+    final isStaleCalculation =
+        calculationVersion != _routeCalculationVersion ||
+        targetIndex != _currentPoiIndex;
+    if (isStaleCalculation) {
+      if (calculationVersion == _routeCalculationVersion) {
+        _isCalculatingRoute = false;
+        _notifyListeners();
+      }
+      return;
+    }
+
+    _routePoints = nextRoute.points;
+    _navigationSteps = nextRoute.steps;
+    _currentStepIndex = 0;
+    _updateCurrentNavigationStep();
+    _lastRoutedPosition = _currentPosition;
+    _isCalculatingRoute = false;
+    _notifyListeners();
   }
 
-  /// Marca el punto actual como visitado y fuerza el recálculo al siguiente más cercano
-  void markCurrentPoiAsCompleted() async {
-    if (_currentPoiIndex == -1) return;
+  /// Marks the current point as visited and recalculates the closest target.
+  bool markCurrentPoiAsCompleted() {
+    if (_currentPoiIndex == -1) return _allPoisCompleted;
 
-    debugPrint("✅ [PROGRESO] '${_pointsOfInterest[_currentPoiIndex].nombre}' marcado como completado.");
+    debugPrint(
+      "[PROGRESS] '${_pointsOfInterest[_currentPoiIndex].name}' marked as completed.",
+    );
 
     if (!_completedPoiIndices.contains(_currentPoiIndex)) {
       _completedPoiIndices.add(_currentPoiIndex);
     }
 
     _hasReachedDestination = false;
+    _isSimulating = false;
 
-    // Recalcular cuál es el más cercano AHORA (excluyendo el que acabamos de terminar)
     _selectNearestTargetPoi();
 
     if (!_allPoisCompleted) {
-      await _calculateStreetRoute();
+      unawaited(_calculateStreetRoute());
     }
-    notifyListeners();
+    _notifyListeners();
+    return _allPoisCompleted;
   }
 
-  // --- CONTROL GPS ---
+  // --- GPS control ---
 
   Future<void> _initGpsTracking() async {
-    debugPrint("🛰️ [GPS] Configurando sensor...");
+    debugPrint("[GPS] Configuring position stream.");
     LocationPermission permission = await Geolocator.checkPermission();
+    if (_isDisposed) return;
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
+      if (_isDisposed) return;
     }
 
-    // Posición inicial
     Position pos = await Geolocator.getCurrentPosition();
-    _currentPosition = osm.LatLng(pos.latitude, pos.longitude);
+    if (_isDisposed) return;
+    _currentPosition = LatLng(pos.latitude, pos.longitude);
 
-    // Escucha activa de movimiento
-    _positionStream = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-          distanceFilter: 10 // Actualiza cada 3 metros para suavidad
-      ),
-    ).listen((Position pos) {
-      if (!_isSimulating) {
-        _currentPosition = osm.LatLng(pos.latitude, pos.longitude);
-        _checkArrivalProximity(_currentPosition);
-        notifyListeners();
-      }
-    });
+    _positionStream =
+        Geolocator.getPositionStream(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+            distanceFilter: 10,
+          ),
+        ).listen((Position pos) {
+          if (_isDisposed) return;
+          if (_isSimulating || _hasReachedDestination) return;
+
+          _currentPosition = LatLng(pos.latitude, pos.longitude);
+          _checkArrivalProximity(_currentPosition);
+          _updateCurrentNavigationStep();
+          _refreshStreetRouteIfNeeded();
+          _notifyListeners();
+        });
   }
 
-  void _checkArrivalProximity(osm.LatLng pos) {
-    if (_hasReachedDestination || _allPoisCompleted || _currentPoiIndex == -1) return;
+  void _refreshStreetRouteIfNeeded() {
+    if (_allPoisCompleted || _currentPoiIndex == -1 || _hasReachedDestination) {
+      return;
+    }
+
+    final lastPosition = _lastRoutedPosition;
+    if (lastPosition == null) return;
+
+    final movedDistance = NavigationDistanceUtils.metersBetween(
+      lastPosition,
+      _currentPosition,
+    );
+
+    if (movedDistance >= 25) {
+      unawaited(_calculateStreetRoute());
+    }
+  }
+
+  void _checkArrivalProximity(LatLng pos) {
+    if (_hasReachedDestination || _allPoisCompleted || _currentPoiIndex == -1) {
+      return;
+    }
 
     final target = _pointsOfInterest[_currentPoiIndex];
-    double distance = const osm.Distance().as(osm.LengthUnit.Meter, pos, target.localizacion);
+    final distance = NavigationDistanceUtils.metersBetween(
+      pos,
+      target.location,
+    );
 
-    // Comprobamos contra el radio de Firebase (recomendado 20m)
-    if (distance <= target.radioActivacion) {
-      debugPrint("📍 [LLEGADA] ¡Has llegado a ${target.nombre}! Distancia: ${distance.toInt()}m");
+    if (distance <= target.activationRadius) {
+      debugPrint(
+        "[ARRIVAL] Reached ${target.name}. Distance: ${distance.toInt()}m",
+      );
+      _currentPosition = target.location;
       _hasReachedDestination = true;
       _isSimulating = false;
-      notifyListeners();
+      _notifyListeners();
     }
   }
 
-  // --- SIMULACIÓN PARA PRUEBAS ---
+  // --- Test simulation ---
 
   Future<void> startSimulation() async {
     if (_allPoisCompleted || _currentPoiIndex == -1) return;
+    if (_isCalculatingRoute) return;
 
-    debugPrint("🎬 [SIM] Iniciando recorrido automático hacia ${_pointsOfInterest[_currentPoiIndex].nombre}...");
+    if (_routePoints.isEmpty) {
+      await _calculateStreetRoute();
+      if (_isDisposed) return;
+      if (_routePoints.isEmpty || _allPoisCompleted || _currentPoiIndex == -1) {
+        return;
+      }
+    }
+
+    debugPrint(
+      "[SIM] Starting automatic route to ${_pointsOfInterest[_currentPoiIndex].name}.",
+    );
     _isSimulating = true;
     _hasReachedDestination = false;
 
     for (var point in _routePoints) {
-      if (!_isSimulating) break;
+      if (_isDisposed || !_isSimulating) break;
       _currentPosition = point;
       _checkArrivalProximity(_currentPosition);
-      notifyListeners();
-      await Future.delayed(const Duration(milliseconds: 300));
+      _updateCurrentNavigationStep();
+      _notifyListeners();
+      await Future.delayed(_simulationStepDelay);
     }
-    // Si terminó la simulación y NO saltó el popup por pocos metros, lo forzamos
+    if (_isDisposed) return;
+
     if (_isSimulating && !_hasReachedDestination) {
       final target = _pointsOfInterest[_currentPoiIndex];
-      double finalDist = const osm.Distance().as(osm.LengthUnit.Meter, _currentPosition, target.localizacion);
+      final finalDistance = NavigationDistanceUtils.metersBetween(
+        _currentPosition,
+        target.location,
+      );
 
-      debugPrint("🏁 [SIM] Fin de puntos. Distancia final al monumento: ${finalDist.toInt()}m");
+      debugPrint(
+        "[SIM] End of route points. Final distance: ${finalDistance.toInt()}m",
+      );
 
-      // Si al terminar estamos a menos de 100 metros, asumimos llegada para que el usuario no se quede bloqueado
-      if (finalDist < 200) {
-        debugPrint("🎯 [SIM] Forzando llegada por proximidad final.");
+      if (finalDistance < 200) {
+        debugPrint("[SIM] Forcing arrival by final proximity.");
         _hasReachedDestination = true;
       }
     }
 
     _isSimulating = false;
-    notifyListeners();
+    _notifyListeners();
   }
 
-  // --- HELPERS PARA UI ---
+  // --- UI helpers ---
 
   double get distanceToNextPoi {
     if (_currentPoiIndex == -1 || _allPoisCompleted) return 0.0;
-    return const osm.Distance().as(osm.LengthUnit.Meter, _currentPosition, _pointsOfInterest[_currentPoiIndex].localizacion);
+    return NavigationDistanceUtils.metersBetween(
+      _currentPosition,
+      _pointsOfInterest[_currentPoiIndex].location,
+    );
   }
 
-  void skipToNext() => markCurrentPoiAsCompleted();
+  double? get distanceToCurrentNavigationStep {
+    final step = currentNavigationStep;
+    if (step == null) return null;
+
+    return NavigationDistanceUtils.metersBetween(
+      _currentPosition,
+      step.maneuverLocation,
+    );
+  }
+
+  void _updateCurrentNavigationStep() {
+    if (_navigationSteps.length <= 1 ||
+        _currentStepIndex >= _navigationSteps.length - 1) {
+      return;
+    }
+
+    var currentStep = _navigationSteps[_currentStepIndex];
+    var distanceToStep = NavigationDistanceUtils.metersBetween(
+      _currentPosition,
+      currentStep.maneuverLocation,
+    );
+
+    while (distanceToStep <= 20 &&
+        _currentStepIndex < _navigationSteps.length - 1) {
+      _currentStepIndex++;
+      currentStep = _navigationSteps[_currentStepIndex];
+      distanceToStep = NavigationDistanceUtils.metersBetween(
+        _currentPosition,
+        currentStep.maneuverLocation,
+      );
+    }
+  }
+
+  Future<RouteCompletionSummary> finishRoute() async {
+    final completedAllMissions =
+        QuizRouteProgress.visitedMonuments >= _pointsOfInterest.length;
+    final currentAttemptPoints = completedAllMissions
+        ? QuizRouteProgress.pointsWithCompletionBonus(_routeCompletionBonus)
+        : QuizRouteProgress.routePoints;
+    final visitedPois = _completedPoiIndices.length;
+    final skippedPois = _skippedPois();
+    final elapsedTime = DateTime.now().difference(_startedAt);
+    final routeName = await missionUseCases.getRouteName(routeId);
+    final answers = List<QuizAnswerResult>.from(
+      QuizRouteProgress.answerResults,
+    );
+    final completedMissions = QuizRouteProgress.visitedMonuments;
+    final saveResult = await missionUseCases.saveBestRouteProgress(
+      routeId: routeId,
+      currentAttemptPoints: currentAttemptPoints,
+      visitedPois: visitedPois,
+      completedMissions: completedMissions,
+      skippedPois: skippedPois,
+    );
+    final correctAnswers = _countCorrectAnswers(answers);
+    final totalAnswers = answers.length;
+    final shouldSaveDetailedResult =
+        currentAttemptPoints >= saveResult.savedBestPoints;
+
+    if (shouldSaveDetailedResult) {
+      await missionUseCases.saveRouteResult(
+        RouteResultRecord(
+          routeId: routeId,
+          routeName: routeName,
+          previousBestScore: saveResult.previousBestPoints,
+          savedBestScore: saveResult.savedBestPoints,
+          attemptScore: currentAttemptPoints,
+          visitedPois: visitedPois,
+          completedMissions: completedMissions,
+          totalPois: _pointsOfInterest.length,
+          totalPossiblePoints: (_pointsOfInterest.length * 30) + 10,
+          elapsedTimeLabel: RouteDurationFormatter.format(elapsedTime),
+          correctAnswers: correctAnswers,
+          totalAnswers: totalAnswers,
+          answerResults: _answerRecords(answers),
+          skippedPois: _poiNames(skippedPois),
+        ),
+      );
+    }
+
+    QuizRouteProgress.reset();
+
+    return RouteCompletionSummary(
+      currentAttemptPoints: currentAttemptPoints,
+      previousBestPoints: saveResult.previousBestPoints,
+      savedBestPoints: saveResult.savedBestPoints,
+      visitedPois: visitedPois,
+      completedMissions: completedMissions,
+      totalPois: _pointsOfInterest.length,
+      totalPossiblePoints: (_pointsOfInterest.length * 30) + 10,
+      correctAnswers: correctAnswers,
+      totalAnswers: totalAnswers,
+      routeName: routeName,
+      elapsedTime: elapsedTime,
+      answerResults: answers,
+      skippedPoiNames: _poiNames(skippedPois),
+    );
+  }
+
+  List<RouteAnswerResultRecord> _answerRecords(List<QuizAnswerResult> answers) {
+    final records = <RouteAnswerResultRecord>[];
+
+    for (final answer in answers) {
+      records.add(
+        RouteAnswerResultRecord(
+          monumentName: answer.monumentName,
+          question: answer.question,
+          selectedAnswer: answer.selectedAnswer,
+          correctAnswer: answer.correctAnswer,
+          isCorrect: answer.isCorrect,
+        ),
+      );
+    }
+
+    return records;
+  }
+
+  List<PointOfInterest> _skippedPois() {
+    final skippedPois = <PointOfInterest>[];
+
+    for (final completedIndex in _completedPoiIndices) {
+      final poi = _pointsOfInterest[completedIndex];
+
+      if (!QuizRouteProgress.visitedPointIds.contains(poi.id)) {
+        skippedPois.add(poi);
+      }
+    }
+
+    return skippedPois;
+  }
+
+  int _countCorrectAnswers(List<QuizAnswerResult> answers) {
+    var total = 0;
+
+    for (final answer in answers) {
+      if (answer.isCorrect) {
+        total++;
+      }
+    }
+
+    return total;
+  }
+
+  List<String> _poiNames(List<PointOfInterest> pois) {
+    final names = <String>[];
+
+    for (final poi in pois) {
+      names.add(poi.name);
+    }
+
+    return names;
+  }
+
+  void _notifyListeners() {
+    if (_isDisposed) return;
+    notifyListeners();
+  }
 
   @override
   void dispose() {
-    debugPrint("🗑️ [TRIP_PROVIDER] Limpiando recursos y cerrando GPS Stream.");
+    debugPrint("[TRIP_PROVIDER] Disposing GPS stream.");
+    _isDisposed = true;
+    _isSimulating = false;
+    _routeCalculationVersion++;
     _positionStream?.cancel();
     super.dispose();
   }

@@ -1,18 +1,25 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:mobile_app/features/auth/domain/repository/auth_repository.dart';
-import 'package:mobile_app/features/auth/domain/usescases/auth_use_cases.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
-import '../../../core/routes/app_routes.dart';
-import '../../../core/widgets/auth/auth_card.dart';
-import '../../../core/widgets/inputs/custom_inputs.dart';
-import '../../../core/widgets/buttons/custom_button.dart';
-import '../../../core/utils/validadores.dart';
-import '../data/auth_repository_impl.dart';
-
+import '../../../app/navigation/app_routes.dart';
+import '../../../core/theme/theme_selector_button.dart';
+import '../../../core/utils/validators.dart';
+import '../../../core/widgets/audio_guide/audio_guide.dart';
+import '../data/repositories/auth_repository_impl.dart';
+import '../domain/usecases/auth_use_cases.dart';
+import 'widgets/auth_snack_bar.dart';
+import 'widgets/login_content.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -26,98 +33,129 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  late final AuthUsesCases _authUseCases;
+  late final AuthUseCases _authUseCases;
 
   bool _isLoading = false;
-  String? _errorMessage;
+  String? _audioGuideMessage;
+
+  String get _defaultAudioGuideText =>
+      'Pantalla de inicio de sesión. Introduce tu email y contraseña. Pulsa iniciar sesión, continúa con Google, recupera tu contraseña si la has olvidado o regístrate si aún no tienes cuenta.';
 
   @override
   void initState() {
     super.initState();
-
-    final repository = AuthRepositoryImpl(
-      FirebaseAuth.instance,
-      FirebaseFirestore.instance,
-    );
-    _authUseCases = AuthUsesCases(repository as AuthRepository);
+    _authUseCases = context.read<AuthUseCases>();
   }
 
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
+    setState(() => _isLoading = true);
 
     try {
-      // 1. Logueamos
-      await _authUseCases.login(
+      final user = await _authUseCases.login(
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
 
-      // 2. Esperamos un instante a que el estado se asiente y pillamos el user
-      final user = FirebaseAuth.instance.currentUser;
-
-      if (user != null) {
-        // 3. Comprobamos admin
-        final bool isAdmin = await _authUseCases.checkAdminStatus(user.uid);
-
-        // DEBUG: Esto os dirá la verdad en la consola de VS Code
-        print("VERIFICACIÓN: Web=$kIsWeb | Admin=$isAdmin | Email=${user.email}");
-
-        if (!mounted) return;
-
-        // 4. EL SEMÁFORO
-        if (kIsWeb && isAdmin) {
-          Navigator.pushReplacementNamed(context, AppRoutes.adminPanel);
-        } else {
-          Navigator.pushReplacementNamed(context, AppRoutes.home);
-        }
-      } else {
-        throw Exception("No se pudo recuperar el usuario tras el login");
-      }
-
+      await _navigateAfterLogin(user.uid, user.email);
     } catch (e) {
-      setState(() => _errorMessage = e.toString());
+      if (!mounted) return;
+      _setAudioGuideMessage(e.toString());
+      showAuthSnackBar(context, e.toString(), backgroundColor: AppColors.error);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  Future<void> _recoverPassword() async{
-    final emailerror = Validadores.validarEmail(_emailController.text);
-    if(emailerror != null){
+  Future<void> _handleGoogleLogin() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final user = await _authUseCases.loginWithGoogle();
+      await _navigateAfterLogin(user.uid, user.email);
+    } on GoogleSignInCancelledException {
+      return;
+    } catch (e) {
+      if (!mounted) return;
+      _setAudioGuideMessage(e.toString());
+      showAuthSnackBar(context, e.toString(), backgroundColor: AppColors.error);
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _navigateAfterLogin(String uid, String? email) async {
+    final isAdmin = await _authUseCases.checkAdminStatus(uid);
+
+    debugPrint("AUTH CHECK: Web=$kIsWeb | Admin=$isAdmin | Email=$email");
+
+    if (!mounted) return;
+
+    if (kIsWeb && isAdmin) {
+      Navigator.pushReplacementNamed(context, AppRoutes.adminPanel);
+    } else {
+      Navigator.pushReplacementNamed(context, AppRoutes.home);
+    }
+  }
+
+  Future<void> _recoverPassword() async {
+    final emailError = Validators.validateEmail(_emailController.text);
+    if (emailError != null) {
+      _setAudioGuideMessage(
+        "Introduce un email válido arriba para recuperar tu contraseña",
+      );
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Introduce un email válido arriba para recuperar tu contraseña"),
-            backgroundColor: Colors.orange),
+        const SnackBar(
+          content: Text(
+            "Introduce un email válido arriba para recuperar tu contraseña",
+          ),
+          backgroundColor: Colors.orange,
+        ),
       );
       return;
     }
 
     setState(() => _isLoading = true);
 
-    try{
+    try {
       await _authUseCases.recoverPassword(_emailController.text.trim());
-      if (mounted){
+      if (mounted) {
+        _setAudioGuideMessage("Correo de recuperación enviado.");
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text("Correo de recuperacuión enviado."),
-              backgroundColor: AppColors.exito,
+            content: Text("Correo de recuperación enviado."),
+            backgroundColor: AppColors.exito,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
+        _setAudioGuideMessage(e.toString());
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString()), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  Future<void> _openRegister() async {
+    await Navigator.pushNamed(context, AppRoutes.register);
+    if (!mounted) return;
+
+    _emailController.clear();
+    _passwordController.clear();
+  }
+
+  void _setAudioGuideMessage(String message) {
+    setState(() {
+      _audioGuideMessage = message.replaceAll("Exception: ", "");
+    });
   }
 
   @override
@@ -129,143 +167,43 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final autoRead = MediaQuery.of(context).accessibleNavigation;
 
     return Scaffold(
-      resizeToAvoidBottomInset: false,
-      extendBodyBehindAppBar: true,
+      resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
-          // FONDO (Mapa)
-          Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/Mapa_fondo_Extremadura.png'),
-                opacity: 0.4,
-                fit: BoxFit.contain,
+          LoginContent(
+            formKey: _formKey,
+            emailController: _emailController,
+            passwordController: _passwordController,
+            isLoading: _isLoading,
+            onLogin: _handleLogin,
+            onGoogleLogin: _handleGoogleLogin,
+            onRecoverPassword: _recoverPassword,
+            onOpenRegister: _openRegister,
+          ),
+          const SafeArea(
+            child: Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: EdgeInsets.only(top: 4, right: 8),
+                child: ThemeSelectorButton(),
               ),
             ),
           ),
-
-          SingleChildScrollView(
-            child: Column(
-              children: [
-                const SizedBox(height: 80),
-                // LOGO
-                Hero(
-                  tag: 'logo',
-                  child: Image.asset(
-                    'assets/Logo_Color_Rutexgo.png',
-                    height: size.height * 0.18,
-                  ),
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 4, left: 8),
+                child: AudioGuideWidget(
+                  text: _audioGuideMessage ?? _defaultAudioGuideText,
+                  autoRead: autoRead,
+                  semanticLabel:
+                      'Botón de audioguía. Pulsa para escuchar las instrucciones de inicio de sesión.',
                 ),
-
-                const SizedBox(height: 20),
-
-                // TEXTO DESCRIPTIVO
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40),
-                  child: Text(
-                    '"Descubre rutas culturales, aprende y juega recorriendo la historia de Extremadura."',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      height: 1.2,
-                      color: AppColors.negroTexto,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                // CARD
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 35),
-                  child: AuthCard(
-                    children: [
-                      Form(
-                        key: _formKey,
-                        child: Column(
-                          children: [
-                            custom_input(
-                              label: 'Email',
-                              hint: 'Introduce tu email',
-                              controller: _emailController,
-                              keyboardType: TextInputType.emailAddress,
-                              validator: Validadores.validarEmail,
-                            ),
-
-                            custom_input(
-                              label: 'Contraseña',
-                              hint: 'Introduce tu contraseña',
-                              isPassword: true,
-                              controller: _passwordController,
-                              validator: Validadores.validarPassword,
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 30),
-
-                      // BOTÓN INICIAR SESIÓN
-                      CustomButton(
-                        text: _isLoading ? "CARGANDO..." : "Iniciar Sesión",
-                        onPressed: _isLoading ? null : _handleLogin,
-                      ),
-
-                      // ENLACE CONTRASEÑA OLVIDADA
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: _recoverPassword,
-                          style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                          child: Text(
-                            "¿Has olvidado tu contraseña?",
-                            style: Theme.of(context).textTheme.labelMedium
-                                ?.copyWith(
-                                  fontSize: 11,
-                                  color: AppColors.grisSombra,
-                                ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 14),
-
-                      // FOOTER REGISTRO
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "¿No tienes cuenta?  ",
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(fontWeight: FontWeight.w700),
-                          ),
-                          GestureDetector(
-                            onTap: () => Navigator.pushNamed(
-                              context,
-                              AppRoutes.register,
-                            ),
-                            child: Text(
-                              "Regístrate",
-                              style: TextStyle(
-                                color: AppColors
-                                    .verdePrincipal,
-                                fontWeight: FontWeight.bold,
-                                decoration: TextDecoration
-                                    .none,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 50),
-              ],
+              ),
             ),
           ),
         ],
