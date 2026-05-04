@@ -27,6 +27,7 @@ class TripSimulationProvider extends ChangeNotifier {
 
   final MissionUseCases missionUseCases;
   final String routeId;
+  final bool useGoogleDirections;
   final RoutingService _routingService = RoutingService();
   final DateTime _startedAt = DateTime.now();
   LatLng? _lastRoutedPosition;
@@ -79,6 +80,7 @@ class TripSimulationProvider extends ChangeNotifier {
   TripSimulationProvider({
     required this.missionUseCases,
     required this.routeId,
+    required this.useGoogleDirections,
   }) {
     debugPrint("[TRIP_PROVIDER] Initializing proximity-based navigation.");
     _initializeTrip();
@@ -163,6 +165,9 @@ class TripSimulationProvider extends ChangeNotifier {
       final route = await _routingService.getNavigationRoute(
         _currentPosition,
         target,
+        source: useGoogleDirections
+            ? NavigationRouteSource.googleWalking
+            : NavigationRouteSource.appWalking,
       );
       if (_isDisposed) return;
       nextRoute = route.points.isNotEmpty

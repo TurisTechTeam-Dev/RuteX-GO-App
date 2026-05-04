@@ -15,20 +15,17 @@ import 'package:latlong2/latlong.dart';
 import '../../../domain/entities/poi_entity.dart';
 
 class MapView extends StatefulWidget {
-  static const bool useGoogleMaps = bool.fromEnvironment(
-    'USE_GOOGLE_MAPS',
-    defaultValue: false,
-  );
-
   final List<LatLng> routePoints;
   final List<PointOfInterest> pointsOfInterest;
   final LatLng? currentPosition;
+  final bool useGoogleMaps;
 
   const MapView({
     super.key,
     required this.routePoints,
     required this.pointsOfInterest,
     this.currentPosition,
+    required this.useGoogleMaps,
   });
 
   @override
@@ -52,7 +49,7 @@ class _MapViewState extends State<MapView> {
       if (!mounted) return;
 
       final centerToUse = _centerToUse();
-      if (MapView.useGoogleMaps && _googleMapController != null) {
+      if (widget.useGoogleMaps && _googleMapController != null) {
         _googleMapController!.animateCamera(
           google_maps.CameraUpdate.newLatLng(_toGoogleLatLng(centerToUse)),
         );
@@ -69,7 +66,7 @@ class _MapViewState extends State<MapView> {
   Widget build(BuildContext context) {
     final centerToUse = _centerToUse();
 
-    if (MapView.useGoogleMaps) {
+    if (widget.useGoogleMaps) {
       return _buildGoogleMap(centerToUse);
     }
 

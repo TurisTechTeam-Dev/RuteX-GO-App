@@ -18,6 +18,11 @@ if (dotenvFile.exists()) {
 val mapsApiKey: String = dotenv.getProperty("Maps_API_KEY")
     ?: System.getenv("Maps_API_KEY")
     ?: ""
+val googleDirectionsApiKey: String = dotenv.getProperty("Google_Directions_API_KEY")
+    ?: dotenv.getProperty("GOOGLE_DIRECTIONS_API_KEY")
+    ?: System.getenv("Google_Directions_API_KEY")
+    ?: System.getenv("GOOGLE_DIRECTIONS_API_KEY")
+    ?: mapsApiKey
 
 android {
     namespace = "com.rutexgo.mobile_app"
@@ -33,6 +38,10 @@ android {
         jvmTarget = JavaVersion.VERSION_21.toString()
     }
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.rutexgo.mobile_app"
@@ -43,6 +52,7 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         resValue("string", "Maps_API_KEY", mapsApiKey)
+        buildConfigField("String", "GOOGLE_DIRECTIONS_API_KEY", "\"$googleDirectionsApiKey\"")
     }
 
     buildTypes {

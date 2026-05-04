@@ -13,7 +13,13 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 
+import '../config/native_api_keys.dart';
+
+enum NavigationRouteSource { appWalking, googleWalking }
+
 class RoutingService {
+  static const _googleDirectionsUrl =
+      'https://maps.googleapis.com/maps/api/directions/json';
   static const _valhallaRouteUrl = 'https://valhalla1.openstreetmap.de/route';
   static const _osrmWalkingProfiles = ['foot'];
 
@@ -22,9 +28,18 @@ class RoutingService {
     return route.points;
   }
 
-  Future<NavigationRoute> getNavigationRoute(LatLng start, LatLng end) async {
+  Future<NavigationRoute> getNavigationRoute(
+    LatLng start,
+    LatLng end, {
+    NavigationRouteSource source = NavigationRouteSource.appWalking,
+  }) async {
     if (start.latitude == end.latitude && start.longitude == end.longitude) {
       return NavigationRoute(points: [start, end]);
+    }
+
+    if (source == NavigationRouteSource.googleWalking) {
+      final googleRoute = await _getGoogleWalkingRoute(start, end);
+      if (googleRoute.points.isNotEmpty) return googleRoute;
     }
 
     // Valhalla da mejores indicaciones peatonales; OSRM se mantiene como
@@ -38,6 +53,100 @@ class RoutingService {
 
     debugPrint('Plan B: linea recta al no poder calcular ruta peatonal');
     return NavigationRoute(points: [start, end]);
+  }
+
+  Future<NavigationRoute> _getGoogleWalkingRoute(
+    LatLng start,
+    LatLng end,
+  ) async {
+    final apiKey = await NativeApiKeys.googleDirectionsApiKey();
+    if (apiKey.isEmpty) {
+      debugPrint('Google Directions sin clave; usando ruta peatonal interna');
+      return const NavigationRoute(points: []);
+    }
+
+    final uri = Uri.parse(_googleDirectionsUrl).replace(
+      queryParameters: {
+        'origin': '${start.latitude},${start.longitude}',
+        'destination': '${end.latitude},${end.longitude}',
+        'mode': 'walking',
+        'language': 'es',
+        'key': apiKey,
+      },
+    );
+
+    try {
+      final response = await http.get(uri).timeout(const Duration(seconds: 10));
+      if (response.statusCode != 200) {
+        debugPrint('Google Directions devolvió ${response.statusCode}');
+        return const NavigationRoute(points: []);
+      }
+
+      final data = json.decode(response.body);
+      if (data is! Map || data['status'] != 'OK') {
+        debugPrint('Google Directions sin ruta walking: ${data['status']}');
+        return const NavigationRoute(points: []);
+      }
+
+      final routes = data['routes'];
+      if (routes is! List || routes.isEmpty || routes.first is! Map) {
+        return const NavigationRoute(points: []);
+      }
+
+      final route = routes.first as Map;
+      final overviewPolyline = route['overview_polyline'];
+      final encodedPolyline = overviewPolyline is Map
+          ? overviewPolyline['points']?.toString()
+          : null;
+      if (encodedPolyline == null || encodedPolyline.isEmpty) {
+        return const NavigationRoute(points: []);
+      }
+
+      final points = _decodePolyline(encodedPolyline);
+      final steps = _googleStepsFromRoute(route);
+      return NavigationRoute(points: points, steps: steps);
+    } catch (e) {
+      debugPrint('Fallo con Google Directions walking: $e');
+      return const NavigationRoute(points: []);
+    }
+  }
+
+  List<NavigationStep> _googleStepsFromRoute(Map route) {
+    final rawLegs = route['legs'];
+    if (rawLegs is! List) return [];
+
+    final steps = <NavigationStep>[];
+    for (final rawLeg in rawLegs) {
+      if (rawLeg is! Map) continue;
+
+      final rawSteps = rawLeg['steps'];
+      if (rawSteps is! List) continue;
+
+      for (final rawStep in rawSteps) {
+        if (rawStep is! Map) continue;
+
+        final startLocation = rawStep['start_location'];
+        if (startLocation is! Map) continue;
+
+        final latitude = (startLocation['lat'] as num?)?.toDouble();
+        final longitude = (startLocation['lng'] as num?)?.toDouble();
+        if (latitude == null || longitude == null) continue;
+
+        steps.add(
+          NavigationStep(
+            instruction: _stripHtml(rawStep['html_instructions']?.toString()),
+            maneuverLocation: LatLng(latitude, longitude),
+            distance: _googleNumericValue(rawStep['distance']),
+            duration: _googleNumericValue(rawStep['duration']),
+            maneuverType: rawStep['maneuver']?.toString() ?? '',
+            modifier: null,
+            roadName: '',
+          ),
+        );
+      }
+    }
+
+    return steps;
   }
 
   Future<NavigationRoute> _getValhallaPedestrianRoute(
@@ -281,6 +390,24 @@ class RoutingService {
       default:
         return 'Continúa$roadSuffix';
     }
+  }
+
+  double _googleNumericValue(dynamic value) {
+    if (value is Map) {
+      return (value['value'] as num?)?.toDouble() ?? 0;
+    }
+
+    return 0;
+  }
+
+  String _stripHtml(String? value) {
+    if (value == null || value.isEmpty) return 'Continúa';
+
+    return value
+        .replaceAll(RegExp(r'<[^>]*>'), '')
+        .replaceAll('&nbsp;', ' ')
+        .replaceAll('&amp;', '&')
+        .trim();
   }
 
   String _directionLabel(String? modifier) {
