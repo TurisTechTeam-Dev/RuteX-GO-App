@@ -29,6 +29,17 @@ android {
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
+    // CONFIGURACIÓN DE FIRMA PARA TUS PROFESORES
+    signingConfigs {
+        create("release") {
+            // Asegúrate de que el archivo key.jks esté en la carpeta android/app/
+            storeFile = file("key.jks")
+            storePassword = "123456"
+            keyAlias = "alias_profes"
+            keyPassword = "123456"
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
@@ -43,10 +54,7 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.rutexgo.mobile_app"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -57,9 +65,12 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // USAMOS LA CONFIGURACIÓN DE RELEASE EN LUGAR DE DEBUG
+            signingConfig = signingConfigs.getByName("release")
+
+            // Opcional: optimizaciones de código
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 }
