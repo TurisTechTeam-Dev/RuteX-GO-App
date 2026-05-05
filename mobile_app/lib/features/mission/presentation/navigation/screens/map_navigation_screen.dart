@@ -7,7 +7,7 @@
   Año: 2026
   -----------------------------------------------------------------------------
 */
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide NavigationMode;
 import 'package:provider/provider.dart';
 
 import '../../../../../app/navigation/app_routes.dart';
@@ -16,6 +16,7 @@ import '../../mission_flow_result.dart';
 import '../../quiz/models/route_result_args.dart';
 import '../../quiz/quiz_route_progress.dart';
 import '../../qr_scanner/models/mission_scanner_args.dart';
+import '../models/navigation_types.dart';
 import '../models/route_completion_summary.dart';
 import '../provider/trip_provider.dart';
 import '../utils/route_duration_formatter.dart';
@@ -26,11 +27,15 @@ import '../widgets/navigation_info_panel.dart';
 class MapNavigationScreen extends StatefulWidget {
   final String routeId;
   final bool allowSimulation;
+  final UserRole userRole;
+  final NavigationMode navigationMode;
 
   const MapNavigationScreen({
     super.key,
     required this.routeId,
     required this.allowSimulation,
+    required this.userRole,
+    required this.navigationMode,
   });
 
   @override
@@ -87,7 +92,7 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
               currentPosition: tripProvider.currentPosition,
               routePoints: tripProvider.routePoints,
               pointsOfInterest: tripProvider.pointsOfInterest,
-              useGoogleMaps: !widget.allowSimulation,
+              useGoogleMaps: widget.userRole == UserRole.normal,
             ),
             if (tripProvider.isLoading)
               Container(
@@ -107,9 +112,9 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
                       .name,
                   distanceToNextStop: tripProvider.distanceToNextPoi,
                   navigationInstruction:
-                      tripProvider.currentNavigationStep?.instruction,
+                  tripProvider.currentNavigationStep?.instruction,
                   distanceToInstruction:
-                      tripProvider.distanceToCurrentNavigationStep,
+                  tripProvider.distanceToCurrentNavigationStep,
                 ),
               ),
             Positioned(
@@ -128,7 +133,7 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
                   text: _navigationAudioText(tripProvider),
                   autoRead: autoRead,
                   semanticLabel:
-                      'Botón de audioguía. Pulsa para escuchar las indicaciones de navegación.',
+                  'Botón de audioguía. Pulsa para escuchar las indicaciones de navegación.',
                 ),
               ),
           ],
@@ -151,8 +156,8 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
     final instruction = provider.currentNavigationStep?.instruction;
     final routeModeText = widget.allowSimulation
         ? provider.isSimulating
-              ? 'La simulación está en marcha.'
-              : 'Puedes simular el recorrido desde el botón inferior.'
+        ? 'La simulación está en marcha.'
+        : 'Puedes simular el recorrido desde el botón inferior.'
         : 'Sigue la ruta en Google Maps y acércate al punto para continuar.';
 
     if (instruction == null || instruction.isEmpty) {
@@ -163,12 +168,12 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
   }
 
   void _showArrivalBottomSheet(
-    BuildContext context,
-    TripSimulationProvider provider,
-  ) {
+      BuildContext context,
+      TripSimulationProvider provider,
+      ) {
     final isFinalTarget =
         provider.completedPoiIndices.length + 1 >=
-        provider.pointsOfInterest.length;
+            provider.pointsOfInterest.length;
     final poi = provider.pointsOfInterest[provider.currentPoiIndex];
 
     showModalBottomSheet(
@@ -227,9 +232,9 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
   }
 
   Future<void> _finishRoute(
-    BuildContext context,
-    TripSimulationProvider provider,
-  ) async {
+      BuildContext context,
+      TripSimulationProvider provider,
+      ) async {
     late final RouteCompletionSummary summary;
     try {
       summary = await provider.finishRoute();
@@ -266,6 +271,7 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
         totalAnswers: summary.totalAnswers,
         answerResults: summary.answerResults,
         skippedPois: summary.skippedPoiNames,
+        visitedPoiNames: summary.visitedPoiNames,
       ),
     );
   }
@@ -308,7 +314,7 @@ class _SimulationButton extends StatelessWidget {
           : () => tripProvider.startSimulation(),
       style: ElevatedButton.styleFrom(
         backgroundColor:
-            tripProvider.isSimulating || tripProvider.isCalculatingRoute
+        tripProvider.isSimulating || tripProvider.isCalculatingRoute
             ? Colors.grey
             : Colors.green,
         padding: const EdgeInsets.symmetric(vertical: 18),

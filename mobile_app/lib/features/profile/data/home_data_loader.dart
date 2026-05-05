@@ -22,8 +22,6 @@ class HomeDataLoader {
 
   const HomeDataLoader(this.remoteDataSource);
 
-  /// Compone el home desde varias colecciones y sanea progreso antiguo si la
-  /// ruta ya no existe, para que la app no muestre puntos huérfanos.
   Future<HomeData> load(String uid) async {
     final userDoc = await remoteDataSource.getUserDoc(uid);
     final userData = userDoc.data() ?? {};
@@ -115,10 +113,10 @@ class HomeDataLoader {
   }
 
   static UserProfile _parseUser(
-    Map<String, dynamic> data,
-    String uid,
-    int points,
-  ) {
+      Map<String, dynamic> data,
+      String uid,
+      int points,
+      ) {
     return UserProfile(
       uid: data[UserFields.uid]?.toString() ?? uid,
       name: data[UserFields.nombre]?.toString() ?? 'Sin nombre',
@@ -158,15 +156,13 @@ class HomeDataLoader {
   }
 
   static String? _routeIdFromProgress(dynamic progress) {
-    // Se aceptan varios nombres porque el modelo de progreso cambió durante
-    // el proyecto y usuarios reales pueden conservar datos con claves antiguas.
     if (progress is String) return progress;
 
     if (progress is Map) {
       final routeId =
           progress[CompletedRouteFields.rutaId] ??
-          progress[CompletedRouteFields.idRuta] ??
-          progress[CompletedRouteFields.routeId];
+              progress[CompletedRouteFields.idRuta] ??
+              progress[CompletedRouteFields.routeId];
       return routeId?.toString();
     }
 
@@ -174,9 +170,9 @@ class HomeDataLoader {
   }
 
   static List<dynamic> _filterValidRoutesProgress(
-    List<dynamic> routesProgress,
-    Set<String> validRouteIds,
-  ) {
+      List<dynamic> routesProgress,
+      Set<String> validRouteIds,
+      ) {
     final validRoutesProgress = <dynamic>[];
 
     for (final progress in routesProgress) {
@@ -216,8 +212,8 @@ class HomeDataLoader {
   }
 
   static Set<String> _routeIdsFromDocs(
-    List<QueryDocumentSnapshot<Map<String, dynamic>>> routeDocs,
-  ) {
+      List<QueryDocumentSnapshot<Map<String, dynamic>>> routeDocs,
+      ) {
     final routeIds = <String>{};
 
     for (final doc in routeDocs) {
@@ -228,9 +224,9 @@ class HomeDataLoader {
   }
 
   static int _sumRemovedRoutePoints(
-    List<dynamic> routesProgress,
-    Set<String> validRouteIds,
-  ) {
+      List<dynamic> routesProgress,
+      Set<String> validRouteIds,
+      ) {
     var total = 0;
 
     for (final progress in routesProgress) {
@@ -250,9 +246,9 @@ class HomeDataLoader {
   }
 
   static Map<String, dynamic> _progressMapForRoute(
-    List<dynamic> routesProgress,
-    String routeId,
-  ) {
+      List<dynamic> routesProgress,
+      String routeId,
+      ) {
     for (final progress in routesProgress) {
       if (progress is Map && _routeIdFromProgress(progress) == routeId) {
         return Map<String, dynamic>.from(progress);
@@ -289,6 +285,9 @@ class HomeDataLoader {
       time: data[ResultFields.tiempoIntento]?.toString() ?? '--',
       answerResults: _answerResultsFromData(data[ResultFields.respuestas]),
       skippedPois: _stringList(data[ResultFields.puntosInteresSaltados]),
+      visitedPoiNames: _stringList(
+        data[ResultFields.puntosInteresVisitadosNombres],
+      ),
     );
   }
 
@@ -303,13 +302,12 @@ class HomeDataLoader {
       answers.add(
         HomeAnswerResult(
           monumentName:
-              answer[ResultAnswerFields.nombreMonumento]?.toString() ?? '',
+          answer[ResultAnswerFields.nombreMonumento]?.toString() ?? '',
           question: answer[ResultAnswerFields.pregunta]?.toString() ?? '',
           selectedAnswer:
-              answer[ResultAnswerFields.respuestaSeleccionada]?.toString() ??
-              '',
+          answer[ResultAnswerFields.respuestaSeleccionada]?.toString() ?? '',
           correctAnswer:
-              answer[ResultAnswerFields.respuestaCorrecta]?.toString() ?? '',
+          answer[ResultAnswerFields.respuestaCorrecta]?.toString() ?? '',
           isCorrect: answer[ResultAnswerFields.esCorrecta] == true,
         ),
       );

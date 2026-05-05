@@ -7,13 +7,14 @@
   Año: 2026
   -----------------------------------------------------------------------------
 */
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide NavigationMode;
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../app/navigation/app_routes.dart';
 import '../../../../core/widgets/cards/custom_cards.dart';
 import '../../../../core/widgets/images/framed_storage_image.dart';
 import '../../domain/entities/tourist_route.dart';
+import '../../../mission/presentation/navigation/models/navigation_types.dart';
 
 class RouteCard extends StatelessWidget {
   final TouristRoute route;
@@ -339,10 +340,21 @@ class _StartRouteButton extends StatelessWidget {
   }
 
   void _startRoute(BuildContext context, {required bool allowSimulation}) {
+    // Determinamos rol y modo según si es admin y si ha escogido simulación
+    final userRole = isAdmin ? UserRole.admin : UserRole.normal;
+    final navigationMode = isAdmin
+        ? (allowSimulation ? NavigationMode.adminSimulation : NavigationMode.adminRoute)
+        : NavigationMode.userWalking;
+
     Navigator.pushNamed(
       context,
       AppRoutes.mapNavigation,
-      arguments: {'routeId': routeId, 'allowSimulation': allowSimulation},
+      arguments: {
+        'routeId': routeId,
+        'allowSimulation': allowSimulation,
+        'userRole': userRole,
+        'navigationMode': navigationMode,
+      },
     );
   }
 }

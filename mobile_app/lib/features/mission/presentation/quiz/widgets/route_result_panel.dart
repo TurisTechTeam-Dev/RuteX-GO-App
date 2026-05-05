@@ -8,6 +8,7 @@
   -----------------------------------------------------------------------------
 */
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../../../app/navigation/app_routes.dart';
 import '../models/route_result_data.dart';
@@ -88,10 +89,10 @@ class RouteResultPanel extends StatelessWidget {
             onPressed: () => _showQuestionResults(context, result),
           ),
           const SizedBox(height: 14),
-          const _ActionButton(
+          _ActionButton(
             label: 'Compartir',
-            color: Color(0xFF4DB46E),
-            onPressed: null,
+            color: const Color(0xFF4DB46E),
+            onPressed: () => _shareResult(result),
           ),
           const SizedBox(height: 14),
           _ActionButton(
@@ -108,7 +109,7 @@ class RouteResultPanel extends StatelessWidget {
     Navigator.pushNamedAndRemoveUntil(
       context,
       AppRoutes.home,
-      (route) => false,
+          (route) => false,
     );
   }
 
@@ -124,6 +125,42 @@ class RouteResultPanel extends StatelessWidget {
       ),
       builder: (context) => QuestionResultsSheet(result: result),
     );
+  }
+
+  Future<void> _shareResult(RouteResultData result) async {
+    final visitedNames = result.visitedPoiNames;
+    final visitedText = visitedNames.isNotEmpty
+        ? visitedNames.join(', ')
+        : '${result.visitedMonuments}/${result.totalPois}';
+
+    final shareText = '''
+🎉 ¡Acabo de completar la increíble ruta "${result.routeName}" en RuteX Go!
+
+📍 Explora los monumentos más fascinantes de Extremadura mientras resuelves emocionantes misiones.
+
+📊 Estos fueron mis resultados:
+🏆 Puntuación: ${result.attemptScore}/${result.totalPossiblePoints} puntos
+🗺️ Monumentos visitados: $visitedText
+🧠 Respuestas correctas: ${result.correctAnswers}/${result.totalAnswers} preguntas
+⏱️ Tiempo empleado: ${result.time}
+
+¡Descarga RuteX Go ahora y vive una experiencia única explorando la historia de Extremadura! 🏛️✨
+
+Desafíate a ti mismo y aprende sobre nuestro patrimonio cultural. ¡Te espera una aventura extraordinaria!
+
+#RuteXGo #ExtremaduraMonumental #DescrubridorDeMonumentos #TurismoInteligente #GamificaciónTurística
+''';
+
+    try {
+      await SharePlus.instance.share(
+        ShareParams(
+          text: shareText,
+          subject: '¡Completa la ruta ${result.routeName} en RuteX Go! 🏛️',
+        ),
+      );
+    } catch (e) {
+      debugPrint("[SHARE] Error compartiendo resultado: $e");
+    }
   }
 }
 

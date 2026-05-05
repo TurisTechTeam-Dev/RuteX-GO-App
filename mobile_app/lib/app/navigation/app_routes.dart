@@ -7,7 +7,7 @@
   Año: 2026
   -----------------------------------------------------------------------------
 */
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide NavigationMode;
 import 'package:provider/provider.dart';
 
 import '../../features/admin_panel/presentation/admin_panel_screen.dart';
@@ -17,6 +17,7 @@ import '../../features/explorer_diary/presentation/explorer_diary_screen.dart';
 import '../../features/mission/domain/usecases/mission_use_cases.dart';
 import '../../features/mission/presentation/monument_detail/models/monument_info_args.dart';
 import '../../features/mission/presentation/monument_detail/screens/monument_info_screen.dart';
+import '../../features/mission/presentation/navigation/models/navigation_types.dart';
 import '../../features/mission/presentation/navigation/provider/trip_provider.dart';
 import '../../features/mission/presentation/navigation/screens/map_navigation_screen.dart';
 import '../../features/mission/presentation/qr_scanner/models/mission_scanner_args.dart';
@@ -57,11 +58,15 @@ class AppRoutes {
             create: (context) => TripSimulationProvider(
               missionUseCases: context.read<MissionUseCases>(),
               routeId: routeArgs.routeId,
-              useGoogleDirections: !routeArgs.allowSimulation,
+              userRole: routeArgs.userRole,
+              navigationMode: routeArgs.navigationMode,
             ),
             child: MapNavigationScreen(
               routeId: routeArgs.routeId,
-              allowSimulation: routeArgs.allowSimulation,
+              allowSimulation:
+              routeArgs.navigationMode == NavigationMode.adminSimulation,
+              userRole: routeArgs.userRole,
+              navigationMode: routeArgs.navigationMode,
             ),
           ),
         );
@@ -150,12 +155,20 @@ class AppRoutes {
       return _MapNavigationArgs(
         routeId: arguments['routeId']?.toString() ?? '',
         allowSimulation: arguments['allowSimulation'] == true,
+        userRole: arguments['userRole'] is UserRole
+            ? arguments['userRole'] as UserRole
+            : UserRole.normal,
+        navigationMode: arguments['navigationMode'] is NavigationMode
+            ? arguments['navigationMode'] as NavigationMode
+            : NavigationMode.userWalking,
       );
     }
 
     return _MapNavigationArgs(
       routeId: arguments?.toString() ?? '',
       allowSimulation: false,
+      userRole: UserRole.normal,
+      navigationMode: NavigationMode.userWalking,
     );
   }
 }
@@ -163,9 +176,13 @@ class AppRoutes {
 class _MapNavigationArgs {
   final String routeId;
   final bool allowSimulation;
+  final UserRole userRole;
+  final NavigationMode navigationMode;
 
   const _MapNavigationArgs({
     required this.routeId,
     required this.allowSimulation,
+    required this.userRole,
+    required this.navigationMode,
   });
 }

@@ -24,6 +24,7 @@ class RouteResultArgs {
   final int totalAnswers;
   final List<QuizAnswerResult> answerResults;
   final List<String> skippedPois;
+  final List<String> visitedPoiNames;
 
   const RouteResultArgs({
     required this.routeId,
@@ -40,5 +41,6 @@ class RouteResultArgs {
     required this.totalAnswers,
     required this.answerResults,
     required this.skippedPois,
+    required this.visitedPoiNames,
   });
 }

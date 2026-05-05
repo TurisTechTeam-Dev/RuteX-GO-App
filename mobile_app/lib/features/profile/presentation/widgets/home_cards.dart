@@ -8,7 +8,6 @@
   -----------------------------------------------------------------------------
 */
 import 'package:flutter/material.dart';
-
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/cards/custom_cards.dart';
 import '../../../../core/widgets/images/storage_aware_image.dart';
@@ -192,7 +191,7 @@ class _RankLine extends StatelessWidget {
 
     final canShowRankLogo =
         rankLogo.isNotEmpty &&
-        (!preferOfflineFallback || _isAssetPath(rankLogo));
+            (!preferOfflineFallback || _isAssetPath(rankLogo));
 
     if (canShowRankLogo) {
       content.add(const SizedBox(width: 6));
@@ -396,6 +395,7 @@ class HomeRouteCard extends StatelessWidget {
       time: result.time,
       answerResults: result.answerResults.map(_answerResultData).toList(),
       skippedPois: result.skippedPois,
+      visitedPoiNames: result.visitedPoiNames,
     );
   }
 

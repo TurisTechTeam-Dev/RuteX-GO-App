@@ -8,13 +8,15 @@
   -----------------------------------------------------------------------------
 */
 import 'dart:async';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide NavigationMode;
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
+
 import '../../../../../core/map/routing_service.dart';
 import '../../../domain/entities/poi_entity.dart';
 import '../../../domain/entities/route_result_record.dart';
 import '../../../domain/usecases/mission_use_cases.dart';
+import '../models/navigation_types.dart';
 import '../models/route_completion_summary.dart';
 import '../utils/navigation_distance_utils.dart';
 import '../utils/route_duration_formatter.dart';
@@ -27,7 +29,8 @@ class TripSimulationProvider extends ChangeNotifier {
 
   final MissionUseCases missionUseCases;
   final String routeId;
-  final bool useGoogleDirections;
+  final UserRole userRole;
+  final NavigationMode navigationMode;
   final RoutingService _routingService = RoutingService();
   final DateTime _startedAt = DateTime.now();
   LatLng? _lastRoutedPosition;
@@ -80,11 +83,20 @@ class TripSimulationProvider extends ChangeNotifier {
   TripSimulationProvider({
     required this.missionUseCases,
     required this.routeId,
-    required this.useGoogleDirections,
+    required this.userRole,
+    required this.navigationMode,
   }) {
-    debugPrint("[TRIP_PROVIDER] Initializing proximity-based navigation.");
+    debugPrint("[TRIP_PROVIDER] Initializing navigation.");
     _initializeTrip();
   }
+
+  bool get _isUserNormal => userRole == UserRole.normal;
+  bool get _isAdminSimulation =>
+      userRole == UserRole.admin &&
+          navigationMode == NavigationMode.adminSimulation;
+  bool get _isAdminRoute =>
+      userRole == UserRole.admin &&
+          navigationMode == NavigationMode.adminRoute;
 
   Future<void> _initializeTrip() async {
     try {
@@ -113,7 +125,6 @@ class TripSimulationProvider extends ChangeNotifier {
     }
   }
 
-  /// Selecciona el punto pendiente más cercano al usuario.
   void _selectNearestTargetPoi() {
     if (_pointsOfInterest.isEmpty) return;
 
@@ -136,7 +147,6 @@ class TripSimulationProvider extends ChangeNotifier {
     );
   }
 
-  /// Calcula una ruta de calle hacia el objetivo actual.
   Future<void> _calculateStreetRoute() async {
     if (_allPoisCompleted || _currentPoiIndex == -1) {
       _routePoints = [];
@@ -157,7 +167,7 @@ class TripSimulationProvider extends ChangeNotifier {
 
     final target = _pointsOfInterest[targetIndex].location;
     debugPrint(
-      "[OSRM] Building route to: ${_pointsOfInterest[targetIndex].name}",
+      "[ROUTE] Building route to: ${_pointsOfInterest[targetIndex].name}",
     );
 
     late final NavigationRoute nextRoute;
@@ -165,7 +175,7 @@ class TripSimulationProvider extends ChangeNotifier {
       final route = await _routingService.getNavigationRoute(
         _currentPosition,
         target,
-        source: useGoogleDirections
+        source: _isUserNormal
             ? NavigationRouteSource.googleWalking
             : NavigationRouteSource.appWalking,
       );
@@ -175,16 +185,14 @@ class TripSimulationProvider extends ChangeNotifier {
           : NavigationRoute(points: [_currentPosition, target]);
     } catch (e) {
       if (_isDisposed) return;
-      debugPrint("[OSRM] Connection error. Falling back to a straight line.");
+      debugPrint("[ROUTE] Connection error. Falling back to a straight line.");
       nextRoute = NavigationRoute(points: [_currentPosition, target]);
     }
 
     final isStaleCalculation =
         calculationVersion != _routeCalculationVersion ||
-        targetIndex != _currentPoiIndex;
+            targetIndex != _currentPoiIndex;
     if (isStaleCalculation) {
-      // La posición GPS puede cambiar mientras llega la respuesta de ruta; si
-      // el objetivo ya cambió, descartamos el resultado para no pintar rutas viejas.
       if (calculationVersion == _routeCalculationVersion) {
         _isCalculatingRoute = false;
         _notifyListeners();
@@ -201,7 +209,6 @@ class TripSimulationProvider extends ChangeNotifier {
     _notifyListeners();
   }
 
-  /// Marca el punto actual y recalcula el siguiente objetivo por cercanía.
   bool markCurrentPoiAsCompleted() {
     if (_currentPoiIndex == -1) return _allPoisCompleted;
 
@@ -242,7 +249,7 @@ class TripSimulationProvider extends ChangeNotifier {
         Geolocator.getPositionStream(
           locationSettings: const LocationSettings(
             accuracy: LocationAccuracy.high,
-            distanceFilter: 10,
+            distanceFilter: 5,
           ),
         ).listen((Position pos) {
           if (_isDisposed) return;
@@ -251,29 +258,8 @@ class TripSimulationProvider extends ChangeNotifier {
           _currentPosition = LatLng(pos.latitude, pos.longitude);
           _checkArrivalProximity(_currentPosition);
           _updateCurrentNavigationStep();
-          _refreshStreetRouteIfNeeded();
           _notifyListeners();
         });
-  }
-
-  void _refreshStreetRouteIfNeeded() {
-    if (_allPoisCompleted || _currentPoiIndex == -1 || _hasReachedDestination) {
-      return;
-    }
-
-    final lastPosition = _lastRoutedPosition;
-    if (lastPosition == null) return;
-
-    final movedDistance = NavigationDistanceUtils.metersBetween(
-      lastPosition,
-      _currentPosition,
-    );
-
-    if (movedDistance >= 25) {
-      // Recalcular en cada posición consume mucho y hace parpadear el mapa;
-      // 25 metros mantiene la guía actualizada sin saturar el servicio externo.
-      unawaited(_calculateStreetRoute());
-    }
   }
 
   void _checkArrivalProximity(LatLng pos) {
@@ -299,6 +285,7 @@ class TripSimulationProvider extends ChangeNotifier {
   }
 
   Future<void> startSimulation() async {
+    if (!_isAdminSimulation) return;
     if (_allPoisCompleted || _currentPoiIndex == -1) return;
     if (_isCalculatingRoute) return;
 
@@ -316,7 +303,7 @@ class TripSimulationProvider extends ChangeNotifier {
     _isSimulating = true;
     _hasReachedDestination = false;
 
-    for (var point in _routePoints) {
+    for (final point in _routePoints) {
       if (_isDisposed || !_isSimulating) break;
       _currentPosition = point;
       _checkArrivalProximity(_currentPosition);
@@ -389,8 +376,6 @@ class TripSimulationProvider extends ChangeNotifier {
   }
 
   Future<RouteCompletionSummary> finishRoute() async {
-    // Solo guardamos el detalle completo cuando la nueva puntuación iguala o
-    // supera la mejor marca; así el historial muestra el intento relevante.
     final completedAllMissions =
         QuizRouteProgress.visitedMonuments >= _pointsOfInterest.length;
     final currentAttemptPoints = completedAllMissions
@@ -398,6 +383,15 @@ class TripSimulationProvider extends ChangeNotifier {
         : QuizRouteProgress.routePoints;
     final visitedPois = _completedPoiIndices.length;
     final skippedPois = _skippedPois();
+
+    final visitedPoiNames = <String>[];
+    for (final completedIndex in _completedPoiIndices) {
+      final poi = _pointsOfInterest[completedIndex];
+      if (QuizRouteProgress.visitedPointIds.contains(poi.id)) {
+        visitedPoiNames.add(poi.name);
+      }
+    }
+
     final elapsedTime = DateTime.now().difference(_startedAt);
     final routeName = await missionUseCases.getRouteName(routeId);
     final answers = List<QuizAnswerResult>.from(
@@ -433,6 +427,7 @@ class TripSimulationProvider extends ChangeNotifier {
           totalAnswers: totalAnswers,
           answerResults: _answerRecords(answers),
           skippedPois: _poiNames(skippedPois),
+          visitedPoiNames: visitedPoiNames,
         ),
       );
     }
@@ -453,6 +448,7 @@ class TripSimulationProvider extends ChangeNotifier {
       elapsedTime: elapsedTime,
       answerResults: answers,
       skippedPoiNames: _poiNames(skippedPois),
+      visitedPoiNames: visitedPoiNames,
     );
   }
 

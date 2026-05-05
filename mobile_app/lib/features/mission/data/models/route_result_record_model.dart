@@ -6,7 +6,8 @@
   TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
   Año: 2026
   -----------------------------------------------------------------------------
-*/import 'package:cloud_firestore/cloud_firestore.dart';
+*/
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../../core/constants/firestore_contract.dart';
 import '../../domain/entities/route_result_record.dart';
@@ -34,13 +35,14 @@ class RouteResultRecordModel {
       ResultFields.totalRespuestas: result.totalAnswers,
       ResultFields.respuestas: result.answerResults.map(_answerToFirestore).toList(),
       ResultFields.puntosInteresSaltados: result.skippedPois,
+      ResultFields.puntosInteresVisitadosNombres: result.visitedPoiNames,
       ResultFields.fechaCreacion: FieldValue.serverTimestamp(),
     };
   }
 
   static Map<String, dynamic> _answerToFirestore(
-    RouteAnswerResultRecord answer,
-  ) {
+      RouteAnswerResultRecord answer,
+      ) {
     return {
       ResultAnswerFields.nombreMonumento: answer.monumentName,
       ResultAnswerFields.pregunta: answer.question,
