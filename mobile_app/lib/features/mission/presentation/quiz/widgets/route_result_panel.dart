@@ -128,9 +128,11 @@ class RouteResultPanel extends StatelessWidget {
   }
 
   Future<void> _shareResult(RouteResultData result) async {
-    final visitedNames = result.visitedPoiNames;
-    final visitedText = visitedNames.isNotEmpty
-        ? visitedNames.join(', ')
+    // ✅ Convertir IDs a nombres usando los datos de respuestas
+    final monumentNames = _extractMonumentNames(result);
+
+    final visitedText = monumentNames.isNotEmpty
+        ? monumentNames.join(', ')
         : '${result.visitedMonuments}/${result.totalPois}';
 
     final shareText = '''
@@ -161,6 +163,20 @@ Desafíate a ti mismo y aprende sobre nuestro patrimonio cultural. ¡Te espera u
     } catch (e) {
       debugPrint("[SHARE] Error compartiendo resultado: $e");
     }
+  }
+
+  // ✅ Función para extraer nombres únicos de monumentos desde las respuestas
+  List<String> _extractMonumentNames(RouteResultData result) {
+    final monumentNames = <String>{};
+
+    // Recorrer todas las respuestas y extraer nombres únicos
+    for (final answer in result.answerResults) {
+      if (answer.monumentName.isNotEmpty) {
+        monumentNames.add(answer.monumentName);
+      }
+    }
+
+    return monumentNames.toList();
   }
 }
 

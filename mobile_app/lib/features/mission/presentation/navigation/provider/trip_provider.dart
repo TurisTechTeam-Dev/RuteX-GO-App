@@ -384,13 +384,15 @@ class TripSimulationProvider extends ChangeNotifier {
     final visitedPois = _completedPoiIndices.length;
     final skippedPois = _skippedPois();
 
-    final visitedPoiNames = <String>[];
-    for (final completedIndex in _completedPoiIndices) {
-      final poi = _pointsOfInterest[completedIndex];
-      if (QuizRouteProgress.visitedPointIds.contains(poi.id)) {
-        visitedPoiNames.add(poi.name);
-      }
-    }
+    // ✅ Extraer IDs de los monumentos para guardar en Firebase
+    final visitedPoiIds = _poiIds(
+      _completedPoiIndices.map((index) => _pointsOfInterest[index]).toList(),
+    );
+
+    // ✅ Extraer nombres de los monumentos para mostrar en la app
+    final visitedPoiNames = _poiNames(
+      _completedPoiIndices.map((index) => _pointsOfInterest[index]).toList(),
+    );
 
     final elapsedTime = DateTime.now().difference(_startedAt);
     final routeName = await missionUseCases.getRouteName(routeId);
@@ -426,8 +428,8 @@ class TripSimulationProvider extends ChangeNotifier {
           correctAnswers: correctAnswers,
           totalAnswers: totalAnswers,
           answerResults: _answerRecords(answers),
-          skippedPois: _poiNames(skippedPois),
-          visitedPoiNames: visitedPoiNames,
+          skippedPois: _poiIds(skippedPois),
+          visitedPoiNames: visitedPoiIds,
         ),
       );
     }
@@ -504,6 +506,16 @@ class TripSimulationProvider extends ChangeNotifier {
     }
 
     return names;
+  }
+
+  List<String> _poiIds(List<PointOfInterest> pois) {
+    final ids = <String>[];
+
+    for (final poi in pois) {
+      ids.add(poi.id);
+    }
+
+    return ids;
   }
 
   void _notifyListeners() {
