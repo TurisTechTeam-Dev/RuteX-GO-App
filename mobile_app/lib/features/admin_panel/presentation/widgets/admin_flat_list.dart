@@ -1,4 +1,12 @@
-import 'package:flutter/material.dart';
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/import 'package:flutter/material.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/admin_navbar.dart';
 import 'package:mobile_app/features/admin_panel/data/models/admin_models.dart';
 import 'package:mobile_app/features/admin_panel/domain/usecases/admin_use_cases.dart';

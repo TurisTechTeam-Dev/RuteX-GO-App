@@ -20,6 +20,7 @@ class RouteCard extends StatelessWidget {
   final bool canStart;
   final List<String> pointNames;
   final bool isCheckingAvailability;
+  final bool isAdmin;
 
   const RouteCard({
     super.key,
@@ -27,6 +28,7 @@ class RouteCard extends StatelessWidget {
     required this.canStart,
     this.pointNames = const [],
     this.isCheckingAvailability = false,
+    this.isAdmin = false,
   });
 
   @override
@@ -82,6 +84,7 @@ class RouteCard extends StatelessWidget {
         routeId: route.id,
         canStart: canStart,
         isCheckingAvailability: isCheckingAvailability,
+        isAdmin: isAdmin,
       ),
     );
 
@@ -254,11 +257,13 @@ class _StartRouteButton extends StatelessWidget {
   final String routeId;
   final bool canStart;
   final bool isCheckingAvailability;
+  final bool isAdmin;
 
   const _StartRouteButton({
     required this.routeId,
     required this.canStart,
     required this.isCheckingAvailability,
+    required this.isAdmin,
   });
 
   @override
@@ -288,9 +293,11 @@ class _StartRouteButton extends StatelessWidget {
       return null;
     }
 
-    return () {
-      Navigator.pushNamed(context, AppRoutes.mapNavigation, arguments: routeId);
-    };
+    if (!isAdmin) {
+      return () => _startRoute(context, allowSimulation: false);
+    }
+
+    return () => _showAdminStartOptions(context);
   }
 
   String _buttonLabel() {
@@ -303,5 +310,39 @@ class _StartRouteButton extends StatelessWidget {
     }
 
     return "Ruta no disponible";
+  }
+
+  Future<void> _showAdminStartOptions(BuildContext context) async {
+    final selectedMode = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Iniciar ruta'),
+        content: const Text('Elige cómo quieres iniciar esta ruta.'),
+        actions: [
+          TextButton.icon(
+            onPressed: () => Navigator.pop(context, false),
+            icon: const Icon(Icons.map_outlined),
+            label: const Text('Hacer ruta'),
+          ),
+          TextButton.icon(
+            onPressed: () => Navigator.pop(context, true),
+            icon: const Icon(Icons.play_circle_outline),
+            label: const Text('Simular ruta'),
+          ),
+        ],
+      ),
+    );
+
+    if (selectedMode == null || !context.mounted) return;
+
+    _startRoute(context, allowSimulation: selectedMode);
+  }
+
+  void _startRoute(BuildContext context, {required bool allowSimulation}) {
+    Navigator.pushNamed(
+      context,
+      AppRoutes.mapNavigation,
+      arguments: {'routeId': routeId, 'allowSimulation': allowSimulation},
+    );
   }
 }

@@ -1,8 +1,17 @@
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/
 import 'package:flutter/material.dart';
 import 'package:mobile_app/core/utils/text_normalizer.dart';
-import 'package:mobile_app/core/widgets/buttons/custom_button.dart';
 import 'package:mobile_app/core/widgets/cards/custom_cards.dart';
 import 'package:mobile_app/features/admin_panel/data/models/admin_models.dart';
+import 'package:mobile_app/features/admin_panel/presentation/models/admin_form_controller.dart';
 
 class MissionForm extends StatefulWidget {
   final AdminMissionModel? mission;
@@ -10,6 +19,7 @@ class MissionForm extends StatefulWidget {
   final List<AdminMissionModel> existingMissions;
   final List<AdminCityModel> cities;
   final List<AdminRouteModel> routes;
+  final AdminFormController formController;
   final ValueChanged<AdminMissionModel> onSave;
 
   const MissionForm({
@@ -19,6 +29,7 @@ class MissionForm extends StatefulWidget {
     required this.existingMissions,
     required this.cities,
     required this.routes,
+    required this.formController,
     required this.onSave,
   });
 
@@ -37,6 +48,7 @@ class _MissionFormState extends State<MissionForm> {
   late String? _selectedPointId;
   late String? _selectedCityId;
   late final List<int> _correctAnswers;
+  Object? _formControllerToken;
 
   @override
   void initState() {
@@ -75,6 +87,8 @@ class _MissionFormState extends State<MissionForm> {
         ? widget.mission!.pointId
         : null;
     _selectedCityId = _cityIdForSelectedPoint();
+    _attachChangeListeners();
+    _registerFormController();
   }
 
   @override
@@ -87,18 +101,12 @@ class _MissionFormState extends State<MissionForm> {
     for (final controller in _answerControllers) {
       controller.dispose();
     }
+    _unregisterFormController();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final usedPointIds = widget.existingMissions
-        .where((mission) => mission.id != widget.mission?.id)
-        .map((mission) => mission.pointId)
-        .where((id) => id.isNotEmpty)
-        .map(TextNormalizer.toAsciiSlug)
-        .toSet();
-
     final pointIdsForSelectedCity = _pointIdsForSelectedCity();
 
     final availablePoints = widget.availablePoints
@@ -123,126 +131,101 @@ class _MissionFormState extends State<MissionForm> {
           child: Padding(
             padding: const EdgeInsets.all(18),
             child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Cada punto de interés solo puede tener una misión asociada.',
-                style: TextStyle(fontSize: 12, color: Colors.black54),
-              ),
-              const SizedBox(height: 16),
-              _buildLabel('Título de la Misión'),
-              SizedBox(width: 420, child: _buildTextField(_titleController)),
-              const SizedBox(height: 24),
-              _buildLabel('Ciudad'),
-              const SizedBox(height: 8),
-              SizedBox(
-                width: 320,
-                child: DropdownButtonFormField<String>(
-                  initialValue:
-                      widget.cities.any((city) => city.id == _selectedCityId)
-                      ? _selectedCityId
-                      : null,
-                  isExpanded: true,
-                  decoration: _inputDecoration(),
-                  items: widget.cities
-                      .where((city) => city.id != null)
-                      .map(
-                        (city) => DropdownMenuItem<String>(
-                          value: city.id!,
-                          child: Text(
-                            city.name,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedCityId = value;
-                      _selectedPointId = null;
-                    });
-                  },
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Cada punto de interés solo puede tener una misión asociada.',
+                  style: TextStyle(fontSize: 12, color: Colors.black54),
                 ),
-              ),
-              const SizedBox(height: 16),
-
-              _buildLabel('Punto de interés'),
-              const SizedBox(height: 8),
-              SizedBox(
-                width: 420,
-                child: DropdownButtonFormField<String>(
-                  initialValue:
-                      availablePoints.any((p) => p.id == _selectedPointId)
-                      ? _selectedPointId
-                      : null,
-                  isExpanded: true,
-                  decoration: _inputDecoration(),
-                  items: availablePoints
-                      .map(
-                        (point) => DropdownMenuItem<String>(
-                          value: point.id!,
-                          child: Text(
-                            '${point.name} (${_cityNameForPoint(point)})',
-                            overflow: TextOverflow.ellipsis,
+                const SizedBox(height: 16),
+                _buildLabel('Título de la Misión'),
+                SizedBox(width: 420, child: _buildTextField(_titleController)),
+                const SizedBox(height: 24),
+                _buildLabel('Ciudad'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: 320,
+                  child: DropdownButtonFormField<String>(
+                    initialValue:
+                        widget.cities.any((city) => city.id == _selectedCityId)
+                        ? _selectedCityId
+                        : null,
+                    isExpanded: true,
+                    decoration: _inputDecoration(),
+                    items: widget.cities
+                        .where((city) => city.id != null)
+                        .map(
+                          (city) => DropdownMenuItem<String>(
+                            value: city.id!,
+                            child: Text(
+                              city.name,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: _selectedCityId == null || availablePoints.isEmpty
-                      ? null
-                      : (value) => setState(() => _selectedPointId = value),
-                ),
-              ),
-              const SizedBox(height: 30),
-
-              // Question accordion
-              _buildQuestionAccordion(
-                number: 1,
-                questionController: _questionOneController,
-                answersOffset: 0,
-              ),
-              const SizedBox(height: 12),
-              _buildQuestionAccordion(
-                number: 2,
-                questionController: _questionTwoController,
-                answersOffset: 3,
-              ),
-              const SizedBox(height: 12),
-              _buildQuestionAccordion(
-                number: 3,
-                questionController: _questionThreeController,
-                answersOffset: 6,
-              ),
-
-              const SizedBox(height: 26),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 220,
-                    child: CustomButton(
-                      text: 'GUARDAR MISIÓN',
-                      onPressed: () {
-                        final error = _validate(usedPointIds);
-                        if (error != null) {
-                          _showMessage(error);
-                          return;
-                        }
-
-                        widget.onSave(
-                          AdminMissionModel(
-                            id: widget.mission?.id,
-                            pointId: _selectedPointId ?? '',
-                            title: _titleController.text.trim(),
-                            questions: _buildQuestions(),
-                          ),
-                        );
-                      },
-                    ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedCityId = value;
+                        _selectedPointId = null;
+                      });
+                      widget.formController.markChanged();
+                    },
                   ),
-                ],
-              ),
-            ],
+                ),
+                const SizedBox(height: 16),
+
+                _buildLabel('Punto de interés'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: 420,
+                  child: DropdownButtonFormField<String>(
+                    initialValue:
+                        availablePoints.any((p) => p.id == _selectedPointId)
+                        ? _selectedPointId
+                        : null,
+                    isExpanded: true,
+                    decoration: _inputDecoration(),
+                    items: availablePoints
+                        .map(
+                          (point) => DropdownMenuItem<String>(
+                            value: point.id!,
+                            child: Text(
+                              '${point.name} (${_cityNameForPoint(point)})',
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        )
+                        .toList(),
+                    onChanged:
+                        _selectedCityId == null || availablePoints.isEmpty
+                        ? null
+                        : (value) {
+                            setState(() => _selectedPointId = value);
+                            widget.formController.markChanged();
+                          },
+                  ),
+                ),
+                const SizedBox(height: 30),
+
+                _buildQuestionAccordion(
+                  number: 1,
+                  questionController: _questionOneController,
+                  answersOffset: 0,
+                ),
+                const SizedBox(height: 12),
+                _buildQuestionAccordion(
+                  number: 2,
+                  questionController: _questionTwoController,
+                  answersOffset: 3,
+                ),
+                const SizedBox(height: 12),
+                _buildQuestionAccordion(
+                  number: 3,
+                  questionController: _questionThreeController,
+                  answersOffset: 6,
+                ),
+              ],
             ),
           ),
         ),
@@ -303,6 +286,7 @@ class _MissionFormState extends State<MissionForm> {
                 ],
                 onChanged: (value) {
                   setState(() => _correctAnswers[number - 1] = value ?? 0);
+                  widget.formController.markChanged();
                 },
               ),
             ),
@@ -497,6 +481,59 @@ class _MissionFormState extends State<MissionForm> {
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
+  }
+
+  void _attachChangeListeners() {
+    _titleController.addListener(_markChanged);
+    _questionOneController.addListener(_markChanged);
+    _questionTwoController.addListener(_markChanged);
+    _questionThreeController.addListener(_markChanged);
+    for (final controller in _answerControllers) {
+      controller.addListener(_markChanged);
+    }
+  }
+
+  void _markChanged() {
+    widget.formController.markChanged();
+  }
+
+  void _registerFormController() {
+    _unregisterFormController();
+    _formControllerToken = widget.formController.registerSaveAction(() async {
+      final usedPointIds = widget.existingMissions
+          .where((mission) => mission.id != widget.mission?.id)
+          .map((mission) => mission.pointId)
+          .where((id) => id.isNotEmpty)
+          .map(TextNormalizer.toAsciiSlug)
+          .toSet();
+
+      _save(usedPointIds);
+    });
+  }
+
+  void _unregisterFormController() {
+    final token = _formControllerToken;
+    if (token == null) return;
+
+    widget.formController.unregisterSaveAction(token);
+    _formControllerToken = null;
+  }
+
+  void _save(Set<String> usedPointIds) {
+    final error = _validate(usedPointIds);
+    if (error != null) {
+      _showMessage(error);
+      return;
+    }
+
+    widget.onSave(
+      AdminMissionModel(
+        id: widget.mission?.id,
+        pointId: _selectedPointId ?? '',
+        title: _titleController.text.trim(),
+        questions: _buildQuestions(),
+      ),
     );
   }
 }

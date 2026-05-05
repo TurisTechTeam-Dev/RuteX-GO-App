@@ -1,8 +1,17 @@
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/
 import 'package:flutter/material.dart';
 import 'dart:typed_data';
-import 'package:mobile_app/core/widgets/buttons/custom_button.dart';
 import 'package:mobile_app/core/widgets/cards/custom_cards.dart';
 import 'package:mobile_app/features/admin_panel/data/models/admin_models.dart';
+import 'package:mobile_app/features/admin_panel/presentation/models/admin_form_controller.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/components/image_picker_box.dart';
 import 'package:mobile_app/core/utils/text_normalizer.dart';
 
@@ -13,6 +22,7 @@ class RouteForm extends StatefulWidget {
     required this.availableCities,
     required this.availablePoints,
     required this.availableMissions,
+    required this.formController,
     required this.onSave,
     required this.onUploadImage,
   });
@@ -21,6 +31,7 @@ class RouteForm extends StatefulWidget {
   final List<AdminCityModel> availableCities;
   final List<AdminPoiModel> availablePoints;
   final List<AdminMissionModel> availableMissions;
+  final AdminFormController formController;
   final ValueChanged<AdminRouteModel> onSave;
   final Future<String> Function(Uint8List bytes, String fileName) onUploadImage;
 
@@ -50,6 +61,7 @@ class _RouteFormState extends State<RouteForm> {
   bool _isUploading = false;
   Uint8List? _pendingImageBytes;
   String? _pendingImageName;
+  Object? _formControllerToken;
 
   @override
   void initState() {
@@ -69,6 +81,8 @@ class _RouteFormState extends State<RouteForm> {
     _selectedCity = widget.route?.cityId;
     _selectedPointIds = List<String>.from(widget.route?.pointIds ?? []);
     _isActive = widget.route?.isActive ?? false;
+    _attachChangeListeners();
+    _registerFormController();
   }
 
   @override
@@ -89,6 +103,8 @@ class _RouteFormState extends State<RouteForm> {
         _selectedPointIds = List<String>.from(widget.route?.pointIds ?? []);
         _isActive = widget.route?.isActive ?? false;
       });
+      widget.formController.markClean();
+      _registerFormController();
     }
   }
 
@@ -101,6 +117,7 @@ class _RouteFormState extends State<RouteForm> {
     _durationController.dispose();
     _totalPointsController.dispose();
     _imageController.dispose();
+    _unregisterFormController();
     super.dispose();
   }
 
@@ -117,231 +134,193 @@ class _RouteFormState extends State<RouteForm> {
           child: Padding(
             padding: const EdgeInsets.all(18),
             child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: 380,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildLabel('Nombre'),
-                        _buildTextField(_nameController),
-                        const SizedBox(height: 16),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 380,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildLabel('Nombre'),
+                          _buildTextField(_nameController),
+                          const SizedBox(height: 16),
 
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildLabel('Dificultad'),
-                                  _buildTextField(_difficultyController),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildLabel('Duración'),
-                                  _buildTextField(_durationController),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 16),
-                        _buildLabel('Puntos totales'),
-                        _buildTextField(_totalPointsController),
-                        const SizedBox(height: 16),
-
-                        _buildLabel('Imagen de la Ruta'),
-                        const SizedBox(height: 8),
-                        ImagePickerBox(
-                          imageUrl: _imageController.text,
-                          alternateImageSources: [
-                            'assets/merida_monumental.png',
-                            _nameController.text,
-                            if (widget.route != null) widget.route!.name,
-                          ],
-                          isUploading: _isUploading,
-                          onImageSelected: (bytes, name) {
-                            setState(() {
-                              _pendingImageBytes = bytes;
-                              _pendingImageName = name;
-                            });
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        _buildLabel('Descripción'),
-                        _buildTextField(_descriptionController, maxLines: 3),
-                        const SizedBox(height: 16),
-
-                        SwitchListTile(
-                          title: const Text(
-                            '¿Ruta activa?',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          value: _isActive,
-                          activeThumbColor: const Color(0xFF6B7249),
-                          onChanged: (val) => setState(() => _isActive = val),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-
-                  SizedBox(
-                    width: 300,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildLabel('Ciudad'),
-                        const SizedBox(height: 8),
-                        SizedBox(
-                          height: _singleLineFieldHeight,
-                          child: DropdownButtonFormField<String>(
-                            initialValue:
-                                widget.availableCities.any(
-                                  (c) => c.id == _selectedCity,
-                                )
-                                ? _selectedCity
-                                : null,
-                            isExpanded: true,
-                            decoration: _inputDecoration(),
-                            items: widget.availableCities
-                                .where((city) => city.id != null)
-                                .map(
-                                  (city) => DropdownMenuItem<String>(
-                                    value: city.id!,
-                                    child: Text(city.name),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (value) =>
-                                setState(() => _selectedCity = value),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-
-                        _buildLabel('Puntos de Interés'),
-                        const SizedBox(height: 8),
-                        Container(
-                          height: 220,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: const Color(
-                                0xFF6B7249,
-                              ).withValues(alpha: 0.3),
-                            ),
-                          ),
-                          child: _selectedCity == null
-                              ? const Center(
-                                  child: Text('Selecciona una ciudad primero'),
-                                )
-                              : _filteredPoints().isEmpty
-                              ? const Center(
-                                  child: Text('No hay puntos en esta ciudad'),
-                                )
-                              : ListView.builder(
-                                  itemCount: _filteredPoints().length,
-                                  itemBuilder: (context, index) {
-                                    final poi = _filteredPoints()[index];
-                                    final isSelected = _selectedPointIds
-                                        .contains(poi.id);
-                                    return CheckboxListTile(
-                                      secondary: const Icon(
-                                        Icons.location_on,
-                                        color: Colors.redAccent,
-                                      ),
-                                      title: Text(
-                                        poi.name,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      subtitle: Text(
-                                        poi.description,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      value: isSelected,
-                                      activeColor: const Color(0xFF6B7249),
-                                      onChanged: (checked) {
-                                        setState(() {
-                                          if (checked == true) {
-                                            if (poi.id != null) {
-                                              _selectedPointIds.add(poi.id!);
-                                            }
-                                          } else {
-                                            _selectedPointIds.remove(poi.id);
-                                          }
-                                        });
-                                      },
-                                    );
-                                  },
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildLabel('Dificultad'),
+                                    _buildTextField(_difficultyController),
+                                  ],
                                 ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 26),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 220,
-                    child: CustomButton(
-                      text: _isUploading
-                          ? 'SUBIENDO IMAGEN...'
-                          : 'GUARDAR RUTA',
-                      onPressed: _isUploading
-                          ? null
-                          : () async {
-                              final error = _validate(
-                                _filteredPoints().map((p) => p.id!).toSet(),
-                              );
-                              if (error != null) {
-                                _showMessage(error);
-                                return;
-                              }
-                              final imagePath = await _uploadPendingImage();
-                              if (imagePath == null) return;
-
-                              widget.onSave(
-                                AdminRouteModel(
-                                  id: widget.route?.id,
-                                  name: _nameController.text.trim(),
-                                  description: _descriptionController.text
-                                      .trim(),
-                                  difficulty: _difficultyController.text.trim(),
-                                  duration: _durationController.text.trim(),
-                                  cityId: _selectedCity ?? '',
-                                  pointIds: _selectedPointIds.toSet().toList(),
-                                  imageAsset: imagePath,
-                                  isActive: _isActive,
-                                  totalPoints:
-                                      int.tryParse(
-                                        _totalPointsController.text.trim(),
-                                      ) ??
-                                      0,
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildLabel('Duración'),
+                                    _buildTextField(_durationController),
+                                  ],
                                 ),
-                              );
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 16),
+                          _buildLabel('Puntos totales'),
+                          _buildTextField(_totalPointsController),
+                          const SizedBox(height: 16),
+
+                          _buildLabel('Imagen de la Ruta'),
+                          const SizedBox(height: 8),
+                          ImagePickerBox(
+                            imageUrl: _imageController.text,
+                            alternateImageSources: [
+                              'assets/merida_monumental.png',
+                              _nameController.text,
+                              if (widget.route != null) widget.route!.name,
+                            ],
+                            isUploading: _isUploading,
+                            onImageSelected: (bytes, name) {
+                              setState(() {
+                                _pendingImageBytes = bytes;
+                                _pendingImageName = name;
+                              });
+                              widget.formController.markChanged();
                             },
+                          ),
+                          const SizedBox(height: 16),
+                          _buildLabel('Descripción'),
+                          _buildTextField(_descriptionController, maxLines: 3),
+                          const SizedBox(height: 16),
+
+                          SwitchListTile(
+                            title: const Text(
+                              '¿Ruta activa?',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            value: _isActive,
+                            activeThumbColor: const Color(0xFF6B7249),
+                            onChanged: (val) {
+                              setState(() => _isActive = val);
+                              widget.formController.markChanged();
+                            },
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                    const SizedBox(width: 16),
+
+                    SizedBox(
+                      width: 300,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildLabel('Ciudad'),
+                          const SizedBox(height: 8),
+                          SizedBox(
+                            height: _singleLineFieldHeight,
+                            child: DropdownButtonFormField<String>(
+                              initialValue:
+                                  widget.availableCities.any(
+                                    (c) => c.id == _selectedCity,
+                                  )
+                                  ? _selectedCity
+                                  : null,
+                              isExpanded: true,
+                              decoration: _inputDecoration(),
+                              items: widget.availableCities
+                                  .where((city) => city.id != null)
+                                  .map(
+                                    (city) => DropdownMenuItem<String>(
+                                      value: city.id!,
+                                      child: Text(city.name),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (value) {
+                                setState(() => _selectedCity = value);
+                                widget.formController.markChanged();
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+
+                          _buildLabel('Puntos de Interés'),
+                          const SizedBox(height: 8),
+                          Container(
+                            height: 220,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: const Color(
+                                  0xFF6B7249,
+                                ).withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: _selectedCity == null
+                                ? const Center(
+                                    child: Text(
+                                      'Selecciona una ciudad primero',
+                                    ),
+                                  )
+                                : _filteredPoints().isEmpty
+                                ? const Center(
+                                    child: Text('No hay puntos en esta ciudad'),
+                                  )
+                                : ListView.builder(
+                                    itemCount: _filteredPoints().length,
+                                    itemBuilder: (context, index) {
+                                      final poi = _filteredPoints()[index];
+                                      final isSelected = _selectedPointIds
+                                          .contains(poi.id);
+                                      return CheckboxListTile(
+                                        secondary: const Icon(
+                                          Icons.location_on,
+                                          color: Colors.redAccent,
+                                        ),
+                                        title: Text(
+                                          poi.name,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        subtitle: Text(
+                                          poi.description,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        value: isSelected,
+                                        activeColor: const Color(0xFF6B7249),
+                                        onChanged: (checked) {
+                                          setState(() {
+                                            if (checked == true) {
+                                              if (poi.id != null) {
+                                                _selectedPointIds.add(poi.id!);
+                                              }
+                                            } else {
+                                              _selectedPointIds.remove(poi.id);
+                                            }
+                                          });
+                                          widget.formController.markChanged();
+                                        },
+                                      );
+                                    },
+                                  ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),
@@ -352,7 +331,8 @@ class _RouteFormState extends State<RouteForm> {
   List<AdminPoiModel> _filteredPoints() {
     if (_selectedCity == null || _selectedCity!.isEmpty) return [];
 
-    // Find the selected city so matching works with id or name
+    // Firestore conserva rutas antiguas con id o nombre de ciudad; aceptamos
+    // ambos formatos para editarlas sin migración previa.
     final selectedCity = widget.availableCities.firstWhere(
       (c) => c.id == _selectedCity || c.name == _selectedCity,
       orElse: () => const AdminCityModel(
@@ -365,7 +345,8 @@ class _RouteFormState extends State<RouteForm> {
     );
 
     return widget.availablePoints.where((poi) {
-      // Keep already selected points visible while editing
+      // Algunos puntos pueden venir de rutas antiguas o de otra ciudad asociada.
+      // Se mantienen visibles para no perder selecciones al guardar.
       if (poi.id != null && _selectedPointIds.contains(poi.id)) return true;
 
       return _belongsToCity(poi.cityId, selectedCity);
@@ -457,5 +438,57 @@ class _RouteFormState extends State<RouteForm> {
     } finally {
       if (mounted) setState(() => _isUploading = false);
     }
+  }
+
+  void _attachChangeListeners() {
+    _nameController.addListener(_markChanged);
+    _descriptionController.addListener(_markChanged);
+    _difficultyController.addListener(_markChanged);
+    _durationController.addListener(_markChanged);
+    _totalPointsController.addListener(_markChanged);
+    _imageController.addListener(_markChanged);
+  }
+
+  void _markChanged() {
+    widget.formController.markChanged();
+  }
+
+  void _registerFormController() {
+    _unregisterFormController();
+    _formControllerToken = widget.formController.registerSaveAction(_save);
+  }
+
+  void _unregisterFormController() {
+    final token = _formControllerToken;
+    if (token == null) return;
+
+    widget.formController.unregisterSaveAction(token);
+    _formControllerToken = null;
+  }
+
+  Future<void> _save() async {
+    if (_isUploading) return;
+    final error = _validate(_filteredPoints().map((p) => p.id!).toSet());
+    if (error != null) {
+      _showMessage(error);
+      return;
+    }
+    final imagePath = await _uploadPendingImage();
+    if (imagePath == null) return;
+
+    widget.onSave(
+      AdminRouteModel(
+        id: widget.route?.id,
+        name: _nameController.text.trim(),
+        description: _descriptionController.text.trim(),
+        difficulty: _difficultyController.text.trim(),
+        duration: _durationController.text.trim(),
+        cityId: _selectedCity ?? '',
+        pointIds: _selectedPointIds.toSet().toList(),
+        imageAsset: imagePath,
+        isActive: _isActive,
+        totalPoints: int.tryParse(_totalPointsController.text.trim()) ?? 0,
+      ),
+    );
   }
 }

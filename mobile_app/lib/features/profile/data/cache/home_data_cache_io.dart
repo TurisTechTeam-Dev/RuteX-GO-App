@@ -21,6 +21,8 @@ import '../../domain/entities/user_profile.dart';
 class HomeDataCache {
   const HomeDataCache();
 
+  /// Lee el último home válido guardado para permitir entrar sin conexión.
+  /// Si la caché está corrupta, se ignora y se fuerza carga online.
   Future<HomeData?> read(String uid) async {
     try {
       final file = await _cacheFile(uid);
@@ -48,6 +50,8 @@ class HomeDataCache {
 
   Future<File> _cacheFile(String uid) async {
     final directory = await getApplicationSupportDirectory();
+    // El uid acaba en nombre de archivo local, así que evitamos caracteres que
+    // puedan romper la ruta en Android o Windows.
     final safeUid = uid.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '_');
     return File('${directory.path}/home_cache_$safeUid.json');
   }
@@ -136,9 +140,9 @@ class HomeDataCache {
       totalMissions: _asInt(json['totalMissions']),
       obtainedPoints: _asInt(json['obtainedPoints']),
       completedMissions: _asInt(json['completedMissions']),
-      result: json['result'] == null ? null : _resultFromJson(
-        _asMap(json['result']),
-      ),
+      result: json['result'] == null
+          ? null
+          : _resultFromJson(_asMap(json['result'])),
     );
   }
 

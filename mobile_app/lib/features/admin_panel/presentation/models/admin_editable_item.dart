@@ -1,4 +1,12 @@
-import '../../data/models/admin_models.dart';
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/import '../../data/models/admin_models.dart';
 import '../widgets/admin_navbar.dart';
 
 sealed class AdminEditableItem {

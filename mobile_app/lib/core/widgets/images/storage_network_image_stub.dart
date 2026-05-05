@@ -27,7 +27,6 @@ Widget buildResolvedStorageNetworkImage({
       return placeholder ?? const SizedBox.shrink();
     },
     errorBuilder: (context, error, stackTrace) {
-      debugPrint('Storage preview image render failed for "$imageUrl": $error');
       return fallback;
     },
   );

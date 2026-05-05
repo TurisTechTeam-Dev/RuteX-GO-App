@@ -22,6 +22,8 @@ class HomeDataLoader {
 
   const HomeDataLoader(this.remoteDataSource);
 
+  /// Compone el home desde varias colecciones y sanea progreso antiguo si la
+  /// ruta ya no existe, para que la app no muestre puntos huérfanos.
   Future<HomeData> load(String uid) async {
     final userDoc = await remoteDataSource.getUserDoc(uid);
     final userData = userDoc.data() ?? {};
@@ -156,6 +158,8 @@ class HomeDataLoader {
   }
 
   static String? _routeIdFromProgress(dynamic progress) {
+    // Se aceptan varios nombres porque el modelo de progreso cambió durante
+    // el proyecto y usuarios reales pueden conservar datos con claves antiguas.
     if (progress is String) return progress;
 
     if (progress is Map) {

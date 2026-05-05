@@ -29,49 +29,42 @@ class AppTheme {
       ),
 
       textTheme: const TextTheme(
-        // H1 Títulos grandes
         displayLarge: TextStyle(
           fontSize: 28,
           fontWeight: FontWeight.w700,
           color: AppColors.negroTexto,
         ),
 
-        // H2 Subtítulos
         displayMedium: TextStyle(
           fontSize: 22,
           fontWeight: FontWeight.w600,
           color: AppColors.negroTexto,
         ),
 
-        // Título de pantallas / AppBar
         titleMedium: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w600,
           color: AppColors.negroTexto,
         ),
 
-        // Body / Información
         bodyLarge: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w400,
           color: AppColors.negroTexto,
         ),
 
-        // Inputs
         bodyMedium: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w400,
           color: AppColors.grisSombra,
         ),
 
-        // TextButton
         labelLarge: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w400,
           color: AppColors.verdePrincipal,
         ),
 
-        // Footnote
         labelMedium: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w400,
@@ -79,7 +72,6 @@ class AppTheme {
         ),
       ),
 
-      // 2. CARD THEME
       cardTheme: CardThemeData(
         color: AppColors.blancoTarjeta,
         elevation: 0,
@@ -87,7 +79,6 @@ class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
 
-      // 3. INPUT DECORATION THEME
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.cremaInput,
@@ -99,7 +90,6 @@ class AppTheme {
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: AppColors.verdeBorde, width: 2),
         ),
-        // Borde al seleccionar (Focused)
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(
@@ -107,7 +97,6 @@ class AppTheme {
             width: 2.5,
           ),
         ),
-        // Estilo del hint
         hintStyle: TextStyle(
           color: AppColors.grisSombra.withValues(alpha: 0.4),
           fontSize: 14,
@@ -115,7 +104,6 @@ class AppTheme {
         ),
       ),
 
-      // 4. ELEVATED BUTTON THEME
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.verdePrincipal,

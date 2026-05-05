@@ -1,9 +1,19 @@
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/
 import 'package:flutter/material.dart';
 import 'dart:typed_data';
 
 import 'package:mobile_app/features/admin_panel/data/models/admin_models.dart';
 import 'package:mobile_app/features/admin_panel/domain/usecases/admin_use_cases.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/admin_navbar.dart';
+import 'package:mobile_app/features/admin_panel/presentation/models/admin_form_controller.dart';
 
 import 'package:mobile_app/features/admin_panel/presentation/widgets/route_form.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/forms/city_form.dart';
@@ -15,6 +25,7 @@ class AdminFormRouter extends StatelessWidget {
   final AdminNavTab tab;
   final AdminEditableItem? itemToEdit;
   final AdminUseCases adminUseCases;
+  final AdminFormController formController;
   final Future<void> Function(Future<void> Function()) onSave;
   final VoidCallback onResetSelection;
 
@@ -23,6 +34,7 @@ class AdminFormRouter extends StatelessWidget {
     required this.tab,
     required this.itemToEdit,
     required this.adminUseCases,
+    required this.formController,
     required this.onSave,
     required this.onResetSelection,
   });
@@ -31,7 +43,6 @@ class AdminFormRouter extends StatelessWidget {
   Widget build(BuildContext context) {
     final uniqueKey = ValueKey('${tab.index}_${itemToEdit?.id ?? 'nuevo'}');
 
-    // Always show the form for the active tab.
     switch (tab) {
       case AdminNavTab.cities:
         return CityForm(
@@ -39,6 +50,7 @@ class AdminFormRouter extends StatelessWidget {
           city: itemToEdit is AdminCityItem
               ? (itemToEdit as AdminCityItem).city
               : null,
+          formController: formController,
           onSave: (city) => onSave(() => adminUseCases.saveCity(city)),
           onCancel: onResetSelection,
           onUploadImage: (Uint8List bytes, String name) =>
@@ -57,7 +69,6 @@ class AdminFormRouter extends StatelessWidget {
     }
   }
 
-  // Routes form
   Widget _buildRouteFormWithData(Key key) {
     return StreamBuilder<List<AdminCityModel>>(
       stream: adminUseCases.watchCities(),
@@ -81,6 +92,7 @@ class AdminFormRouter extends StatelessWidget {
                   availableCities: citySnapshot.data!,
                   availablePoints: pointSnapshot.data!,
                   availableMissions: missionSnapshot.data!,
+                  formController: formController,
                   onSave: (route) =>
                       onSave(() => adminUseCases.saveRoute(route)),
                   onUploadImage: (Uint8List bytes, String name) =>
@@ -98,7 +110,6 @@ class AdminFormRouter extends StatelessWidget {
     );
   }
 
-  // --- 3. FORMULARIO DE PUNTOS DE INTERÉS ---
   Widget _buildPointFormWithData(Key key) {
     return StreamBuilder<List<AdminCityModel>>(
       stream: adminUseCases.watchCities(),
@@ -113,6 +124,7 @@ class AdminFormRouter extends StatelessWidget {
               ? (itemToEdit as AdminPoiItem).point
               : null,
           cities: snapshot.data!,
+          formController: formController,
           onSave: (point) => onSave(() => adminUseCases.savePoi(point)),
           onUploadImage: (Uint8List bytes, String name) =>
               adminUseCases.uploadFile(
@@ -125,7 +137,6 @@ class AdminFormRouter extends StatelessWidget {
     );
   }
 
-  // Missions form
   Widget _buildMissionFormWithData(Key key) {
     return StreamBuilder<List<AdminCityModel>>(
       stream: adminUseCases.watchCities(),
@@ -155,6 +166,7 @@ class AdminFormRouter extends StatelessWidget {
                       existingMissions: missionSnapshot.data!,
                       cities: citySnapshot.data!,
                       routes: routeSnapshot.data!,
+                      formController: formController,
                       onSave: (mission) =>
                           onSave(() => adminUseCases.saveMission(mission)),
                     );

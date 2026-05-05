@@ -1,4 +1,12 @@
-import 'dart:typed_data';
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/import 'dart:typed_data';
 
 import '../../domain/entities/home_data.dart';
 import '../../domain/repositories/profile_repository.dart';

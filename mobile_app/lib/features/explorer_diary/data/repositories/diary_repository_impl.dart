@@ -11,23 +11,15 @@ import 'package:mobile_app/features/explorer_diary/data/datasources/diary_remote
 import 'package:mobile_app/features/explorer_diary/domain/entities/diary_entry.dart';
 import 'package:mobile_app/features/explorer_diary/domain/repositories/diary_repository.dart';
 
-class DiaryRepositoryImpl implements DiaryRepository{
+class DiaryRepositoryImpl implements DiaryRepository {
+  final DiaryRemoteDataSource remoteDataSource;
 
-  final DiaryRemoteDatasource remoteDataSource;
-
-  DiaryRepositoryImpl({
-    required this.remoteDataSource,
-  });
-
-
+  DiaryRepositoryImpl({required this.remoteDataSource});
 
   @override
   Future<List<DiaryEntry>> getCompletedRoutes(String userId) async {
-    // Llamamos al DataSource para obtener los mapas de datos
-    final List<Map<String, dynamic>> rawDataList =
-    await remoteDataSource.getAllDiaryData(userId);
+    final rawDataList = await remoteDataSource.getAllDiaryData(userId);
 
-    // Convertimos cada mapa en una entidad DiaryEntry
     return rawDataList.map((data) {
       return DiaryEntry(
         routeId: data['id'].toString(),
@@ -35,8 +27,6 @@ class DiaryRepositoryImpl implements DiaryRepository{
         completionDate: data['fecha'],
         monuments: List<String>.from(data['puntos_interes_nombres']),
         sealUrl: data['seal_url'],
-        // IMPORTANTE: Aquí se inicializa la lista de archivos vacía.
-        // Las fotos se añadirán en la capa de presentación (UI).
         photos: [],
       );
     }).toList();

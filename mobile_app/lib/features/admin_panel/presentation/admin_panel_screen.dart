@@ -1,4 +1,12 @@
-import 'package:flutter/material.dart';
+/*
+  -----------------------------------------------------------------------------
+  Proyecto: RuteX Go
+  Desarrollado por: TurisTechTeam
+  Descripción: Esta aplicación y su código fuente son propiedad intelectual de
+  TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
+  Año: 2026
+  -----------------------------------------------------------------------------
+*/import 'package:flutter/material.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/admin_footer.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/components/admin_form_router.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/components/admin_map_explorer.dart';
@@ -6,6 +14,7 @@ import 'package:mobile_app/features/admin_panel/presentation/widgets/components/
 import 'package:mobile_app/features/admin_panel/presentation/widgets/admin_navbar.dart';
 import 'package:mobile_app/features/admin_panel/domain/usecases/admin_use_cases.dart';
 import 'package:mobile_app/features/admin_panel/presentation/models/admin_editable_item.dart';
+import 'package:mobile_app/features/admin_panel/presentation/models/admin_form_controller.dart';
 import 'package:provider/provider.dart';
 
 class AdminPanelScreen extends StatefulWidget {
@@ -17,7 +26,7 @@ class AdminPanelScreen extends StatefulWidget {
 
 class _AdminPanelScreenState extends State<AdminPanelScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final ScrollController _formHorizontalScrollController = ScrollController();
+  final AdminFormController _formController = AdminFormController();
 
   AdminNavTab? _currentTab;
   AdminEditableItem? _itemToEdit;
@@ -25,7 +34,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
 
   @override
   void dispose() {
-    _formHorizontalScrollController.dispose();
+    _formController.dispose();
     super.dispose();
   }
 
@@ -65,6 +74,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                     _currentTab = tab;
                     _itemToEdit = null;
                     _formResetVersion++;
+                    _formController.reset();
                   });
                 },
               ),
@@ -147,24 +157,18 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                 title: _titleForTab(tab),
                 isEditing: _itemToEdit != null,
                 onNewPressed: _resetForm,
+                formController: _formController,
                 isCompact: isCompact,
               ),
               const SizedBox(height: 16),
               Expanded(
-                child: Scrollbar(
-                  controller: _formHorizontalScrollController,
-                  thumbVisibility: true,
-                  trackVisibility: true,
-                  interactive: true,
-                  child: SingleChildScrollView(
-                    controller: _formHorizontalScrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: SizedBox(
-                      width: isCompact ? 860 : 820,
-                      child: AdminFormRouter(
+                child: _HorizontalFormScroll(
+                  width: isCompact ? 860 : 820,
+                  child: AdminFormRouter(
                       tab: tab,
                       itemToEdit: _itemToEdit,
                       adminUseCases: adminUseCases,
+                      formController: _formController,
                       onSave: (saveItem) async {
                         try {
                           await saveItem();
@@ -189,8 +193,6 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                         }
                       },
                       onResetSelection: _resetForm,
-                      ),
-                    ),
                   ),
                 ),
               ),
@@ -205,6 +207,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
     setState(() {
       _itemToEdit = item;
       _currentTab = item?.tab ?? _currentTab;
+      _formController.reset();
     });
   }
 
@@ -212,6 +215,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
     setState(() {
       _itemToEdit = null;
       _formResetVersion++;
+      _formController.reset();
     });
   }
 
@@ -229,17 +233,54 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
   }
 }
 
+class _HorizontalFormScroll extends StatefulWidget {
+  final double width;
+  final Widget child;
+
+  const _HorizontalFormScroll({required this.width, required this.child});
+
+  @override
+  State<_HorizontalFormScroll> createState() => _HorizontalFormScrollState();
+}
+
+class _HorizontalFormScrollState extends State<_HorizontalFormScroll> {
+  final ScrollController _controller = ScrollController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scrollbar(
+      controller: _controller,
+      thumbVisibility: true,
+      trackVisibility: true,
+      interactive: true,
+      child: SingleChildScrollView(
+        controller: _controller,
+        scrollDirection: Axis.horizontal,
+        child: SizedBox(width: widget.width, child: widget.child),
+      ),
+    );
+  }
+}
+
 class _AdminFormHeader extends StatelessWidget {
   final String title;
   final bool isEditing;
   final bool isCompact;
   final VoidCallback onNewPressed;
+  final AdminFormController formController;
 
   const _AdminFormHeader({
     required this.title,
     required this.isEditing,
     required this.onNewPressed,
     required this.isCompact,
+    required this.formController,
   });
 
   @override
@@ -252,6 +293,11 @@ class _AdminFormHeader extends StatelessWidget {
       ),
     );
 
+    final actions = _HeaderActions(
+      formController: formController,
+      onNewPressed: onNewPressed,
+    );
+
     if (isCompact) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -260,11 +306,7 @@ class _AdminFormHeader extends StatelessWidget {
           const SizedBox(height: 8),
           Align(
             alignment: Alignment.centerLeft,
-            child: OutlinedButton.icon(
-              onPressed: onNewPressed,
-              icon: const Icon(Icons.add),
-              label: const Text('Nuevo / limpiar'),
-            ),
+            child: actions,
           ),
         ],
       );
@@ -273,12 +315,51 @@ class _AdminFormHeader extends StatelessWidget {
     return Row(
       children: [
         Expanded(child: titleWidget),
-        OutlinedButton.icon(
-          onPressed: onNewPressed,
-          icon: const Icon(Icons.add),
-          label: const Text('Nuevo / limpiar'),
-        ),
+        actions,
       ],
+    );
+  }
+}
+
+class _HeaderActions extends StatelessWidget {
+  final AdminFormController formController;
+  final VoidCallback onNewPressed;
+
+  const _HeaderActions({
+    required this.formController,
+    required this.onNewPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: formController,
+      builder: (context, _) {
+        return Wrap(
+          spacing: 10,
+          runSpacing: 8,
+          children: [
+            FilledButton.icon(
+              onPressed: formController.canSave ? formController.save : null,
+              icon: formController.isSaving
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.save),
+              label: Text(
+                formController.isSaving ? 'Guardando...' : 'Guardar cambios',
+              ),
+            ),
+            OutlinedButton.icon(
+              onPressed: onNewPressed,
+              icon: const Icon(Icons.add),
+              label: const Text('Nuevo / limpiar'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

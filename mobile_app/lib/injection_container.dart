@@ -14,7 +14,7 @@ import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
 import 'core/theme/theme_provider.dart';
-import 'features/admin_panel/data/admin_remote_datasource.dart';
+import 'features/admin_panel/data/datasources/admin_remote_datasource.dart';
 import 'features/admin_panel/data/repositories/admin_repository_impl.dart';
 import 'features/admin_panel/domain/repositories/admin_repository.dart';
 import 'features/admin_panel/domain/usecases/admin_use_cases.dart';
@@ -74,7 +74,7 @@ List<SingleChildWidget> buildAppProviders() {
     ),
     ProxyProvider2<FirebaseFirestore, FirebaseStorage, DiaryRepository>(
       update: (context, firestore, storage, previous) => DiaryRepositoryImpl(
-        remoteDataSource: DiaryRemoteDatasource(
+        remoteDataSource: DiaryRemoteDataSource(
           firestore: firestore,
           storage: storage,
         ),

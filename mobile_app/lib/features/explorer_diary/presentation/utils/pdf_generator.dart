@@ -32,18 +32,17 @@ class PdfGenerator {
     );
 
     try {
-      // Primera pagina: portada y contraportada (final)
       pdf.addPage(
         pw.Page(
           pageFormat: _pageFormat,
           margin: pw.EdgeInsets.zero,
-          build: (content) => pw.Row(
+          build: (context) => pw.Row(
             children: [
               pw.Expanded(child: _buildFinalPage(logoImage)),
               pw.Expanded(
                 child: _buildCover(
-                    logoImage: logoImage,
-                    userName: userName
+                  logoImage: logoImage,
+                  userName: userName,
                 ),
               ),
             ],
@@ -51,7 +50,6 @@ class PdfGenerator {
         ),
       );
 
-      // Paginas interiores: cada ruta con su sello y sus fotos de recuerdo
       for (final entry in allRoutes) {
         pdf.addPage(
           pw.Page(
@@ -67,7 +65,6 @@ class PdfGenerator {
         );
       }
 
-      //  Vista de la preview nativa de Flutter Printing
       await Printing.layoutPdf(
         onLayout: (PdfPageFormat format) async => pdf.save(),
         name: 'diario_explorador_rutexgo.pdf',

@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "711545941492-gul802cag83e4geb2ud9quhns8akjr94.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rutexgo.mobile_app",
+            "certificate_hash": "682a58498e0b74e3b1cb3b69e229f1742ebf6570"
+          }
+        },
+        {
           "client_id": "711545941492-scu5al49eoes35p4mgh3vu448r08aenp.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

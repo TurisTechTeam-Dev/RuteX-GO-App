@@ -50,15 +50,19 @@ class AppRoutes {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
       case mapNavigation:
-        final routeId = settings.arguments as String? ?? '';
+        final routeArgs = _mapNavigationArgs(settings.arguments);
 
         return MaterialPageRoute(
           builder: (context) => ChangeNotifierProvider(
             create: (context) => TripSimulationProvider(
               missionUseCases: context.read<MissionUseCases>(),
-              routeId: routeId,
+              routeId: routeArgs.routeId,
+              useGoogleDirections: !routeArgs.allowSimulation,
             ),
-            child: MapNavigationScreen(routeId: routeId),
+            child: MapNavigationScreen(
+              routeId: routeArgs.routeId,
+              allowSimulation: routeArgs.allowSimulation,
+            ),
           ),
         );
 
@@ -140,4 +144,28 @@ class AppRoutes {
 
     return false;
   }
+
+  static _MapNavigationArgs _mapNavigationArgs(Object? arguments) {
+    if (arguments is Map) {
+      return _MapNavigationArgs(
+        routeId: arguments['routeId']?.toString() ?? '',
+        allowSimulation: arguments['allowSimulation'] == true,
+      );
+    }
+
+    return _MapNavigationArgs(
+      routeId: arguments?.toString() ?? '',
+      allowSimulation: false,
+    );
+  }
+}
+
+class _MapNavigationArgs {
+  final String routeId;
+  final bool allowSimulation;
+
+  const _MapNavigationArgs({
+    required this.routeId,
+    required this.allowSimulation,
+  });
 }
