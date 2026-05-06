@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../core/widgets/backgrounds/extremadura_map_background.dart';
 import '../../../../core/widgets/titles/stroke_title.dart';
+import '../../../../core/utils/responsive_layout.dart';
 import '../../domain/entities/city.dart';
 import '../../domain/entities/tourist_route.dart';
 import '../../domain/usecases/routes_use_cases.dart';
@@ -30,7 +31,7 @@ class CitySelectionContent extends StatelessWidget {
         SafeArea(
           child: Column(
             children: [
-              const SizedBox(height: 20),
+              SizedBox(height: ResponsiveLayout.isCompact(context) ? 12 : 20),
               const StrokeTitle(text: "Selecciona una ciudad"),
               const SizedBox(height: 6),
               Padding(
@@ -41,7 +42,7 @@ class CitySelectionContent extends StatelessWidget {
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: ResponsiveLayout.isCompact(context) ? 12 : 20),
               Expanded(child: _CityGrid(routesUseCases: routesUseCases)),
             ],
           ),
@@ -101,13 +102,23 @@ class _CityGrid extends StatelessWidget {
               routeCountByCity,
             );
 
+            final width = MediaQuery.sizeOf(context).width;
+            final isTiny = width < 340;
+
+            final bottomPadding = MediaQuery.paddingOf(context).bottom;
+
             return GridView.builder(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 30),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: 0.72,
+              padding: EdgeInsets.fromLTRB(
+                ResponsiveLayout.horizontalPadding(context),
+                0,
+                ResponsiveLayout.horizontalPadding(context),
+                bottomPadding + 96,
+              ),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: width >= 620 ? 3 : 2,
+                crossAxisSpacing: isTiny ? 10 : 16,
+                mainAxisSpacing: isTiny ? 10 : 16,
+                childAspectRatio: isTiny ? 0.64 : 0.72,
               ),
               itemCount: sortedCities.length,
               itemBuilder: (context, index) {

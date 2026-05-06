@@ -23,6 +23,7 @@ class RouteCompletionSummary {
   final Duration elapsedTime;
   final List<QuizAnswerResult> answerResults;
   final List<String> skippedPoiNames;
+  final List<String> visitedPoiNames;
 
   const RouteCompletionSummary({
     required this.currentAttemptPoints,
@@ -38,5 +39,6 @@ class RouteCompletionSummary {
     required this.elapsedTime,
     required this.answerResults,
     required this.skippedPoiNames,
+    required this.visitedPoiNames,
   });
 }

@@ -173,8 +173,10 @@ class _MonumentInfoScreenState extends State<MonumentInfoScreen> {
                           );
                         }
                       },
-                      child: const Text(
+                      child: Text(
                         "EMPEZAR MISIÓN",
+                        textAlign: TextAlign.center,
+                        softWrap: true,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -183,7 +185,7 @@ class _MonumentInfoScreenState extends State<MonumentInfoScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 80),
+                  SizedBox(height: MediaQuery.paddingOf(context).bottom + 96),
                 ],
               ),
             ),

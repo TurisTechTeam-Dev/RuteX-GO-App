@@ -7,19 +7,21 @@
   Año: 2026
   -----------------------------------------------------------------------------
 */
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide NavigationMode;
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../app/navigation/app_routes.dart';
 import '../../../../core/widgets/cards/custom_cards.dart';
 import '../../../../core/widgets/images/framed_storage_image.dart';
 import '../../domain/entities/tourist_route.dart';
+import '../../../mission/presentation/navigation/models/navigation_types.dart';
 
 class RouteCard extends StatelessWidget {
   final TouristRoute route;
   final bool canStart;
   final List<String> pointNames;
   final bool isCheckingAvailability;
+  final bool isAdmin;
 
   const RouteCard({
     super.key,
@@ -27,6 +29,7 @@ class RouteCard extends StatelessWidget {
     required this.canStart,
     this.pointNames = const [],
     this.isCheckingAvailability = false,
+    this.isAdmin = false,
   });
 
   @override
@@ -34,7 +37,9 @@ class RouteCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: CustomCard(
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(
+          MediaQuery.sizeOf(context).width < 340 ? 10 : 12,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: _buildCardContent(context),
@@ -82,6 +87,7 @@ class RouteCard extends StatelessWidget {
         routeId: route.id,
         canStart: canStart,
         isCheckingAvailability: isCheckingAvailability,
+        isAdmin: isAdmin,
       ),
     );
 
@@ -184,14 +190,15 @@ class _RouteInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
+    return Wrap(
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 6,
+      runSpacing: 2,
       children: [
         Icon(icon, size: 18, color: AppColors.verdePrincipal),
-        const SizedBox(width: 6),
-        RichText(
-          text: TextSpan(
-            style: DefaultTextStyle.of(context).style.copyWith(fontSize: 12),
+        Text.rich(
+          TextSpan(
             children: [
               TextSpan(
                 text: '$label: ',
@@ -200,6 +207,8 @@ class _RouteInfo extends StatelessWidget {
               TextSpan(text: value),
             ],
           ),
+          textAlign: TextAlign.center,
+          style: DefaultTextStyle.of(context).style.copyWith(fontSize: 12),
         ),
       ],
     );
@@ -254,19 +263,21 @@ class _StartRouteButton extends StatelessWidget {
   final String routeId;
   final bool canStart;
   final bool isCheckingAvailability;
+  final bool isAdmin;
 
   const _StartRouteButton({
     required this.routeId,
     required this.canStart,
     required this.isCheckingAvailability,
+    required this.isAdmin,
   });
 
   @override
   Widget build(BuildContext context) {
     final buttonLabel = _buttonLabel();
 
-    return SizedBox(
-      height: 36,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 36),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: canStart
@@ -278,7 +289,7 @@ class _StartRouteButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24),
         ),
         onPressed: _buildOnPressed(context),
-        child: Text(buttonLabel),
+        child: Text(buttonLabel, textAlign: TextAlign.center, softWrap: true),
       ),
     );
   }
@@ -288,9 +299,11 @@ class _StartRouteButton extends StatelessWidget {
       return null;
     }
 
-    return () {
-      Navigator.pushNamed(context, AppRoutes.mapNavigation, arguments: routeId);
-    };
+    if (!isAdmin) {
+      return () => _startRoute(context, allowSimulation: false);
+    }
+
+    return () => _showAdminStartOptions(context);
   }
 
   String _buttonLabel() {
@@ -303,5 +316,52 @@ class _StartRouteButton extends StatelessWidget {
     }
 
     return "Ruta no disponible";
+  }
+
+  Future<void> _showAdminStartOptions(BuildContext context) async {
+    final selectedMode = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Iniciar ruta'),
+        content: const Text('Elige cómo quieres iniciar esta ruta.'),
+        actions: [
+          TextButton.icon(
+            onPressed: () => Navigator.pop(context, false),
+            icon: const Icon(Icons.map_outlined),
+            label: const Text('Hacer ruta'),
+          ),
+          TextButton.icon(
+            onPressed: () => Navigator.pop(context, true),
+            icon: const Icon(Icons.play_circle_outline),
+            label: const Text('Simular ruta'),
+          ),
+        ],
+      ),
+    );
+
+    if (selectedMode == null || !context.mounted) return;
+
+    _startRoute(context, allowSimulation: selectedMode);
+  }
+
+  void _startRoute(BuildContext context, {required bool allowSimulation}) {
+    // Determinamos rol y modo según si es admin y si ha escogido simulación
+    final userRole = isAdmin ? UserRole.admin : UserRole.normal;
+    final navigationMode = isAdmin
+        ? (allowSimulation
+              ? NavigationMode.adminSimulation
+              : NavigationMode.adminRoute)
+        : NavigationMode.userWalking;
+
+    Navigator.pushNamed(
+      context,
+      AppRoutes.mapNavigation,
+      arguments: {
+        'routeId': routeId,
+        'allowSimulation': allowSimulation,
+        'userRole': userRole,
+        'navigationMode': navigationMode,
+      },
+    );
   }
 }

@@ -9,6 +9,7 @@
 */
 import 'package:flutter/material.dart';
 
+import '../../../../core/utils/responsive_layout.dart';
 import '../../domain/entities/user_profile.dart';
 import 'profile_forms.dart';
 import 'profile_header.dart';
@@ -77,9 +78,15 @@ class ProfileContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final displayName = user.username.isNotEmpty ? user.username : user.name;
     final profileSections = _buildProfileSections(displayName);
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+      padding: EdgeInsets.fromLTRB(
+        ResponsiveLayout.horizontalPadding(context),
+        0,
+        ResponsiveLayout.horizontalPadding(context),
+        bottomPadding + 96,
+      ),
       child: Column(children: profileSections),
     );
   }

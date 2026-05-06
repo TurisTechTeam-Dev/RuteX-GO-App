@@ -373,29 +373,40 @@ class _ProfileActionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: OutlinedButton(
-            onPressed: isSaving ? null : onCancel,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.negroTexto,
-              side: const BorderSide(color: AppColors.verdeBorde),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrow = constraints.maxWidth < 320;
+        final cancelButton = OutlinedButton(
+          onPressed: isSaving ? null : onCancel,
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.negroTexto,
+            side: const BorderSide(color: AppColors.verdeBorde),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
             ),
-            child: const Text("Cancelar"),
           ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _ProfileActionButton(
-            text: isSaving ? savingText : saveText,
-            onPressed: isSaving ? null : onSave,
-          ),
-        ),
-      ],
+          child: const Text("Cancelar"),
+        );
+        final saveButton = _ProfileActionButton(
+          text: isSaving ? savingText : saveText,
+          onPressed: isSaving ? null : onSave,
+        );
+
+        if (isNarrow) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [cancelButton, const SizedBox(height: 10), saveButton],
+          );
+        }
+
+        return Row(
+          children: [
+            Expanded(child: cancelButton),
+            const SizedBox(width: 10),
+            Expanded(child: saveButton),
+          ],
+        );
+      },
     );
   }
 }
@@ -408,8 +419,8 @@ class _ProfileActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 44,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 44),
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
@@ -418,7 +429,7 @@ class _ProfileActionButton extends StatelessWidget {
           disabledBackgroundColor: AppColors.grisSombra,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
-        child: Text(text, textAlign: TextAlign.center),
+        child: Text(text, textAlign: TextAlign.center, softWrap: true),
       ),
     );
   }

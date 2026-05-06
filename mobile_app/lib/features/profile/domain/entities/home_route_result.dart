@@ -6,7 +6,8 @@
   TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
   Año: 2026
   -----------------------------------------------------------------------------
-*/class HomeAnswerResult {
+*/
+class HomeAnswerResult {
   final String monumentName;
   final String question;
   final String selectedAnswer;
@@ -35,6 +36,7 @@ class HomeRouteResult {
   final String time;
   final List<HomeAnswerResult> answerResults;
   final List<String> skippedPois;
+  final List<String> visitedPoiNames;
 
   const HomeRouteResult({
     required this.routeName,
@@ -49,5 +51,6 @@ class HomeRouteResult {
     required this.time,
     required this.answerResults,
     required this.skippedPois,
+    required this.visitedPoiNames,
   });
 }

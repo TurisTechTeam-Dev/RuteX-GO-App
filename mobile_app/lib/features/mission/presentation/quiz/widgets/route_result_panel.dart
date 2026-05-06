@@ -8,6 +8,7 @@
   -----------------------------------------------------------------------------
 */
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../../../app/navigation/app_routes.dart';
 import '../models/route_result_data.dart';
@@ -36,7 +37,12 @@ class RouteResultPanel extends StatelessWidget {
 
     return Container(
       constraints: const BoxConstraints(maxWidth: 360),
-      padding: const EdgeInsets.fromLTRB(22, 28, 22, 28),
+      padding: EdgeInsets.fromLTRB(
+        MediaQuery.sizeOf(context).width < 340 ? 14 : 22,
+        24,
+        MediaQuery.sizeOf(context).width < 340 ? 14 : 22,
+        24,
+      ),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface.withValues(
           alpha: theme.brightness == Brightness.dark ? 0.92 : 0.84,
@@ -53,7 +59,7 @@ class RouteResultPanel extends StatelessWidget {
             '${result.routeName}\nCompletada',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 20,
+              fontSize: MediaQuery.sizeOf(context).width < 340 ? 18 : 20,
               fontWeight: FontWeight.w800,
               color: theme.brightness == Brightness.dark
                   ? theme.colorScheme.onSurface
@@ -88,10 +94,10 @@ class RouteResultPanel extends StatelessWidget {
             onPressed: () => _showQuestionResults(context, result),
           ),
           const SizedBox(height: 14),
-          const _ActionButton(
+          _ActionButton(
             label: 'Compartir',
-            color: Color(0xFF4DB46E),
-            onPressed: null,
+            color: const Color(0xFF4DB46E),
+            onPressed: () => _shareResult(result),
           ),
           const SizedBox(height: 14),
           _ActionButton(
@@ -124,6 +130,59 @@ class RouteResultPanel extends StatelessWidget {
       ),
       builder: (context) => QuestionResultsSheet(result: result),
     );
+  }
+
+  Future<void> _shareResult(RouteResultData result) async {
+    // ✅ Convertir IDs a nombres usando los datos de respuestas
+    final monumentNames = _extractMonumentNames(result);
+
+    final visitedText = monumentNames.isNotEmpty
+        ? monumentNames.join(', ')
+        : '${result.visitedMonuments}/${result.totalPois}';
+
+    final shareText =
+        '''
+🎉 ¡Acabo de completar la increíble ruta "${result.routeName}" en RuteX Go!
+
+📍 Explora los monumentos más fascinantes de Extremadura mientras resuelves emocionantes misiones.
+
+📊 Estos fueron mis resultados:
+🏆 Puntuación: ${result.attemptScore}/${result.totalPossiblePoints} puntos
+🗺️ Monumentos visitados: $visitedText
+🧠 Respuestas correctas: ${result.correctAnswers}/${result.totalAnswers} preguntas
+⏱️ Tiempo empleado: ${result.time}
+
+¡Descarga RuteX Go ahora y vive una experiencia única explorando la historia de Extremadura! 🏛️✨
+
+Desafíate a ti mismo y aprende sobre nuestro patrimonio cultural. ¡Te espera una aventura extraordinaria!
+
+#RuteXGo #ExtremaduraMonumental #DescrubridorDeMonumentos #TurismoInteligente #GamificaciónTurística
+''';
+
+    try {
+      await SharePlus.instance.share(
+        ShareParams(
+          text: shareText,
+          subject: '¡Completa la ruta ${result.routeName} en RuteX Go! 🏛️',
+        ),
+      );
+    } catch (e) {
+      debugPrint("[SHARE] Error compartiendo resultado: $e");
+    }
+  }
+
+  // ✅ Función para extraer nombres únicos de monumentos desde las respuestas
+  List<String> _extractMonumentNames(RouteResultData result) {
+    final monumentNames = <String>{};
+
+    // Recorrer todas las respuestas y extraer nombres únicos
+    for (final answer in result.answerResults) {
+      if (answer.monumentName.isNotEmpty) {
+        monumentNames.add(answer.monumentName);
+      }
+    }
+
+    return monumentNames.toList();
   }
 }
 
@@ -172,9 +231,8 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 170,
-      height: 48,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: 170, minHeight: 48),
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
@@ -184,7 +242,7 @@ class _ActionButton extends StatelessWidget {
           disabledForegroundColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         ),
-        child: Text(label, textAlign: TextAlign.center),
+        child: Text(label, textAlign: TextAlign.center, softWrap: true),
       ),
     );
   }

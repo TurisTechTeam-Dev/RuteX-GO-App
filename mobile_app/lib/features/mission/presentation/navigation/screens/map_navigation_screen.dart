@@ -7,7 +7,7 @@
   Año: 2026
   -----------------------------------------------------------------------------
 */
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide NavigationMode;
 import 'package:provider/provider.dart';
 
 import '../../../../../app/navigation/app_routes.dart';
@@ -16,6 +16,7 @@ import '../../mission_flow_result.dart';
 import '../../quiz/models/route_result_args.dart';
 import '../../quiz/quiz_route_progress.dart';
 import '../../qr_scanner/models/mission_scanner_args.dart';
+import '../models/navigation_types.dart';
 import '../models/route_completion_summary.dart';
 import '../provider/trip_provider.dart';
 import '../utils/route_duration_formatter.dart';
@@ -25,8 +26,17 @@ import '../widgets/navigation_info_panel.dart';
 
 class MapNavigationScreen extends StatefulWidget {
   final String routeId;
+  final bool allowSimulation;
+  final UserRole userRole;
+  final NavigationMode navigationMode;
 
-  const MapNavigationScreen({super.key, required this.routeId});
+  const MapNavigationScreen({
+    super.key,
+    required this.routeId,
+    required this.allowSimulation,
+    required this.userRole,
+    required this.navigationMode,
+  });
 
   @override
   State<MapNavigationScreen> createState() => _MapNavigationScreenState();
@@ -82,6 +92,7 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
               currentPosition: tripProvider.currentPosition,
               routePoints: tripProvider.routePoints,
               pointsOfInterest: tripProvider.pointsOfInterest,
+              useGoogleMaps: widget.userRole == UserRole.normal,
             ),
             if (tripProvider.isLoading)
               Container(
@@ -110,36 +121,9 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
               bottom: bottomPadding + 48,
               left: 30,
               right: 30,
-              child: ElevatedButton(
-                onPressed:
-                    tripProvider.isSimulating || tripProvider.isCalculatingRoute
-                    ? null
-                    : () => tripProvider.startSimulation(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      tripProvider.isSimulating ||
-                          tripProvider.isCalculatingRoute
-                      ? Colors.grey
-                      : Colors.green,
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-                child: Text(
-                  tripProvider.isCalculatingRoute
-                      ? "CALCULANDO SIGUIENTE TRAMO..."
-                      : tripProvider.isSimulating
-                      ? "SIMULANDO RECORRIDO..."
-                      : tripProvider.completedPoiIndices.isEmpty
-                      ? "COMENZAR RUTA"
-                      : "CONTINUAR RUTA",
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+              child: widget.allowSimulation
+                  ? _SimulationButton(tripProvider: tripProvider)
+                  : const _WalkingRouteStatus(),
             ),
             if (!tripProvider.isLoading)
               Positioned(
@@ -170,15 +154,17 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
     final nextStop = provider.pointsOfInterest[provider.currentPoiIndex].name;
     final distance = provider.distanceToNextPoi.toInt();
     final instruction = provider.currentNavigationStep?.instruction;
-    final simulationState = provider.isSimulating
-        ? 'La simulación está en marcha.'
-        : 'Pulsa comenzar o continuar ruta para simular el recorrido.';
+    final routeModeText = widget.allowSimulation
+        ? provider.isSimulating
+              ? 'La simulación está en marcha.'
+              : 'Puedes simular el recorrido desde el botón inferior.'
+        : 'Sigue la ruta en Google Maps y acércate al punto para continuar.';
 
     if (instruction == null || instruction.isEmpty) {
-      return 'Pantalla de navegación. El siguiente punto es $nextStop, a unos $distance metros. $simulationState';
+      return 'Pantalla de navegación. El siguiente punto es $nextStop, a unos $distance metros. $routeModeText';
     }
 
-    return 'Pantalla de navegación. El siguiente punto es $nextStop, a unos $distance metros. Indicación actual: $instruction. $simulationState';
+    return 'Pantalla de navegación. El siguiente punto es $nextStop, a unos $distance metros. Indicación actual: $instruction. $routeModeText';
   }
 
   void _showArrivalBottomSheet(
@@ -285,6 +271,7 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
         totalAnswers: summary.totalAnswers,
         answerResults: summary.answerResults,
         skippedPois: summary.skippedPoiNames,
+        visitedPoiNames: summary.visitedPoiNames,
       ),
     );
   }
@@ -311,5 +298,78 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
     );
 
     return shouldLeave ?? false;
+  }
+}
+
+class _SimulationButton extends StatelessWidget {
+  final TripSimulationProvider tripProvider;
+
+  const _SimulationButton({required this.tripProvider});
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: tripProvider.isSimulating || tripProvider.isCalculatingRoute
+          ? null
+          : () => tripProvider.startSimulation(),
+      style: ElevatedButton.styleFrom(
+        backgroundColor:
+            tripProvider.isSimulating || tripProvider.isCalculatingRoute
+            ? Colors.grey
+            : Colors.green,
+        padding: const EdgeInsets.symmetric(vertical: 18),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      ),
+      child: Text(
+        tripProvider.isCalculatingRoute
+            ? "CALCULANDO SIGUIENTE TRAMO..."
+            : tripProvider.isSimulating
+            ? "SIMULANDO RECORRIDO..."
+            : tripProvider.completedPoiIndices.isEmpty
+            ? "SIMULAR RUTA"
+            : "CONTINUAR SIMULACIÓN",
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
+        textAlign: TextAlign.center,
+        softWrap: true,
+      ),
+    );
+  }
+}
+
+class _WalkingRouteStatus extends StatelessWidget {
+  const _WalkingRouteStatus();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.green,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [
+          BoxShadow(color: Colors.black26, blurRadius: 8, offset: Offset(0, 3)),
+        ],
+      ),
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.directions_walk, color: Colors.white),
+          SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'RUTA A PIE EN CURSO',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

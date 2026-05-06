@@ -7,7 +7,6 @@
   Año: 2026
   -----------------------------------------------------------------------------
 */
-import '../quiz_route_progress.dart';
 import 'route_result_args.dart';
 
 class RouteResultData {
@@ -23,6 +22,7 @@ class RouteResultData {
   final String time;
   final List<AnswerResultData> answerResults;
   final List<String> skippedPois;
+  final List<String> visitedPoiNames;
 
   const RouteResultData({
     required this.routeName,
@@ -37,26 +37,8 @@ class RouteResultData {
     required this.time,
     required this.answerResults,
     required this.skippedPois,
+    required this.visitedPoiNames,
   });
-
-  bool get hasNewBestScore => savedBestScore > previousBestScore;
-
-  String get previousBestScoreLabel =>
-      '$previousBestScore/$totalPossiblePoints';
-
-  String get savedBestScoreLabel => '$savedBestScore/$totalPossiblePoints';
-
-  String get visitedPoisLabel => '$visitedMonuments/$totalPois';
-
-  Map<String, List<AnswerResultData>> get groupedAnswers {
-    final grouped = <String, List<AnswerResultData>>{};
-
-    for (final answer in answerResults) {
-      grouped.putIfAbsent(answer.monumentName, () => []).add(answer);
-    }
-
-    return grouped;
-  }
 
   factory RouteResultData.fromArgs(RouteResultArgs args) {
     return RouteResultData(
@@ -70,8 +52,17 @@ class RouteResultData {
       correctAnswers: args.correctAnswers,
       totalAnswers: args.totalAnswers,
       time: args.elapsedTimeLabel,
-      answerResults: _answerResultsFromArgs(args),
+      answerResults: args.answerResults.map((answer) {
+        return AnswerResultData(
+          monumentName: answer.monumentName,
+          question: answer.question,
+          selectedAnswer: answer.selectedAnswer,
+          correctAnswer: answer.correctAnswer,
+          isCorrect: answer.isCorrect,
+        );
+      }).toList(),
       skippedPois: args.skippedPois,
+      visitedPoiNames: args.visitedPoiNames,
     );
   }
 
@@ -83,23 +74,27 @@ class RouteResultData {
       attemptScore: 0,
       visitedMonuments: 0,
       totalPois: 0,
-      totalPossiblePoints: 100,
+      totalPossiblePoints: 0,
       correctAnswers: 0,
       totalAnswers: 0,
-      time: '--',
-      answerResults: [],
-      skippedPois: [],
+      time: '--:--',
+      answerResults: <AnswerResultData>[],
+      skippedPois: <String>[],
+      visitedPoiNames: <String>[],
     );
   }
 
-  static List<AnswerResultData> _answerResultsFromArgs(RouteResultArgs args) {
-    final answerResults = <AnswerResultData>[];
+  String get previousBestScoreLabel =>
+      '$previousBestScore/$totalPossiblePoints';
+  String get visitedPoisLabel => '$visitedMonuments/$totalPois';
 
-    for (final answer in args.answerResults) {
-      answerResults.add(AnswerResultData.fromQuiz(answer));
+  Map<String, List<AnswerResultData>> get groupedAnswers {
+    final grouped = <String, List<AnswerResultData>>{};
+    for (final answer in answerResults) {
+      grouped.putIfAbsent(answer.monumentName, () => <AnswerResultData>[]);
+      grouped[answer.monumentName]!.add(answer);
     }
-
-    return answerResults;
+    return grouped;
   }
 }
 
@@ -117,33 +112,10 @@ class AnswerResultData {
     required this.correctAnswer,
     required this.isCorrect,
   });
-
-  factory AnswerResultData.fromQuiz(QuizAnswerResult data) {
-    return AnswerResultData(
-      monumentName: data.monumentName,
-      question: data.question,
-      selectedAnswer: data.selectedAnswer,
-      correctAnswer: data.correctAnswer,
-      isCorrect: data.isCorrect,
-    );
-  }
 }
 
 class AnswerTextSanitizer {
-  const AnswerTextSanitizer._();
-
-  static String clean(String value) {
-    final cleanLines = <String>[];
-    final normalizedText = value.replaceAll('\r\n', '\n');
-
-    for (final line in normalizedText.split('\n')) {
-      final cleanLine = line.trim();
-
-      if (cleanLine.isNotEmpty) {
-        cleanLines.add(cleanLine);
-      }
-    }
-
-    return cleanLines.join('\n').trim();
+  static String clean(String text) {
+    return text.replaceAll(RegExp(r'<[^>]*>'), '').trim();
   }
 }

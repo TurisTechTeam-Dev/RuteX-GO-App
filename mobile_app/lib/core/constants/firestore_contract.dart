@@ -101,6 +101,7 @@ class ResultFields {
   static const totalRespuestas = 'total_respuestas';
   static const respuestas = 'respuestas';
   static const puntosInteresSaltados = 'puntos_interes_saltados';
+  static const puntosInteresVisitadosNombres = 'puntos_interes_visitados_nombres';
   static const fechaCreacion = 'fecha_creacion';
 }
 

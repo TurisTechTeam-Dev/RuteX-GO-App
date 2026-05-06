@@ -9,9 +9,12 @@
 */
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../core/widgets/backgrounds/extremadura_map_background.dart';
 import '../../../../core/widgets/titles/stroke_title.dart';
+import '../../../../core/utils/responsive_layout.dart';
+import '../../../auth/domain/usecases/auth_use_cases.dart';
 import '../../domain/entities/tourist_route.dart';
 import '../../domain/usecases/routes_use_cases.dart';
 import 'route_card.dart';
@@ -34,9 +37,9 @@ class RouteSelectionContent extends StatelessWidget {
         SafeArea(
           child: Column(
             children: [
-              const SizedBox(height: 20),
+              SizedBox(height: ResponsiveLayout.isCompact(context) ? 12 : 20),
               const StrokeTitle(text: "Rutas Disponibles"),
-              const SizedBox(height: 20),
+              SizedBox(height: ResponsiveLayout.isCompact(context) ? 12 : 20),
               Expanded(
                 child: _RouteList(
                   routesUseCases: routesUseCases,
@@ -59,6 +62,8 @@ class _RouteList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authUseCases = context.read<AuthUseCases>();
+
     return StreamBuilder<List<TouristRoute>>(
       stream: routesUseCases.getRoutesByCityKeys(cityKeys),
       builder: (context, snapshot) {
@@ -89,7 +94,7 @@ class _RouteList extends StatelessWidget {
         }
 
         return FutureBuilder<_RouteListData>(
-          future: _loadRouteListData(routes),
+          future: _loadRouteListData(routes, authUseCases),
           builder: (context, routeDataSnapshot) {
             final routeData =
                 routeDataSnapshot.data ?? const _RouteListData.empty();
@@ -97,7 +102,12 @@ class _RouteList extends StatelessWidget {
                 routeDataSnapshot.connectionState != ConnectionState.done;
 
             return ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.fromLTRB(
+                ResponsiveLayout.horizontalPadding(context),
+                0,
+                ResponsiveLayout.horizontalPadding(context),
+                MediaQuery.paddingOf(context).bottom + 96,
+              ),
               itemCount: routes.length,
               itemBuilder: (context, index) {
                 final route = routes[index];
@@ -110,6 +120,7 @@ class _RouteList extends StatelessWidget {
                   canStart: canStart,
                   pointNames: routeData.pointNames[route.id] ?? const [],
                   isCheckingAvailability: isCheckingAvailability,
+                  isAdmin: routeData.isAdmin,
                 );
               },
             );
@@ -119,23 +130,40 @@ class _RouteList extends StatelessWidget {
     );
   }
 
-  Future<_RouteListData> _loadRouteListData(List<TouristRoute> routes) async {
+  Future<_RouteListData> _loadRouteListData(
+    List<TouristRoute> routes,
+    AuthUseCases authUseCases,
+  ) async {
     final availability = await routesUseCases.executeGetRouteAvailability(
       routes,
     );
     final pointNames = await routesUseCases.executeGetRoutePointNames(routes);
+    final currentUser = authUseCases.getCurrentUser();
+    final isAdmin = currentUser == null
+        ? false
+        : await authUseCases.checkAdminStatus(currentUser.uid);
 
-    return _RouteListData(availability: availability, pointNames: pointNames);
+    return _RouteListData(
+      availability: availability,
+      pointNames: pointNames,
+      isAdmin: isAdmin,
+    );
   }
 }
 
 class _RouteListData {
   final Map<String, bool> availability;
   final Map<String, List<String>> pointNames;
+  final bool isAdmin;
 
-  const _RouteListData({required this.availability, required this.pointNames});
+  const _RouteListData({
+    required this.availability,
+    required this.pointNames,
+    required this.isAdmin,
+  });
 
   const _RouteListData.empty()
     : availability = const <String, bool>{},
-      pointNames = const <String, List<String>>{};
+      pointNames = const <String, List<String>>{},
+      isAdmin = false;
 }

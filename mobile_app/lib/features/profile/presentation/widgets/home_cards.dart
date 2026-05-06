@@ -8,7 +8,6 @@
   -----------------------------------------------------------------------------
 */
 import 'package:flutter/material.dart';
-
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/cards/custom_cards.dart';
 import '../../../../core/widgets/images/storage_aware_image.dart';
@@ -47,30 +46,36 @@ class HomeUserCard extends StatelessWidget {
             preferOfflineFallback: preferOfflineFallback,
           ),
           const SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                displayName,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onSurface,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  displayName,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                explorerLabel,
-                style: TextStyle(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.68),
+                const SizedBox(height: 4),
+                Text(
+                  explorerLabel,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.68),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              _RankLine(
-                rankName: rankName,
-                rankLogo: rankLogo,
-                preferOfflineFallback: preferOfflineFallback,
-              ),
-            ],
+                const SizedBox(height: 4),
+                _RankLine(
+                  rankName: rankName,
+                  rankLogo: rankLogo,
+                  preferOfflineFallback: preferOfflineFallback,
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -167,7 +172,12 @@ class _RankLine extends StatelessWidget {
   Widget build(BuildContext context) {
     final rankContent = _buildRankContent(context);
 
-    return Row(mainAxisSize: MainAxisSize.min, children: rankContent);
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 6,
+      runSpacing: 4,
+      children: rankContent,
+    );
   }
 
   List<Widget> _buildRankContent(BuildContext context) {
@@ -195,7 +205,6 @@ class _RankLine extends StatelessWidget {
         (!preferOfflineFallback || _isAssetPath(rankLogo));
 
     if (canShowRankLogo) {
-      content.add(const SizedBox(width: 6));
       content.add(
         Container(
           width: 30,
@@ -324,7 +333,7 @@ class HomeRouteCard extends StatelessWidget {
               children: [
                 const Icon(Icons.track_changes, size: 18),
                 const SizedBox(width: 6),
-                Text("Misiones completadas: $missions"),
+                Expanded(child: Text("Misiones completadas: $missions")),
               ],
             ),
             const SizedBox(height: 6),
@@ -332,7 +341,7 @@ class HomeRouteCard extends StatelessWidget {
               children: [
                 const Icon(Icons.calendar_today, size: 18),
                 const SizedBox(width: 6),
-                Text(date),
+                Expanded(child: Text(date)),
               ],
             ),
             const SizedBox(height: 6),
@@ -340,7 +349,11 @@ class HomeRouteCard extends StatelessWidget {
               children: [
                 const Icon(Icons.emoji_events, size: 18),
                 const SizedBox(width: 6),
-                Text("Puntos obtenidos: $obtainedPoints / $totalPoints"),
+                Expanded(
+                  child: Text(
+                    "Puntos obtenidos: $obtainedPoints / $totalPoints",
+                  ),
+                ),
               ],
             ),
           ],
@@ -396,6 +409,7 @@ class HomeRouteCard extends StatelessWidget {
       time: result.time,
       answerResults: result.answerResults.map(_answerResultData).toList(),
       skippedPois: result.skippedPois,
+      visitedPoiNames: result.visitedPoiNames,
     );
   }
 

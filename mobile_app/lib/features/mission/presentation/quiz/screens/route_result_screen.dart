@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/widgets/audio_guide/audio_guide.dart';
 import '../../../../../core/widgets/backgrounds/extremadura_map_background.dart';
+import '../../../../../core/utils/responsive_layout.dart';
 import '../../../../../app/widgets/custom_drawer.dart';
 import '../../../../../app/widgets/top_app_bar.dart';
 import '../models/route_result_args.dart';
@@ -45,7 +46,12 @@ class RouteResultScreen extends StatelessWidget {
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(28, 24, 28, 32),
+                padding: EdgeInsets.fromLTRB(
+                  ResponsiveLayout.horizontalPadding(context),
+                  24,
+                  ResponsiveLayout.horizontalPadding(context),
+                  MediaQuery.paddingOf(context).bottom + 96,
+                ),
                 child: RouteResultPanel(result: result),
               ),
             ),

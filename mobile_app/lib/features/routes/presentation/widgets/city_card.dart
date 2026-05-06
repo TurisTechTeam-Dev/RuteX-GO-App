@@ -33,13 +33,13 @@ class CityCard extends StatelessWidget {
     final hasRoutes = routesCount > 0;
 
     return CustomCard(
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(MediaQuery.sizeOf(context).width < 340 ? 10 : 12),
       child: Column(
         children: [
           FramedStorageImage(
             source: city.image,
             fallbackIcon: Icons.location_city,
-            fallbackIconSize: 48,
+            fallbackIconSize: MediaQuery.sizeOf(context).width < 340 ? 38 : 48,
           ),
           const SizedBox(height: 8),
           _StrokeCityTitle(text: city.title),
@@ -83,6 +83,9 @@ class _RouteCounter extends StatelessWidget {
 
     return Text(
       "$routesCount rutas disponibles",
+      textAlign: TextAlign.center,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
       style: Theme.of(context).textTheme.labelMedium,
     );
   }
@@ -118,7 +121,7 @@ class _ExploreButton extends StatelessWidget {
                 );
               }
             : null,
-        child: const Text("Explorar"),
+        child: const FittedBox(child: Text("Explorar")),
       ),
     );
   }
@@ -135,6 +138,9 @@ class _StrokeCityTitle extends StatelessWidget {
       children: [
         Text(
           text,
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -146,6 +152,9 @@ class _StrokeCityTitle extends StatelessWidget {
         ),
         Text(
           text,
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,

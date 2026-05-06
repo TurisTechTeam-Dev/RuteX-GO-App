@@ -13,8 +13,13 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 
+import '../config/native_api_keys.dart';
+
+enum NavigationRouteSource { appWalking, googleWalking }
+
 class RoutingService {
-  static const _valhallaRouteUrl = 'https://valhalla1.openstreetmap.de/route';
+  static const _googleDirectionsUrl =
+      'https://maps.googleapis.com/maps/api/directions/json';
   static const _osrmWalkingProfiles = ['foot'];
 
   Future<List<LatLng>> getRoute(LatLng start, LatLng end) async {
@@ -22,152 +27,150 @@ class RoutingService {
     return route.points;
   }
 
-  Future<NavigationRoute> getNavigationRoute(LatLng start, LatLng end) async {
+  Future<NavigationRoute> getNavigationRoute(
+      LatLng start,
+      LatLng end, {
+        NavigationRouteSource source = NavigationRouteSource.appWalking,
+      }) async {
     if (start.latitude == end.latitude && start.longitude == end.longitude) {
       return NavigationRoute(points: [start, end]);
     }
 
-    // Valhalla da mejores indicaciones peatonales; OSRM se mantiene como
-    // respaldo para que el mapa siga dibujando ruta cuando el primer servicio
-    // falla o no devuelve geometría.
-    final pedestrianRoute = await _getValhallaPedestrianRoute(start, end);
-    if (pedestrianRoute.points.isNotEmpty) return pedestrianRoute;
+    if (source == NavigationRouteSource.googleWalking) {
+      final googleRoute = await _getGoogleWalkingRoute(start, end);
+      if (googleRoute.points.isNotEmpty) return googleRoute;
 
+      // Si Google falla, intentamos OSRM como respaldo rápido.
+      final osrmRoute = await _getOsrmFallbackRoute(start, end);
+      if (osrmRoute.points.isNotEmpty) return osrmRoute;
+
+      debugPrint('Google/OSRM fallaron, usando linea recta.');
+      return NavigationRoute(points: [start, end]);
+    }
+
+    // appWalking (admin): OSRM primero para evitar los timeouts largos de Valhalla.
     final osrmRoute = await _getOsrmFallbackRoute(start, end);
     if (osrmRoute.points.isNotEmpty) return osrmRoute;
 
-    debugPrint('Plan B: linea recta al no poder calcular ruta peatonal');
+    debugPrint('OSRM fallo en appWalking, usando linea recta.');
     return NavigationRoute(points: [start, end]);
   }
 
-  Future<NavigationRoute> _getValhallaPedestrianRoute(
-    LatLng start,
-    LatLng end,
-  ) async {
-    final url = Uri.parse(_valhallaRouteUrl);
-    final body = jsonEncode({
-      'locations': [
-        {'lat': start.latitude, 'lon': start.longitude},
-        {'lat': end.latitude, 'lon': end.longitude},
-      ],
-      'costing': 'pedestrian',
-      'directions_options': {'units': 'kilometers', 'language': 'es-ES'},
-    });
+  Future<NavigationRoute> _getGoogleWalkingRoute(
+      LatLng start,
+      LatLng end,
+      ) async {
+    final apiKey = await NativeApiKeys.googleDirectionsApiKey();
+    if (apiKey.isEmpty) {
+      debugPrint('Google Directions sin clave; fallback a OSRM/linea recta');
+      return const NavigationRoute(points: []);
+    }
+
+    final uri = Uri.parse(_googleDirectionsUrl).replace(
+      queryParameters: {
+        'origin': '${start.latitude},${start.longitude}',
+        'destination': '${end.latitude},${end.longitude}',
+        'mode': 'walking',
+        'language': 'es',
+        'key': apiKey,
+      },
+    );
 
     try {
-      final response = await http
-          .post(
-            url,
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json',
-              'User-Agent': 'RutexGo_App_Demo',
-            },
-            body: body,
-          )
-          .timeout(const Duration(seconds: 12));
-
+      final response = await http.get(uri).timeout(const Duration(seconds: 6));
       if (response.statusCode != 200) {
-        debugPrint('Valhalla devolvio ${response.statusCode}');
+        debugPrint('Google Directions devolvio ${response.statusCode}');
         return const NavigationRoute(points: []);
       }
 
       final data = json.decode(response.body);
-      final trip = data['trip'];
-      if (trip is! Map) return const NavigationRoute(points: []);
-
-      final rawLegs = trip['legs'];
-      if (rawLegs is! List || rawLegs.isEmpty) {
+      if (data is! Map || data['status'] != 'OK') {
+        debugPrint('Google Directions sin ruta walking: ${data['status']}');
         return const NavigationRoute(points: []);
       }
 
-      final points = <LatLng>[];
-      final steps = <NavigationStep>[];
-
-      for (final rawLeg in rawLegs) {
-        if (rawLeg is! Map) continue;
-
-        final shape = rawLeg['shape']?.toString();
-        if (shape == null || shape.isEmpty) continue;
-
-        final legPoints = _decodePolyline(shape, precision: 6);
-        points.addAll(legPoints);
-        steps.addAll(_valhallaStepsFromLeg(rawLeg, legPoints));
+      final routes = data['routes'];
+      if (routes is! List || routes.isEmpty || routes.first is! Map) {
+        return const NavigationRoute(points: []);
       }
 
-      debugPrint(
-        'Ruta peatonal calculada con Valhalla: '
-        '${points.length} puntos, ${steps.length} pasos',
-      );
+      final route = routes.first as Map;
+      final overviewPolyline = route['overview_polyline'];
+      final encodedPolyline = overviewPolyline is Map
+          ? overviewPolyline['points']?.toString()
+          : null;
+      if (encodedPolyline == null || encodedPolyline.isEmpty) {
+        return const NavigationRoute(points: []);
+      }
+
+      final points = _decodePolyline(encodedPolyline);
+      final steps = _googleStepsFromRoute(route);
       return NavigationRoute(points: points, steps: steps);
     } catch (e) {
-      debugPrint('Fallo calculando ruta peatonal con Valhalla: $e');
+      debugPrint('Fallo con Google Directions walking: $e');
       return const NavigationRoute(points: []);
     }
   }
 
-  List<NavigationStep> _valhallaStepsFromLeg(
-    Map rawLeg,
-    List<LatLng> legPoints,
-  ) {
-    final rawManeuvers = rawLeg['maneuvers'];
-    if (rawManeuvers is! List || legPoints.isEmpty) return [];
+  List<NavigationStep> _googleStepsFromRoute(Map route) {
+    final rawLegs = route['legs'];
+    if (rawLegs is! List) return [];
 
     final steps = <NavigationStep>[];
-    for (final rawManeuver in rawManeuvers) {
-      if (rawManeuver is! Map) continue;
+    for (final rawLeg in rawLegs) {
+      if (rawLeg is! Map) continue;
 
-      final beginIndex =
-          (rawManeuver['begin_shape_index'] as num?)?.toInt() ?? 0;
-      final safeIndex = beginIndex.clamp(0, legPoints.length - 1);
-      final streetNames = rawManeuver['street_names'];
-      final roadName = streetNames is List && streetNames.isNotEmpty
-          ? streetNames.first.toString()
-          : '';
-      final instruction =
-          rawManeuver['instruction']?.toString() ??
-          _instructionFor(type: '', modifier: null, roadName: roadName);
-      final lengthKm = (rawManeuver['length'] as num?)?.toDouble() ?? 0;
-      final duration = (rawManeuver['time'] as num?)?.toDouble() ?? 0;
-      final type = rawManeuver['type']?.toString() ?? '';
+      final rawSteps = rawLeg['steps'];
+      if (rawSteps is! List) continue;
 
-      steps.add(
-        NavigationStep(
-          instruction: instruction,
-          maneuverLocation: legPoints[safeIndex],
-          distance: lengthKm * 1000,
-          duration: duration,
-          maneuverType: type,
-          modifier: null,
-          roadName: roadName,
-        ),
-      );
+      for (final rawStep in rawSteps) {
+        if (rawStep is! Map) continue;
+
+        final startLocation = rawStep['start_location'];
+        if (startLocation is! Map) continue;
+
+        final latitude = (startLocation['lat'] as num?)?.toDouble();
+        final longitude = (startLocation['lng'] as num?)?.toDouble();
+        if (latitude == null || longitude == null) continue;
+
+        steps.add(
+          NavigationStep(
+            instruction: _stripHtml(rawStep['html_instructions']?.toString()),
+            maneuverLocation: LatLng(latitude, longitude),
+            distance: _googleNumericValue(rawStep['distance']),
+            duration: _googleNumericValue(rawStep['duration']),
+            maneuverType: rawStep['maneuver']?.toString() ?? '',
+            modifier: null,
+            roadName: '',
+          ),
+        );
+      }
     }
 
     return steps;
   }
 
   Future<NavigationRoute> _getOsrmFallbackRoute(
-    LatLng start,
-    LatLng end,
-  ) async {
+      LatLng start,
+      LatLng end,
+      ) async {
     for (final profile in _osrmWalkingProfiles) {
       final url = Uri.parse(
         'https://router.project-osrm.org/route/v1/$profile/'
-        '${start.longitude},${start.latitude};${end.longitude},${end.latitude}'
-        '?overview=full&geometries=polyline&steps=true',
+            '${start.longitude},${start.latitude};${end.longitude},${end.latitude}'
+            '?overview=full&geometries=polyline&steps=true',
       );
 
       try {
         final response = await http
             .get(
-              url,
-              headers: {
-                'Accept': 'application/json',
-                'User-Agent': 'RutexGo_App_Demo',
-              },
-            )
-            .timeout(const Duration(seconds: 12));
+          url,
+          headers: {
+            'Accept': 'application/json',
+            'User-Agent': 'RutexGo_App',
+          },
+        )
+            .timeout(const Duration(seconds: 4));
 
         if (response.statusCode == 200) {
           final data = json.decode(response.body);
@@ -177,18 +180,15 @@ class RoutingService {
             final points = _decodePolyline(encodedPolyline);
             final steps = _osrmStepsFromRoute(route);
             debugPrint(
-              'Ruta fallback OSRM con perfil $profile: '
-              '${points.length} puntos, ${steps.length} pasos',
+              'Ruta OSRM ($profile): ${points.length} puntos, ${steps.length} pasos',
             );
             return NavigationRoute(points: points, steps: steps);
           }
         } else {
-          debugPrint(
-            'OSRM devolvio ${response.statusCode} con perfil $profile',
-          );
+          debugPrint('OSRM devolvio ${response.statusCode} con perfil $profile');
         }
       } catch (e) {
-        debugPrint('Fallo con fallback OSRM $profile: $e');
+        debugPrint('Fallo con OSRM $profile: $e');
       }
     }
 
@@ -262,11 +262,11 @@ class RoutingService {
       case 'turn':
         return 'Gira $direction$roadSuffix';
       case 'new name':
-        return 'Continúa $direction$roadSuffix';
+        return 'Continua $direction$roadSuffix';
       case 'continue':
-        return 'Continúa$roadSuffix';
+        return 'Continua$roadSuffix';
       case 'merge':
-        return 'Incorpórate $direction$roadSuffix';
+        return 'Incorporate $direction$roadSuffix';
       case 'on ramp':
         return 'Toma la entrada $direction$roadSuffix';
       case 'off ramp':
@@ -275,12 +275,29 @@ class RoutingService {
         return 'Mantente $direction$roadSuffix';
       case 'roundabout':
       case 'rotary':
-        return 'En la rotonda, continúa $direction$roadSuffix';
+        return 'En la rotonda, continua $direction$roadSuffix';
       case 'end of road':
-        return 'Al final de la vía, gira $direction$roadSuffix';
+        return 'Al final de la via, gira $direction$roadSuffix';
       default:
-        return 'Continúa$roadSuffix';
+        return 'Continua$roadSuffix';
     }
+  }
+
+  double _googleNumericValue(dynamic value) {
+    if (value is Map) {
+      return (value['value'] as num?)?.toDouble() ?? 0;
+    }
+    return 0;
+  }
+
+  String _stripHtml(String? value) {
+    if (value == null || value.isEmpty) return 'Continua';
+
+    return value
+        .replaceAll(RegExp(r'<[^>]*>'), '')
+        .replaceAll('&nbsp;', ' ')
+        .replaceAll('&amp;', '&')
+        .trim();
   }
 
   String _directionLabel(String? modifier) {
@@ -307,8 +324,6 @@ class RoutingService {
   }
 
   List<LatLng> _decodePolyline(String encoded, {int precision = 5}) {
-    // Valhalla usa precisión 6 y OSRM precisión 5; compartir decodificador
-    // evita dos implementaciones casi iguales y reduce errores de coordenadas.
     final poly = <LatLng>[];
     var index = 0;
     final len = encoded.length;

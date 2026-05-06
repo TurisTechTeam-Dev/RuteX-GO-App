@@ -95,13 +95,13 @@ class QuizContent extends StatelessWidget {
         question.text,
         textAlign: TextAlign.center,
         style: TextStyle(
-          fontSize: 22,
+          fontSize: MediaQuery.sizeOf(context).width < 340 ? 19 : 22,
           fontWeight: FontWeight.bold,
           height: 1.4,
           color: theme.colorScheme.onSurface,
         ),
       ),
-      const SizedBox(height: 40),
+      SizedBox(height: MediaQuery.sizeOf(context).height < 620 ? 24 : 40),
     ];
 
     for (var index = 0; index < question.answers.length; index++) {
@@ -115,6 +115,7 @@ class QuizContent extends StatelessWidget {
       );
     }
 
+    content.add(const SizedBox(height: 12));
     content.add(const Spacer());
     content.add(
       CustomButton(text: _continueButtonText(), onPressed: onContinue),
