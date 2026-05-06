@@ -201,6 +201,7 @@ class _LoginForm extends StatelessWidget {
             isPassword: true,
             controller: passwordController,
             validator: Validators.validatePassword,
+            helperText: 'Mínimo 8 caracteres, mayúscula, minúscula, número y símbolo.',
           ),
         ],
       ),

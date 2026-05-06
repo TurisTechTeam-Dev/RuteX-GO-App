@@ -18,6 +18,7 @@ class CustomInput extends StatelessWidget {
   final TextInputType keyboardType;
   final TextEditingController? controller;
   final String? Function(String?)? validator;
+  final String? helperText;
 
   const CustomInput({
     super.key,
@@ -27,6 +28,7 @@ class CustomInput extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.controller,
     this.validator,
+    this.helperText,
   });
 
   @override
@@ -69,6 +71,8 @@ class CustomInput extends StatelessWidget {
           style: theme.textTheme.bodyLarge?.copyWith(fontSize: 15),
           decoration: InputDecoration(
             hintText: hint,
+            helperText: helperText,
+            helperMaxLines: 2,
             filled: true,
             fillColor: inputTheme.fillColor ?? AppColors.cremaInput,
             contentPadding:

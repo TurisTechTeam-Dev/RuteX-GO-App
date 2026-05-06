@@ -193,12 +193,14 @@ class _RegisterForm extends StatelessWidget {
             controller: passwordController,
             isPassword: true,
             validator: Validators.validatePassword,
+            helperText: 'Mínimo 8 caracteres, mayúscula, minúscula, número y símbolo.',
           ),
           CustomInput(
             label: 'Confirmar contraseña',
             hint: 'Repite tu contraseña',
             controller: confirmPasswordController,
             isPassword: true,
+            helperText: 'Las contraseñas deben coincidir exactamente.',
             validator: (value) => Validators.validatePasswordMatch(
               value,
               passwordController.text,
