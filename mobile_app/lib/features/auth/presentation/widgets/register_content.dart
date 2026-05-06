@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/widgets/terms_conditions_dialog.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/responsive_layout.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/buttons/custom_button.dart';
 import '../../../../core/widgets/inputs/custom_inputs.dart';
@@ -53,6 +54,12 @@ class RegisterContent extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
     final backgroundOpacity = theme.brightness == Brightness.dark ? 0.18 : 0.3;
+    final isCompact = ResponsiveLayout.isCompact(context);
+    final logoHeight = ResponsiveLayout.clampDouble(
+      size.height * (isCompact ? 0.075 : 0.10),
+      54,
+      96,
+    );
 
     return SafeArea(
       child: AnimatedContainer(
@@ -68,15 +75,18 @@ class RegisterContent extends StatelessWidget {
         ),
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + keyboardInset),
+          padding: ResponsiveLayout.pagePadding(
+            context,
+            bottom: 24 + keyboardInset,
+          ),
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 420),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  AuthLogo(height: size.height * 0.10),
-                  const SizedBox(height: 10),
+                  AuthLogo(height: logoHeight),
+                  SizedBox(height: isCompact ? 6 : 10),
                   AuthCard(
                     children: [
                       _RegisterForm(
@@ -95,8 +105,9 @@ class RegisterContent extends StatelessWidget {
                         onPressed: isButtonEnabled ? onRegister : null,
                       ),
                       const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           Text(
                             "¿Ya tienes cuenta?  ",

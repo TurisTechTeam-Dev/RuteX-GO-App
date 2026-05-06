@@ -37,7 +37,12 @@ class RouteResultPanel extends StatelessWidget {
 
     return Container(
       constraints: const BoxConstraints(maxWidth: 360),
-      padding: const EdgeInsets.fromLTRB(22, 28, 22, 28),
+      padding: EdgeInsets.fromLTRB(
+        MediaQuery.sizeOf(context).width < 340 ? 14 : 22,
+        24,
+        MediaQuery.sizeOf(context).width < 340 ? 14 : 22,
+        24,
+      ),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface.withValues(
           alpha: theme.brightness == Brightness.dark ? 0.92 : 0.84,
@@ -54,7 +59,7 @@ class RouteResultPanel extends StatelessWidget {
             '${result.routeName}\nCompletada',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 20,
+              fontSize: MediaQuery.sizeOf(context).width < 340 ? 18 : 20,
               fontWeight: FontWeight.w800,
               color: theme.brightness == Brightness.dark
                   ? theme.colorScheme.onSurface
@@ -109,7 +114,7 @@ class RouteResultPanel extends StatelessWidget {
     Navigator.pushNamedAndRemoveUntil(
       context,
       AppRoutes.home,
-          (route) => false,
+      (route) => false,
     );
   }
 
@@ -135,7 +140,8 @@ class RouteResultPanel extends StatelessWidget {
         ? monumentNames.join(', ')
         : '${result.visitedMonuments}/${result.totalPois}';
 
-    final shareText = '''
+    final shareText =
+        '''
 🎉 ¡Acabo de completar la increíble ruta "${result.routeName}" en RuteX Go!
 
 📍 Explora los monumentos más fascinantes de Extremadura mientras resuelves emocionantes misiones.
@@ -225,9 +231,8 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 170,
-      height: 48,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: 170, minHeight: 48),
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
@@ -237,7 +242,7 @@ class _ActionButton extends StatelessWidget {
           disabledForegroundColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         ),
-        child: Text(label, textAlign: TextAlign.center),
+        child: Text(label, textAlign: TextAlign.center, softWrap: true),
       ),
     );
   }

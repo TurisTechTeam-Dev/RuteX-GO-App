@@ -112,9 +112,9 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
                       .name,
                   distanceToNextStop: tripProvider.distanceToNextPoi,
                   navigationInstruction:
-                  tripProvider.currentNavigationStep?.instruction,
+                      tripProvider.currentNavigationStep?.instruction,
                   distanceToInstruction:
-                  tripProvider.distanceToCurrentNavigationStep,
+                      tripProvider.distanceToCurrentNavigationStep,
                 ),
               ),
             Positioned(
@@ -133,7 +133,7 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
                   text: _navigationAudioText(tripProvider),
                   autoRead: autoRead,
                   semanticLabel:
-                  'Botón de audioguía. Pulsa para escuchar las indicaciones de navegación.',
+                      'Botón de audioguía. Pulsa para escuchar las indicaciones de navegación.',
                 ),
               ),
           ],
@@ -156,8 +156,8 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
     final instruction = provider.currentNavigationStep?.instruction;
     final routeModeText = widget.allowSimulation
         ? provider.isSimulating
-        ? 'La simulación está en marcha.'
-        : 'Puedes simular el recorrido desde el botón inferior.'
+              ? 'La simulación está en marcha.'
+              : 'Puedes simular el recorrido desde el botón inferior.'
         : 'Sigue la ruta en Google Maps y acércate al punto para continuar.';
 
     if (instruction == null || instruction.isEmpty) {
@@ -168,12 +168,12 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
   }
 
   void _showArrivalBottomSheet(
-      BuildContext context,
-      TripSimulationProvider provider,
-      ) {
+    BuildContext context,
+    TripSimulationProvider provider,
+  ) {
     final isFinalTarget =
         provider.completedPoiIndices.length + 1 >=
-            provider.pointsOfInterest.length;
+        provider.pointsOfInterest.length;
     final poi = provider.pointsOfInterest[provider.currentPoiIndex];
 
     showModalBottomSheet(
@@ -232,9 +232,9 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
   }
 
   Future<void> _finishRoute(
-      BuildContext context,
-      TripSimulationProvider provider,
-      ) async {
+    BuildContext context,
+    TripSimulationProvider provider,
+  ) async {
     late final RouteCompletionSummary summary;
     try {
       summary = await provider.finishRoute();
@@ -314,7 +314,7 @@ class _SimulationButton extends StatelessWidget {
           : () => tripProvider.startSimulation(),
       style: ElevatedButton.styleFrom(
         backgroundColor:
-        tripProvider.isSimulating || tripProvider.isCalculatingRoute
+            tripProvider.isSimulating || tripProvider.isCalculatingRoute
             ? Colors.grey
             : Colors.green,
         padding: const EdgeInsets.symmetric(vertical: 18),
@@ -332,6 +332,8 @@ class _SimulationButton extends StatelessWidget {
           color: Colors.white,
           fontWeight: FontWeight.bold,
         ),
+        textAlign: TextAlign.center,
+        softWrap: true,
       ),
     );
   }
@@ -356,9 +358,15 @@ class _WalkingRouteStatus extends StatelessWidget {
         children: [
           Icon(Icons.directions_walk, color: Colors.white),
           SizedBox(width: 8),
-          Text(
-            'RUTA A PIE EN CURSO',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          Expanded(
+            child: Text(
+              'RUTA A PIE EN CURSO',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),

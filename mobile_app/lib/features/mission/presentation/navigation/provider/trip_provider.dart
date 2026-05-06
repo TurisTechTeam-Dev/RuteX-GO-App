@@ -33,7 +33,6 @@ class TripSimulationProvider extends ChangeNotifier {
   final NavigationMode navigationMode;
   final RoutingService _routingService = RoutingService();
   final DateTime _startedAt = DateTime.now();
-  LatLng? _lastRoutedPosition;
   int _routeCalculationVersion = 0;
   bool _isDisposed = false;
 
@@ -93,11 +92,7 @@ class TripSimulationProvider extends ChangeNotifier {
   bool get _isUserNormal => userRole == UserRole.normal;
   bool get _isAdminSimulation =>
       userRole == UserRole.admin &&
-          navigationMode == NavigationMode.adminSimulation;
-  bool get _isAdminRoute =>
-      userRole == UserRole.admin &&
-          navigationMode == NavigationMode.adminRoute;
-
+      navigationMode == NavigationMode.adminSimulation;
   Future<void> _initializeTrip() async {
     try {
       _isLoading = true;
@@ -191,7 +186,7 @@ class TripSimulationProvider extends ChangeNotifier {
 
     final isStaleCalculation =
         calculationVersion != _routeCalculationVersion ||
-            targetIndex != _currentPoiIndex;
+        targetIndex != _currentPoiIndex;
     if (isStaleCalculation) {
       if (calculationVersion == _routeCalculationVersion) {
         _isCalculatingRoute = false;
@@ -204,7 +199,6 @@ class TripSimulationProvider extends ChangeNotifier {
     _navigationSteps = nextRoute.steps;
     _currentStepIndex = 0;
     _updateCurrentNavigationStep();
-    _lastRoutedPosition = _currentPosition;
     _isCalculatingRoute = false;
     _notifyListeners();
   }

@@ -8,7 +8,6 @@
   -----------------------------------------------------------------------------
 */
 import 'route_result_args.dart';
-import '../quiz_route_progress.dart';
 
 class RouteResultData {
   final String routeName;
@@ -85,7 +84,8 @@ class RouteResultData {
     );
   }
 
-  String get previousBestScoreLabel => '$previousBestScore/$totalPossiblePoints';
+  String get previousBestScoreLabel =>
+      '$previousBestScore/$totalPossiblePoints';
   String get visitedPoisLabel => '$visitedMonuments/$totalPois';
 
   Map<String, List<AnswerResultData>> get groupedAnswers {

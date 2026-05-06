@@ -37,7 +37,9 @@ class RouteCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: CustomCard(
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(
+          MediaQuery.sizeOf(context).width < 340 ? 10 : 12,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: _buildCardContent(context),
@@ -188,14 +190,15 @@ class _RouteInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
+    return Wrap(
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 6,
+      runSpacing: 2,
       children: [
         Icon(icon, size: 18, color: AppColors.verdePrincipal),
-        const SizedBox(width: 6),
-        RichText(
-          text: TextSpan(
-            style: DefaultTextStyle.of(context).style.copyWith(fontSize: 12),
+        Text.rich(
+          TextSpan(
             children: [
               TextSpan(
                 text: '$label: ',
@@ -204,6 +207,8 @@ class _RouteInfo extends StatelessWidget {
               TextSpan(text: value),
             ],
           ),
+          textAlign: TextAlign.center,
+          style: DefaultTextStyle.of(context).style.copyWith(fontSize: 12),
         ),
       ],
     );
@@ -271,8 +276,8 @@ class _StartRouteButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final buttonLabel = _buttonLabel();
 
-    return SizedBox(
-      height: 36,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 36),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: canStart
@@ -284,7 +289,7 @@ class _StartRouteButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24),
         ),
         onPressed: _buildOnPressed(context),
-        child: Text(buttonLabel),
+        child: Text(buttonLabel, textAlign: TextAlign.center, softWrap: true),
       ),
     );
   }
@@ -343,7 +348,9 @@ class _StartRouteButton extends StatelessWidget {
     // Determinamos rol y modo según si es admin y si ha escogido simulación
     final userRole = isAdmin ? UserRole.admin : UserRole.normal;
     final navigationMode = isAdmin
-        ? (allowSimulation ? NavigationMode.adminSimulation : NavigationMode.adminRoute)
+        ? (allowSimulation
+              ? NavigationMode.adminSimulation
+              : NavigationMode.adminRoute)
         : NavigationMode.userWalking;
 
     Navigator.pushNamed(

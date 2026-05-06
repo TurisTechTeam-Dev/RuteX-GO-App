@@ -51,7 +51,16 @@ class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
               },
             )
           : null,
-      title: Image.asset(logo, height: 28),
+      title: LayoutBuilder(
+        builder: (context, constraints) {
+          return Image.asset(
+            logo,
+            height: 28,
+            width: constraints.maxWidth,
+            fit: BoxFit.contain,
+          );
+        },
+      ),
       actions: [
         Builder(
           builder: (context) {

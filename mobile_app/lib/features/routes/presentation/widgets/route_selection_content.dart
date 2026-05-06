@@ -13,6 +13,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/widgets/backgrounds/extremadura_map_background.dart';
 import '../../../../core/widgets/titles/stroke_title.dart';
+import '../../../../core/utils/responsive_layout.dart';
 import '../../../auth/domain/usecases/auth_use_cases.dart';
 import '../../domain/entities/tourist_route.dart';
 import '../../domain/usecases/routes_use_cases.dart';
@@ -36,9 +37,9 @@ class RouteSelectionContent extends StatelessWidget {
         SafeArea(
           child: Column(
             children: [
-              const SizedBox(height: 20),
+              SizedBox(height: ResponsiveLayout.isCompact(context) ? 12 : 20),
               const StrokeTitle(text: "Rutas Disponibles"),
-              const SizedBox(height: 20),
+              SizedBox(height: ResponsiveLayout.isCompact(context) ? 12 : 20),
               Expanded(
                 child: _RouteList(
                   routesUseCases: routesUseCases,
@@ -101,7 +102,12 @@ class _RouteList extends StatelessWidget {
                 routeDataSnapshot.connectionState != ConnectionState.done;
 
             return ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.fromLTRB(
+                ResponsiveLayout.horizontalPadding(context),
+                0,
+                ResponsiveLayout.horizontalPadding(context),
+                MediaQuery.paddingOf(context).bottom + 96,
+              ),
               itemCount: routes.length,
               itemBuilder: (context, index) {
                 final route = routes[index];

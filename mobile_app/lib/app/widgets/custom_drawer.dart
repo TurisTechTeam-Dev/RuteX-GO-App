@@ -57,34 +57,41 @@ class CustomDrawer extends StatelessWidget {
                   ),
                 ),
               ),
-              ListTile(
-                leading: const Icon(Icons.home),
-                title: const Text('Inicio'),
-                onTap: () => _goToRoot(context, AppRoutes.home),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.home),
+                        title: const Text('Inicio'),
+                        onTap: () => _goToRoot(context, AppRoutes.home),
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.person),
+                        title: const Text('Perfil'),
+                        onTap: () => _goToRoot(context, AppRoutes.profile),
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.info_outline),
+                        title: const Text('Info'),
+                        onTap: () {
+                          Navigator.pop(context);
+                          showDialog(
+                            context: context,
+                            builder: (_) => const AppInfoDialog(),
+                          );
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.color_lens_outlined),
+                        title: const Text('Tema'),
+                        subtitle: Text(_themeLabel(themeProvider.themeMode)),
+                        onTap: () => showThemeSelector(context),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              ListTile(
-                leading: const Icon(Icons.person),
-                title: const Text('Perfil'),
-                onTap: () => _goToRoot(context, AppRoutes.profile),
-              ),
-              ListTile(
-                leading: const Icon(Icons.info_outline),
-                title: const Text('Info'),
-                onTap: () {
-                  Navigator.pop(context);
-                  showDialog(
-                    context: context,
-                    builder: (_) => const AppInfoDialog(),
-                  );
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.color_lens_outlined),
-                title: const Text('Tema'),
-                subtitle: Text(_themeLabel(themeProvider.themeMode)),
-                onTap: () => showThemeSelector(context),
-              ),
-              const Spacer(),
               const Divider(),
               ListTile(
                 leading: Icon(Icons.exit_to_app, color: colorScheme.error),

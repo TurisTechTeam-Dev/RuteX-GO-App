@@ -26,11 +26,18 @@ class ArrivalBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final size = MediaQuery.sizeOf(context);
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
     final subtleText = theme.colorScheme.onSurface.withValues(alpha: 0.68);
+    final horizontalPadding = size.width < 340 ? 18.0 : 30.0;
 
     return Container(
-      padding: EdgeInsets.fromLTRB(30, 30, 30, bottomPadding + 30),
+      padding: EdgeInsets.fromLTRB(
+        horizontalPadding,
+        24,
+        horizontalPadding,
+        bottomPadding + 24,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -42,51 +49,62 @@ class ArrivalBottomSheet extends StatelessWidget {
           Text(
             poiName,
             style: TextStyle(
-              fontSize: 24,
+              fontSize: size.width < 340 ? 20 : 24,
               fontWeight: FontWeight.bold,
               color: theme.colorScheme.onSurface,
             ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 25),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: onScanMission,
-              icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
-              label: const Text(
-                "ESCANEAR PARA JUGAR",
-                style: TextStyle(color: Colors.white),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
+          ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: onScanMission,
+                icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
+                label: const Flexible(
+                  child: Text(
+                    "ESCANEAR PARA JUGAR",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
                 ),
               ),
             ),
           ),
           const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              onPressed: onSkipPoint,
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(
-                  color: isFinalTarget ? Colors.red : Colors.grey,
+          ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
+            child: SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: onSkipPoint,
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(
+                    color: isFinalTarget ? Colors.red : Colors.grey,
+                  ),
+                  foregroundColor: isFinalTarget ? Colors.red : subtleText,
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
                 ),
-                foregroundColor: isFinalTarget ? Colors.red : subtleText,
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-              ),
-              child: Text(
-                isFinalTarget ? "FINALIZAR RUTA" : "SALTAR E IR AL SIGUIENTE",
-                style: TextStyle(
-                  color: isFinalTarget ? Colors.red : subtleText,
-                  fontWeight: FontWeight.bold,
+                child: Text(
+                  isFinalTarget ? "FINALIZAR RUTA" : "SALTAR E IR AL SIGUIENTE",
+                  textAlign: TextAlign.center,
+                  softWrap: true,
+                  style: TextStyle(
+                    color: isFinalTarget ? Colors.red : subtleText,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),

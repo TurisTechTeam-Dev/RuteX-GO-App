@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/responsive_layout.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/buttons/custom_button.dart';
 import '../../../../core/widgets/inputs/custom_inputs.dart';
@@ -48,6 +49,12 @@ class LoginContent extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
     final backgroundOpacity = theme.brightness == Brightness.dark ? 0.18 : 0.4;
+    final isCompact = ResponsiveLayout.isCompact(context);
+    final logoHeight = ResponsiveLayout.clampDouble(
+      size.height * (isCompact ? 0.13 : 0.18),
+      82,
+      150,
+    );
 
     return SafeArea(
       child: AnimatedContainer(
@@ -63,15 +70,18 @@ class LoginContent extends StatelessWidget {
         ),
         child: SingleChildScrollView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + keyboardInset),
+          padding: ResponsiveLayout.pagePadding(
+            context,
+            bottom: 24 + keyboardInset,
+          ),
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 420),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  AuthLogo(height: size.height * 0.18),
-                  const SizedBox(height: 20),
+                  AuthLogo(height: logoHeight),
+                  SizedBox(height: isCompact ? 12 : 20),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Semantics(
@@ -82,7 +92,7 @@ class LoginContent extends StatelessWidget {
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.bodyLarge
                               ?.copyWith(
-                                fontSize: 18,
+                                fontSize: isCompact ? 15 : 18,
                                 fontWeight: FontWeight.w600,
                                 height: 1.2,
                                 color: theme.colorScheme.onSurface,
@@ -91,7 +101,7 @@ class LoginContent extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: isCompact ? 12 : 20),
                   AuthCard(
                     children: [
                       _LoginForm(
@@ -99,7 +109,7 @@ class LoginContent extends StatelessWidget {
                         emailController: emailController,
                         passwordController: passwordController,
                       ),
-                      const SizedBox(height: 30),
+                      SizedBox(height: isCompact ? 18 : 30),
                       CustomButton(
                         text: isLoading ? "CARGANDO..." : "Iniciar sesión",
                         onPressed: isLoading ? null : onLogin,
@@ -127,8 +137,9 @@ class LoginContent extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 14),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           Text(
                             "¿No tienes cuenta?  ",
@@ -207,17 +218,25 @@ class _GoogleSignInButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return SizedBox(
-      width: double.infinity,
-      height: 46,
-      child: OutlinedButton.icon(
-        onPressed: isLoading ? null : onPressed,
-        icon: const _GoogleLogo(),
-        label: const Text("Continuar con Google", textAlign: TextAlign.center),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: theme.colorScheme.onSurface,
-          side: BorderSide(color: theme.colorScheme.primary, width: 1.5),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 46),
+      child: SizedBox(
+        width: double.infinity,
+        child: OutlinedButton.icon(
+          onPressed: isLoading ? null : onPressed,
+          icon: const _GoogleLogo(),
+          label: const Text(
+            "Continuar con Google",
+            textAlign: TextAlign.center,
+            softWrap: true,
+          ),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: theme.colorScheme.onSurface,
+            side: BorderSide(color: theme.colorScheme.primary, width: 1.5),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
         ),
       ),
     );

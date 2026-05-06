@@ -19,10 +19,12 @@ class HomeRouteList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: ListView.builder(
-        padding: const EdgeInsets.only(bottom: 40),
+        padding: EdgeInsets.only(bottom: bottomPadding + 112),
         itemCount: routes.length,
         itemBuilder: (context, index) {
           final route = routes[index];
