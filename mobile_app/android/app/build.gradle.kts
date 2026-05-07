@@ -64,6 +64,9 @@ android {
     }
 
     buildTypes {
+        getByName("debug") {
+            signingConfig = signingConfigs.getByName("release")
+        }
         release {
             // USAMOS LA CONFIGURACIÓN DE RELEASE EN LUGAR DE DEBUG
             signingConfig = signingConfigs.getByName("release")

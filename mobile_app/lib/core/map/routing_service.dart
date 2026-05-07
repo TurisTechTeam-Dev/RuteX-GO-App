@@ -18,6 +18,7 @@ import '../config/native_api_keys.dart';
 enum NavigationRouteSource { appWalking, googleWalking }
 
 class RoutingService {
+  static const _valhallaRouteUrl = 'https://valhalla1.openstreetmap.de/route';
   static const _googleDirectionsUrl =
       'https://maps.googleapis.com/maps/api/directions/json';
   static const _osrmWalkingProfiles = ['foot'];
@@ -28,10 +29,10 @@ class RoutingService {
   }
 
   Future<NavigationRoute> getNavigationRoute(
-      LatLng start,
-      LatLng end, {
-        NavigationRouteSource source = NavigationRouteSource.appWalking,
-      }) async {
+    LatLng start,
+    LatLng end, {
+    NavigationRouteSource source = NavigationRouteSource.appWalking,
+  }) async {
     if (start.latitude == end.latitude && start.longitude == end.longitude) {
       return NavigationRoute(points: [start, end]);
     }
@@ -39,30 +40,27 @@ class RoutingService {
     if (source == NavigationRouteSource.googleWalking) {
       final googleRoute = await _getGoogleWalkingRoute(start, end);
       if (googleRoute.points.isNotEmpty) return googleRoute;
-
-      // Si Google falla, intentamos OSRM como respaldo rápido.
-      final osrmRoute = await _getOsrmFallbackRoute(start, end);
-      if (osrmRoute.points.isNotEmpty) return osrmRoute;
-
-      debugPrint('Google/OSRM fallaron, usando linea recta.');
-      return NavigationRoute(points: [start, end]);
     }
 
-    // appWalking (admin): OSRM primero para evitar los timeouts largos de Valhalla.
+    final pedestrianRoute = await _getValhallaPedestrianRoute(start, end);
+    if (pedestrianRoute.points.isNotEmpty) return pedestrianRoute;
+
     final osrmRoute = await _getOsrmFallbackRoute(start, end);
     if (osrmRoute.points.isNotEmpty) return osrmRoute;
 
-    debugPrint('OSRM fallo en appWalking, usando linea recta.');
+    debugPrint('No se pudo calcular ruta walking, usando linea recta.');
     return NavigationRoute(points: [start, end]);
   }
 
   Future<NavigationRoute> _getGoogleWalkingRoute(
-      LatLng start,
-      LatLng end,
-      ) async {
+    LatLng start,
+    LatLng end,
+  ) async {
     final apiKey = await NativeApiKeys.googleDirectionsApiKey();
     if (apiKey.isEmpty) {
-      debugPrint('Google Directions sin clave; fallback a OSRM/linea recta');
+      debugPrint(
+        'Google Directions sin clave; probando ruta peatonal alternativa',
+      );
       return const NavigationRoute(points: []);
     }
 
@@ -150,26 +148,131 @@ class RoutingService {
     return steps;
   }
 
+  Future<NavigationRoute> _getValhallaPedestrianRoute(
+    LatLng start,
+    LatLng end,
+  ) async {
+    final body = jsonEncode({
+      'locations': [
+        {'lat': start.latitude, 'lon': start.longitude},
+        {'lat': end.latitude, 'lon': end.longitude},
+      ],
+      'costing': 'pedestrian',
+      'directions_options': {'units': 'kilometers', 'language': 'es-ES'},
+    });
+
+    try {
+      final response = await http
+          .post(
+            Uri.parse(_valhallaRouteUrl),
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              'User-Agent': 'RutexGo_App',
+            },
+            body: body,
+          )
+          .timeout(const Duration(seconds: 8));
+
+      if (response.statusCode != 200) {
+        debugPrint('Valhalla pedestrian devolvio ${response.statusCode}');
+        return const NavigationRoute(points: []);
+      }
+
+      final data = json.decode(response.body);
+      final trip = data['trip'];
+      if (trip is! Map) return const NavigationRoute(points: []);
+
+      final rawLegs = trip['legs'];
+      if (rawLegs is! List || rawLegs.isEmpty) {
+        return const NavigationRoute(points: []);
+      }
+
+      final points = <LatLng>[];
+      final steps = <NavigationStep>[];
+
+      for (final rawLeg in rawLegs) {
+        if (rawLeg is! Map) continue;
+
+        final shape = rawLeg['shape']?.toString();
+        if (shape == null || shape.isEmpty) continue;
+
+        final legPoints = _decodePolyline(shape, precision: 6);
+        points.addAll(legPoints);
+        steps.addAll(_valhallaStepsFromLeg(rawLeg, legPoints));
+      }
+
+      debugPrint(
+        'Ruta Valhalla pedestrian: ${points.length} puntos, ${steps.length} pasos',
+      );
+      return NavigationRoute(points: points, steps: steps);
+    } catch (e) {
+      debugPrint('Fallo con Valhalla pedestrian: $e');
+      return const NavigationRoute(points: []);
+    }
+  }
+
+  List<NavigationStep> _valhallaStepsFromLeg(
+    Map rawLeg,
+    List<LatLng> legPoints,
+  ) {
+    final rawManeuvers = rawLeg['maneuvers'];
+    if (rawManeuvers is! List || legPoints.isEmpty) return [];
+
+    final steps = <NavigationStep>[];
+    for (final rawManeuver in rawManeuvers) {
+      if (rawManeuver is! Map) continue;
+
+      final beginIndex =
+          (rawManeuver['begin_shape_index'] as num?)?.toInt() ?? 0;
+      final safeIndex = beginIndex.clamp(0, legPoints.length - 1);
+      final streetNames = rawManeuver['street_names'];
+      final roadName = streetNames is List && streetNames.isNotEmpty
+          ? streetNames.first.toString()
+          : '';
+      final instruction =
+          rawManeuver['instruction']?.toString() ??
+          _instructionFor(type: '', modifier: null, roadName: roadName);
+      final lengthKm = (rawManeuver['length'] as num?)?.toDouble() ?? 0;
+      final duration = (rawManeuver['time'] as num?)?.toDouble() ?? 0;
+      final type = rawManeuver['type']?.toString() ?? '';
+
+      steps.add(
+        NavigationStep(
+          instruction: instruction,
+          maneuverLocation: legPoints[safeIndex],
+          distance: lengthKm * 1000,
+          duration: duration,
+          maneuverType: type,
+          modifier: null,
+          roadName: roadName,
+        ),
+      );
+    }
+
+    return steps;
+  }
+
   Future<NavigationRoute> _getOsrmFallbackRoute(
-      LatLng start,
-      LatLng end,
-      ) async {
+    LatLng start,
+    LatLng end,
+  ) async {
     for (final profile in _osrmWalkingProfiles) {
       final url = Uri.parse(
         'https://router.project-osrm.org/route/v1/$profile/'
-            '${start.longitude},${start.latitude};${end.longitude},${end.latitude}'
-            '?overview=full&geometries=polyline&steps=true',
+        '${start.longitude},${start.latitude};${end.longitude},${end.latitude}'
+        '?overview=full&geometries=polyline&steps=true',
       );
 
       try {
         final response = await http
             .get(
-          url,
-          headers: {
-            'Accept': 'application/json',
-            'User-Agent': 'RutexGo_App',
-          },
-        )
+              url,
+              headers: {
+                'Accept': 'application/json',
+                'User-Agent': 'RutexGo_App',
+              },
+            )
             .timeout(const Duration(seconds: 4));
 
         if (response.statusCode == 200) {
@@ -185,7 +288,9 @@ class RoutingService {
             return NavigationRoute(points: points, steps: steps);
           }
         } else {
-          debugPrint('OSRM devolvio ${response.statusCode} con perfil $profile');
+          debugPrint(
+            'OSRM devolvio ${response.statusCode} con perfil $profile',
+          );
         }
       } catch (e) {
         debugPrint('Fallo con OSRM $profile: $e');
