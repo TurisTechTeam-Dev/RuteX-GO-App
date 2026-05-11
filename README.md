@@ -4,8 +4,11 @@
 ![Licencia](https://img.shields.io/badge/Licencia-Propietaria-blue)
 ![Flutter](https://img.shields.io/badge/Flutter-02569B?logo=flutter&logoColor=white)
 ![Firebase](https://img.shields.io/badge/Firebase-FFCA28?logo=firebase&logoColor=black)
+![GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF?logo=github-actions&logoColor=white)
 ![Estado](https://img.shields.io/badge/Estado-En%20Desarrollo-yellow)
-[![Issues](https://img.shields.io/github/issues/TurisTechTeam-Dev/rutex-go-project)](https://github.com/TurisTechTeam-Dev/rutex-go-project/issues)
+
+> [!TIP]
+> **🚀 Despliegue Automático:** El panel de administración se despliega automáticamente en Firebase Hosting mediante GitHub Actions tras cada push a `main`.
 
 ## 👥 Equipo de Desarrollo — TurisTech Team
 
@@ -25,111 +28,136 @@
 
 ## 🌟 Resumen
 
-**RuteX Go** es una aplicación móvil gamificada orientada a potenciar el turismo cultural en Extremadura.  
-Permite recorrer rutas temáticas, escanear códigos QR en monumentos, resolver trivias y ganar puntos para ascender de rango.  
-El objetivo principal es transformar la visita turística en una experiencia educativa, interactiva y accesible.
+**RuteX Go** es una plataforma móvil innovadora diseñada para transformar el turismo convencional en Extremadura en una aventura interactiva, educativa y **plenamente accesible**. A través de la **gamificación**, la app incentiva la exploración del patrimonio histórico, convirtiendo cada visita en un reto personal.
+
+> [!TIP]
+> **La Experiencia RuteX:** No es solo una guía; es un sistema de misiones donde el turista se convierte en protagonista. Al validar su presencia en monumentos reales, el usuario asciende en la jerarquía social de la antigua Roma, transformando el aprendizaje en un juego de progresión.
+
+### 🎮 El núcleo de la aplicación
+* 🗺️ **Rutas Temáticas:** Itinerarios dinámicos por enclaves estratégicos como Mérida, Cáceres y Badajoz.
+* 📸 **Validación Híbrida:** Sistema de verificación física mediante **códigos QR** y geolocalización.
+* 🧠 **Desafíos Históricos:** Trivias interactivas que ponen a prueba los conocimientos adquiridos *in situ*.
+* 🎧 **Accesibilidad (Audioguías):** Narración automática de la historia de cada punto de interés mediante tecnología **TTS**, garantizando una experiencia inclusiva y "manos libres".
+* 📖 **Diario del Explorador:** Generación automática de un **recuerdo digital en PDF** que recopila los hitos y logros de la ruta, eliminando la necesidad de guías en papel.
+* 🏆 **Progresión de Rango:** Evolución del perfil de usuario, desde *Esclavo* hasta alcanzar la gloria como *Emperador*.
 
 ---
 
 ## 📑 Índice
 
-- [🚀 Estado del Proyecto](#-estado-del-proyecto)
-- [✨ Características Principales](#-características-principales)
-- [🎯 Objetivos](#-objetivos)
-- [🛠️ Tecnologías Utilizadas](#️-tecnologías-utilizadas)
-- [📁 Estructura del Repositorio](#-estructura-del-repositorio)
-- [⚙️ Instalación y Ejecución](#️-instalación-y-ejecución)
-- [🏗️ Arquitectura y Decisiones Técnicas](#️-arquitectura-y-decisiones-técnicas)
-- [📚 Documentación](#-documentación)
-- [🤝 Contribución](#-contribución)
-- [📄 Licencia](#-licencia)
-- [📞 Contacto](#-contacto)
+* [🚀 Estado del Proyecto](#estado-del-proyecto)
+* [✨ Características Principales](#características-principales)
+* [🎯 Objetivos](#objetivos)
+* [🛠️ Tecnologías Utilizadas](#tecnologías-utilizadas)
+* [📁 Estructura del Repositorio](#estructura-del-repositorio)
+* [⚙️ Instalación y Ejecución](#instalación-y-ejecución)
+* [🏗️ Arquitectura y Decisiones Técnicas](#arquitectura-y-decisiones-técnicas)
+* [📚 Documentación](#documentación)
+* [🤝 Proceso de Contribución](#proceso-de-contribución)
+* [📄 Licencia y Derechos](#licencia-y-derechos)
+* [📞 Contacto y Soporte](#contacto-y-soporte)
 
 ---
 
-## 🚀 Estado del proyecto
+## 🚀 Estado del Proyecto
 
 | Fase | Estado | Detalle |
 |------|--------|---------|
 | **Sprint 1** – Análisis y Diseño | ✅ Finalizado | Documentación, mockups en Figma y arquitectura base. |
-| **Sprint 2** – Desarrollo del PMV | 🟢 Operativo | Implementación del núcleo funcional y conexión con Firebase. |
-| **Entregable E2** (Actual) | 🏆 **MVP Funcional** | Flujo completo: Auth → Selección de Ruta → Validación QR → Quiz. |
+| **Sprint 2** – Desarrollo del PMV | ✅ Finalizado | Núcleo funcional operativo y conexión con Firebase. |
+| **Sprint 3** – Finalización Técnica | ✅ Finalizado | Implementación de audioguías, generador de PDF y cierre de Roadmap. |
+| **Evaluación Final** | 🟢 En revisión | Fase de documentación y correcciones finales de tutoría. |
 
-> **🎯 Hitos alcanzados en esta evaluación:**
-> * **Arquitectura Profesional:** Implementación de **Clean Architecture** para separar la lógica de negocio (Domain) de la infraestructura (Data/Firebase).
-> * **Backend Integrado:** Conexión real con **Cloud Firestore** y **Firebase Auth** para persistencia de usuarios y datos de rutas.
-> * **Motor de Validación QR:** Lógica funcional de escaneo de códigos para verificar la presencia física del turista en los monumentos.
-> * **Gamificación Operativa:** Sistema de Quizzes dinámicos que consumen datos en tiempo real y gestionan el progreso del usuario.
+> **🎯 Hitos Técnicos Alcanzados (100%):**
+> * **Arquitectura Robusta:** Implementación final de **Clean Architecture** asegurando un código modular y mantenible.
+> * **Ecosistema Firebase:** Autenticación, Firestore y Storage totalmente integrados para datos y multimedia.
+> * **Geolocalización y QR:** Motor de mapas y escaneo de códigos operativos para validación de presencia física.
+> * **Inclusión y Experiencia:** Motores de **Audioguía (TTS)** y **Generador del Diario del Explorador (PDF)** finalizados.
+> * **Gamificación Completa:** Lógica de rangos, misiones y persistencia de progreso lista para producción.
 
-🔮 **Próximos pasos del roadmap:**
-- **Navegación con Google Maps:** Integración de la API de Google Directions para guiar al usuario en tiempo real entre los puntos de la ruta.
-- **Perfil Detallado:** Historial de rutas completadas y visualización de logros/insignias.
-- **Pulido UI/UX:** Ajuste final de la interfaz siguiendo el diseño de alta fidelidad.
-- **Notificaciones:** Sistema de avisos para eventos culturales cercanos.
-- **Pruebas y QA:** Fase intensiva de testeo en dispositivos reales (Android/iOS) para garantizar estabilidad y rendimiento.
-- **Despliegue:** Preparación de builds de producción y configuración de entornos finales para la puesta en marcha.
+🔮 **Últimos pasos antes de la Defensa:**
+- [x] **Desarrollo técnico:** Hoja de ruta técnica cerrada y estable.
+- [ ] **Documentación académica:** Redacción final de la memoria del TFG y manuales técnicos.
+- [ ] **Revisión de Tutoría:** Supervisión por parte de la tutora (**Mercedes**) para ajustes de última hora.
+- [ ] **Cierre del Proyecto:** Preparación de la defensa y generación de builds finales de entrega.
 
 ---
 
-## ✨ Características Principales (Estado del PMV)
+## ✨ Características Principales
 
-### 🚀 Funcionalidades 100% Operativas
-- **🔐 Gestión de Acceso:** Sistema de autenticación robusto con **Firebase Auth** (Registro, Login y persistencia de sesión).
-- **🗺️ Exploración Inteligente:** Visualización de ciudades y rutas dinámicas cargadas en tiempo real desde **Cloud Firestore**.
-- **📸 Validación de Presencia Física:** Motor de escaneo de **códigos QR** integrado con la cámara para asegurar la visita real a los monumentos.
-- **🧠 Motor de Trivias:** Sistema de misiones interactivas con validación de respuestas y feedback inmediato al usuario.
-- **📈 Sistema de Progresión:** Algoritmo de cálculo de puntos y actualización dinámica de **rangos de usuario** (de Esclavo a Emperador).
+RuteX Go se ha consolidado como una plataforma integral que fusiona la potencia del desarrollo multiplataforma con servicios en la nube para ofrecer una experiencia turística sin fisuras, inclusiva y memorable.
 
-### 🛠️ Integraciones Técnicas
-- **Google Maps API:** Renderizado de mapas con marcadores personalizados para puntos de interés (POIs).
-- **Cloud Firestore:** Base de datos NoSQL con arquitectura de colecciones optimizada para escalabilidad.
+### 🚀 Funcionalidades Nucleares (100% Implementadas)
+- **🔐 Ecosistema de Seguridad:** Gestión de usuarios mediante **Firebase Auth**, incluyendo persistencia de sesión, recuperación de cuentas y validación de perfiles.
+- **🗺️ Exploración Dinámica:** Arquitectura basada en datos que permite cargar ciudades, rutas e historias en tiempo real desde **Cloud Firestore** sin necesidad de actualizar la app.
+- **📍 Geolocalización y Mapas:** Integración avanzada con **Google Maps SDK**, permitiendo el rastreo del usuario y la visualización de puntos de interés (POIs).
+- **📸 Validación Híbrida (GPS + QR):** Sistema de verificación de presencia física que combina coordenadas geográficas con escaneo de **códigos QR** para asegurar la integridad de la experiencia.
+- **🎧 Accesibilidad y Audioguías:** Integración de tecnología **Text-to-Speech (TTS)** para la narración automática de contenidos históricos, permitiendo una experiencia inclusiva para personas con discapacidad visual o preferencia de consumo de audio.
+- **📖 Diario del Explorador:** Motor de generación de **documentos PDF** que recopila dinámicamente el progreso del turista, sus logros y los monumentos visitados, ofreciendo un recuerdo digital tangible al finalizar la ruta.
+- **🧠 Gamificación Activa:** Motor de misiones con trivias interactivas, feedback instantáneo y gestión de estados de progreso.
+- **📈 Jerarquía de Usuario:** Algoritmo dinámico de experiencia que gestiona el ascenso de rangos (desde *Esclavo* hasta *Emperador*).
 
-### 🔮 Roadmap (Próximas Implementaciones)
-- 🧭 **Navegación GPS:** Guiado paso a paso entre monumentos.
-- 🏆 **Ranking Social:** Tabla de clasificación global para fomentar la competitividad.
-- 🔔 **Notificaciones Push:** Avisos sobre eventos cercanos y recordatorios de rutas.
+### 🏗️ Arquitectura y Escalabilidad
+- **Clean Architecture:** Separación estricta de capas (Data, Domain, Presentation) que garantiza que la app pueda crecer con nuevas ciudades o funciones sin generar deuda técnica.
+- **Infraestructura Cloud:** Base de datos NoSQL y almacenamiento multimedia en **Firebase Storage**, optimizados para latencia mínima.
+- **CI/CD Integrado:** Automatización con **GitHub Actions** para el despliegue continuo del panel administrador en la nube.
+
+### 🔮 Visiones de Futuro (Escalabilidad Post-Entrega)
+Aunque el núcleo del proyecto está finalizado, RuteX Go está diseñado para integrar:
+- 🛍️ **Ecosistema de Comercio Local:** Implementación de un Marketplace de recompensas donde los puntos (XP) acumulados se canjeen por **vales de descuento y promociones exclusivas** en comercios de Extremadura.
+- 🏆 **Ranking Social:** Sistema de competición global entre turistas para fomentar la recurrencia y el *engagement*.
+- 🔔 **Notificaciones Inteligentes:** Avisos por proximidad a eventos o monumentos mediante tecnología de *Geofencing*.
+- 🌍 **Modo Multilingüe:** Preparación de la arquitectura interna para soporte de idiomas (i18n).
 
 ---
 
 ## 🎯 Objetivos del Proyecto
 
 ### 🏛️ Impacto Turístico y Cultural
-- ✅ **Innovación Turística:** Transformar la visita pasiva en una experiencia activa mediante mecánicas de juego (gamificación).
-- ✅ **Valorización Patrimonial:** Visibilizar monumentos menos conocidos de Extremadura a través de rutas temáticas dinámicas.
-- ✅ **Educación Interactiva:** Fomentar el aprendizaje histórico mediante un motor de trivias y misiones vinculado a cada punto de interés.
-- ✅ **Sostenibilidad:** Reducir el uso de guías de papel y promover rutas peatonales, alineando el proyecto con los **ODS 2030**.
+- ✅ **Innovación y Gamificación:** Transformación de la visita pasiva en una experiencia inmersiva donde el usuario es el protagonista de su propio aprendizaje.
+- ✅ **Accesibilidad Universal:** Eliminación de barreras sensoriales mediante **audioguías dinámicas (TTS)**, permitiendo que el patrimonio extremeño sea disfrutable para todos.
+- ✅ **Sostenibilidad y Recuerdo Digital:** Sustitución de materiales físicos por el **"Diario del Explorador" en PDF**, reduciendo el impacto ambiental y ofreciendo un recuerdo personalizado permanente.
+- ✅ **Valorización del Patrimonio:** Visibilización de la riqueza histórica regional mediante rutas geolocalizadas que conectan al turista con el entorno.
+- 🚀 **Dinamización Socioeconómica:** Diseño de una infraestructura preparada para potenciar el comercio local de proximidad mediante un futuro sistema de recompensas.
 
-### 💻 Objetivos Técnicos
-- ✅ **Arquitectura Escalable:** Implementar **Clean Architecture** para permitir que la app crezca a más ciudades sin rehacer código.
-- ✅ **Interacción con el Entorno:** Utilizar el hardware del dispositivo (Cámara/QR) como puente entre el mundo físico y digital.
-- ✅ **Gestión de Datos en Tiempo Real:** Garantizar la sincronización instantánea de progresos y perfiles mediante **Firebase Cloud Firestore**.
-- ✅ **UX/UI Nativa:** Ofrecer una interfaz fluida y moderna utilizando las capacidades de renderizado de **Flutter**.
+### 💻 Excelencia Técnica (DAM)
+- ✅ **Arquitectura de Alto Nivel:** Implementación rigurosa de **Clean Architecture**, garantizando un código desacoplado, testeable y fácil de mantener.
+- ✅ **Interacción con el Entorno:** Uso avanzado del hardware del dispositivo (Cámara para **QR** y sensor **GPS**) como puente entre el mundo físico y el digital.
+- ✅ **Gestión Cloud Eficiente:** Centralización y sincronización de datos, multimedia y perfiles de usuario a través del ecosistema **Firebase**.
+- ✅ **Cultura DevOps:** Automatización de despliegues del panel administrador mediante flujos de **CI/CD con GitHub Actions**.
 
 ---
 
 ## 🛠️ Tecnologías Utilizadas
 
-### Frontend & Lenguaje
-- **Dart 3.11.0**: Lenguaje de programación optimizado para aplicaciones cliente.
-- **Flutter 3.41.2**: Framework de UI para el desarrollo nativo multiplataforma.
-- **Provider**: Patrón de gestión de estado para la sincronización de datos entre la UI y la lógica de negocio.
-- **Clean Architecture**: Estructura de software dividida en capas (Data, Domain, Presentation) para asegurar la escalabilidad.
+### 📱 Frontend & Core
+- **Dart 3.10.x**: Lenguaje de programación con *Sound Null Safety* para un código robusto.
+- **Flutter SDK**: Framework de Google para el desarrollo nativo multiplataforma (iOS/Android).
+- **Provider**: Patrón de gestión de estado para una comunicación eficiente entre la lógica y la UI.
+- **Clean Architecture**: Metodología de diseño de software organizada en capas (*Data, Domain, Presentation*).
 
-### Backend (Firebase Ecosystem)
-- **Firebase Authentication**: Gestión de identidad y seguridad de sesiones de usuario.
-- **Cloud Firestore**: Base de datos NoSQL documental utilizada para el almacenamiento jerárquico de ciudades, rutas, monumentos y misiones.
-- **Firebase Core**: Integración base para la comunicación entre Flutter y los servicios de Google Cloud.
+### ☁️ Ecosistema Firebase (Backend)
+- **Firebase Authentication & Google Sign-In**: Gestión segura de identidades y acceso social.
+- **Cloud Firestore**: Base de datos NoSQL documental para la sincronización de rutas y progreso en tiempo real.
+- **Firebase Storage**: Almacenamiento en la nube para la gestión de imágenes y recursos multimedia.
 
-### Servicios e Integraciones de Hardware
-- **Google Maps SDK for Flutter**: Motor de renderizado de mapas e interacción con coordenadas geográficas.
-- **Mobile Scanner (QR)**: Uso de la cámara nativa para la validación lógica de llegada a los puntos de interés.
-- **Geolocalización**: Servicios de ubicación para posicionar al usuario en el mapa interactivo.
+### 🗺️ Mapas y Geolocalización
+- **Google Maps SDK**: Motor principal para la visualización de mapas y marcadores de monumentos.
+- **Geolocator**: Servicio de posicionamiento GPS en tiempo real para la verificación de proximidad.
+- **Flutter Map & LatLong2**: Soporte para capas cartográficas y cálculos geográficos avanzados.
 
-### Herramientas de Desarrollo y DevOps
-- **IDE**: Visual Studio Code & Android Studio (para gestión de SDKs y AVD).
-- **Control de Versiones**: Git con flujo de trabajo basado en ramas en GitHub.
-- **Gestión Ágil**: Trello y GitHub Projects para el seguimiento del backlog y Sprints.
-- **Diseño UI/UX**: Figma para la creación de prototipos de alta fidelidad y manual de estilo.
+### ⚙️ Funcionalidades Avanzadas e Integraciones
+- **Mobile Scanner**: Motor de escaneo de **códigos QR** para la validación física de visitas.
+- **Flutter TTS (Text-to-Speech)**: Motor de voz para audioguías integradas, mejorando la **accesibilidad** de la app.
+- **PDF & Printing**: Generación dinámica y exportación de documentos y reportes de rutas completadas.
+- **Cached Network Image**: Sistema de caché inteligente para optimizar el rendimiento y el consumo de datos.
+- **Share Plus**: Integración con el sistema nativo para compartir logros y rutas en redes sociales.
+
+### 🛠️ Herramientas & DevOps
+- **GitHub Actions**: Pipeline de **CI/CD** para el despliegue automático del panel administrador en Firebase Hosting.
+- **Figma**: Herramienta de diseño UI/UX para el prototipado de alta fidelidad.
+- **Git & GitHub**: Control de versiones y gestión colaborativa del repositorio.
+- **Trello & Excel**: Herramientas para la planificación de Sprints y seguimiento de hitos académicos.
 
 ---
 
