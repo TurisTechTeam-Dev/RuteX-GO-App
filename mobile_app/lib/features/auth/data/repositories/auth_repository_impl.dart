@@ -135,6 +135,7 @@ class AuthRepositoryImpl implements AuthRepository {
         UserFields.puntos: 0,
         UserFields.rutasCompletadas: [],
         UserFields.isAdmin: false,
+        UserFields.rango: FirestoreDocs.rangosConfig,
       });
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
@@ -163,6 +164,7 @@ class AuthRepositoryImpl implements AuthRepository {
         UserFields.puntos: 0,
         UserFields.rutasCompletadas: [],
         UserFields.isAdmin: false,
+        UserFields.rango: FirestoreDocs.rangosConfig,
       });
       return;
     }
