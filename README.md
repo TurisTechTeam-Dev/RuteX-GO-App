@@ -9,12 +9,12 @@
 
 ## 👥 Equipo de Desarrollo — TurisTech Team
 
-| Desarrollador | GitHub | Rol |
-|---------------|--------|-----|
-| **Andrés Fernández Expósito** | [@AndresFE0209](https://github.com/AndresFE0209) | Backend & Coordinación |
-| **Joel Manuel García Villarino** | [@Joeljole1987](https://github.com/Joeljole1987) | Backend & Diseño UX/UI |
-| **Diego Vivas Paredes** | [@DiegoVP963](https://github.com/DiegoVP963) | Frontend & Diseño UX/UI |
-| **María Mercedes Martínez Fragoso** | [@MercedesOrg01](https://github.com/MercedesOrg01) | Tutora del proyecto |
+| Avatar | Desarrollador | GitHub | Rol |
+|:---:|---------------|--------|-----|
+| <img src="https://github.com/AndresFE0209.png?size=40" width="40"> | [**Andrés Fernández Expósito**](https://github.com/AndresFE0209) | [@AndresFE0209](https://github.com/AndresFE0209) | Backend & Coordinación |
+| <img src="https://github.com/Joeljole1987.png?size=40" width="40"> | [**Joel Manuel García Villarino**](https://github.com/Joeljole1987) | [@Joeljole1987](https://github.com/Joeljole1987) | Backend & Diseño UX/UI |
+| <img src="https://github.com/DiegoVP963.png?size=40" width="40"> | [**Diego Vivas Paredes**](https://github.com/DiegoVP963) | [@DiegoVP963](https://github.com/DiegoVP963) | Frontend & Diseño UX/UI |
+| <img src="https://github.com/MercedesOrg01.png?size=40" width="40"> | [**María Mercedes Martínez Fragoso**](https://github.com/MercedesOrg01) | [@MercedesOrg01](https://github.com/MercedesOrg01) | Tutora del proyecto |
 
 **Centro:** IES Albarregas (Mérida, Badajoz)  
 **Ciclo:** 2º FP Desarrollo de Aplicaciones Multiplataforma  
