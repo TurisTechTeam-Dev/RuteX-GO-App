@@ -66,7 +66,9 @@ class AdminFormController extends ChangeNotifier {
 
     try {
       await saveAction();
-      _hasChanges = false;
+      // _hasChanges lo limpia reset() o markClean() cuando el guardado
+      // realmente termina. No lo tocamos aquí para que un fallo de
+      // validación o de red no deje el botón deshabilitado sin haber guardado.
     } finally {
       _isSaving = false;
       notifyListeners();
