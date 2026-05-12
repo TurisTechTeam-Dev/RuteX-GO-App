@@ -6,7 +6,8 @@
   TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
   Año: 2026
   -----------------------------------------------------------------------------
-*/import 'package:flutter/material.dart';
+*/
+import 'package:flutter/material.dart';
 import 'package:mobile_app/core/constants/app_colors.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/logout_button.dart';
 
@@ -54,13 +55,12 @@ class AdminNavbar extends StatelessWidget {
               spacing: 8,
               children: [
                 _buildNavButton(AdminNavTab.cities, 'Ciudades'),
-                _buildNavButton(AdminNavTab.routes, 'Rutas'),
                 _buildNavButton(
                   AdminNavTab.pointsOfInterest,
                   'Puntos de interés',
                 ),
                 _buildNavButton(AdminNavTab.missions, 'Misiones'),
-
+                _buildNavButton(AdminNavTab.routes, 'Rutas'),
               ],
             ),
           ),

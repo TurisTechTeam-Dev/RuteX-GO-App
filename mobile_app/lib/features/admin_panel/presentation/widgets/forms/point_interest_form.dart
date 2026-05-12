@@ -164,240 +164,258 @@ class _PointInterestFormState extends State<PointInterestForm> {
     final mapCenter = _selectedCoordinates ?? _meridaCentro;
 
     return CustomCard(
-      child: Scrollbar(
-        controller: _scrollController,
-        thumbVisibility: true,
-        trackVisibility: true,
-        interactive: true,
-        child: SingleChildScrollView(
-          controller: _scrollController,
-          child: Padding(
-            padding: const EdgeInsets.all(18),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isNarrow = constraints.maxWidth < 720;
+          final nameWidth = isNarrow ? double.infinity : 420.0;
+          final qrWidth = isNarrow ? double.infinity : 260.0;
+          final cityWidth = isNarrow ? double.infinity : 340.0;
+          final radiusWidth = isNarrow ? double.infinity : 180.0;
+          final coordinateWidth = isNarrow ? double.infinity : 220.0;
+          final imageWidth = isNarrow ? double.infinity : 520.0;
+
+          return Scrollbar(
+            controller: _scrollController,
+            thumbVisibility: true,
+            trackVisibility: true,
+            interactive: true,
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              child: Padding(
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
-                      width: 420,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildLabel('Nombre'),
-                          _buildTextField(_nameController),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    SizedBox(
-                      width: 260,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildLabel('Código QR'),
-                          _buildTextField(_qrController),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                SizedBox(
-                  width: 520,
-                  child: ImagePickerBox(
-                    imageUrl: _imageController.text,
-                    alternateImageSources: [
-                      _qrController.text,
-                      _nameController.text,
-                      if (widget.point != null) widget.point!.qrCode,
-                      if (widget.point != null) widget.point!.name,
-                    ],
-                    isUploading: _isUploading,
-                    onImageSelected: (bytes, name) {
-                      setState(() {
-                        _pendingImageBytes = bytes;
-                        _pendingImageName = name;
-                      });
-                      widget.formController.markChanged();
-                    },
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                Row(
-                  children: [
-                    SizedBox(
-                      width: 340,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildLabel('Ciudad'),
-                          const SizedBox(height: 8),
-                          DropdownButtonFormField<String>(
-                            initialValue: _selectedCityId,
-                            decoration: _inputDecoration(),
-                            items: widget.cities
-                                .where((c) => c.id != null)
-                                .map(
-                                  (c) => DropdownMenuItem(
-                                    value: c.id,
-                                    child: Text(c.name),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (val) {
-                              setState(() => _selectedCityId = val);
-                              widget.formController.markChanged();
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    SizedBox(
-                      width: 180,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildLabel('Radio de activación'),
-                          _buildTextField(_activationRadiusController),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                _buildLabel('Selecciona coordenadas en el mapa'),
-                const SizedBox(height: 6),
-                const Text(
-                  'Haz clic sobre el mapa para capturar latitud y longitud. Usa + y - para ajustar el zoom.',
-                  style: TextStyle(fontSize: 12, color: Colors.black54),
-                ),
-                const SizedBox(height: 10),
-
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: SizedBox(
-                    height: 230,
-                    child: Stack(
+                    Flex(
+                      direction: isNarrow ? Axis.vertical : Axis.horizontal,
                       children: [
-                        FlutterMap(
-                          key: ValueKey(
-                            '${widget.point?.id ?? 'nuevo'}-${_selectedCoordinates?.latitude}-${_selectedCoordinates?.longitude}',
+                        SizedBox(
+                          width: nameWidth,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildLabel('Nombre'),
+                              _buildTextField(_nameController),
+                            ],
                           ),
-                          mapController: _mapController,
-                          options: MapOptions(
-                            initialCenter: mapCenter,
-                            initialZoom: _selectedCoordinates == null ? 13 : 16,
-                            interactionOptions: const InteractionOptions(
-                              flags:
-                                  InteractiveFlag.all &
-                                  ~InteractiveFlag.scrollWheelZoom,
-                            ),
-                            onTap: (tapPosition, latLng) =>
-                                _setCoordinates(latLng),
-                            onSecondaryTap: (tapPosition, latLng) =>
-                                _setCoordinates(latLng),
+                        ),
+                        SizedBox(width: isNarrow ? 0 : 16, height: 16),
+                        SizedBox(
+                          width: qrWidth,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildLabel('Código QR'),
+                              _buildTextField(_qrController),
+                            ],
                           ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    SizedBox(
+                      width: imageWidth,
+                      child: ImagePickerBox(
+                        imageUrl: _imageController.text,
+                        alternateImageSources: [
+                          _qrController.text,
+                          _nameController.text,
+                          if (widget.point != null) widget.point!.qrCode,
+                          if (widget.point != null) widget.point!.name,
+                        ],
+                        isUploading: _isUploading,
+                        onImageSelected: (bytes, name) {
+                          setState(() {
+                            _pendingImageBytes = bytes;
+                            _pendingImageName = name;
+                          });
+                          widget.formController.markChanged();
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    Flex(
+                      direction: isNarrow ? Axis.vertical : Axis.horizontal,
+                      children: [
+                        SizedBox(
+                          width: cityWidth,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildLabel('Ciudad'),
+                              const SizedBox(height: 8),
+                              DropdownButtonFormField<String>(
+                                initialValue: _selectedCityId,
+                                decoration: _inputDecoration(),
+                                items: widget.cities
+                                    .where((c) => c.id != null)
+                                    .map(
+                                      (c) => DropdownMenuItem(
+                                        value: c.id,
+                                        child: Text(c.name),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (val) {
+                                  setState(() => _selectedCityId = val);
+                                  widget.formController.markChanged();
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(width: isNarrow ? 0 : 16, height: 16),
+                        SizedBox(
+                          width: radiusWidth,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildLabel('Radio de activación'),
+                              _buildTextField(_activationRadiusController),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    _buildLabel('Selecciona coordenadas en el mapa'),
+                    const SizedBox(height: 6),
+                    const Text(
+                      'Haz clic sobre el mapa para capturar latitud y longitud. Usa + y - para ajustar el zoom.',
+                      style: TextStyle(fontSize: 12, color: Colors.black54),
+                    ),
+                    const SizedBox(height: 10),
+
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: SizedBox(
+                        height: 230,
+                        child: Stack(
                           children: [
-                            TileLayer(
-                              urlTemplate:
-                                  'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                              userAgentPackageName: 'com.rutexgo.mobile_app',
+                            FlutterMap(
+                              key: ValueKey(
+                                '${widget.point?.id ?? 'nuevo'}-${_selectedCoordinates?.latitude}-${_selectedCoordinates?.longitude}',
+                              ),
+                              mapController: _mapController,
+                              options: MapOptions(
+                                initialCenter: mapCenter,
+                                initialZoom: _selectedCoordinates == null
+                                    ? 13
+                                    : 16,
+                                interactionOptions: const InteractionOptions(
+                                  flags:
+                                      InteractiveFlag.all &
+                                      ~InteractiveFlag.scrollWheelZoom,
+                                ),
+                                onTap: (tapPosition, latLng) =>
+                                    _setCoordinates(latLng),
+                                onSecondaryTap: (tapPosition, latLng) =>
+                                    _setCoordinates(latLng),
+                              ),
+                              children: [
+                                TileLayer(
+                                  urlTemplate:
+                                      'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                  userAgentPackageName:
+                                      'com.rutexgo.mobile_app',
+                                ),
+                                if (_selectedCoordinates != null)
+                                  MarkerLayer(
+                                    markers: [
+                                      Marker(
+                                        point: _selectedCoordinates!,
+                                        width: 44,
+                                        height: 44,
+                                        child: const Icon(
+                                          Icons.location_on,
+                                          color: Colors.red,
+                                          size: 40,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                              ],
                             ),
-                            if (_selectedCoordinates != null)
-                              MarkerLayer(
-                                markers: [
-                                  Marker(
-                                    point: _selectedCoordinates!,
-                                    width: 44,
-                                    height: 44,
-                                    child: const Icon(
-                                      Icons.location_on,
-                                      color: Colors.red,
-                                      size: 40,
-                                    ),
+                            Positioned(
+                              top: 8,
+                              right: 8,
+                              child: Column(
+                                children: [
+                                  _MapZoomButton(
+                                    icon: Icons.add,
+                                    onPressed: () => _zoomMap(1),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  _MapZoomButton(
+                                    icon: Icons.remove,
+                                    onPressed: () => _zoomMap(-1),
                                   ),
                                 ],
                               ),
+                            ),
                           ],
                         ),
-                        Positioned(
-                          top: 8,
-                          right: 8,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    OutlinedButton.icon(
+                      onPressed: _selectedCoordinates == null
+                          ? null
+                          : () {
+                              setState(() {
+                                _selectedCoordinates = null;
+                                _latitudeController.clear();
+                                _longitudeController.clear();
+                              });
+                              widget.formController.markChanged();
+                              _moveMapToSelection();
+                            },
+                      icon: const Icon(Icons.clear),
+                      label: const Text('Limpiar coordenadas'),
+                    ),
+                    const SizedBox(height: 16),
+
+                    Flex(
+                      direction: isNarrow ? Axis.vertical : Axis.horizontal,
+                      children: [
+                        SizedBox(
+                          width: coordinateWidth,
                           child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _MapZoomButton(
-                                icon: Icons.add,
-                                onPressed: () => _zoomMap(1),
+                              _buildLabel('Latitud'),
+                              _buildTextField(
+                                _latitudeController,
+                                onChanged: (_) => _syncCoordinatesFromInputs(),
                               ),
-                              const SizedBox(height: 6),
-                              _MapZoomButton(
-                                icon: Icons.remove,
-                                onPressed: () => _zoomMap(-1),
+                            ],
+                          ),
+                        ),
+                        SizedBox(width: isNarrow ? 0 : 12, height: 12),
+                        SizedBox(
+                          width: coordinateWidth,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildLabel('Longitud'),
+                              _buildTextField(
+                                _longitudeController,
+                                onChanged: (_) => _syncCoordinatesFromInputs(),
                               ),
                             ],
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                OutlinedButton.icon(
-                  onPressed: _selectedCoordinates == null
-                      ? null
-                      : () {
-                          setState(() {
-                            _selectedCoordinates = null;
-                            _latitudeController.clear();
-                            _longitudeController.clear();
-                          });
-                          widget.formController.markChanged();
-                          _moveMapToSelection();
-                        },
-                  icon: const Icon(Icons.clear),
-                  label: const Text('Limpiar coordenadas'),
-                ),
-                const SizedBox(height: 16),
-
-                Row(
-                  children: [
-                    SizedBox(
-                      width: 220,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildLabel('Latitud'),
-                          _buildTextField(
-                            _latitudeController,
-                            onChanged: (_) => _syncCoordinatesFromInputs(),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    SizedBox(
-                      width: 220,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildLabel('Longitud'),
-                          _buildTextField(
-                            _longitudeController,
-                            onChanged: (_) => _syncCoordinatesFromInputs(),
-                          ),
-                        ],
-                      ),
-                    ),
                   ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
@@ -454,7 +472,10 @@ class _PointInterestFormState extends State<PointInterestForm> {
       child: TextField(
         controller: controller,
         maxLines: maxLines,
-        onChanged: onChanged,
+        onChanged: (value) {
+          _markChanged();
+          onChanged?.call(value);
+        },
         decoration: const InputDecoration(
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),

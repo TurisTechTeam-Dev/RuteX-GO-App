@@ -139,12 +139,15 @@ class _MissionFormState extends State<MissionForm> {
                 ),
                 const SizedBox(height: 16),
                 _buildLabel('Título de la Misión'),
-                SizedBox(width: 420, child: _buildTextField(_titleController)),
+                _responsiveBox(
+                  maxWidth: 420,
+                  child: _buildTextField(_titleController),
+                ),
                 const SizedBox(height: 24),
                 _buildLabel('Ciudad'),
                 const SizedBox(height: 8),
-                SizedBox(
-                  width: 320,
+                _responsiveBox(
+                  maxWidth: 320,
                   child: DropdownButtonFormField<String>(
                     initialValue:
                         widget.cities.any((city) => city.id == _selectedCityId)
@@ -177,8 +180,8 @@ class _MissionFormState extends State<MissionForm> {
 
                 _buildLabel('Punto de interés'),
                 const SizedBox(height: 8),
-                SizedBox(
-                  width: 420,
+                _responsiveBox(
+                  maxWidth: 420,
                   child: DropdownButtonFormField<String>(
                     initialValue:
                         availablePoints.any((p) => p.id == _selectedPointId)
@@ -238,8 +241,8 @@ class _MissionFormState extends State<MissionForm> {
     required TextEditingController questionController,
     required int answersOffset,
   }) {
-    return SizedBox(
-      width: 520,
+    return _responsiveBox(
+      maxWidth: 520,
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
@@ -261,21 +264,24 @@ class _MissionFormState extends State<MissionForm> {
           children: [
             _buildLabel('Enunciado de la pregunta'),
             const SizedBox(height: 8),
-            SizedBox(width: 460, child: _buildTextField(questionController)),
+            _responsiveBox(
+              maxWidth: 460,
+              child: _buildTextField(questionController),
+            ),
             const SizedBox(height: 16),
             for (var i = 0; i < 3; i++) ...[
               _buildLabel('Respuesta ${i + 1}'),
               const SizedBox(height: 8),
-              SizedBox(
-                width: 460,
+              _responsiveBox(
+                maxWidth: 460,
                 child: _buildTextField(_answerControllers[answersOffset + i]),
               ),
               const SizedBox(height: 12),
             ],
             _buildLabel('¿Cuál es la correcta?'),
             const SizedBox(height: 8),
-            SizedBox(
-              width: 220,
+            _responsiveBox(
+              maxWidth: 220,
               child: DropdownButtonFormField<int>(
                 initialValue: _correctAnswers[number - 1],
                 decoration: _inputDecoration(),
@@ -293,6 +299,17 @@ class _MissionFormState extends State<MissionForm> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _responsiveBox({required double maxWidth, required Widget child}) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth < maxWidth
+            ? double.infinity
+            : maxWidth;
+        return SizedBox(width: width, child: child);
+      },
     );
   }
 
@@ -324,7 +341,11 @@ class _MissionFormState extends State<MissionForm> {
   }
 
   Widget _buildTextField(TextEditingController controller) {
-    return TextField(controller: controller, decoration: _inputDecoration());
+    return TextField(
+      controller: controller,
+      onChanged: (_) => _markChanged(),
+      decoration: _inputDecoration(),
+    );
   }
 
   InputDecoration _inputDecoration() {

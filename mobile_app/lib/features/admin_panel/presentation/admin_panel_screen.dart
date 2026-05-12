@@ -6,7 +6,8 @@
   TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
   Año: 2026
   -----------------------------------------------------------------------------
-*/import 'package:flutter/material.dart';
+*/
+import 'package:flutter/material.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/admin_footer.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/components/admin_form_router.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/components/admin_map_explorer.dart';
@@ -150,7 +151,9 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
       ),
       child: Center(
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: isCompact ? 860 : 820),
+          constraints: BoxConstraints(
+            maxWidth: isCompact ? double.infinity : 820,
+          ),
           child: Column(
             children: [
               _AdminFormHeader(
@@ -163,36 +166,36 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
               const SizedBox(height: 16),
               Expanded(
                 child: _HorizontalFormScroll(
-                  width: isCompact ? 860 : 820,
+                  width: isCompact ? double.infinity : 820,
                   child: AdminFormRouter(
-                      tab: tab,
-                      itemToEdit: _itemToEdit,
-                      adminUseCases: adminUseCases,
-                      formController: _formController,
-                      onSave: (saveItem) async {
-                        try {
-                          await saveItem();
-                          if (!mounted) return;
+                    tab: tab,
+                    itemToEdit: _itemToEdit,
+                    adminUseCases: adminUseCases,
+                    formController: _formController,
+                    onSave: (saveItem) async {
+                      try {
+                        await saveItem();
+                        if (!mounted) return;
 
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Guardado con éxito'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-                          _resetForm();
-                        } catch (error) {
-                          if (!mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Guardado con éxito'),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                        _resetForm();
+                      } catch (error) {
+                        if (!mounted) return;
 
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Error: $error'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        }
-                      },
-                      onResetSelection: _resetForm,
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Error: $error'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    },
+                    onResetSelection: _resetForm,
                   ),
                 ),
               ),
@@ -254,6 +257,8 @@ class _HorizontalFormScrollState extends State<_HorizontalFormScroll> {
 
   @override
   Widget build(BuildContext context) {
+    if (!widget.width.isFinite) return widget.child;
+
     return Scrollbar(
       controller: _controller,
       thumbVisibility: true,
@@ -304,10 +309,7 @@ class _AdminFormHeader extends StatelessWidget {
         children: [
           titleWidget,
           const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: actions,
-          ),
+          Align(alignment: Alignment.centerLeft, child: actions),
         ],
       );
     }
@@ -355,7 +357,7 @@ class _HeaderActions extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: onNewPressed,
               icon: const Icon(Icons.add),
-              label: const Text('Nuevo / limpiar'),
+              label: const Text('Limpiar'),
             ),
           ],
         );

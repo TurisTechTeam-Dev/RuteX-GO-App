@@ -6,7 +6,8 @@
   TurisTechTeam. Queda prohibida su copia, distribución o uso no autorizado.
   Año: 2026
   -----------------------------------------------------------------------------
-*/import 'package:flutter/material.dart';
+*/
+import 'package:flutter/material.dart';
 import 'dart:typed_data';
 import 'package:mobile_app/core/widgets/cards/custom_cards.dart';
 import 'package:mobile_app/core/utils/text_normalizer.dart';
@@ -89,101 +90,113 @@ class _CityFormState extends State<CityForm> {
   @override
   Widget build(BuildContext context) {
     return CustomCard(
-      child: Scrollbar(
-        controller: _scrollController,
-        thumbVisibility: true,
-        trackVisibility: true,
-        interactive: true,
-        child: SingleChildScrollView(
-          controller: _scrollController,
-          child: Padding(
-            padding: const EdgeInsets.all(18),
-            child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: widget.onCancel,
-                    icon: const Icon(Icons.close),
-                  ),
-                  const Text(
-                    'Editar Ciudad',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 18),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isNarrow = constraints.maxWidth < 760;
+          final fieldsWidth = isNarrow ? double.infinity : 420.0;
+          final imageWidth = isNarrow ? double.infinity : 300.0;
 
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: 420,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+          return Scrollbar(
+            controller: _scrollController,
+            thumbVisibility: true,
+            trackVisibility: true,
+            interactive: true,
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              child: Padding(
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        _buildLabel('Nombre de la Ciudad'),
-                        _buildTextField(_nameController),
-                        const SizedBox(height: 16),
-
-                        _buildLabel('Provincia (Capital)'),
-                        _buildTextField(_provinceController),
-                        const SizedBox(height: 12),
-
-                        SwitchListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: const Text(
-                            '¿Ciudad activa en la app?',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                        IconButton(
+                          onPressed: widget.onCancel,
+                          icon: const Icon(Icons.close),
+                        ),
+                        const Text(
+                          'Editar Ciudad',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
-                          value: isActive,
-                          activeThumbColor: const Color(0xFF6B7249),
-                          onChanged: (val) {
-                            setState(() => isActive = val);
-                            widget.formController?.markChanged();
-                          },
                         ),
                       ],
                     ),
-                  ),
+                    const SizedBox(height: 18),
 
-                  const SizedBox(width: 24),
-
-                  SizedBox(
-                    width: 300,
-                    child: Column(
+                    Flex(
+                      direction: isNarrow ? Axis.vertical : Axis.horizontal,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildLabel('Imagen de la Ciudad'),
-                        const SizedBox(height: 8),
-                        ImagePickerBox(
-                          imageUrl: _imageController.text,
-                          alternateImageSources: [
-                            if (widget.city?.id != null)
-                              'assets/images_selection/${widget.city!.id}.jpg',
-                            'assets/images_selection/${TextNormalizer.toAsciiSlug(_nameController.text)}.jpg',
-                            _nameController.text,
-                            if (widget.city != null) widget.city!.name,
-                          ],
-                          isUploading: _isUploading,
-                          onImageSelected: (bytes, name) {
-                            setState(() {
-                              _pendingImageBytes = bytes;
-                              _pendingImageName = name;
-                            });
-                            widget.formController?.markChanged();
-                          },
+                        SizedBox(
+                          width: fieldsWidth,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildLabel('Nombre de la Ciudad'),
+                              _buildTextField(_nameController),
+                              const SizedBox(height: 16),
+
+                              _buildLabel('Provincia (Capital)'),
+                              _buildTextField(_provinceController),
+                              const SizedBox(height: 12),
+
+                              SwitchListTile(
+                                contentPadding: EdgeInsets.zero,
+                                title: const Text(
+                                  '¿Ciudad activa en la app?',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                value: isActive,
+                                activeThumbColor: const Color(0xFF6B7249),
+                                onChanged: (val) {
+                                  setState(() => isActive = val);
+                                  widget.formController?.markChanged();
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        SizedBox(width: isNarrow ? 0 : 24, height: 16),
+
+                        SizedBox(
+                          width: imageWidth,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildLabel('Imagen de la Ciudad'),
+                              const SizedBox(height: 8),
+                              ImagePickerBox(
+                                imageUrl: _imageController.text,
+                                alternateImageSources: [
+                                  if (widget.city?.id != null)
+                                    'assets/images_selection/${widget.city!.id}.jpg',
+                                  'assets/images_selection/${TextNormalizer.toAsciiSlug(_nameController.text)}.jpg',
+                                  _nameController.text,
+                                  if (widget.city != null) widget.city!.name,
+                                ],
+                                isUploading: _isUploading,
+                                onImageSelected: (bytes, name) {
+                                  setState(() {
+                                    _pendingImageBytes = bytes;
+                                    _pendingImageName = name;
+                                  });
+                                  widget.formController?.markChanged();
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ],
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
