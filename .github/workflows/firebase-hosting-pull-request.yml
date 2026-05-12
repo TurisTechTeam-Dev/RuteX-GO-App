@@ -5,6 +5,10 @@ on:
       - develop
       - main
 
+concurrency:
+  group: firebase-hosting-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 permissions:
   checks: write
   contents: read
@@ -22,13 +26,16 @@ jobs:
           channel: "stable"
           cache: true
 
+      - name: Install dependencies
+        working-directory: mobile_app
+        run: flutter pub get
+
       - name: Build Flutter web
         working-directory: mobile_app
-        run: |
-          flutter pub get
-          flutter build web --release
+        run: flutter build web --release
 
-      - uses: FirebaseExtended/action-hosting-deploy@v0
+      - name: Deploy preview to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_RUTEXGO_2DAMA }}
