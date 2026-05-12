@@ -30,7 +30,7 @@ class PointInterestForm extends StatefulWidget {
   final AdminPoiModel? point;
   final List<AdminCityModel> cities;
   final AdminFormController formController;
-  final ValueChanged<AdminPoiModel> onSave;
+  final Future<void> Function(AdminPoiModel) onSave;
   final Future<String> Function(Uint8List bytes, String fileName) onUploadImage;
 
   @override
@@ -43,6 +43,7 @@ class _PointInterestFormState extends State<PointInterestForm> {
   final ScrollController _scrollController = ScrollController();
 
   late final TextEditingController _nameController;
+  late final TextEditingController _descriptionController;
   late final TextEditingController _imageController;
   late final TextEditingController _qrController;
   late final TextEditingController _activationRadiusController;
@@ -61,6 +62,7 @@ class _PointInterestFormState extends State<PointInterestForm> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.point?.name);
+    _descriptionController = TextEditingController(text: widget.point?.description);
     _imageController = TextEditingController(text: widget.point?.imageUrl);
     _qrController = TextEditingController(text: widget.point?.qrCode);
     _activationRadiusController = TextEditingController(
@@ -112,6 +114,7 @@ class _PointInterestFormState extends State<PointInterestForm> {
     if (!pointChanged) return;
 
     _nameController.text = widget.point?.name ?? '';
+    _descriptionController.text = widget.point?.description ?? '';
     _imageController.text = widget.point?.imageUrl ?? '';
     _pendingImageBytes = null;
     _pendingImageName = null;
@@ -150,6 +153,7 @@ class _PointInterestFormState extends State<PointInterestForm> {
   void dispose() {
     _scrollController.dispose();
     _nameController.dispose();
+    _descriptionController.dispose();
     _imageController.dispose();
     _qrController.dispose();
     _activationRadiusController.dispose();
@@ -209,6 +213,18 @@ class _PointInterestFormState extends State<PointInterestForm> {
                               _buildTextField(_qrController),
                             ],
                           ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildLabel('Descripción'),
+                        _buildTextField(
+                          _descriptionController,
+                          maxLines: 4,
                         ),
                       ],
                     ),
@@ -549,6 +565,7 @@ class _PointInterestFormState extends State<PointInterestForm> {
 
   void _attachChangeListeners() {
     _nameController.addListener(_markChanged);
+    _descriptionController.addListener(_markChanged);
     _imageController.addListener(_markChanged);
     _qrController.addListener(_markChanged);
     _activationRadiusController.addListener(_markChanged);
@@ -585,11 +602,11 @@ class _PointInterestFormState extends State<PointInterestForm> {
     final imageUrl = await _uploadPendingImage();
     if (imageUrl == null) return;
 
-    widget.onSave(
+    await widget.onSave(
       AdminPoiModel(
         id: widget.point?.id,
         name: _nameController.text.trim(),
-        description: '',
+        description: _descriptionController.text.trim(),
         imageUrl: imageUrl,
         qrCode: _qrController.text.trim(),
         activationRadius:

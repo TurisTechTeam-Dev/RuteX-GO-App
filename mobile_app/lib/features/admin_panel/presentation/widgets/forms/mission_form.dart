@@ -20,7 +20,7 @@ class MissionForm extends StatefulWidget {
   final List<AdminCityModel> cities;
   final List<AdminRouteModel> routes;
   final AdminFormController formController;
-  final ValueChanged<AdminMissionModel> onSave;
+  final Future<void> Function(AdminMissionModel) onSave;
 
   const MissionForm({
     super.key,
@@ -529,7 +529,7 @@ class _MissionFormState extends State<MissionForm> {
           .map(TextNormalizer.toAsciiSlug)
           .toSet();
 
-      _save(usedPointIds);
+      await _save(usedPointIds);
     });
   }
 
@@ -541,14 +541,14 @@ class _MissionFormState extends State<MissionForm> {
     _formControllerToken = null;
   }
 
-  void _save(Set<String> usedPointIds) {
+  Future<void> _save(Set<String> usedPointIds) async {
     final error = _validate(usedPointIds);
     if (error != null) {
       _showMessage(error);
       return;
     }
 
-    widget.onSave(
+    await widget.onSave(
       AdminMissionModel(
         id: widget.mission?.id,
         pointId: _selectedPointId ?? '',

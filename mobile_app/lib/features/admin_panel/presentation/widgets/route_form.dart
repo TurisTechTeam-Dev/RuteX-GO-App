@@ -32,7 +32,7 @@ class RouteForm extends StatefulWidget {
   final List<AdminPoiModel> availablePoints;
   final List<AdminMissionModel> availableMissions;
   final AdminFormController formController;
-  final ValueChanged<AdminRouteModel> onSave;
+  final Future<void> Function(AdminRouteModel) onSave;
   final Future<String> Function(Uint8List bytes, String fileName) onUploadImage;
 
   @override
@@ -500,7 +500,7 @@ class _RouteFormState extends State<RouteForm> {
     final imagePath = await _uploadPendingImage();
     if (imagePath == null) return;
 
-    widget.onSave(
+    await widget.onSave(
       AdminRouteModel(
         id: widget.route?.id,
         name: _nameController.text.trim(),

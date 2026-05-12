@@ -17,7 +17,7 @@ import 'package:mobile_app/features/admin_panel/presentation/widgets/components/
 
 class CityForm extends StatefulWidget {
   final AdminCityModel? city;
-  final ValueChanged<AdminCityModel> onSave;
+  final Future<void> Function(AdminCityModel) onSave;
   final VoidCallback onCancel;
   final Future<String> Function(Uint8List bytes, String fileName) onUploadImage;
   final AdminFormController? formController;
@@ -290,7 +290,7 @@ class _CityFormState extends State<CityForm> {
     }
     final imageUrl = await _uploadPendingImage();
     if (imageUrl == null) return;
-    widget.onSave(
+    await widget.onSave(
       AdminCityModel(
         id: widget.city?.id,
         name: _nameController.text.trim(),

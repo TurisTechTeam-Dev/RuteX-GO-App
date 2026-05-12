@@ -51,7 +51,7 @@ class AdminFormRouter extends StatelessWidget {
               ? (itemToEdit as AdminCityItem).city
               : null,
           formController: formController,
-          onSave: (city) => onSave(() => adminUseCases.saveCity(city)),
+          onSave: (city) async => await onSave(() => adminUseCases.saveCity(city)),
           onCancel: onResetSelection,
           onUploadImage: (Uint8List bytes, String name) =>
               adminUseCases.uploadFile(
@@ -93,8 +93,8 @@ class AdminFormRouter extends StatelessWidget {
                   availablePoints: pointSnapshot.data!,
                   availableMissions: missionSnapshot.data!,
                   formController: formController,
-                  onSave: (route) =>
-                      onSave(() => adminUseCases.saveRoute(route)),
+                  onSave: (route) async =>
+                      await onSave(() => adminUseCases.saveRoute(route)),
                   onUploadImage: (Uint8List bytes, String name) =>
                       adminUseCases.uploadFile(
                         fileBytes: bytes,
@@ -125,7 +125,7 @@ class AdminFormRouter extends StatelessWidget {
               : null,
           cities: snapshot.data!,
           formController: formController,
-          onSave: (point) => onSave(() => adminUseCases.savePoi(point)),
+          onSave: (point) async => await onSave(() => adminUseCases.savePoi(point)),
           onUploadImage: (Uint8List bytes, String name) =>
               adminUseCases.uploadFile(
                 fileBytes: bytes,
@@ -167,8 +167,8 @@ class AdminFormRouter extends StatelessWidget {
                       cities: citySnapshot.data!,
                       routes: routeSnapshot.data!,
                       formController: formController,
-                      onSave: (mission) =>
-                          onSave(() => adminUseCases.saveMission(mission)),
+                      onSave: (mission) async =>
+                          await onSave(() => adminUseCases.saveMission(mission)),
                     );
                   },
                 );
