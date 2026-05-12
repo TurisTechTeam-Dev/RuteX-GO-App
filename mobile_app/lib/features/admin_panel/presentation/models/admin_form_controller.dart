@@ -16,7 +16,7 @@ class AdminFormController extends ChangeNotifier {
 
   bool get hasChanges => _hasChanges;
   bool get isSaving => _isSaving;
-  bool get canSave => !_isSaving && _saveAction != null;
+  bool get canSave => !_isSaving;
 
   Object registerSaveAction(Future<void> Function() saveAction) {
     final token = Object();
