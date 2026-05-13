@@ -121,6 +121,7 @@ class _MissionFormState extends State<MissionForm> {
         .toList();
 
     return CustomCard(
+      width: double.infinity,
       child: Scrollbar(
         controller: _scrollController,
         thumbVisibility: true,
@@ -307,7 +308,7 @@ class _MissionFormState extends State<MissionForm> {
       builder: (context, constraints) {
         final width = constraints.maxWidth < maxWidth
             ? double.infinity
-            : maxWidth;
+            : double.infinity;
         return SizedBox(width: width, child: child);
       },
     );
