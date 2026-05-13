@@ -198,17 +198,27 @@ class _RouteFormState extends State<RouteForm> {
                                 },
                               ),
                               const SizedBox(height: 16),
-                              SwitchListTile(
-                                title: const Text(
-                                  '¿Ruta activa?',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                value: _isActive,
-                                activeThumbColor: Color(0xFF6B7249),
-                                onChanged: (val) {
-                                  setState(() => _isActive = val);
-                                  widget.formController.markChanged();
-                                },
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text(
+                                    '¿Ruta activa?',
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Switch(
+                                    value: _isActive,
+                                    activeThumbColor: const Color(0xFF6B7249),
+                                    activeTrackColor:
+                                        const Color(0xFF6B7249).withOpacity(0.35),
+                                    inactiveThumbColor: Colors.red,
+                                    inactiveTrackColor: Colors.red.withOpacity(0.25),
+                                    onChanged: (val) {
+                                      setState(() => _isActive = val);
+                                      widget.formController.markChanged();
+                                    },
+                                  ),
+                                ],
                               ),
                             ],
                           ),

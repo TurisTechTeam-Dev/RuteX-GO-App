@@ -207,6 +207,7 @@ class _PointInterestFormState extends State<PointInterestForm> {
                   children: [
                     Flex(
                       direction: isNarrow ? Axis.vertical : Axis.horizontal,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SizedBox(
                           width: nameWidth,
@@ -266,6 +267,7 @@ class _PointInterestFormState extends State<PointInterestForm> {
                     const SizedBox(height: 16),
                     Flex(
                       direction: isNarrow ? Axis.vertical : Axis.horizontal,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SizedBox(
                           width: cityWidth,
