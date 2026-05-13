@@ -7,8 +7,9 @@
   Año: 2026
   -----------------------------------------------------------------------------
 */
-import 'package:flutter/material.dart';
 import 'dart:typed_data';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -62,7 +63,9 @@ class _PointInterestFormState extends State<PointInterestForm> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.point?.name);
-    _descriptionController = TextEditingController(text: widget.point?.description);
+    _descriptionController = TextEditingController(
+      text: widget.point?.description,
+    );
     _imageController = TextEditingController(text: widget.point?.imageUrl);
     _qrController = TextEditingController(text: widget.point?.qrCode);
     _activationRadiusController = TextEditingController(
@@ -74,14 +77,9 @@ class _PointInterestFormState extends State<PointInterestForm> {
     _longitudeController = TextEditingController(
       text: widget.point?.longitude?.toString() ?? '',
     );
-    _selectedCityId = widget.point?.cityId;
-    // Los datos del panel llegan por streams; si una ciudad desaparece,
-    // limpiamos el selector para evitar valores huérfanos en el formulario.
-    if (_selectedCityId != null &&
-        (_selectedCityId!.isEmpty ||
-            !widget.cities.any((c) => c.id == _selectedCityId))) {
-      _selectedCityId = null;
-    }
+
+    // Intentamos resolver la selección con la lista actual de ciudades.
+    _selectedCityId = _normalizeCitySelection(widget.point?.cityId);
     _mapController = MapController();
 
     if (widget.point?.latitude != null && widget.point?.longitude != null) {
@@ -104,33 +102,50 @@ class _PointInterestFormState extends State<PointInterestForm> {
 
     final pointChanged =
         oldWidget.point?.id != widget.point?.id ||
-        oldWidget.point?.latitude != widget.point?.latitude ||
-        oldWidget.point?.longitude != widget.point?.longitude ||
-        oldWidget.point?.imageUrl != widget.point?.imageUrl ||
-        oldWidget.point?.name != widget.point?.name ||
-        oldWidget.point?.qrCode != widget.point?.qrCode ||
-        oldWidget.point?.cityId != widget.point?.cityId;
+            oldWidget.point?.latitude != widget.point?.latitude ||
+            oldWidget.point?.longitude != widget.point?.longitude ||
+            oldWidget.point?.imageUrl != widget.point?.imageUrl ||
+            oldWidget.point?.name != widget.point?.name ||
+            oldWidget.point?.qrCode != widget.point?.qrCode ||
+            oldWidget.point?.cityId != widget.point?.cityId;
 
-    if (!pointChanged) return;
+    final citiesChanged = !_isCitiesEqual(oldWidget.cities, widget.cities);
 
-    _nameController.text = widget.point?.name ?? '';
-    _descriptionController.text = widget.point?.description ?? '';
-    _imageController.text = widget.point?.imageUrl ?? '';
-    _pendingImageBytes = null;
-    _pendingImageName = null;
-    _qrController.text = widget.point?.qrCode ?? '';
-    _activationRadiusController.text = (widget.point?.activationRadius ?? 20)
-        .toString();
-    _latitudeController.text = widget.point?.latitude?.toString() ?? '';
-    _longitudeController.text = widget.point?.longitude?.toString() ?? '';
-    _selectedCityId = widget.point?.cityId;
+    // Si no ha cambiado ni el punto ni la lista de ciudades, no hacemos nada.
+    if (!pointChanged && !citiesChanged) return;
 
-    // Los datos del panel llegan por streams; si una ciudad desaparece,
-    // limpiamos el selector para evitar valores huérfanos en el formulario.
-    if (_selectedCityId != null &&
-        (_selectedCityId!.isEmpty ||
-            !widget.cities.any((c) => c.id == _selectedCityId))) {
-      _selectedCityId = null;
+    // Si ha cambiado el punto, actualizamos los campos habituales.
+    if (pointChanged) {
+      _nameController.text = widget.point?.name ?? '';
+      _descriptionController.text = widget.point?.description ?? '';
+      _imageController.text = widget.point?.imageUrl ?? '';
+      _pendingImageBytes = null;
+      _pendingImageName = null;
+      _qrController.text = widget.point?.qrCode ?? '';
+      _activationRadiusController.text = (widget.point?.activationRadius ?? 20)
+          .toString();
+      _latitudeController.text = widget.point?.latitude?.toString() ?? '';
+      _longitudeController.text = widget.point?.longitude?.toString() ?? '';
+
+      // Intentamos resolver la ciudad del punto contra la lista actual.
+      final resolvedCity = _normalizeCitySelection(widget.point?.cityId);
+      setState(() {
+        _selectedCityId = resolvedCity;
+      });
+    }
+
+    // Si solo ha cambiado la lista de ciudades y aún no hay selección,
+    // reintentamos resolver la ciudad del punto (útil cuando las cities
+    // se cargan asincrónicamente después del punto).
+    if (citiesChanged) {
+      if (_selectedCityId == null && widget.point?.cityId != null) {
+        final resolved = _normalizeCitySelection(widget.point?.cityId);
+        if (resolved != null) {
+          setState(() {
+            _selectedCityId = resolved;
+          });
+        }
+      }
     }
 
     if (widget.point?.latitude != null && widget.point?.longitude != null) {
@@ -217,7 +232,6 @@ class _PointInterestFormState extends State<PointInterestForm> {
                       ],
                     ),
                     const SizedBox(height: 16),
-
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -229,7 +243,6 @@ class _PointInterestFormState extends State<PointInterestForm> {
                       ],
                     ),
                     const SizedBox(height: 16),
-
                     SizedBox(
                       width: imageWidth,
                       child: ImagePickerBox(
@@ -251,7 +264,6 @@ class _PointInterestFormState extends State<PointInterestForm> {
                       ),
                     ),
                     const SizedBox(height: 16),
-
                     Flex(
                       direction: isNarrow ? Axis.vertical : Axis.horizontal,
                       children: [
@@ -260,24 +272,32 @@ class _PointInterestFormState extends State<PointInterestForm> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildLabel('Ciudad'),
+                              _buildLabel('Ciudad (opcional)'),
                               const SizedBox(height: 8),
                               DropdownButtonFormField<String>(
+                                key: ValueKey(
+                                  'poi-city-dropdown-${widget.point?.id ?? 'nuevo'}-${_selectedCityId ?? 'none'}-${widget.cities.map((c) => c.id).join('|')}',
+                                ),
                                 initialValue: _selectedCityId,
                                 decoration: _inputDecoration(),
                                 items: widget.cities
                                     .where((c) => c.id != null)
                                     .map(
                                       (c) => DropdownMenuItem(
-                                        value: c.id,
-                                        child: Text(c.name),
-                                      ),
-                                    )
+                                    value: c.id,
+                                    child: Text(c.name),
+                                  ),
+                                )
                                     .toList(),
                                 onChanged: (val) {
                                   setState(() => _selectedCityId = val);
                                   widget.formController.markChanged();
                                 },
+                              ),
+                              const SizedBox(height: 6),
+                              const Text(
+                                'Opcional: asigna la ciudad si conoces a qué ciudad pertenece este punto. La pertenencia final se confirma al añadir el punto a una ruta.',
+                                style: TextStyle(fontSize: 12, color: Colors.black54),
                               ),
                             ],
                           ),
@@ -296,7 +316,6 @@ class _PointInterestFormState extends State<PointInterestForm> {
                       ],
                     ),
                     const SizedBox(height: 16),
-
                     _buildLabel('Selecciona coordenadas en el mapa'),
                     const SizedBox(height: 6),
                     const Text(
@@ -304,7 +323,6 @@ class _PointInterestFormState extends State<PointInterestForm> {
                       style: TextStyle(fontSize: 12, color: Colors.black54),
                     ),
                     const SizedBox(height: 10),
-
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: SizedBox(
@@ -323,8 +341,8 @@ class _PointInterestFormState extends State<PointInterestForm> {
                                     : 16,
                                 interactionOptions: const InteractionOptions(
                                   flags:
-                                      InteractiveFlag.all &
-                                      ~InteractiveFlag.scrollWheelZoom,
+                                  InteractiveFlag.all &
+                                  ~InteractiveFlag.scrollWheelZoom,
                                 ),
                                 onTap: (tapPosition, latLng) =>
                                     _setCoordinates(latLng),
@@ -334,9 +352,9 @@ class _PointInterestFormState extends State<PointInterestForm> {
                               children: [
                                 TileLayer(
                                   urlTemplate:
-                                      'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                  'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                                   userAgentPackageName:
-                                      'com.rutexgo.mobile_app',
+                                  'com.rutexgo.mobile_app',
                                 ),
                                 if (_selectedCoordinates != null)
                                   MarkerLayer(
@@ -381,19 +399,18 @@ class _PointInterestFormState extends State<PointInterestForm> {
                       onPressed: _selectedCoordinates == null
                           ? null
                           : () {
-                              setState(() {
-                                _selectedCoordinates = null;
-                                _latitudeController.clear();
-                                _longitudeController.clear();
-                              });
-                              widget.formController.markChanged();
-                              _moveMapToSelection();
-                            },
+                        setState(() {
+                          _selectedCoordinates = null;
+                          _latitudeController.clear();
+                          _longitudeController.clear();
+                        });
+                        widget.formController.markChanged();
+                        _moveMapToSelection();
+                      },
                       icon: const Icon(Icons.clear),
                       label: const Text('Limpiar coordenadas'),
                     ),
                     const SizedBox(height: 16),
-
                     Flex(
                       direction: isNarrow ? Axis.vertical : Axis.horizontal,
                       children: [
@@ -454,7 +471,7 @@ class _PointInterestFormState extends State<PointInterestForm> {
 
   String? _validate() {
     if (_nameController.text.trim().isEmpty) return 'El nombre es obligatorio';
-    if (_selectedCityId == null) return 'Selecciona una ciudad';
+    // Ciudad ahora es opcional en POI; la ruta define la ciudad de pertenencia.
     if (_latitudeController.text.trim().isEmpty ||
         _longitudeController.text.trim().isEmpty) {
       return 'Las coordenadas son obligatorias';
@@ -474,10 +491,10 @@ class _PointInterestFormState extends State<PointInterestForm> {
   }
 
   Widget _buildTextField(
-    TextEditingController controller, {
-    int maxLines = 1,
-    ValueChanged<String>? onChanged,
-  }) {
+      TextEditingController controller, {
+        int maxLines = 1,
+        ValueChanged<String>? onChanged,
+      }) {
     return Container(
       margin: const EdgeInsets.only(top: 8),
       decoration: BoxDecoration(
@@ -610,12 +627,36 @@ class _PointInterestFormState extends State<PointInterestForm> {
         imageUrl: imageUrl,
         qrCode: _qrController.text.trim(),
         activationRadius:
-            int.tryParse(_activationRadiusController.text.trim()) ?? 20,
+        int.tryParse(_activationRadiusController.text.trim()) ?? 20,
         cityId: _selectedCityId ?? '',
         latitude: _selectedCoordinates?.latitude,
         longitude: _selectedCoordinates?.longitude,
       ),
     );
+  }
+
+  String? _normalizeCitySelection(String? cityId) {
+    if (cityId == null || cityId.trim().isEmpty) return null;
+
+    final rawValue = cityId.trim().toLowerCase();
+
+    for (final city in widget.cities) {
+      final cityIdValue = city.id?.trim().toLowerCase();
+      final cityNameValue = city.name.trim().toLowerCase();
+
+      if (cityIdValue == rawValue || cityNameValue == rawValue) {
+        return city.id;
+      }
+    }
+
+    return null;
+  }
+
+  bool _isCitiesEqual(List<AdminCityModel> a, List<AdminCityModel> b) {
+    if (a.length != b.length) return false;
+    final aIds = a.map((c) => c.id).toSet();
+    final bIds = b.map((c) => c.id).toSet();
+    return aIds.length == bIds.length && aIds.containsAll(bIds);
   }
 }
 

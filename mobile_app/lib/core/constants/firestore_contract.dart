@@ -48,13 +48,11 @@ class PointInterestFields {
 }
 
 class RouteFields {
-  static const descripcion = 'descripcion';
   static const dificultad = 'dificultad';
   static const duracion = 'duracion';
   static const idCiudad = 'id_ciudad';
   static const idPuntosInteres = 'id_puntos_interes';
   static const imagen = 'imagen';
-  static const imagenAsset = 'imagen_asset';
   static const isActive = 'isActive';
   static const nombre = 'nombre';
   static const puntosTotales = 'puntos_totales';

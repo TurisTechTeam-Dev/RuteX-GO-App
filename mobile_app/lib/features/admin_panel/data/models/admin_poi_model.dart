@@ -88,8 +88,13 @@ class AdminPoiModel {
       PointInterestFields.imagen: imageUrl.trim(),
       PointInterestFields.qrCode: qrCode.trim(),
       PointInterestFields.radioActivacion: activationRadius,
-      PointInterestFields.idCiudad: cityId,
     };
+
+    // Añadimos id_ciudad solo si tiene un valor significativo (no cadena vacía).
+    final trimmedCityId = cityId.trim();
+    if (trimmedCityId.isNotEmpty) {
+      data[PointInterestFields.idCiudad] = trimmedCityId;
+    }
 
     if (latitude != null && longitude != null) {
       data[PointInterestFields.localizacion] = GeoPoint(latitude!, longitude!);

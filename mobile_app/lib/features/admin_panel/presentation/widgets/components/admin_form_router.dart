@@ -15,7 +15,7 @@ import 'package:mobile_app/features/admin_panel/domain/usecases/admin_use_cases.
 import 'package:mobile_app/features/admin_panel/presentation/widgets/admin_navbar.dart';
 import 'package:mobile_app/features/admin_panel/presentation/models/admin_form_controller.dart';
 
-import 'package:mobile_app/features/admin_panel/presentation/widgets/route_form.dart';
+import 'package:mobile_app/features/admin_panel/presentation/widgets/forms/route_form.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/forms/city_form.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/forms/mission_form.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/forms/point_interest_form.dart';

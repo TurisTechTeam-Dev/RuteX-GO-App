@@ -53,7 +53,6 @@ TouristRoute _route(String id, List<String> pointIds) {
     id: id,
     cityId: 'caceres',
     title: 'Caceres medieval',
-    description: '',
     difficulty: 'Media',
     time: '60 min',
     pointIds: pointIds,
