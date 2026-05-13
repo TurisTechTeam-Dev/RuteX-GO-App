@@ -17,7 +17,7 @@ import 'package:mobile_app/features/admin_panel/presentation/widgets/components/
 
 class CityForm extends StatefulWidget {
   final AdminCityModel? city;
-  final ValueChanged<AdminCityModel> onSave;
+  final Future<void> Function(AdminCityModel) onSave;
   final VoidCallback onCancel;
   final Future<String> Function(Uint8List bytes, String fileName) onUploadImage;
   final AdminFormController? formController;
@@ -142,18 +142,27 @@ class _CityFormState extends State<CityForm> {
                               _buildTextField(_provinceController),
                               const SizedBox(height: 12),
 
-                              SwitchListTile(
-                                contentPadding: EdgeInsets.zero,
-                                title: const Text(
-                                  '¿Ciudad activa en la app?',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                value: isActive,
-                                activeThumbColor: const Color(0xFF6B7249),
-                                onChanged: (val) {
-                                  setState(() => isActive = val);
-                                  widget.formController?.markChanged();
-                                },
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text(
+                                    '¿Ciudad activa en la app?',
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Switch(
+                                    value: isActive,
+                                    activeThumbColor: const Color(0xFF6B7249),
+                                    activeTrackColor:
+                                        const Color(0xFF6B7249).withOpacity(0.35),
+                                    inactiveThumbColor: Colors.red,
+                                    inactiveTrackColor: Colors.red.withOpacity(0.25),
+                                    onChanged: (val) {
+                                      setState(() => isActive = val);
+                                      widget.formController?.markChanged();
+                                    },
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -290,7 +299,7 @@ class _CityFormState extends State<CityForm> {
     }
     final imageUrl = await _uploadPendingImage();
     if (imageUrl == null) return;
-    widget.onSave(
+    await widget.onSave(
       AdminCityModel(
         id: widget.city?.id,
         name: _nameController.text.trim(),

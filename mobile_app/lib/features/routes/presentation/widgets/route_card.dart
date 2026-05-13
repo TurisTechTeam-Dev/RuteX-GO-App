@@ -60,18 +60,6 @@ class RouteCard extends StatelessWidget {
       content.add(_RoutePointNames(pointNames: pointNames));
     }
 
-    final description = route.description.trim();
-    if (description.isNotEmpty) {
-      content.add(const SizedBox(height: 8));
-      content.add(
-        Text(
-          description,
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.labelMedium,
-        ),
-      );
-    }
-
     content.add(const SizedBox(height: 12));
     content.add(_RouteDetails(route: route));
 

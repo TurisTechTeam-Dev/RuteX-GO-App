@@ -140,13 +140,51 @@ class AdminRemoteDataSource {
 
   Future<void> saveRoute(AdminRouteModel route) async {
     final collection = _firestore.collection(FirestoreCollections.rutas);
-    if (route.id == null || route.id!.isEmpty) {
-      await collection.add(route.toFirestore());
-      return;
+
+    try {
+      DocumentReference<Map<String, dynamic>> docRef;
+
+      // Guardamos la ruta (añadimos si es nueva, o actualizamos si ya existe).
+      if (route.id == null || route.id!.isEmpty) {
+        docRef = await collection.add(route.toFirestore());
+      } else {
+        docRef = collection.doc(route.id);
+        await docRef.set(route.toFirestore(), SetOptions(merge: true));
+      }
+
+      // Synchronize POIs' cityId with route.cityId
+      final cityId = route.cityId.trim();
+      final pointIds = route.pointIds;
+
+      if (cityId.isEmpty || pointIds.isEmpty) {
+        // Nothing to sync.
+        return;
+      }
+
+      final batch = _firestore.batch();
+      int pendingUpdates = 0;
+
+      for (final poiId in pointIds) {
+        if (poiId.trim().isEmpty) continue;
+        final poiRef = _firestore.collection(FirestoreCollections.puntosInteres).doc(poiId);
+
+        final poiSnap = await poiRef.get();
+        if (!poiSnap.exists) continue;
+
+        final existingCity = poiSnap.data()?[PointInterestFields.idCiudad]?.toString().trim() ?? '';
+        if (existingCity == cityId) continue;
+
+        // Actualizamos solo id_ciudad (merge).
+        batch.update(poiRef, { PointInterestFields.idCiudad: cityId });
+        pendingUpdates++;
+      }
+
+      if (pendingUpdates > 0) {
+        await batch.commit();
+      }
+    } catch (e) {
+      throw Exception('Error al guardar ruta y sincronizar POIs: $e');
     }
-    await collection
-        .doc(route.id)
-        .set(route.toFirestore(), SetOptions(merge: true));
   }
 
   Future<void> deleteCity(String id) async {

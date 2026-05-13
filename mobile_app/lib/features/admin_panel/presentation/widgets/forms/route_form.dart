@@ -7,13 +7,14 @@
   Año: 2026
   -----------------------------------------------------------------------------
 */
-import 'package:flutter/material.dart';
 import 'dart:typed_data';
+
+import 'package:flutter/material.dart';
+import 'package:mobile_app/core/utils/text_normalizer.dart';
 import 'package:mobile_app/core/widgets/cards/custom_cards.dart';
 import 'package:mobile_app/features/admin_panel/data/models/admin_models.dart';
 import 'package:mobile_app/features/admin_panel/presentation/models/admin_form_controller.dart';
 import 'package:mobile_app/features/admin_panel/presentation/widgets/components/image_picker_box.dart';
-import 'package:mobile_app/core/utils/text_normalizer.dart';
 
 class RouteForm extends StatefulWidget {
   const RouteForm({
@@ -32,7 +33,7 @@ class RouteForm extends StatefulWidget {
   final List<AdminPoiModel> availablePoints;
   final List<AdminMissionModel> availableMissions;
   final AdminFormController formController;
-  final ValueChanged<AdminRouteModel> onSave;
+  final Future<void> Function(AdminRouteModel) onSave;
   final Future<String> Function(Uint8List bytes, String fileName) onUploadImage;
 
   @override
@@ -49,7 +50,6 @@ class _RouteFormState extends State<RouteForm> {
   final ScrollController _scrollController = ScrollController();
 
   late final TextEditingController _nameController;
-  late final TextEditingController _descriptionController;
   late final TextEditingController _difficultyController;
   late final TextEditingController _durationController;
   late final TextEditingController _totalPointsController;
@@ -67,9 +67,6 @@ class _RouteFormState extends State<RouteForm> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.route?.name);
-    _descriptionController = TextEditingController(
-      text: widget.route?.description,
-    );
     _difficultyController = TextEditingController(
       text: widget.route?.difficulty,
     );
@@ -77,7 +74,7 @@ class _RouteFormState extends State<RouteForm> {
     _totalPointsController = TextEditingController(
       text: widget.route?.totalPoints.toString() ?? '',
     );
-    _imageController = TextEditingController(text: widget.route?.imageAsset);
+    _imageController = TextEditingController(text: widget.route?.image);
     _selectedCity = widget.route?.cityId;
     _selectedPointIds = List<String>.from(widget.route?.pointIds ?? []);
     _isActive = widget.route?.isActive ?? false;
@@ -89,13 +86,12 @@ class _RouteFormState extends State<RouteForm> {
   void didUpdateWidget(covariant RouteForm oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.route?.id != widget.route?.id ||
-        oldWidget.route?.imageAsset != widget.route?.imageAsset) {
+        oldWidget.route?.image != widget.route?.image) {
       _nameController.text = widget.route?.name ?? '';
-      _descriptionController.text = widget.route?.description ?? '';
       _difficultyController.text = widget.route?.difficulty ?? '';
       _durationController.text = widget.route?.duration ?? '';
       _totalPointsController.text = widget.route?.totalPoints.toString() ?? '';
-      _imageController.text = widget.route?.imageAsset ?? '';
+      _imageController.text = widget.route?.image ?? '';
       _pendingImageBytes = null;
       _pendingImageName = null;
       setState(() {
@@ -112,7 +108,6 @@ class _RouteFormState extends State<RouteForm> {
   void dispose() {
     _scrollController.dispose();
     _nameController.dispose();
-    _descriptionController.dispose();
     _difficultyController.dispose();
     _durationController.dispose();
     _totalPointsController.dispose();
@@ -154,13 +149,12 @@ class _RouteFormState extends State<RouteForm> {
                               _buildLabel('Nombre'),
                               _buildTextField(_nameController),
                               const SizedBox(height: 16),
-
                               Row(
                                 children: [
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      CrossAxisAlignment.start,
                                       children: [
                                         _buildLabel('Dificultad'),
                                         _buildTextField(_difficultyController),
@@ -171,7 +165,7 @@ class _RouteFormState extends State<RouteForm> {
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      CrossAxisAlignment.start,
                                       children: [
                                         _buildLabel('Duración'),
                                         _buildTextField(_durationController),
@@ -180,12 +174,10 @@ class _RouteFormState extends State<RouteForm> {
                                   ),
                                 ],
                               ),
-
                               const SizedBox(height: 16),
                               _buildLabel('Puntos totales'),
                               _buildTextField(_totalPointsController),
                               const SizedBox(height: 16),
-
                               _buildLabel('Imagen de la Ruta'),
                               const SizedBox(height: 8),
                               ImagePickerBox(
@@ -206,30 +198,32 @@ class _RouteFormState extends State<RouteForm> {
                                 },
                               ),
                               const SizedBox(height: 16),
-                              _buildLabel('Descripción'),
-                              _buildTextField(
-                                _descriptionController,
-                                maxLines: 3,
-                              ),
-                              const SizedBox(height: 16),
-
-                              SwitchListTile(
-                                title: const Text(
-                                  '¿Ruta activa?',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                value: _isActive,
-                                activeThumbColor: const Color(0xFF6B7249),
-                                onChanged: (val) {
-                                  setState(() => _isActive = val);
-                                  widget.formController.markChanged();
-                                },
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text(
+                                    '¿Ruta activa?',
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Switch(
+                                    value: _isActive,
+                                    activeThumbColor: const Color(0xFF6B7249),
+                                    activeTrackColor:
+                                        const Color(0xFF6B7249).withOpacity(0.35),
+                                    inactiveThumbColor: Colors.red,
+                                    inactiveTrackColor: Colors.red.withOpacity(0.25),
+                                    onChanged: (val) {
+                                      setState(() => _isActive = val);
+                                      widget.formController.markChanged();
+                                    },
+                                  ),
+                                ],
                               ),
                             ],
                           ),
                         ),
                         SizedBox(width: isNarrow ? 0 : 16, height: 16),
-
                         SizedBox(
                           width: secondaryWidth,
                           child: Column(
@@ -240,9 +234,9 @@ class _RouteFormState extends State<RouteForm> {
                                 height: _singleLineFieldHeight,
                                 child: DropdownButtonFormField<String>(
                                   initialValue:
-                                      widget.availableCities.any(
+                                  widget.availableCities.any(
                                         (c) => c.id == _selectedCity,
-                                      )
+                                  )
                                       ? _selectedCity
                                       : null,
                                   isExpanded: true,
@@ -251,10 +245,10 @@ class _RouteFormState extends State<RouteForm> {
                                       .where((city) => city.id != null)
                                       .map(
                                         (city) => DropdownMenuItem<String>(
-                                          value: city.id!,
-                                          child: Text(city.name),
-                                        ),
-                                      )
+                                      value: city.id!,
+                                      child: Text(city.name),
+                                    ),
+                                  )
                                       .toList(),
                                   onChanged: (value) {
                                     setState(() => _selectedCity = value);
@@ -263,7 +257,6 @@ class _RouteFormState extends State<RouteForm> {
                                 ),
                               ),
                               const SizedBox(height: 16),
-
                               _buildLabel('Puntos de Interés'),
                               const SizedBox(height: 8),
                               Container(
@@ -279,62 +272,61 @@ class _RouteFormState extends State<RouteForm> {
                                 ),
                                 child: _selectedCity == null
                                     ? const Center(
-                                        child: Text(
-                                          'Selecciona una ciudad primero',
-                                        ),
-                                      )
+                                  child: Text(
+                                    'Selecciona una ciudad primero',
+                                  ),
+                                )
                                     : _filteredPoints().isEmpty
                                     ? const Center(
-                                        child: Text(
-                                          'No hay puntos en esta ciudad',
-                                        ),
-                                      )
+                                  child: Text(
+                                    'No hay puntos en esta ciudad',
+                                  ),
+                                )
                                     : ListView.builder(
-                                        itemCount: _filteredPoints().length,
-                                        itemBuilder: (context, index) {
-                                          final poi = _filteredPoints()[index];
-                                          final isSelected = _selectedPointIds
-                                              .contains(poi.id);
-                                          return CheckboxListTile(
-                                            secondary: const Icon(
-                                              Icons.location_on,
-                                              color: Colors.redAccent,
-                                            ),
-                                            title: Text(
-                                              poi.name,
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            subtitle: Text(
-                                              poi.description,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            value: isSelected,
-                                            activeColor: const Color(
-                                              0xFF6B7249,
-                                            ),
-                                            onChanged: (checked) {
-                                              setState(() {
-                                                if (checked == true) {
-                                                  if (poi.id != null) {
-                                                    _selectedPointIds.add(
-                                                      poi.id!,
-                                                    );
-                                                  }
-                                                } else {
-                                                  _selectedPointIds.remove(
-                                                    poi.id,
-                                                  );
-                                                }
-                                              });
-                                              widget.formController
-                                                  .markChanged();
-                                            },
-                                          );
-                                        },
+                                  itemCount: _filteredPoints().length,
+                                  itemBuilder: (context, index) {
+                                    final poi = _filteredPoints()[index];
+                                    final isSelected = _selectedPointIds
+                                        .contains(poi.id);
+                                    return CheckboxListTile(
+                                      secondary: const Icon(
+                                        Icons.location_on,
+                                        color: Colors.redAccent,
                                       ),
+                                      title: Text(
+                                        poi.name,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      subtitle: Text(
+                                        poi.description,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      value: isSelected,
+                                      activeColor: const Color(
+                                        0xFF6B7249,
+                                      ),
+                                      onChanged: (checked) {
+                                        setState(() {
+                                          if (checked == true) {
+                                            if (poi.id != null) {
+                                              _selectedPointIds.add(
+                                                poi.id!,
+                                              );
+                                            }
+                                          } else {
+                                            _selectedPointIds.remove(
+                                              poi.id,
+                                            );
+                                          }
+                                        });
+                                        widget.formController.markChanged();
+                                      },
+                                    );
+                                  },
+                                ),
                               ),
                             ],
                           ),
@@ -354,10 +346,8 @@ class _RouteFormState extends State<RouteForm> {
   List<AdminPoiModel> _filteredPoints() {
     if (_selectedCity == null || _selectedCity!.isEmpty) return [];
 
-    // Firestore conserva rutas antiguas con id o nombre de ciudad; aceptamos
-    // ambos formatos para editarlas sin migración previa.
     final selectedCity = widget.availableCities.firstWhere(
-      (c) => c.id == _selectedCity || c.name == _selectedCity,
+          (c) => c.id == _selectedCity || c.name == _selectedCity,
       orElse: () => const AdminCityModel(
         id: '',
         name: '',
@@ -368,10 +358,7 @@ class _RouteFormState extends State<RouteForm> {
     );
 
     return widget.availablePoints.where((poi) {
-      // Algunos puntos pueden venir de rutas antiguas o de otra ciudad asociada.
-      // Se mantienen visibles para no perder selecciones al guardar.
       if (poi.id != null && _selectedPointIds.contains(poi.id)) return true;
-
       return _belongsToCity(poi.cityId, selectedCity);
     }).toList();
   }
@@ -466,7 +453,6 @@ class _RouteFormState extends State<RouteForm> {
 
   void _attachChangeListeners() {
     _nameController.addListener(_markChanged);
-    _descriptionController.addListener(_markChanged);
     _difficultyController.addListener(_markChanged);
     _durationController.addListener(_markChanged);
     _totalPointsController.addListener(_markChanged);
@@ -500,16 +486,15 @@ class _RouteFormState extends State<RouteForm> {
     final imagePath = await _uploadPendingImage();
     if (imagePath == null) return;
 
-    widget.onSave(
+    await widget.onSave(
       AdminRouteModel(
         id: widget.route?.id,
         name: _nameController.text.trim(),
-        description: _descriptionController.text.trim(),
         difficulty: _difficultyController.text.trim(),
         duration: _durationController.text.trim(),
         cityId: _selectedCity ?? '',
         pointIds: _selectedPointIds.toSet().toList(),
-        imageAsset: imagePath,
+        image: imagePath,
         isActive: _isActive,
         totalPoints: int.tryParse(_totalPointsController.text.trim()) ?? 0,
       ),

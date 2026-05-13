@@ -16,7 +16,7 @@ class AdminFormController extends ChangeNotifier {
 
   bool get hasChanges => _hasChanges;
   bool get isSaving => _isSaving;
-  bool get canSave => _hasChanges && !_isSaving && _saveAction != null;
+  bool get canSave => !_isSaving;
 
   Object registerSaveAction(Future<void> Function() saveAction) {
     final token = Object();
@@ -66,7 +66,9 @@ class AdminFormController extends ChangeNotifier {
 
     try {
       await saveAction();
-      _hasChanges = false;
+      // _hasChanges lo limpia reset() o markClean() cuando el guardado
+      // realmente termina. No lo tocamos aquí para que un fallo de
+      // validación o de red no deje el botón deshabilitado sin haber guardado.
     } finally {
       _isSaving = false;
       notifyListeners();

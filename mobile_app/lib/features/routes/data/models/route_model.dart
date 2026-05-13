@@ -18,7 +18,6 @@ class RouteModel extends TouristRoute {
     required super.id,
     required super.cityId,
     required super.title,
-    required super.description,
     required super.difficulty,
     required super.time,
     required super.pointIds,
@@ -36,7 +35,6 @@ class RouteModel extends TouristRoute {
       id: doc.id,
       cityId: _cityId(data),
       title: data[RouteFields.nombre]?.toString() ?? 'Ruta',
-      description: data[RouteFields.descripcion]?.toString() ?? '',
       difficulty: data[RouteFields.dificultad]?.toString() ?? 'Media',
       time: _routeDurationLabel(data),
       pointIds: pointIds,
@@ -130,7 +128,6 @@ class RouteModel extends TouristRoute {
   static String _routeImage(Map<String, dynamic> data) {
     const fallbackKeys = [
       RouteFields.imagen,
-      RouteFields.imagenAsset,
       'image',
       'imagen_url',
     ];
@@ -180,7 +177,6 @@ class RouteModel extends TouristRoute {
   static String _cityIdFromRouteText(Map<String, dynamic> data) {
     final rawSearchableValues = [
       data[RouteFields.nombre],
-      data[RouteFields.descripcion],
       data['titulo'],
       data['title'],
       data['name'],

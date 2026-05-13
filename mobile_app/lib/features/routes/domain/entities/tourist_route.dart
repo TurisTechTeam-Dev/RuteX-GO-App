@@ -11,7 +11,6 @@ class TouristRoute {
   final String id;
   final String cityId;
   final String title;
-  final String description;
   final String difficulty;
   final String time;
   final List<String> pointIds;
@@ -23,7 +22,6 @@ class TouristRoute {
     required this.id,
     required this.cityId,
     required this.title,
-    required this.description,
     required this.difficulty,
     required this.time,
     required this.pointIds,
