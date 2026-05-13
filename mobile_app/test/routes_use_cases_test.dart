@@ -14,7 +14,19 @@ import 'package:mobile_app/features/routes/domain/usecases/routes_use_cases.dart
 
 void main() {
   group('RoutesUseCases.executeGetRouteAvailability', () {
-    test('enables route when every point has at least one mission', () async {
+    test('enables route when it has exactly 3 points and all have mission', () async {
+      final useCases = RoutesUseCases(
+        _FakeRoutesRepository({'poi-1', 'poi-2', 'poi-3'}),
+      );
+
+      final availability = await useCases.executeGetRouteAvailability([
+        _route('route-1', ['poi-1', 'poi-2', 'poi-3']),
+      ]);
+
+      expect(availability['route-1'], isTrue);
+    });
+
+    test('disables route when it has only 2 points', () async {
       final useCases = RoutesUseCases(
         _FakeRoutesRepository({'poi-1', 'poi-2'}),
       );
@@ -23,14 +35,16 @@ void main() {
         _route('route-1', ['poi-1', 'poi-2']),
       ]);
 
-      expect(availability['route-1'], isTrue);
+      expect(availability['route-1'], isFalse);
     });
 
-    test('disables route when any point has no mission', () async {
-      final useCases = RoutesUseCases(_FakeRoutesRepository({'poi-1'}));
+    test('disables route when one of its 3 points has no mission', () async {
+      final useCases = RoutesUseCases(
+        _FakeRoutesRepository({'poi-1', 'poi-2'}),
+      );
 
       final availability = await useCases.executeGetRouteAvailability([
-        _route('route-1', ['poi-1', 'poi-2']),
+        _route('route-1', ['poi-1', 'poi-2', 'poi-3']),
       ]);
 
       expect(availability['route-1'], isFalse);

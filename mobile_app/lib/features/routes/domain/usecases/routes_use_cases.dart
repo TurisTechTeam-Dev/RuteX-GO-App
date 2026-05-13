@@ -33,8 +33,8 @@ class RoutesUseCases {
   }
 
   Future<Map<String, bool>> executeGetRouteAvailability(
-    List<TouristRoute> routes,
-  ) async {
+      List<TouristRoute> routes,
+      ) async {
     final allPointIds = _collectUniquePointIds(routes);
 
     final pointIdsWithMission = await repository.getPointIdsWithMission(
@@ -45,8 +45,8 @@ class RoutesUseCases {
   }
 
   Future<Map<String, List<String>>> executeGetRoutePointNames(
-    List<TouristRoute> routes,
-  ) async {
+      List<TouristRoute> routes,
+      ) async {
     final allPointIds = _collectUniquePointIds(routes);
     final pointNamesById = await repository.getPointNamesByIds(allPointIds);
     final pointNamesByRoute = <String, List<String>>{};
@@ -84,9 +84,9 @@ class RoutesUseCases {
   }
 
   Map<String, bool> _buildAvailabilityByRoute(
-    List<TouristRoute> routes,
-    Set<String> pointIdsWithMission,
-  ) {
+      List<TouristRoute> routes,
+      Set<String> pointIdsWithMission,
+      ) {
     final availabilityByRoute = <String, bool>{};
 
     for (final route in routes) {
@@ -100,16 +100,15 @@ class RoutesUseCases {
   }
 
   bool _routeCanStart(TouristRoute route, Set<String> pointIdsWithMission) {
-    if (route.pointIds.isEmpty) {
+    if (route.pointIds.length != 3) {
       return false;
     }
 
     for (final pointId in route.pointIds) {
-      if (!pointIdsWithMission.contains(pointId)) {
+      if (!pointIdsWithMission.contains(pointId.trim())) {
         return false;
       }
     }
-
     return true;
   }
 }
