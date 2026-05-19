@@ -99,7 +99,7 @@ Tras la consolidación y despliegue de la Versión 1.0, el proyecto se orienta h
 * **Rutas Colaborativas:** Sistema descentralizado para que los usuarios puedan crear, valorar y compartir sus propias rutas patrimoniales.
 * **Leaderboards Globales:** Rankings competitivos a nivel regional para incentivar la exploración profunda de todo el legado histórico de Extremadura.
 
---
+---
 
 ## 6. Modelo de Sostenibilidad y Viabilidad
 
