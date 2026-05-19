@@ -79,44 +79,26 @@ El stack tecnológico y las versiones mínimas de compatibilidad para el entorno
 
 ## 2.3. Diagrama de Casos de Uso
 
-Para modelar de forma visual el comportamiento funcional del sistema y delimitar con precisión las interacciones de los usuarios con la plataforma, se ha elaborado el Diagrama de Casos de Uso (ver Ilustración 1). Este modelo permite identificar los roles (actores) que intervienen y el abanico de servicios y operaciones que la aplicación Rutex GO pone a su disposición.
+Para modelar de forma visual el comportamiento funcional del sistema y delimitar con precisión las interacciones de los usuarios, se ha elaborado el Diagrama de Casos de Uso. Este modelo organiza las funcionalidades por bloques operativos y establece una **relación de herencia** entre los actores del sistema, garantizando una jerarquía clara de permisos y acciones.
 
-### 2.3.1. Actores del Sistema
+### 2.3.1. Actores del Sistema y Jerarquía
+El sistema identifica dos actores principales, cuya relación se define mediante un principio de herencia:
 
-El sistema se compone de dos actores principales perfectamente diferenciados por sus privilegios, objetivos y entorno de interacción:
+* **Usuario (Turista/Explorador):** Es el actor base que interactúa con la aplicación móvil. Realiza la exploración, el registro de progreso y la gamificación.
+* **Administrador:** Actor con privilegios elevados. **Este actor hereda todas las funciones del usuario**, lo que le permite realizar tanto las acciones de exploración como las de gestión técnica y mantenimiento de contenidos en la plataforma.
 
-* **Turista:** Es el actor principal y usuario final de la aplicación móvil. Interactúa con la interfaz para explorar el catálogo de rutas históricas, navegar por el mapa, registrar su progreso geográfico y participar en las dinámicas de gamificación.
-* **Administrador:** Actor técnico con privilegios elevados encargado de la gestión global de la plataforma, el mantenimiento de los contenidos culturales y la supervisión del sistema a través de las herramientas de gestión del backend en la nube.
+### 2.3.2. Clasificación de Funcionalidades
+Las funcionalidades del sistema se agrupan en los siguientes bloques operativos, reflejados en el diagrama:
 
-### 2.3.2. Descripción y Desglose de los Casos de Uso
-
-A continuación, se describen y clasifican las funcionalidades representadas en el diagrama según el rol de procedencia:
-
-#### A. Gestión de Sesión y Perfil (Actor: Turista y Administrador)
-
-* **Iniciar Sesión:** Permite al usuario autenticarse para recuperar su progreso. Este caso de uso presenta dos extensiones opcionales (`<<extend>>`) según el proveedor de identidad elegido:
-  * **Iniciar Sesión con Google:** Autenticación federada rápida utilizando el SDK de Google.
-  * **Iniciar Sesión con Correo y Contraseña:** Autenticación tradicional mediante credenciales almacenadas de forma segura en Firebase Auth.
-* **Registrarse:** Permite a un nuevo usuario dar de alta sus credenciales en el sistema para comenzar a guardar su historial.
-* **Visualizar Perfil:** Módulo de control del usuario que incluye obligatoriamente (`<<include>>`) la subfuncionalidad de *Visualizar Progreso de Rutas* (estadísticas, niveles y logros obtenidos). Asimismo, desde esta vista se extiende (`<<extend>>`) de forma opcional la acción de *Cerrar Sesión*.
-
-#### B. Núcleo de Exploración y Gamificación (Actor: Turista y Administrador)
-
-* **Seleccionar Ciudad:** Permite al usuario filtrar la base de datos geográfica para escoger la localidad que desea visitar.
-* **Seleccionar Ruta:** Una vez seleccionada la ciudad, el usuario escoge un itinerario temático o cultural concreto dentro del catálogo disponible.
-* **Ver Mapa de la Ruta:** Despliega la interfaz cartográfica interactiva (Google Maps) con el trazado del recorrido, la posición en tiempo real del usuario y los marcadores de los monumentos.
-* **Escanear QR:** Activa la cámara del dispositivo móvil para capturar y decodificar el código físico situado en el monumento turístico.
-* **Validar Ubicación (GPS):** El sistema comprueba en segundo plano (mediante técnicas de geofencing) si las coordenadas actuales del dispositivo móvil coinciden con el radio de activación del punto de interés.
-* **Responder Quiz:** Tras una validación exitosa (QR y GPS), el sistema desbloquea mecánicas de juego basadas en preguntas y respuestas para comprobar los conocimientos adquiridos por el usuario sobre el monumento y otorgarle puntos de experiencia (XP).
-
-#### C. Panel de Mantenimiento de Contenidos (Actor: Administrador)
-
-El administrador interactúa con la base de datos para garantizar la persistencia y actualización del contenido de la app a través de operaciones completas de persistencia (CRUD):
-
-* **Gestionar Ciudades (CRUD):** Creación, consulta, modificación y borrado de las ciudades integradas en la plataforma.
-* **Gestionar Rutas (CRUD):** Definición y trazado de los itinerarios culturales asociados a cada localización geográfica.
-* **Gestionar Monumentos (CRUD):** Administración de la información detallada, coordenadas e imágenes de los puntos de interés turísticos.
-* **Gestionar Preguntas (CRUD):** Modificación y ampliación del banco de preguntas, respuestas y datos históricos que alimentan las trivias del sistema de gamificación.
+1. **Autenticación:** Gestión del acceso al sistema mediante el registro, inicio de sesión (tradicional con correo o federado con Google) y recuperación de credenciales.
+2. **Gestión de Perfil:** Visualización de estadísticas de progreso, niveles, logros obtenidos y edición de datos personales.
+3. **Exploración de Rutas:** Consulta del catálogo cultural, filtrado por ciudades y selección de itinerarios temáticos.
+4. **Núcleo de Misión (Gamificación):** Bloque interactivo que integra:
+    * **Navegación:** Uso de mapas interactivos y geolocalización.
+    * **Validación:** Escaneo de códigos QR y verificación GPS.
+    * **Desafíos:** Resolución de *Quizzes* para la obtención de puntos (XP).
+5. **Diario del Explorador:** Consulta del historial de rutas completadas y generación del documento PDF resumen.
+6. **Administración (Acceso Exclusivo Admin):** Panel de control para la gestión técnica (CRUD) sobre ciudades, rutas, monumentos y banco de preguntas de la trivia.
 
 #### Diagrama de Casos de Uso
 
