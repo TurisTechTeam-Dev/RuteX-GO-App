@@ -1,367 +1,914 @@
 # RuteX Go – Documentación Técnica
-**TurisTech Team – Proyecto DAM 2024/2025**  
+**TurisTech Team**  
+**Curso Académico:** 2025-2026
+**Tutor/a del Proyecto:** María Mercedes Martínez Fragoso
+**Proyecto:** Desarrollo de Aplicaciones Multiplataformas
 **Stack principal:** Flutter · Firebase · Google Maps API
 
 ---
 
 # 📑 Índice
 
-1. [Introducción](#1-introducción)  
-2. [Arquitectura](#2-arquitectura)  
-   - 2.1 [Vista de Contexto (C1)](#21-vista-de-contexto-c1)  
-   - 2.2 [Vista de Contenedores (C2)](#22-vista-de-contenedores-c2)  
-   - 2.3 [Decisiones de Arquitectura (ADR)](#23-decisiones-de-arquitectura-adr)  
-3. [Módulos Funcionales](#3-módulos-funcionales)  
-4. [Modelo de Datos](#4-modelo-de-datos)  
-5. [Integraciones y Dependencias](#5-integraciones-y-dependencias)  
-6. [Requisitos No Funcionales (NFR)](#6-requisitos-no-funcionales-nfr)  
-7. [Diseño UI/UX](#7-diseño-uiux)  
-8. [Plan de Pruebas y KPIs](#8-plan-de-pruebas-y-kpis)  
-9. [Conclusiones Técnicas](#9-conclusiones-técnicas)  
-10. [Roadmap y Evolución del Sistema](#10-roadmap-y-evolución-del-sistema)
+1. [1. Introducción](#1-introducción)
+2. [2. Requisitos del Sistema](#2-requisitos-del-sistema)
+   - [2.1. Requisitos de Hardware](#21-requisitos-de-hardware)
+   - [2.2. Requisitos de Software](#22-requisitos-de-software)
+   - [2.3. Diagrama de Casos de Uso](#23-diagrama-de-casos-de-uso)
+3. [3. Instalación y Configuración](#3-instalación-y-configuración)
+4. [4. Arquitectura de la Aplicación](#4-arquitectura-de-la-aplicación)
+   - [4.1. Arquitectura del Sistema (Modelo C4)](#41-arquitectura-del-sistema-modelo-c4)
+   - [4.2. Diagrama de Flujo](#42-diagrama-de-flujo)
+   - [4.3. Backend (Infraestructura Cloud)](#43-backend-infraestructura-cloud)
+   - [4.4. Frontend (Arquitectura de Software)](#44-frontend-arquitectura-de-software)
+   - [4.5. Diagramas de Secuencia](#45-diagramas-de-secuencia)
+5. [5. Base de Datos](#5-base-de-datos)
+6. [6. Seguridad y Permisos](#6-seguridad-y-permisos)
+   - [6.1. Autenticación y Gestión de Identidades](#61-autenticación-y-gestión-de-identidades)
+   - [6.2. Reglas de Seguridad de la Base de Datos (Cloud Firestore)](#62-reglas-de-seguridad-de-la-base-de-datos-cloud-firestore)
+   - [6.3. Permisos de Hardware y Servicios Nativos](#63-permisos-de-hardware-y-servicios-nativos)
+7. [7. Pruebas Realizadas](#7-pruebas-realizadas)
+8. [8. Resolución de Problemas y Soluciones](#8-resolución-de-problemas-y-soluciones)
+9. [9. Bibliografía y Referencias Técnicas](#9-bibliografía-y-referencias-técnicas)
 
 ---
 
 # 1. Introducción
 
-RuteX Go es una aplicación móvil gamificada diseñada para transformar la experiencia turística en ciudades con un alto valor patrimonial. La app guía al usuario a través de rutas culturales, combina navegación mediante mapa con la validación de llegada a puntos de interés mediante códigos QR y ofrece misiones educativas que otorgan puntos y rangos dentro del sistema de gamificación.
+# 1. Introducción
 
-El propósito de esta documentación es describir de forma clara y estructurada la arquitectura del proyecto, sus módulos funcionales, el modelo de datos utilizado, las integraciones que emplea, los requisitos no funcionales y el plan de pruebas realizado. Está orientada a evaluadores académicos y desarrolladores que requieran entender la base técnica del sistema.
+RuteX Go es una aplicación móvil multiplataforma diseñada para la gestión y dinamización del turismo cultural mediante técnicas de gamificación. Su finalidad es ofrecer un sistema integral que permita la exploración de rutas históricas, la validación de visitas a monumentos y la participación en desafíos interactivos, transformando la experiencia del turista en un proceso de aprendizaje activo y lúdico. A continuación, se exponen los objetivos estratégicos y técnicos que se pretenden alcanzar con esta aplicación:
 
-## Objetivos Técnicos Principales
-
-- Implementar una arquitectura modular, escalable y mantenible.  
-- Utilizar Firebase como backend para autenticación, base de datos (**Cloud Firestore**) y almacenamiento.  
-- Integrar Google Maps API para ayudar al usuario a orientarse durante las rutas.  
-- Diseñar un modelo de datos flexible para permitir la expansión a nuevas ciudades y contenidos.  
-- Garantizar un rendimiento estable y una validación de presencia física fiable mediante tecnología QR.  
-
-RuteX Go se sustenta sobre **Firebase** como Backend-as-a-Service, lo que permite un desarrollo rápido y seguro, y sobre **Google Maps API**, que facilita la visualización del mapa y la ubicación aproximada del usuario durante las rutas.
+* **Digitalizar la experiencia turística:** Sustituir los soportes físicos tradicionales por una plataforma interactiva que centralice la información de monumentos, rutas y misiones en una única interfaz reactiva.
+* **Implementar la validación presencial:** Garantizar que el progreso del usuario está vinculado a su presencia física mediante el uso de tecnologías de lectura de códigos QR y geolocalización, aportando rigor al sistema de juego.
+* **Fomentar la gamificación cultural:** Proporcionar herramientas de progresión basadas en el rendimiento del usuario (trivias y retos), permitiendo la obtención de puntos y el ascenso en una jerarquía de rangos históricos.
+* **Optimizar la gestión de contenidos:** Ofrecer una estructura de datos flexible que permita a los administradores del sistema actualizar rutas, puntos de interés y misiones en tiempo real sin necesidad de realizar nuevas compilaciones de software.
+* **Garantizar la persistencia y ubicuidad:** Implementar un sistema de sincronización en la nube que permita al usuario acceder a su perfil, historial de rutas y logros alcanzados desde cualquier dispositivo con garantías de seguridad.
+* **Ofrecer una interfaz de alta fidelidad:** Desarrollar una experiencia de usuario (UX) fluida y adaptada a entornos exteriores, priorizando la accesibilidad, el bajo consumo de recursos y la rapidez de respuesta en la carga de activos multimedia.
 
 ---
 
-# 2. Arquitectura
+# 2. Requisitos del Sistema
 
-La arquitectura de RuteX Go está diseñada para ser ligera, escalable y fácil de mantener.  
-El proyecto combina Flutter como framework de desarrollo móvil y Firebase como backend principal, junto con Google Maps API para funcionalidades de orientación en el mapa.
+Para garantizar el correcto despliegue, ejecución y mantenimiento de la plataforma RuteX Go, se han definido los siguientes requisitos técnicos. Estos parámetros aseguran la integridad del sistema y una respuesta óptima de la interfaz en condiciones de uso real.
 
-A continuación se describen las vistas arquitectónicas principales del sistema.
+## 2.1. Requisitos de Hardware
+
+Para que la aplicación funcione de manera óptima, el dispositivo móvil debe cumplir las siguientes especificaciones técnicas:
+
+| Componente | Especificación Mínima Requerida |
+| :--- | :--- |
+| **Cámara** | Cámara trasera con enfoque automático para garantizar la lectura de los códigos QR en los monumentos. |
+| **Localización** | Sensor GPS activo para el seguimiento de las rutas y la detección de los puntos de interés. |
+| **Memoria RAM** | Mínimo de 2 GB de memoria RAM para gestionar la carga de mapas y la persistencia de datos en segundo plano. |
+| **Almacenamiento** | Al menos 100 MB libres para la instalación de la aplicación y el almacenamiento de datos temporales (caché). |
+| **Conexión a Internet** | Conexión de datos (4G/5G) o Wi-Fi para sincronizar el progreso del usuario y consultar la base de datos en tiempo real. |
+
+## 2.2. Requisitos de Software
+
+El stack tecnológico y las versiones mínimas de compatibilidad para el entorno de ejecución son:
+
+* **Sistemas Operativos compatibles:**
+  * Android: Versión 8.0 (API Level 26) o superior.
+  * iOS: Versión 14.0 o superior.
+* **Entorno de Desarrollo e Infraestructura:**
+  * Framework: Flutter 3.24.
+  * Lenguaje: Dart 3.10.4.
+  * Servicios Cloud (Firebase): Firebase Core, Auth, Cloud Firestore y Firebase Storage.
+* **Librerías y Dependencias Críticas:**
+  * Google Maps & Flutter Map: Renderización de cartografía interactiva.
+  * Mobile Scanner: Procesamiento de visión artificial para códigos QR.
+  * Geolocator: Gestión de servicios de ubicación y distancia.
+
+## 2.3. Diagrama de Casos de Uso
+
+Para modelar de forma visual el comportamiento funcional del sistema y delimitar con precisión las interacciones de los usuarios con la plataforma, se ha elaborado el Diagrama de Casos de Uso (ver Ilustración 1). Este modelo permite identificar los roles (actores) que intervienen y el abanico de servicios y operaciones que la aplicación Rutex GO pone a su disposición.
+
+### 2.3.1. Actores del Sistema
+
+El sistema se compone de dos actores principales perfectamente diferenciados por sus privilegios, objetivos y entorno de interacción:
+
+* **Turista:** Es el actor principal y usuario final de la aplicación móvil. Interactúa con la interfaz para explorar el catálogo de rutas históricas, navegar por el mapa, registrar su progreso geográfico y participar en las dinámicas de gamificación.
+* **Administrador:** Actor técnico con privilegios elevados encargado de la gestión global de la plataforma, el mantenimiento de los contenidos culturales y la supervisión del sistema a través de las herramientas de gestión del backend en la nube.
+
+### 2.3.2. Descripción y Desglose de los Casos de Uso
+
+A continuación, se describen y clasifican las funcionalidades representadas en el diagrama según el rol de procedencia:
+
+#### A. Gestión de Sesión y Perfil (Actor: Turista y Administrador)
+
+* **Iniciar Sesión:** Permite al usuario autenticarse para recuperar su progreso. Este caso de uso presenta dos extensiones opcionales (`<<extend>>`) según el proveedor de identidad elegido:
+  * **Iniciar Sesión con Google:** Autenticación federada rápida utilizando el SDK de Google.
+  * **Iniciar Sesión con Correo y Contraseña:** Autenticación tradicional mediante credenciales almacenadas de forma segura en Firebase Auth.
+* **Registrarse:** Permite a un nuevo usuario dar de alta sus credenciales en el sistema para comenzar a guardar su historial.
+* **Visualizar Perfil:** Módulo de control del usuario que incluye obligatoriamente (`<<include>>`) la subfuncionalidad de *Visualizar Progreso de Rutas* (estadísticas, niveles y logros obtenidos). Asimismo, desde esta vista se extiende (`<<extend>>`) de forma opcional la acción de *Cerrar Sesión*.
+
+#### B. Núcleo de Exploración y Gamificación (Actor: Turista y Administrador)
+
+* **Seleccionar Ciudad:** Permite al usuario filtrar la base de datos geográfica para escoger la localidad que desea visitar.
+* **Seleccionar Ruta:** Una vez seleccionada la ciudad, el usuario escoge un itinerario temático o cultural concreto dentro del catálogo disponible.
+* **Ver Mapa de la Ruta:** Despliega la interfaz cartográfica interactiva (Google Maps) con el trazado del recorrido, la posición en tiempo real del usuario y los marcadores de los monumentos.
+* **Escanear QR:** Activa la cámara del dispositivo móvil para capturar y decodificar el código físico situado en el monumento turístico.
+* **Validar Ubicación (GPS):** El sistema comprueba en segundo plano (mediante técnicas de geofencing) si las coordenadas actuales del dispositivo móvil coinciden con el radio de activación del punto de interés.
+* **Responder Quiz:** Tras una validación exitosa (QR y GPS), el sistema desbloquea mecánicas de juego basadas en preguntas y respuestas para comprobar los conocimientos adquiridos por el usuario sobre el monumento y otorgarle puntos de experiencia (XP).
+
+#### C. Panel de Mantenimiento de Contenidos (Actor: Administrador)
+
+El administrador interactúa con la base de datos para garantizar la persistencia y actualización del contenido de la app a través de operaciones completas de persistencia (CRUD):
+
+* **Gestionar Ciudades (CRUD):** Creación, consulta, modificación y borrado de las ciudades integradas en la plataforma.
+* **Gestionar Rutas (CRUD):** Definición y trazado de los itinerarios culturales asociados a cada localización geográfica.
+* **Gestionar Monumentos (CRUD):** Administración de la información detallada, coordenadas e imágenes de los puntos de interés turísticos.
+* **Gestionar Preguntas (CRUD):** Modificación y ampliación del banco de preguntas, respuestas y datos históricos que alimentan las trivias del sistema de gamificación.
+
+#### Diagrama de Casos de Uso
+(Pendiente insertar codigo mermaid.)
 
 ---
 
-## 2.1 Vista de Contexto (C1)
+# 3. Instalación y Configuración
 
-Representa el sistema desde una perspectiva de alto nivel, mostrando cómo interactúan los usuarios y los servicios externos.
+Para garantizar la replicabilidad del proyecto y un entorno de desarrollo estable, se deben seguir los pasos detallados a continuación:
+
+1. **Preparación del SDK y Herramientas:**
+   * Instalar el SDK de Flutter 3.24 y verificar la instalación mediante el comando `flutter doctor`.
+   * Configurar un entorno de desarrollo integrado (IDE) como VS Code o Android Studio con los plugins oficiales de Dart y Flutter.
+
+2. **Vinculación con Firebase (Backend):**
+   * Acceder a la consola de Firebase y descargar los archivos de configuración específicos por plataforma: `google-services.json` para Android y `GoogleService-Info.plist` para iOS.
+   * Ubicar dichos archivos en las carpetas raíz de cada plataforma (`/android/app` y `/ios/Runner`) para habilitar los servicios de Auth, Firestore y Storage.
+
+3. **Configuración de Dependencias:**
+   * Ejecutar el comando `flutter pub get` desde la raíz del proyecto para descargar e instalar las librerías críticas de mapas, escaneo QR y geolocalización.
+
+---
+
+# 4. Arquitectura de la Aplicación
+
+La arquitectura de RuteX Go se basa en un modelo de computación distribuida que separa la persistencia de datos y la lógica de servidor de la interfaz de usuario. El sistema garantiza la integridad de la información mediante una sincronización asíncrona entre el cliente móvil y la infraestructura en la nube.
+
+## 4.1. Arquitectura del Sistema (Modelo C4)
+
+Para una mejor comprensión de la estructura de RuteX Go, se utiliza el modelo C4 para visualizar la arquitectura en diferentes niveles de detalle.
+
+### 4.1.1. Arquitectura del Sistema (Modelo C4)
 
 ```mermaid
 flowchart LR
-    User((Usuario))
-    App[RuteX Go Aplicación Móvil]
-    Firebase[(Firebase Auth · Firestore · Storage)]
-    Maps[(Google Maps API)]
+  %% Agrupaciones
+  subgraph Sistema_RuteX_Go["Sistema RuteX Go"]
+    style Sistema_RuteX_Go fill:#fff8e6,stroke:#e6c07a,stroke-width:1px
+    app["Aplicación Móvil<br/>Flutter"]
+  end
 
-    User --> App
-    App --> Firebase
-    App --> Maps
+  subgraph Servicios_Externos["Servicios Externos (Firebase & APIs)"]
+    style Servicios_Externos fill:#eef6ff,stroke:#9fbfff,stroke-width:1px
+    auth["Firebase Auth<br/>Email / Google"]
+    firestore["Cloud Firestore<br/>Base de Datos NoSQL"]
+    storage["Cloud Storage<br/>Multimedia / Fotos"]
+    maps["APIs de Mapas<br/>Google Maps / OSM"]
+  end
+
+  %% Actores
+  Turista((Turista))
+  Administrador((Administrador))
+
+  %% Relaciones actor -> sistema
+  Turista -- "Interacción UI" --> app
+  Administrador -- "Gestión de Contenido" --> app
+
+  %% Relaciones app -> servicios externos (con etiquetas)
+  app -- "Validación Acceso" --> auth
+  app -- "Consulta Rutas / Quizzes" --> firestore
+  app -- "CRUD Ciudades / Rutas / POIs" --> firestore
+  app -- "Subida de Imágenes" --> storage
+  app -- "Carga Mapas Turísticos" --> maps
+  app -- "Localización de Puntos" --> maps
+
+  %% Alineación sugerida
+  classDef actor fill:#ffffff,stroke:#cfcfcf;
+  class Turista,Administrador actor;
 ```
 
-- **Usuario** → interactúa con la app móvil.
-- **App móvil RuteX Go (Flutter)** → UI, lógica de presentación y orquestación.
-- **Firebase** → Auth, Firestore, Storage, Messaging.
-- **Google Maps API** → mapas, geolocalización y cálculo de distancias.
+El Diagrama de Contexto define los límites del sistema RuteX Go y las entidades externas con las que interactúa. En este nivel de abstracción, la aplicación se comporta como un núcleo central que orquesta las siguientes relaciones:
 
-### 2.2 Vista de Contenedores (C2)
+* **Interacción de Usuarios:** El sistema diferencia entre el Turista, que consume las rutas y resuelve los desafíos, y el Administrador, encargado de la gestión de contenidos (CRUD de ciudades, rutas y misiones).
+* **Servicios Cloud (Firebase):** La aplicación delega la seguridad en Firebase Auth, la persistencia de datos jerárquicos en Cloud Firestore y el almacenamiento de archivos binarios en Cloud Storage.
+* **Proveedores Geográficos:** Se integra la API de Google Maps para la visualización del usuario y OpenStreetMap para las herramientas de gestión técnica, garantizando una geolocalización precisa de los puntos de interés.
 
-La vista C2 muestra los principales contenedores lógicos que forman el sistema, así como sus relaciones. Representa cómo se divide la aplicación internamente y qué servicios externos utiliza para funcionar.
+### 4.1.2. Análisis de Contenedores y Flujos de Datos
+
+El Diagrama de Contenedores (Nivel 2) detalla la organización interna de la solución y las tecnologías que permiten la comunicación entre el cliente móvil y el backend.
 
 ```mermaid
 flowchart TB
+  %% Actor superior
+  actor((Turista / Admin))
 
-    subgraph Mobile["App Móvil RuteX Go"]
-        UI["UI - Pantallas Flutter"]
-        State["Gestión de Estado (MVVM - BLoC)"]
-        Services["Servicios Internos (Firebase · Maps · QR)"]
-        Logger["Logger Service (Eventos y Errores)"]
-    end
+  %% Dispositivo móvil (contenedor)
+  subgraph Dispositivo_Móvil["Dispositivo Móvil (App Flutter)"]
+    style Dispositivo_Móvil fill:#fffce6,stroke:#e6d89a,stroke-width:1px
+    UI["Capa de Interfaz<br/>Widgets / UI UX"]
+    Logic["Lógica de Negocio<br/>Providers / Casos de Uso"]
+    Data["Capa de Datos<br/>Repositorios / SDK Firebase"]
+  end
 
-    subgraph Backend["Firebase"]
-        Auth["Firebase Auth"]
-        Firestore["Firestore DB"]
-        Storage["Firebase Storage"]
-        Messaging["Cloud Messaging"]
-        Analytics["Firebase Analytics"]
-        Crashlytics["Firebase Crashlytics"]
-    end
+  %% APIs de mapas (a la derecha)
+  Maps["APIs de Mapas<br/>Google Maps / OSM"]
 
-    Maps["Google Maps API"]
+  %% Servicios Firebase (contenedor inferior)
+  subgraph Servicios_Firebase["Servicios Firebase (BaaS)"]
+    style Servicios_Firebase fill:#f7fff3,stroke:#cfe8c6,stroke-width:1px
+    Auth["Firebase Auth<br/>Autenticación"]
+    Firestore[(Cloud Firestore<br/>Base de Datos NoSQL)]
+    Storage["Cloud Storage<br/>Repositorio Imágenes"]
+  end
 
-    UI --> State
-    State --> Services
-    Services --> Auth
-    Services --> Firestore
-    Services --> Storage
-    Services --> Messaging
-    Services --> Maps
+  %% Conexiones principales
+  actor -->|Usa la interfaz| UI
+  UI -->|Llama a| Logic
+  Logic -->|Solicita datos a| Data
+  UI -->|Visualiza mapas| Maps
 
-    %% Envío de eventos y errores
-    Logger --> Analytics
-    Logger --> Crashlytics
+  %% Conexiones desde capa de datos a servicios
+  Data -->|Protocolo HTTPS| Auth
+  Data -->|Sincronización RealTime| Firestore
+  Data -->|Carga de archivos| Storage
+
+  %% Estilos de nodos
+  classDef actorStyle fill:#f3f0ff,stroke:#c8bfff,stroke-width:1px;
+  classDef boxStyle fill:#f2efff,stroke:#d6c9ff,stroke-width:1px;
+  class actor actorStyle;
+  class UI,Logic,Data,Auth,Storage boxStyle;
 ```
 
-**Descripción de los contenedores principales:**
+El Diagrama de Contenedores detalla la arquitectura interna del software y los protocolos de comunicación utilizados. El sistema se desglosa en los siguientes componentes tecnológicos:
 
-- **App móvil RuteX Go**
-  - **UI:** Interfaz desarrollada en Flutter centrada en la experiencia del turista.
-  - **Gestión de Estado:** Implementación del patrón MVVM para desacoplar la vista de la lógica de datos.
-  - **Servicios internos:** Capa de abstracción para el manejo de Cloud Firestore, Firebase Auth y el módulo de escaneo QR.
-  - **Logger Service:** Módulo encargado de reportar eventos de usuario y fallos críticos de la aplicación.
+* **Contenedor App Móvil:** Desarrollado con el SDK de Flutter, implementa una estructura de capas (UI, Lógica y Datos) que separa la interfaz reactiva de la lógica de negocio mediante gestores de estado como Providers.
+* **Comunicación y Protocolos:** La transferencia de datos entre la aplicación y Firebase se realiza mediante el SDK de Firebase, utilizando protocolos HTTPS para peticiones atómicas y WebSockets (Streams) para la sincronización de la base de datos en tiempo real.
+* **Infraestructura Externa:** El backend opera bajo un modelo serverless, donde Cloud Firestore gestiona la base de datos NoSQL y Cloud Storage sirve los activos multimedia bajo demanda, optimizando el rendimiento del dispositivo móvil.
 
-- **Firebase**
-  - **Auth:** Gestión segura de identidades (Login/Registro).
-  - **Firestore:** Almacenamiento documental de usuarios, ciudades, rutas, puntos de interés y resultados.
-  - **Storage:** Repositorio de imágenes para puntos de interés y portadas de ciudades.
-  - **Analytics & Crashlytics:** Herramientas de monitoreo de rendimiento y comportamiento del usuario.
+## 4.2. Diagrama de Flujo
 
-- **Google Maps API**
-  - Proporciona las capas de mapas y la visualización de la posición del usuario en tiempo real durante el recorrido de las rutas.
+Para comprender el comportamiento dinámico de la aplicación y el recorrido secuencial que experimenta el usuario final (Turista), se ha desarrollado un Diagrama de Flujo global. Este modelo detalla los estados, las bifurcaciones lógicas y las validaciones de datos que realiza el software desde su inicialización hasta la finalización de un itinerario cultural.
+
+### 4.2.1. Análisis del Flujo de Ejecución
+
+El ciclo de navegación y la lógica de negocio representados en el diagrama se estructuran en las siguientes etapas secuenciales:
+
+1. **Inicialización y Control de Acceso (Módulo Auth):** Al iniciar la aplicación (Inicio), el sistema ejecuta de manera automática una comprobación mediante el SDK de Firebase Auth (*¿Tiene sesión iniciada?*). Esta bifurcación divide el flujo en dos caminos:
+   * **a. Flujo Alternativo (No autenticado):** El usuario es redirigido a la pantalla de Login, donde puede optar por el Registro, iniciar sesión de forma tradicional (Email/Contraseña) o mediante autenticación federada (Google). Una vez validado, avanza al menú principal.
+   * **b. Flujo Principal (Usuario autenticado):** El sistema realiza un bypass transparente y carga directamente la interfaz de la pantalla principal (HomeScreen).
+2. **Selección y Carga de Experiencias:** En el menú principal, el usuario navega jerárquicamente seleccionando una Ciudad y luego una Ruta cultural. Al confirmar la selección, la app despacha una petición asíncrona a Cloud Firestore para descargar el listado de monumentos y sus coordenadas geográficas.
+3. **Navegación e Interacción Cartográfica:** Se despliega el Mapa interactivo basado en Google Maps. A partir de este momento, se inicia un bucle de monitorización en tiempo real apoyado en los servicios nativos de geolocalización:
+   * **a.** El sistema comprueba constantemente la posición física del usuario (*¿Está cerca del monumento?*).
+   * **b.** Si la respuesta es negativa, el mapa se sigue actualizando de forma pasiva.
+   * **c.** Si el usuario entra en el radio de activación (Geofencing), el sistema rompe el bucle y activa el botón de Escanear QR.
+4. **Proceso de Validación y Gamificación:** Al pulsar el botón, se despliega la interfaz de la cámara para capturar el código físico del monumento. El sistema evalúa el resultado (*¿Código QR correcto?*):
+   * **a.** Si el código es erróneo o no corresponde al Punto de Interés (POI), la aplicación muestra un mensaje de error y permite reintentar el escaneo.
+   * **b.** Si el código es correcto, se desbloquea el Quiz. El usuario responde a las preguntas planteadas y el backend procesa los resultados para actualizar su puntuación, nivel y progreso en la base de datos de Firestore.
+5. **Finalización del Itinerario:** Tras completar el Quiz, el sistema evalúa si se han visitado todos los hitos históricos del recorrido (*¿Ruta finalizada?*). Si quedan monumentos pendientes, el flujo retorna a la pantalla del Mapa. En caso de haber completado la ruta al 100%, la app redirige al usuario a la pantalla de Ruta Completada, donde se ofrece la funcionalidad de Generar PDF ("Diario del Explorador") con el resumen de la aventura antes de finalizar el proceso (Fin).
+
+```mermaid
+flowchart TD
+    A([Inicio de la app]) --> B[Inicializar Firebase]
+    B --> C[MaterialApp]
+    C --> D[AuthWrapper]
+
+    D --> E{¿Hay usuario autenticado?}
+
+    E -- No --> F[SplashScreen]
+    F --> G[LoginScreen]
+    G --> H{¿Quiere registrarse?}
+
+    H -- Sí --> I[RegisterScreen]
+    I --> J[Crear cuenta]
+    J --> K[Volver a LoginScreen]
+
+    H -- No --> L[Iniciar sesión]
+    L --> M{¿Autenticación correcta?}
+    M -- No --> G
+    M -- Sí --> N{¿Es admin y entra desde web?}
+
+    E -- Sí --> N
+
+    N -- Sí --> O[AdminPanelScreen]
+    O --> P[Gestionar ciudades]
+    P --> Q[Gestionar rutas]
+    Q --> R[Gestionar puntos de interés]
+    R --> S[Gestionar misiones]
+    S --> T[Cerrar sesión]
+    T --> F
+
+    N -- No --> U[HomeScreen]
+
+    U --> V[ProfileScreen]
+    V --> U
+
+    U --> W[CitySelectionScreen]
+    W --> X[RouteSelectionScreen]
+    X --> Y[MapNavigationScreen]
+    Y --> Z[MissionScannerScreen]
+    Z --> AA[MonumentInfoScreen]
+    AA --> AB[QuizScreen]
+    AB --> AC[RouteResultScreen]
+    AC --> U
+
+    U --> AD[ExplorerDiaryScreen]
+    AD --> U
+
+    U --> AE[Cerrar sesión]
+    AE --> F
+```
+
+## 4.3. Backend (Infraestructura Cloud)
+
+Para el backend del sistema se ha adoptado un modelo BaaS (Backend as a Service) mediante la plataforma Google Firebase. Esta configuración permite centralizar la seguridad y la lógica de datos sin la necesidad de gestionar servidores físicos. Los servicios fundamentales son:
+
+* **Firebase Authentication:** Gestiona el sistema de identidades y el control de accesos. Implementa protocolos de seguridad para la persistencia de sesiones y asegura que cada usuario interactúe exclusivamente con sus registros de progreso.
+* **Cloud Firestore:** Actúa como el núcleo de persistencia de datos. Se trata de una base de datos NoSQL orientada a documentos que permite la distribución de información en tiempo real. Su estructura jerárquica facilita la gestión de colecciones de rutas, misiones, perfiles de usuario, etc.
+* **Cloud Storage:** Infraestructura de almacenamiento utilizada para el alojamiento de activos multimedia pesados (imágenes de monumentos y recursos gráficos), optimizando el tamaño del paquete binario de la aplicación.
+
+## 4.4. Frontend (Arquitectura de Software)
+
+La aplicación cliente se ha desarrollado con el SDK de Flutter, utilizando una arquitectura de software basada en los principios de Clean Architecture y un diseño Modular. Esta estructura garantiza el desacoplamiento entre la lógica de negocio y las implementaciones tecnológicas.
+
+### 4.4.1. Estructura de Capas (Clean Architecture)
+
+El código fuente se divide en tres niveles de abstracción con responsabilidades independientes:
+
+* **Capa de Presentación:** Contiene la interfaz de usuario (Widgets) y la lógica de control visual. Utiliza el patrón de diseño Observer a través de la librería Provider para reaccionar a los cambios en el estado de los datos sin necesidad de recargar manualmente la interfaz.
+* **Capa de Dominio:** Es la capa central del sistema. Define las Entidades (modelos de datos puros) y los Casos de Uso (Use Cases). Aquí reside la lógica de negocio crítica, como la validación de misiones y el cálculo de rangos históricos, siendo totalmente independiente de librerías externas o del framework.
+* **Capa de Datos:** Implementa la comunicación con los servicios externos. Contiene los Repositorios y los DataSources que interactúan con las APIs de Firebase, además de los Mappers encargados de transformar los documentos JSON en objetos del dominio.
+
+### 4.4.2. Patrón de Diseño Modular
+
+La aplicación se organiza en módulos funcionales independientes que encapsulan su propia lógica y recursos. Este enfoque facilita la escalabilidad del proyecto:
+
+* **Módulo Splash:** Gestiona el flujo de entrada inicial y la comprobación de estado de la sesión antes del acceso al contenido principal.
+* **Módulo Auth:** Centraliza la lógica de autenticación. Incluye las interfaces y servicios para el registro (`register_screen`) e inicio de sesión (`login_screen`) vinculados a Firebase Auth.
+* **Módulo Routes:** Administra el catálogo de experiencias. Incluye la selección de ciudades (`city_selection`) y la visualización de itinerarios disponibles (`route_selection`).
+* **Módulo Mission:** Es el núcleo interactivo de la aplicación. Encapsula la lógica de navegación entre monumentos, el detalle de los mismos, el escáner de códigos QR y el sistema de cuestionarios (Quiz) con su correspondiente flujo de resultados.
+* **Módulo Profile:** Gestiona la persistencia de los datos del usuario. Permite la visualización de la pantalla de inicio personalizada (`home_screen`) y el estado del perfil con sus estadísticas y rangos.
+* **Módulo Admin Panel:** Implementa las herramientas de gestión interna para la administración de los recursos del sistema y la supervisión de datos de la plataforma.
+* **Módulo Explorer_Diary:** Implementa las herramientas necesarias para la creación, maquetación e impresión en PDF del diario del explorador.
+
+```mermaid
+flowchart TD
+    %% Módulos principales (Features)
+    subgraph Features["Módulos (Features)"]
+        direction LR
+        F1[auth: Login / Register]
+        F2[mission: Quiz / QR / Navigation]
+        F3[routes: City / Selection]
+        F4[profile: Home / Stats]
+        F5[admin_panel]
+        F6[splash]
+        F7[explorer_diary: PDF]
+    end
+
+    %% Capas de Clean Architecture
+    subgraph Presentation["Presentation"]
+        direction TB
+        P1[Widgets / Screens]
+    end
+
+    subgraph Domain["Domain (Lógica de Negocio)"]
+        direction TB
+        D1[Use Cases]
+        D2[Entities]
+        D3[Repository Abstractions]
+    end
+
+    subgraph Data["Data"]
+        direction TB
+        DA1[Repository Implementations]
+        DA2[Data Sources]
+        DA3[Models]
+    end
+
+    %% Servicios externos
+    subgraph External["External Services"]
+        direction LR
+        E1[Firebase Auth]
+        E2[Firestore DB]
+        E3[Cloud Storage]
+        E4[GPS]
+        E5[Cámara]
+        E6[Maps]
+        E7[PDF Generator]
+    end
+
+    %% Relaciones entre módulos y capas
+    F1 --> P1
+    F2 --> P1
+    F3 --> P1
+    F4 --> P1
+    F5 --> P1
+    F6 --> P1
+    F7 --> P1
+
+    P1 --> D1
+    D1 --> D2
+    D1 --> D3
+    D3 --> DA1
+    DA1 --> DA2
+    DA1 --> DA3
+
+    %% Relación de Data con servicios externos
+    DA2 --> E1
+    DA2 --> E2
+    DA2 --> E3
+    DA2 --> E4
+    DA2 --> E5
+    DA2 --> E6
+    DA2 --> E7
+```
+
+## 4.5. Diagramas de Secuencia
+
+Debido a la arquitectura modular de RuteX Go y siguiendo los principios de la Separación de Responsabilidades (Clean Architecture), el comportamiento dinámico de la aplicación se analiza de forma independiente para cada uno de sus módulos funcionales. A continuación, se detalla la secuencia temporal de intercambio de mensajes entre el usuario, los componentes de la interfaz de usuario (Frontend), las capas de datos (Repositories) y los servicios externos (Backend e infraestructura Cloud).
+
+### 4.5.1. Módulo de Autenticación (Auth Module)
+
+El diagrama de la Ilustración 6 detalla los flujos lógicos de control de acceso (tradicional y federado), registro y recuperación de credenciales en RuteX Go.
+
+1. **Inicio de Sesión (Correo y Contraseña / Google):**
+   * **a. Petición:** El Usuario introduce sus datos en `LoginScreen` o pulsa "Iniciar sesión con Google". La vista captura las credenciales (o el token de Google) e invoca a `AuthUseCases` mediante `iniciarSesion()`, delegando la acción en `AuthRepository`.
+   * **b. Validación:** El repositorio autentica la sesión en Firebase Auth mediante `signInWithEmailAndPassword()` o `signInWithCredential()` (para Google). Tras el éxito, consulta el rol del usuario en Firestore con `consultarRolUsuario()`.
+   * **c. Resolución (alt):**
+     * *[Usuario normal]:* Redirige y renderiza la pantalla principal (`HomeScreen`).
+     * *[Administrador en web]:* Redirige al panel de gestión (`AdminPanelScreen`).
+     * *[Error]:* Propaga la excepción y muestra un mensaje de fallo en la interfaz.
+
+2. **Recuperación de Contraseña:**
+   * **a.** El Usuario introduce su correo para restablecer la cuenta. `LoginScreen` envía la petición a través de las capas hasta ejecutar `sendPasswordResetEmail()` en Firebase Auth, despachando el correo de recuperación.
+
+3. **Registro de Usuario:**
+   * **a.** El Usuario envía el formulario de alta y `RegisterScreen` invoca `registrarUsuario()`. `AuthRepository` crea la identidad en Firebase Auth con `createUserWithEmailAndPassword()` e inmediatamente inicializa su perfil en Firestore mediante `crearPerfilUsuario()`.
+
+```mermaid
+sequenceDiagram
+    actor Usuario
+    participant LoginScreen
+    participant AuthUseCases
+    participant AuthRepository
+    participant Firebase Auth
+    participant Firestore
+
+    Usuario->>LoginScreen: Introduce email y contraseña
+    LoginScreen->>AuthUseCases: login(email, password)
+    AuthUseCases->>AuthRepository: Delegar autenticación
+    AuthRepository->>Firebase Auth: Autenticar
+    Firebase Auth-->>AuthRepository: Usuario autenticado
+    AuthRepository->>Firestore: Consultar si es admin
+    Firestore-->>AuthRepository: Rol del usuario
+    AuthRepository-->>AuthUseCases: Usuario + rol
+    AuthUseCases-->>LoginScreen: Éxito
+    LoginScreen->>LoginScreen: Navegar a Home o AdminPanel
+
+    alt Login con Google
+        Usuario->>LoginScreen: Pulsa "Iniciar con Google"
+        LoginScreen->>AuthUseCases: loginWithGoogle()
+        AuthUseCases->>AuthRepository: Delegar
+        AuthRepository->>Firebase Auth: Google Sign In
+        Firebase Auth-->>AuthRepository: Token
+        AuthRepository-->>AuthUseCases: Usuario
+        AuthUseCases-->>LoginScreen: Éxito
+        LoginScreen->>LoginScreen: Navegar a Home o AdminPanel
+    else Recuperar contraseña
+        Usuario->>LoginScreen: Pulsa recuperar contraseña
+        LoginScreen->>AuthUseCases: recoverPassword(email)
+        AuthUseCases->>AuthRepository: Enviar correo
+        AuthRepository->>Firebase Auth: Generar enlace
+        Firebase Auth-->>AuthRepository: Enlace generado
+        AuthRepository-->>AuthUseCases: Éxito
+        AuthUseCases-->>LoginScreen: Correo enviado
+        LoginScreen->>LoginScreen: Mostrar mensaje
+    end
+```
+
+### 4.5.2. Módulo Perfil/Home
+
+El diagrama de la Ilustración 7 detalla los flujos lógicos para la carga inicial de la interfaz, el mecanismo de tolerancia a fallos (Fallback) y las actualizaciones del perfil en RuteX Go.
+
+1. **Carga Inicial del Home y Fallback (Caché):**
+   * **a. Carga Inicial (alt):** El Usuario opens la app y `HomeScreen` solicita el estado de la sesión a `AuthUseCases`.
+     * *[Usuario existe]:* `HomeScreen` pide la información a `ProfileUseCases`, quien delega en `ProfileRepository` para Consultar datos en Firestore. Tras recibir la respuesta, la vista guarda la información en `HomeDataCache` y ordena a `HomeContent` renderizar la interfaz online.
+     * *[Usuario no existe]:* Se interrumpe el flujo y se redirige al actor a la pantalla de `LoginScreen`.
+   * **b. Fallback (Carga desde Caché - alt):** Si la carga online falla, `HomeScreen` ejecuta Leer datos desde caché en `HomeDataCache`.
+     * *[Existe caché]:* `HomeContent` renderiza los datos locales en modo offline.
+     * *[No existe caché]:* La aplicación muestra un mensaje de error controlado al usuario en pantalla.
+
+2. **Actualización de Perfil (Nombre y Avatar - alt):**
+   * **a. Cambiar nombre de usuario:** El Usuario modifica el texto. `HomeScreen` invoca a `ProfileUseCases` (Actualizar nombre), este delega en `ProfileRepository` y el cambio se persiste de forma remota en Firestore (Guardar cambio en Firestore). Tras la configuración en cascada, la vista notifica el éxito.
+   * **b. Seleccionar nueva imagen:** El Usuario elige un archivo. El flujo se repite de forma idéntica a través de las capas de caso de uso y repositorio para ejecutar Guardar imagen/avatar en Firestore, confirmando la actualización en la interfaz gráfica tras el éxito de la transacción.
+
+```mermaid
+sequenceDiagram
+    actor Usuario
+    participant HomeScreen
+    participant AuthUseCases
+    participant ProfileUseCases
+    participant HomeDataCache
+    participant ProfileRepository
+    participant Firestore
+
+    Usuario->>HomeScreen: Entra en la app
+    HomeScreen->>AuthUseCases: getCurrentUser()
+    AuthUseCases-->>HomeScreen: Usuario actual
+    HomeScreen->>ProfileUseCases: getHomeData(uid)
+    ProfileUseCases->>ProfileRepository: Consultar datos
+    ProfileRepository->>Firestore: Obtener datos del usuario
+    Firestore-->>ProfileRepository: Datos recibidos
+    ProfileRepository-->>ProfileUseCases: HomeData
+    ProfileUseCases-->>HomeScreen: HomeData
+    HomeScreen->>HomeDataCache: Guardar en caché
+    HomeScreen->>HomeScreen: Mostrar Home con datos
+
+    alt Conexión online exitosa
+        HomeScreen->>HomeScreen: Mostrar datos en línea
+    else Conexión fallida - Cargar desde caché
+        HomeScreen->>ProfileRepository: getHomeData(uid) - timeout
+        ProfileRepository-->>HomeScreen: Error de conexión
+        HomeScreen->>HomeDataCache: Leer desde caché
+        HomeDataCache-->>HomeScreen: Datos en caché
+        HomeScreen->>HomeScreen: Mostrar Home offline
+    end
+
+    alt Actualizar perfil
+        Usuario->>HomeScreen: Abre ProfileScreen
+        HomeScreen->>ProfileScreen: Navegar
+        Usuario->>ProfileScreen: Edita nombre/avatar
+        ProfileScreen->>ProfileUseCases: updateUsername() / uploadAvatar()
+        ProfileUseCases->>ProfileRepository: Guardar cambios
+        ProfileRepository->>Firestore: Actualizar datos
+        Firestore-->>ProfileRepository: Éxito
+        ProfileRepository-->>ProfileUseCases: Datos actualizados
+        ProfileUseCases-->>ProfileScreen: Éxito
+        ProfileScreen->>ProfileScreen: Refrescar datos
+        ProfileScreen->>HomeScreen: Volver a Home
+    end
+```
+
+### 4.5.3. Módulo Rutas
+
+El diagrama de la Ilustración 8 detalla la lógica secuencial dividida en cuatro fases esenciales para la exploración, consulta y validación de los itinerarios culturales en RuteX Go.
+
+1. **Carga de Ciudades y Selección de Rutas:**
+   * **a. Carga de ciudades:** El Usuario accede a la sección de selección de destinos en `CitySelectionScreen`. La vista solicita los datos a `RoutesUseCases` (Solicitar ciudades), quien delega en `RoutesRepository` para ejecutar un GET síncrono sobre la base de datos cloud Firestore (Consultar ciudades). Al retornar la lista estructurada, la pantalla pinta el catálogo disponible.
+   * **b. Selección de ciudad:** El Usuario selecciona un destino y `RouteSelectionScreen` solicita los itinerarios asociados mediante `Solicitar rutas de la ciudad(idCiudad)`. El caso de uso recupera los documentos desde Firestore, procesa internamente la función *Calcular disponibilidad de rutas* y delega en el subcomponente `RouteSelectionContent` la acción de pintar las opciones válidas (Mostrar rutas disponibles).
+
+2. **Consulta de Puntos de Interés y Validación:**
+   * **a. Consulta de nombres de POI:** Para completar la información de las tarjetas de cada itinerario, `RouteSelectionScreen` dispara de forma automatizada el método `Solicitar nombres de puntos de interés(listaIds)`. La petición viaja por las capas de dominio y datos para consultar los nodos específicos en Firestore. Tras la respuesta del servidor, se ejecuta *Actualizar nombres* en la vista.
+   * **b. Validación de disponibilidad de ruta:** Cuando el Usuario selecciona formalmente una ruta (`idRuta`), `RouteSelectionScreen` invoca de manera reactiva `Validar disponibilidad de ruta()`. La capa de dominio procesa de forma interna la subfunción *Validar horarios, requisitos y cupos disponibles*. Finalmente, el veredicto del sistema es enviado hacia `RouteSelectionContent` para *Mostrar estado de disponibilidad* en la interfaz gráfica del terminal.
+
+```mermaid
+sequenceDiagram
+    actor Usuario
+    participant CitySelectionScreen
+    participant RouteSelectionScreen
+    participant RoutesUseCases
+    participant RoutesRepository
+    participant Firestore
+
+    Usuario->>CitySelectionScreen: Explorar ciudades
+    CitySelectionScreen->>RoutesUseCases: getCities()
+    RoutesUseCases->>RoutesRepository: Consultar ciudades
+    RoutesRepository->>Firestore: Obtener lista de ciudades
+    Firestore-->>RoutesRepository: Ciudades
+    RoutesRepository-->>RoutesUseCases: Lista de ciudades
+    RoutesUseCases-->>CitySelectionScreen: Ciudades cargadas
+    CitySelectionScreen->>CitySelectionScreen: Mostrar ciudades
+
+    Usuario->>CitySelectionScreen: Selecciona una ciudad
+    CitySelectionScreen->>RouteSelectionScreen: Navegar con cityKeys
+    RouteSelectionScreen->>RoutesUseCases: getRoutesByCity(cityKeys)
+    RoutesUseCases->>RoutesRepository: Consultar rutas
+    RoutesRepository->>Firestore: Obtener rutas de la ciudad
+    Firestore-->>RoutesRepository: Rutas
+    RoutesRepository-->>RoutesUseCases: Lista de rutas
+    RoutesUseCases->>RoutesUseCases: Calcular disponibilidad
+    RoutesUseCases-->>RouteSelectionScreen: Rutas con disponibilidad
+    RouteSelectionScreen->>RouteSelectionScreen: Mostrar rutas disponibles
+
+    alt Seleccionar ruta
+        Usuario->>RouteSelectionScreen: Selecciona una ruta
+        RouteSelectionScreen->>RoutesUseCases: getRouteDetails(routeId)
+        RoutesUseCases->>RoutesRepository: Obtener detalles
+        RoutesRepository->>Firestore: Cargar puntos de interés
+        Firestore-->>RoutesRepository: POIs
+        RoutesRepository-->>RoutesUseCases: Detalles completos
+        RoutesUseCases-->>RouteSelectionScreen: Datos de ruta
+        RouteSelectionScreen->>RouteSelectionScreen: Mostrar detalles
+        Usuario->>RouteSelectionScreen: Comenzar ruta
+        RouteSelectionScreen->>MapNavigationScreen: Navegar
+    end
+```
+
+### 4.5.4. Módulos Misión/QR
+
+El diagrama de la Ilustración 9 detalla el flujo dinámico de validación óptica mediante códigos QR, la consulta de misiones y la gestión de la lógica de gamificación en RuteX Go.
+
+1. **Flujo Principal (Validación Exitosa y Progreso):**
+   * **a. Escaneo:** El Usuario abre la funcionalidad en `MissionScannerScreen`. La vista activa el hardware mediante `MobileScanner` (Activar escaneo). Una vez capturada la lectura, se envía el identificador a `MissionUseCases` mediante `Validar y procesar QR()`.
+   * **b. Consulta remota (alt [Punto existe]):** El caso de uso delega en `MissionRepository` para verificar el código en Firestore (Consultar punto de interés). Si el monumento es válido, el repositorio realiza una segunda consulta cruzada en la base de datos para extraer los retos lúdicos vinculados (Buscar misión asociada).
+   * **c. Visualización y Gamificación (alt [Aplica quiz / pregunta]):** La app consolida la información y despliega `MonumentInfoScreen`. Si el hito contiene una evaluación activa, se navega automáticamente a `QuizScreen`. Al responder correctamente, `MissionUseCases` llama a `Guardar progreso de misión()` en el repositorio para persistir de forma asíncrona la recompensa en Firestore y finalmente redirigir al actor a `RouteResultScreen`.
+
+2. **Flujos Alternativos de Control (alt):**
+   * **a. [QR inválido]:** Si el código capturado no coincide con ningún registro del sistema, `MissionScannerScreen` intercepta la excepción, imprime en la interfaz el aviso "Mensaje: QR no válido" y ejecuta de forma automática la instrucción *Reanudar escaneo* para reiniciar el hardware de la cámara.
+   * **b. [Punto ya completado]:** Si el usuario escanea un hito previamente superado, el sistema bloquea la entrega de nuevas recompensas, despliega el aviso "Mensaje: Punto ya completado" y redirige la navegación a `MonumentInfoScreen` operando exclusivamente en modo solo lectura.
+   * **c. [Escanear otro QR]:** Si el usuario decide cancelar la acción actual o cambiar de objetivo en plena navegación, la vista invoca la instrucción de control *Escanear otro código* para purgar el estado temporal y saltar al paso inicial de activación del lector óptico.
+
+```mermaid
+sequenceDiagram
+    actor Usuario
+    participant MissionScannerScreen
+    participant MobileScanner
+    participant MissionUseCases
+    participant MissionRepository
+    participant Firestore
+    participant MonumentInfoScreen
+    participant QuizScreen
+    participant RouteResultScreen
+
+    Usuario->>MissionScannerScreen: Abre escáner QR
+    MissionScannerScreen->>MobileScanner: Activar escáner
+    MobileScanner-->>MissionScannerScreen: Escáner listo
+
+    Usuario->>MobileScanner: Escanea código QR
+    MobileScanner-->>MissionScannerScreen: Código QR detectado
+    MissionScannerScreen->>MissionUseCases: validateQRCode(qrCode)
+    MissionUseCases->>MissionRepository: Buscar punto asociado
+    MissionRepository->>Firestore: Consultar por QR code
+    Firestore-->>MissionRepository: Punto de interés
+    MissionRepository-->>MissionUseCases: Datos del punto
+
+    alt Verificación de punto
+        MissionUseCases->>MissionRepository: Verificar si ya completado
+        MissionRepository->>Firestore: Consultar progreso del usuario
+        Firestore-->>MissionRepository: Estado del progreso
+        MissionRepository-->>MissionUseCases: Ya completado / Nuevo
+    end
+
+    MissionUseCases-->>MissionScannerScreen: Validación completa
+    MissionScannerScreen->>MonumentInfoScreen: Navegar
+    Usuario->>MonumentInfoScreen: Ve información del monumento
+    Usuario->>MonumentInfoScreen: Continúa misión
+    MonumentInfoScreen->>QuizScreen: Navegar
+
+    alt Completar misión
+        Usuario->>QuizScreen: Completa el quiz
+        QuizScreen->>MissionUseCases: submitQuiz(answers)
+        MissionUseCases->>MissionRepository: Guardar progreso
+        MissionRepository->>Firestore: Actualizar estado de misión
+        Firestore-->>MissionRepository: Éxito
+        MissionRepository-->>MissionUseCases: Progreso guardado
+        MissionUseCases-->>QuizScreen: Éxito
+        QuizScreen->>RouteResultScreen: Mostrar resultado
+        Usuario->>RouteResultScreen: Ve el resultado
+        RouteResultScreen->>MissionScannerScreen: Volver a escanear
+    end
+```
+
+### 4.5.5. Módulo Diario del Explorador
+
+El diagrama de la Ilustración 10 detalla la lógica secuencial para la consolidación de actividades culturales realizadas, la integración de recursos multimedia y la exportación del documento final en formato portable.
+
+1. **Flujo Principal (Consulta, Selección y Compilación):**
+   * **a. Carga e inicialización:** El Usuario abre la funcionalidad en `ExplorerDiaryScreen`. La vista obtiene la sesión activa mediante `AuthUseCases` (Obtener usuario actual) y solicita las actividades completadas a `DiaryUseCases` con `Solicitar rutas completadas`. El caso de uso delega en `DiaryRepository` para extraer los documentos remotos de Firestore (Consultar rutas completadas).
+   * **b. Enriquecimiento del diario (alt [Añadir fotos]):** Tras recibir el historial y los datos del perfil desde `ProfileUseCases`, el Usuario selecciona los itinerarios a exportar. Si opta por adjuntar imágenes, se activa el hardware del sistema operativo a través de `ImagePicker` (Seleccionar fotos). Acto seguido, la vista ejecuta localmente la subfunción reflexiva *Preparar información para el PDF*.
+   * **c. Generación y descarga:** `ExplorerDiaryScreen` envía los datos estructurados al componente de servicio `PdfGenerator` mediante *Generar PDF del diario*. Una vez compilado el archivo binario, la interfaz muestra la vista previa en el terminal. El Usuario pulsa el control de descarga e interactúa asíncronamente para recibir el archivo PDF descargado.
+
+2. **Flujos Alternativos de Excepción (alt):**
+   * **a. [A. Sin rutas completadas]:** Si la consulta inicial en la base de datos cloud retorna un registro vacío, el sistema interrumpe el flujo normal y la pantalla principal de la funcionalidad imprime el aviso informativo "Mensaje: No tienes rutas completadas todavía".
+   * **b. [B. Límite de fotos excedido]:** Si el actor intenta adjuntar más recursos de los permitidos por el sistema (máximo 5), el proceso de selección óptica se bloquea y la aplicación le notifica en pantalla la restricción mediante "Mensaje: Límite de 5 fotos por ruta alcanzado".
+   * **c. [C. Cancelar generación]:** Si en cualquier punto del proceso de maquetación el usuario decide anular la exportación, la vista destruye las variables de estado temporales, detiene las llamadas en cascada e invoca "Proceso cancelado y se mantiene en la pantalla actual".
+
+```mermaid
+sequenceDiagram
+    actor Usuario
+    participant ExplorerDiaryScreen
+    participant DiaryUseCases
+    participant AuthUseCases
+    participant ProfileUseCases
+    participant DiaryRepository
+    participant ImagePicker
+    participant PdfGenerator
+    participant Firestore
+
+    Usuario->>ExplorerDiaryScreen: Abre diario del explorador
+    ExplorerDiaryScreen->>AuthUseCases: getCurrentUser()
+    AuthUseCases-->>ExplorerDiaryScreen: Usuario actual
+
+    ExplorerDiaryScreen->>DiaryUseCases: getCompletedRoutes(uid)
+    DiaryUseCases->>DiaryRepository: Consultar rutas completadas
+    DiaryRepository->>Firestore: Obtener rutas del usuario
+    Firestore-->>DiaryRepository: Rutas completadas
+    DiaryRepository-->>DiaryUseCases: Lista de rutas
+
+    ExplorerDiaryScreen->>ProfileUseCases: getHomeData(uid)
+    ProfileUseCases->>Firestore: Obtener perfil del usuario
+    Firestore-->>ProfileUseCases: Datos del usuario
+
+    DiaryUseCases-->>ExplorerDiaryScreen: Rutas completadas
+    ProfileUseCases-->>ExplorerDiaryScreen: Datos del perfil
+    ExplorerDiaryScreen->>ExplorerDiaryScreen: Mostrar rutas completadas
+
+    Usuario->>ExplorerDiaryScreen: Selecciona rutas para diario
+    ExplorerDiaryScreen->>ExplorerDiaryScreen: Actualizar selección
+    ExplorerDiaryScreen->>ExplorerDiaryScreen: Mostrar vista previa
+
+    alt Añadir fotos
+        Usuario->>ExplorerDiaryScreen: Añadir fotos a ruta
+        ExplorerDiaryScreen->>ImagePicker: Abrir galería
+        ImagePicker-->>ExplorerDiaryScreen: Fotos seleccionadas
+        ExplorerDiaryScreen->>ExplorerDiaryScreen: Guardar fotos localmente
+        ExplorerDiaryScreen->>ExplorerDiaryScreen: Actualizar vista previa
+    end
+
+    alt Descargar PDF
+        Usuario->>ExplorerDiaryScreen: Descargar diario en PDF
+        ExplorerDiaryScreen->>PdfGenerator: generateExplorerBook()
+        PdfGenerator->>PdfGenerator: Crear portada
+        PdfGenerator->>PdfGenerator: Crear página por cada ruta
+        PdfGenerator->>PdfGenerator: Insertar fotos
+        PdfGenerator->>PdfGenerator: Crear página final motivadora
+        PdfGenerator-->>ExplorerDiaryScreen: PDF generado
+        ExplorerDiaryScreen->>ExplorerDiaryScreen: Descargar archivo
+        Usuario->>Usuario: Archivo descargado
+    end
+```
+
+### 4.5.6. Módulo Panel de Administración
+
+El diagrama de la Ilustración 11 detalla la secuencia de operaciones de gestión, consulta y mutación de datos (CRUD) efectuadas por el administrador sobre el catálogo del ecosistema.
+
+1. **Carga de Datos:**
+   * **a. Petición:** El Administrador realiza la acción "Accede al panel" sobre la interfaz `AdminPanelScreen`. La vista procesa el evento y solicita la información de la sección activa mediante `solicitaDatos(sección)` a `AdminUseCases`.
+   * **b. Consolidación:** El caso de uso delega la consulta en `AdminRepository`, el cual invoca el método `obtenerDatosRemotos(sección)` en el proveedor de datos remotos `AdminRemoteDataSource`.
+   * **c. Origen de Datos:** El data source procesa la solicitud atacando dos servicios en paralelo: realiza una lectura en la base de datos cloud Firestore (*Consulta datos en Firestore*) y extrae los recursos multimedia vinculados desde Firebase Storage (*Obtiene archivos/imágenes*). Una vez consolidados, los datos viajan de vuelta en cascada hasta que `AdminPanelScreen` renderiza los elementos con *Datos mostrados en la vista*.
+
+2. **Operaciones de Mutación de Contenidos:**
+   * **a. Crear o Editar Elemento:** El Administrador abre el formulario gestionado por el enrutador de vistas `AdminFormRouter` (Crea / edita elemento). Al enviar el formulario, este despacha el método *Envío de datos del formulario* a través del caso de uso. `AdminRepository` procesa el comando ejecutando *Guardar en origen* en el data source, el cual realiza concurrentemente la escritura documental en Firestore (Guardar datos en Firestore) y la subida de binarios en Firebase Storage (Subir archivos/imágenes). Tras recibir ambas confirmaciones, se refresca la interfaz con *Confirmación de guardado y actualización de vista*.
+   * **b. Eliminar Elemento:** El Administrador acciona la remoción física o lógica de un registro. `AdminPanelScreen` transmite la orden mediante `Solicitar eliminación(id, tipo)` a través de las capas de dominio. El origen de datos unifica la baja eliminando simultáneamente el documento físico en Firestore (*Eliminar en Firestore*) y purgando sus dependencias multimedia en Firebase Storage (*Eliminar archivos asociados*), retornando el éxito para actualizar el estado visual de la pantalla.
+   * **c. Subida Independiente de Archivos / Imágenes:** En flujos aislados de pre-carga, el administrador puede interactuar directamente seleccionando un archivo multimedia. La interfaz solicita la persistencia inmediata mediante `Solicitar subida de archivo(s)`. La orden recorre el repositorio hasta invocar *Subir a Firebase Storage* en el data source, devolviendo las URL(s) generada(s) por el servidor en la nube para su posterior asignación en los formularios del panel de control.
+
+```mermaid
+sequenceDiagram
+    actor Administrador
+    participant AdminPanelScreen
+    participant AdminSidebar
+    participant AdminFormRouter
+    participant AdminUseCases
+    participant AdminRepository
+    participant Firestore
+    participant Firebase Storage
+
+    Administrador->>AdminPanelScreen: Acceder al panel
+    AdminPanelScreen->>AdminSidebar: Cargar secciones
+    AdminSidebar-->>AdminPanelScreen: Secciones listas
+
+    Administrador->>AdminSidebar: Selecciona "Ciudades"
+    AdminSidebar->>AdminUseCases: getCities()
+    AdminUseCases->>AdminRepository: Consultar ciudades
+    AdminRepository->>Firestore: Obtener todas las ciudades
+    Firestore-->>AdminRepository: Lista de ciudades
+    AdminRepository-->>AdminUseCases: Ciudades cargadas
+    AdminUseCases-->>AdminSidebar: Mostrar en lista
+
+    Administrador->>AdminSidebar: Selecciona una ciudad
+    AdminSidebar->>AdminFormRouter: Mostrar formulario
+    AdminFormRouter->>AdminFormRouter: Llenar campos con datos
+
+    alt Operación CRUD
+        alt Editar
+            Administrador->>AdminFormRouter: Edita datos y guarda
+            AdminFormRouter->>AdminUseCases: updateCity(data)
+            AdminUseCases->>AdminRepository: Guardar cambios
+            AdminRepository->>Firestore: Actualizar ciudad
+            Firestore-->>AdminRepository: Éxito
+        else Crear
+            Administrador->>AdminFormRouter: Introduce datos y crea
+            AdminFormRouter->>AdminUseCases: createCity(newData)
+            AdminUseCases->>AdminRepository: Insertar
+            AdminRepository->>Firestore: Crear nuevo documento
+            Firestore-->>AdminRepository: Éxito
+        else Eliminar
+            Administrador->>AdminFormRouter: Eliminar elemento
+            AdminFormRouter->>AdminUseCases: deleteCity(id)
+            AdminUseCases->>AdminRepository: Eliminar
+            AdminRepository->>Firestore: Borrar documento
+            Firestore-->>AdminRepository: Éxito
+        end
+    end
+
+    alt Subir archivo si aplica
+        AdminUseCases->>AdminRepository: Subir imagen
+        AdminRepository->>Firebase Storage: Subir archivo
+        Firebase Storage-->>AdminRepository: URL de archivo
+        AdminRepository->>Firestore: Guardar referencia
+    end
+
+    AdminRepository-->>AdminUseCases: Guardado completo
+    AdminUseCases-->>AdminFormRouter: Éxito
+    AdminFormRouter->>AdminFormRouter: Mostrar confirmación
+    AdminFormRouter->>AdminSidebar: Refrescar lista
+```
 
 ---
 
-### 2.3 Decisiones de Arquitectura (ADR)
-
-### ADR-001 – Firebase como Backend-as-a-Service (BaaS)
-Se ha seleccionado Firebase para gestionar la infraestructura serverless, permitiendo autenticación segura, almacenamiento y analíticas sin la necesidad de administrar servidores propios. Esta decisión reduce drásticamente el coste operativo y la complejidad del despliegue inicial.
-
-### ADR-002 – Desarrollo Multiplataforma con Flutter
-La elección de Flutter permite desarrollar interfaces modernas y consistentes para múltiples plataformas desde un único código base. Se reserva el uso de **Kotlin** exclusivamente para integraciones nativas que requieran acceso directo al hardware del dispositivo o SDKs específicos del sistema operativo que no estén cubiertos por plugins de Flutter.
-
-### ADR-003 – Cloud Firestore como Base de Datos NoSQL
-Se adopta Firestore por su modelo orientado a documentos, ideal para estructuras de datos dinámicas y consultas de baja latencia. Su capacidad de sincronización en tiempo real y la integración nativa de reglas de seguridad con Firebase Auth garantizan que los datos de los usuarios y las rutas estén protegidos y actualizados instantáneamente.
-
----
-
-# 3. Módulos Funcionales
-
-RuteX Go se estructura en una serie de módulos funcionales que trabajan de manera conjunta para ofrecer una experiencia turística gamificada. El GPS se utiliza únicamente para orientar al usuario en el mapa, mientras que la validación de llegada a los **puntos de interés** se realiza mediante códigos QR, garantizando precisión y fiabilidad en la validación física.
-
-Los módulos principales son:
-
-- **Autenticación:** Gestión de acceso y registro de usuarios.
-- **Selección de Ciudad:** Filtrado dinámico de contenido según la ubicación de interés.
-- **Rutas y Navegación:** Visualización de itinerarios y orientación mediante el mapa.
-- **Escaneo QR:** Validación técnica de llegada al punto de interés.
-- **Misiones y Trivias:** Lógica de gamificación y aprendizaje interactivo.
-- **Resultados y Progresión:** Registro de historial de rutas y actualización del rango global del usuario.
-- **Perfil del Usuario:** Visualización de estadísticas, puntos acumulados y logros.
-
----
-
-## 3.1 Módulo de Autenticación
-Gestionado íntegramente mediante el SDK de Firebase Authentication para garantizar un estándar de seguridad elevado.
-
-* **Funciones:** Registro de usuarios, inicio de sesión seguro, recuperación de contraseña mediante flujo de email y manejo de errores (formatos inválidos, contraseñas débiles).
-* **Persistencia:** Gestión automática del estado de la sesión y generación del documento de perfil en la colección users/{uid} tras el registro exitoso.
-* **Dependencias:** firebase_auth, cloud_firestore.
-
-## 3.2 Módulo de Selección de Ciudad
-Actúa como el filtro principal de contenido, permitiendo que la aplicación escale geográficamente de forma sencilla.
-
-* **Funciones:** Consulta en tiempo real de la colección cities en Firestore, visualización de tarjetas con imagen y nombre de la ciudad, y filtrado dinámico de rutas según el cityId seleccionado.
-* **Escalabilidad:** Permite la incorporación de nuevas sedes turísticas simplemente añadiendo documentos a la base de datos sin necesidad de actualizar el código de la app.
-* **Dependencias:** cloud_firestore, provider.
-
-## 3.3 Módulo de Rutas y Navegación
-Presenta los itinerarios culturales y supervisa el recorrido del usuario integrando la lógica de navegación.
-
-* **Funciones:** Visualización de fichas técnicas (duración, dificultad, puntos totales), renderizado de marcadores interactivos en el mapa y seguimiento del progreso del usuario.
-* **Uso del GPS:** Se emplea exclusivamente para mostrar la ubicación en tiempo real y ayudar a la orientación. No activa misiones de forma automática, cumpliendo con los requisitos de eficiencia energética (NFR-005).
-* **Dependencias:** google_maps_flutter, geolocator.
-
-## 3.4 Módulo de Validación (QR)
-Este componente es el núcleo de seguridad que confirma la presencia física del usuario en el punto de interés.
-
-* **Proceso de validación:** El usuario escanea el código físico; la app extrae el ID y lo contrasta con el poiId esperado en la secuencia de la ruta actual.
-* **Ventajas:** Elimina el margen de error del GPS en zonas urbanas densas y evita la validación fraudulenta mediante aplicaciones de ubicación simulada (Mock Locations).
-* **Dependencias:** mobile_scanner (hardware de cámara), cloud_firestore (validación lógica).
-
-## 3.5 Módulo de Misiones e Interacción (Trivias)
-Núcleo educativo y de gamificación que transforma la visita en una experiencia interactiva.
-
-* **Estructura:** Cuestionarios de 3 preguntas con 4 opciones cada una, con corrección automática y feedback inmediato.
-* **Sistema de puntos:** Se asigna puntuación base por acierto y un "Bonus de Excelencia" si se completa la misión sin errores.
-* **Impacto en perfil:** Al finalizar, se realiza una operación atómica en Firestore para actualizar los puntos totales del usuario, su rango y la tabla de resultados.
-* **Dependencias:** cloud_firestore.
-
-## 3.6 Módulo de Perfil y Resultados
-Panel centralizado donde el usuario consulta su evolución y el historial de sus expediciones.
-
-* **Gestión de Perfil:** Visualización del rango global (Novato, Explorador, Legionario, etc.) calculado dinámicamente según el puntaje acumulado.
-* **Historial de Rutas:** Listado detallado obtenido de la colección results, mostrando fechas de realización, puntos obtenidos y nivel de acierto en las trivias.
-* **Dependencias:** cloud_firestore, intl (formateo de fechas y números).
-
----
-
-# 4. Modelo de Datos
-
-El modelo de datos de **RuteX Go** está construido sobre **Firebase Firestore**, una base de datos NoSQL orientada a documentos. Esta estructura está diseñada para minimizar las lecturas de red, permitiendo que la aplicación funcione de manera fluida y escalable.
-
-Las colecciones principales son:
-
-Las colecciones principales son:
-
-- **`usuario`**: Almacena los perfiles de usuario, credenciales de administrador, puntos acumulados y el progreso global de rutas completadas.
-- **`ciudades`**: Catálogo de las localidades disponibles donde se desarrollan las experiencias turísticas.
-- **`rutas`**: Guías de los recorridos turísticos vinculadas a una ciudad, que agrupan diversos puntos de interés.
-- **`puntos_interes`**: Ubicaciones físicas clave con información histórica, coordenadas geográficas y validación mediante códigos QR.
-- **`misiones`**: Desafíos de tipo trivia (preguntas y respuestas) asociados a cada punto de interés para gamificar la visita.
-- **`resultado`**: Historial detallado de las rutas finalizadas, incluyendo tiempos y puntuaciones obtenidas por sesión.
-- **`config_rangos`**: Configuración del sistema de niveles y progresión basado en la puntuación del usuario.
-
----
-
-## 4.1 Colección: `usuarios`
-
-Almacena la información principal y el progreso acumulado de cada usuario registrado.
-
-| Campo | Tipo | Descripción |
-| :--- | :--- | :--- |
-| nombre | string | Nombre completo del usuario. |
-| email | string | Correo electrónico asociado a la cuenta. |
-| rango | string | ID o referencia al título obtenido basado en puntos. |
-| puntos | number | Total de puntos acumulados globalmente. |
-| rutas_completadas | array<string> | Lista de identificadores de las rutas finalizadas. |
-| fecha_creacion | timestamp | Fecha y hora de creación del perfil. |
-| ultimo_acceso | timestamp | Registro del último acceso a la aplicación. |
-| isAdmin | boolean | Indica si el usuario tiene privilegios de administrador. |
-
----
-
-## 4.2 Colección: `ciudades`
-
-Define las ciudades disponibles donde se pueden realizar rutas.
-
-| Campo | Tipo | Descripción |
-| :--- | :--- | :--- |
-| nombre | string | Nombre de la ciudad (ej: "Mérida"). |
-| provincia | string | Provincia a la que pertenece la ciudad. |
-| imageURL | string(url) | Imagen representativa de la ciudad para la UI. |
-| isActive | boolean | Determina si la ciudad es visible y seleccionable. |
-
----
-
-## 4.3 Colección: `rutas`
-
-Define las plantillas de los recorridos culturales en cada ciudad.
-
-| Campo | Tipo | Descripción |
-| :--- | :--- | :--- |
-| dificultad | string | Nivel de dificultad de la ruta (ej: "Facil"). |
-| duracion | string | Tiempo estimado para completar el recorrido. |
-| id_ciudad | string | ID de referencia de la ciudad a la que pertenece la ruta. |
-| id_puntos_interes | array<string> | Lista de IDs de los puntos de interés que componen la ruta. |
-| isActive | boolean | Define si la ruta está disponible para los usuarios. |
-| nombre | string | Título o nombre de la ruta (ej: "Espectáculos"). |
-| puntos_totales | number | Suma total de puntos que se pueden obtener en la ruta. |
-
----
-
-## 4.4 Colección: `puntos_interes`
-
-Información específica sobre los lugares clave que el usuario debe visitar durante una ruta.
-
-| Campo | Tipo | Descripción |
-| :--- | :--- | :--- |
-| descripcion | string | Reseña histórica o informativa detallada del lugar. |
-| imagen | string | URL o referencia a la imagen del punto de interés. |
-| localizacion | geopoint | Coordenadas geográficas (latitud y longitud) del punto. |
-| nombre | string | Nombre oficial del monumento o lugar (ej: "Anfiteatro Romano"). |
-| qr_code | string | Código identificador único para la validación mediante QR. |
-| radio_activacion | number | Distancia en metros para activar el punto por proximidad. |
-
----
-
-## 4.5 Colección: `misiones`
-
-Contiene los desafíos tipo trivia asociados a cada punto de interés.
-
-| Campo | Tipo | Descripción |
-| :--- | :--- | :--- |
-| puntos_premio | number | Cantidad de puntos otorgados al completar la misión. |
-| puntos_interes_id | string | ID del punto de interés al que pertenece esta misión. |
-| titulo | string | Título descriptivo del desafío. |
-| preguntas | array<map> | Lista de preguntas con sus opciones y el índice de la respuesta correcta. |
-
-### Estructura del objeto `preguntas` (dentro de `misiones`)
-
-Cada elemento dentro del array `preguntas` es un objeto de tipo mapa que contiene los siguientes campos:
-
-| Campo | Tipo | Descripción |
-| :--- | :--- | :--- |
-| pregunta_1 | string | El enunciado de la pregunta a mostrar al usuario. |
-| respuesta_1 | string | Primera opción de respuesta (ej: "a) 25 a.C."). |
-| respuesta_2 | string | Segunda opción de respuesta (ej: "b) 8 a.C."). |
-| respuesta_3 | string | Tercera opción de respuesta (ej: "c) 16 a.C."). |
-| indice_correcta | number | El índice numérico que identifica cuál de las respuestas es la correcta. |
-
----
-
-## 4.6 Colección: `resultado`
-
-Almacena el registro de las partidas finalizadas por los usuarios para generar el resumen histórico y estadísticas de juego.
-
-| Campo | Tipo | Descripción |
-| :--- | :--- | :--- |
-| id_ruta | string | Identificador de la ruta que el usuario ha completado. |
-| id_usuario | string | Identificador único del usuario que ha realizado la ruta. |
-| puntos_partida | number | Cantidad de puntos obtenidos por el usuario en esa sesión específica. |
-| tiempo_empleado | string | Tiempo real que el usuario ha tardado en completar el recorrido. |
-| tiempo_total | string | Tiempo de referencia o duración estimada total de la ruta. |
-| detalles_mision | map | Mapa que contiene el desglose técnico o información adicional de la partida. |
-
----
-
-## 4.7 Colección: `config_rangos`
-
-Define la jerarquía de niveles y los requisitos de puntuación para la progresión del usuario.
-
-| Campo | Tipo | Descripción |
-| :--- | :--- | :--- |
-| rangos | array<map> | Lista de objetos que definen cada escalafón del sistema de niveles. |
-
-### Estructura del objeto `rangos`
-
-Cada elemento dentro del array representa un nivel alcanzable:
-
-| Campo | Tipo | Descripción |
-| :--- | :--- | :--- |
-| nombre | string | Título del rango (ej: "Esclavo", "Ciudadano", "Legionario"). |
-| puntos_necesarios | number | Cantidad mínima de puntos globales requerida para alcanzar este rango. |
-| logo | string | URL o referencia al icono representativo del nivel. |
-
----
-
-### 4.8 Diagrama de Referencias Lógicas
-
-A continuación se detalla la estructura lógica de las colecciones y sus referencias, definiendo la organización y el tipado de la información almacenada en el sistema.
+# 5. Base de Datos
+
+Para el almacenamiento y persistencia de la información de RuteX Go, se ha seleccionado Cloud Firestore, una base de datos NoSQL orientada a documentos que organiza la información en colecciones y documentos estructurados en formato clave-valor. A continuación, se detalla el esquema de datos y el desglose de cada una de las colecciones que componen el ecosistema:
+
+### Colección: usuarios
+Es la colección principal para la gestión de jugadores. Cada documento utiliza como ID el uid de Firebase Authentication.
+* **Campos:**
+  * `avatar` (string): Ruta del archivo en Firebase Storage.
+  * `email` (string): Correo electrónico de registro.
+  * `fecha_creacion` (timestamp): Fecha y hora exacta del registro.
+  * `isAdmin` (boolean): Flag de control para acceso al panel de administración.
+  * `nombre` (string): Nombre real del turista.
+  * `puntos` (int64): Puntuación acumulada por completar misiones.
+  * `rango` (string): ID rango actual según su puntuación.
+  * `rutas_completadas` (array): Lista de identificadores de las rutas finalizadas con éxito.
+  * `uid` (string): Identificador único de usuario.
+  * `ultimo_acceso` (timestamp): Registro de la última actividad en la app.
+  * `usuario` (string): Nombre de usuario (username).
+
+### Colección: config_rangos
+Es la colección que actúa como motor de niveles. Contiene un documento con la configuración global de progresión.
+* **Campos:**
+  * `rangos` (array): Lista ordenada de objetos que definen la jerarquía:
+    * `logo` (string): Ruta del archivo en Firebase Storage.
+    * `nombre` (string): Etiqueta temática del nivel.
+    * `puntos_necesarios` (int64): Puntuación mínima para alcanzar dicho nivel.
+
+### Colección: Ciudades
+Es la colección que almacena la información de las localidades integradas en la aplicación.
+* **Campos:**
+  * `imagen` (string): Ruta del archivo en Firebase Storage.
+  * `isActive` (boolean): Flag de control para habilitar o deshabilitar la ciudad en la interfaz de usuario.
+  * `nombre` (string): Nombre oficial de la localidad.
+  * `provincia` (string): Provincia a la que pertenece la ciudad.
+
+### Colección: Rutas
+Es la colección que define los itinerarios turísticos disponibles, vinculando ciudades con sus respectivos puntos de interés.
+* **Campos:**
+  * `descripcion` (string): Resumen informativo sobre el recorrido y temática de la ruta.
+  * `dificultad` (string): Nivel de esfuerzo estimado (ej: "Fácil").
+  * `duracion` (string): Tiempo estimado para completar el recorrido (ej: "1 hora 30 minutos").
+  * `id_ciudad` (string): Identificador único del documento de la ciudad a la que pertenece la ruta.
+  * `id_puntos_interes` (array): Lista ordenada de identificadores que apuntan a los documentos de la colección puntos_interes.
+  * `imagen` (string): Ruta de acceso al recurso visual en Firebase Storage.
+  * `isActive` (boolean): Estado de disponibilidad de la ruta para los usuarios.
+  * `nombre` (string): Título descriptivo de la ruta.
+  * `puntos_totales` (int64): Cantidad de puntos que el usuario recibe al completar la ruta íntegramente.
+
+### Colección: Puntos de Interes
+Esta colección contiene la información detallada de cada monumento o parada técnica dentro de las rutas. Estos datos son fundamentales para la renderización del mapa y la validación de la llegada del usuario al destino físico.
+* **Campos:**
+  * `descripcion` (string): Información histórica y detalles arquitectónicos del monumento.
+  * `imagen` (string): Ruta de acceso al recurso visual en Firebase Storage.
+  * `localizacion` (geopoint): Coordenadas geográficas exactas (latitud y longitud) del punto.
+  * `nombre` (string): Nombre oficial del monumento o sitio.
+  * `qr_code` (string): Identificador único del código QR físico que el usuario debe escanear para validar su visita.
+  * `radio_activacion` (int64): Radio de proximidad en metros para considerar que el usuario ha llegado al punto y habilitar la interacción.
+
+### Colección: Misiones
+Esta colección gestiona la lógica de los desafíos de tipo "Quiz" que se activan al visitar un punto de interés. Contiene el banco de preguntas y define las recompensas asociadas a cada desafío.
+* **Campos:**
+  * `preguntas` (array): Lista de objetos (maps) que contienen los reactivos del cuestionario:
+    * `indice_correcta` (int64): Posición (índice) de la respuesta válida dentro del array de respuestas.
+    * `pregunta_X` (string): Enunciado o texto de la pregunta.
+    * `respuestas` (array): Opciones de respuesta disponibles para el usuario.
+    * `punto_interes_id` (string): Identificador único del documento de la colección puntos_interes al que está vinculada esta misión.
+    * `puntos_premio` (int64): Cantidad de puntos que se suman al perfil del usuario tras completar la misión con éxito.
+    * `título` (string): Nombre descriptivo de la misión.
+
+### DIAGRAMA DE MODELO DE DATOS
 
 ```mermaid
 erDiagram
-    usuario ||--o| config_rangos : "referencia campo 'rango'"
-    usuario ||--o{ resultado : "referencia campo 'id_usuario'"
+    usuarios ||--o| config_rangos : "referencia campo 'rango'"
+    usuarios ||--o{ resultado : "referencia campo 'id_usuario'"
     ciudades ||--o{ rutas : "referencia campo 'id_ciudad'"
     rutas ||--o{ puntos_interes : "referencia array 'id_puntos_interes'"
-    puntos_interes ||--o| misiones : "referencia campo 'puntos_interes_id'"
+    puntos_interes ||--o| misiones : "referencia campo 'punto_interes_id'"
     rutas ||--o{ resultado : "referencia campo 'id_ruta'"
 
-    usuario {
+    usuarios {
+        string uid
+        string usuario
         string nombre
         string email
         string rango
-        number puntos
-        array_string rutas_completadas
+        int64 puntos
+        array rutas_completadas
         timestamp fecha_creacion
         timestamp ultimo_acceso
         boolean isAdmin
+        string avatar
     }
 
     ciudades {
@@ -373,11 +920,13 @@ erDiagram
 
     rutas {
         string nombre
+        string descripcion
         string id_ciudad
-        array_string id_puntos_interes
+        array id_puntos_interes
         string dificultad
         string duracion
-        number puntos_totales
+        int puntos_totales
+        string imagen
         boolean isActive
     }
 
@@ -392,7 +941,7 @@ erDiagram
 
     misiones {
         string titulo
-        string puntos_interes_id
+        string punto_interes_id
         number puntos_premio
         array_map preguntas
     }
@@ -400,641 +949,138 @@ erDiagram
     resultado {
         string id_usuario
         string id_ruta
-        number puntos_partida
-        string tiempo_empleado
-        string tiempo_total
-        map detalles_mision
+        string nombre_ruta
+        number puntuacion_intento
+        number mejor_puntuacion_anterior
+        number mejor_puntuacion_guardada
+        string tiempo_intento
+        int misiones_completadas
+        int puntos_interes_visitados
+        array Puntos_interes_visitados_nombres
+        int total_puntos_interes
+        int puntos_totales_posibles
+        int respuestas_correctas
+        int total_respuestas
+        array_map respuestas
+        array puntos_interes_saltados
+        timestamp fecha_creacion
     }
 
     config_rangos {
         array_map rangos
     }
-```
 
 ---
 
-### 4.9 Disparadores de Datos y Validación (Triggers)
+# 6. Seguridad y Permisos
 
-El flujo de datos representado en el diagrama anterior se dinamiza mediante dos mecanismos de validación clave que vinculan la base de datos con el entorno físico del usuario:
+El sistema RuteX Go implementa un modelo de seguridad robusto que actúa en diferentes niveles, desde la autenticación de la identidad del usuario hasta el control granular de acceso a la base de datos y el hardware del dispositivo.
 
-* **Validación por Geolocalización:** El campo `localizacion` (Geopoint) y el `radio_activacion` en la colección `puntos_interes` actúan como un disparador geoespacial. La aplicación compara en tiempo real la ubicación del dispositivo con las coordenadas almacenadas para habilitar el acceso a la misión correspondiente.
-* **Validación por Código QR:** El campo `qr_code` sirve como un mecanismo de integridad presencial. Funciona como una clave de acceso que el usuario debe escanear para confirmar su llegada al punto físico, permitiendo que la aplicación realice una consulta a la colección `misiones` y presente la trivia asociada.
+## 6.1. Autenticación y Gestión de Identidades
 
-Estos disparadores aseguran que la persistencia en la colección `resultado` solo se produzca tras una interacción verificada con el patrimonio histórico, garantizando la veracidad de los puntos obtenidos.
+La seguridad de acceso se delega en el servicio Firebase Authentication, que garantiza una gestión de sesiones cifrada y segura:
 
----
+* **Proveedores de Identidad:** El sistema soporta el inicio de sesión mediante credenciales clásicas (Email/Password) y proveedores externos como Google Sign-In.
+* **Identificadores Únicos (UID):** Cada usuario autenticado recibe un token único que vincula su sesión con su documento específico en la colección `usuarios`, impidiendo la suplantación de identidad.
 
-# 5. Integraciones y Dependencias
+## 6.2. Reglas de Seguridad de la Base de Datos (Cloud Firestore)
 
-RuteX Go utiliza una serie de servicios externos y paquetes que permiten implementar autenticación, base de datos, navegación por mapa y validación mediante códigos QR. Las integraciones están clasificadas según su relevancia dentro del producto mínimo viable (MVP).
+Para proteger la integridad de la información técnica (rutas, ciudades y misiones), se han configurado Security Rules en el backend que validan cada petición:
 
----
+* **Acceso de Administrador:** Solo los usuarios que poseen el campo `isAdmin: true` en su perfil tienen permisos de escritura (Crear, Actualizar, Borrar) sobre las colecciones de contenido turístico.
+* **Privacidad del Turista:** Las reglas restringen la escritura en la colección `resultado` para que un usuario solo pueda registrar sus propios progresos, prohibiendo el acceso a los datos de otros jugadores.
 
-## 5.1 Integraciones confirmadas para el MVP
+## 6.3. Permisos de Hardware y Servicios Nativos
 
-### Firebase Authentication
-Servicio encargado de gestionar la identidad de los usuarios de forma segura.
-- **Uso:** Registro de nuevos usuarios, inicio de sesión y recuperación de contraseña.
-- **Seguridad:** Permite gestionar autorizaciones sin necesidad de un backend propio, delegando el cifrado y la seguridad a la infraestructura de Google.
+Dado que la aplicación interactúa con componentes físicos, se implementa una gestión de permisos en tiempo de ejecución (Runtime Permissions):
 
-### Firestore (Firebase)
-Base de datos NoSQL principal del proyecto.
-- **Contenido:** Almacena información crítica como perfiles de usuarios, ciudades, rutas, monumentos (POI), misiones y resultados históricos.
-- **Flexibilidad:** Su estructura basada en documentos facilita ampliaciones futuras del modelo de datos sin necesidad de migraciones de esquemas complejas.
-
-### Google Maps API
-Herramienta de apoyo visual para la orientación del turista durante las rutas.
-- **Funciones:** Visualización del mapa urbano, ubicación aproximada del usuario y renderizado de marcadores de monumentos.
-- **Criterio:** No se utiliza para validaciones lógicas de llegada, evitando errores por falta de precisión satelital.
-
-### Lector de Códigos QR
-Mecanismo principal para validar la presencia física del usuario en el monumento.
-- **Proceso:** Escaneo del código, obtención del ID codificado, validación contra el monumento activo de la ruta y desbloqueo de la misión.
-- **Ventajas:** Ofrece precisión total independientemente de la señal GPS y evita la manipulación de la ubicación mediante software de terceros.
-- **Paquetes recomendados:** `mobile_scanner` o `qr_code_scanner`.
-
-
+* **Cámara:** El sistema solicita acceso explícito para el uso del módulo de visión artificial necesario en el escaneo de códigos QR.
+* **Localización (GPS):** Se requiere el permiso de ubicación precisa para calcular la distancia entre el turista y el monumento, habilitando la misión solo cuando se encuentra dentro del `radio_activacion` definido y verificando que el usuario está realmente en el monumento mediante el escaneo del código QR.
 
 ---
 
-## 5.2 Integraciones recomendadas (futuras fases)
+# 7. Pruebas Realizadas
 
-### Firebase Storage
-Destinado al almacenamiento de activos multimedia de alta resolución.
-- **Uso:** Imágenes detalladas de monumentos, ciudades y recursos visuales específicos del sistema.
-- **Estado:** Opcional para el MVP (los recursos iniciales pueden servirse mediante URLs externas o assets locales).
+Este apartado describe los procedimientos estandarizados para validar las funcionalidades críticas de RuteX Go, asegurando que el flujo de gamificación y la lógica de proximidad operen según el diseño técnico.
 
-### Firebase Cloud Messaging
-Sistema de notificaciones push para mejorar la retención de usuarios.
-- **Uso:** Avisos sobre nuevas rutas disponibles, recompensas obtenidas y eventos turísticos locales.
+## 7.1. Pruebas de Funcionalidades Críticas
 
----
+| ID Escenario Crítico | Procedimiento de Verificación | Resultado Esperado |
+| :--- | :--- | :--- |
+| **TC-01:** Activación por Proximidad (Geofencing) | 1. Activar GPS y comenzar ruta. 2. Desplazarse físicamente hasta entrar en el radio del monumento. | Al detectar la ubicación, el sistema debe disparar automáticamente el mensaje de llegada y habilitar las opciones de "Escanear QR" o "Saltar punto". |
+| **TC-02:** Sincronización de Puntos | 1. Responder Quiz correctamente. 2. Consultar perfil de usuario. 3. Verificar consola Firebase. | El campo puntos en Firestore debe incrementarse de forma atómica y reflejarse inmediatamente en la UI del perfil. |
+| **TC-03:** Generación de Diario PDF | 1. Finalizar una ruta completa. 2. Pulsar "Generar Diario". 3. Abrir archivo resultante. | El PDF generado debe incluir los datos dinámicos de la sesión: nombre, estadísticas y fotos de los puntos visitados. |
+| **TC-04:** Restricción de Admin | 1. Loguearse con cuenta estándar. 2. Intentar forzar la navegación al panel de administración. | El sistema debe validar el campo `isAdmin` y denegar el acceso, manteniendo al usuario en la interfaz de turista. |
 
-## 5.3 Integraciones futuras (post-MVP)
+## 7.2. Procedimientos de Pruebas Técnicas
 
-* **Google Directions API:** Implementación de navegación guiada paso a paso entre puntos de interés.
-* **NFC / Beacons:** Validación automática de llegada por proximidad mediante sensores físicos.
-* **Realidad Aumentada (ARCore / ARKit):** Visualización de contenido histórico digital superpuesto sobre los monumentos físicos.
+Para realizar verificaciones de mantenimiento o tras actualizaciones del código, se deben seguir estos pasos:
 
----
+1. **Verificación del Trigger de Localización:**
+   * **Acción:** Utilizar un emulador con "Location Mock" o caminar físicamente hacia un monumento monitorizando los logs de la consola.
+   * **Verificación:** El evento de entrada al Geofence debe disparar el componente UI de validación sin latencia perceptible. Si el usuario está fuera de rango, la interfaz debe permanecer en modo navegación estricta sin mostrar opciones de escaneo.
 
-## 5.4 Dependencias iniciales en Flutter
+2. **Prueba de Integridad del Módulo PDF:**
+   * **Acción:** Ejecutar la generación del diario en un dispositivo con poco almacenamiento disponible.
+   * **Verificación:** El sistema debe gestionar el guardado temporal del archivo y permitir su visualización/compartición mediante las herramientas nativas del SO.
 
-Para garantizar el funcionamiento de los módulos mencionados, el archivo `pubspec.yaml` incluirá las siguientes dependencias base:
+## 7.3. Informe de Resultados de Calidad
 
-```yaml
-dependencies:
-  flutter:
-    sdk: flutter
-  firebase_core: ^latest
-  firebase_auth: ^latest
-  cloud_firestore: ^latest
-  google_maps_flutter: ^latest
-  mobile_scanner: ^latest
-  provider: ^latest
-```
+Tras las pruebas ejecutadas en la versión actual (v0.1.0):
+
+* **Precisión del Trigger:** El aviso de llegada salta con un margen de error de ±3 metros respecto al geopoint almacenado.
+* **Flujo de Usuario:** La opción de "Saltar prueba" garantiza que el usuario no se quede bloqueado en la ruta si hay problemas con el código QR físico.
+* **Persistencia:** Todos los estados (visitado/saltado) se reflejan correctamente en el array de la colección `resultado` en menos de 1 segundo tras la acción.
 
 ---
 
-# 6. Requisitos No Funcionales (NFR)
+# 8. Resolución de Problemas y Soluciones
 
-Los Requisitos No Funcionales establecen las condiciones clave que deben cumplirse para garantizar que RuteX Go ofrezca un rendimiento estable, seguro y una experiencia de usuario adecuada.
+En esta sección se detallan las incidencias técnicas más comunes que pueden surgir durante el uso de RuteX Go y los procedimientos recomendados para su resolución, con el fin de facilitar el mantenimiento preventivo y correctivo del sistema.
 
-Cada requisito está identificado mediante un código único:  
-**NFR-001, NFR-002, …**
+## 8.1. Incidencias de Hardware y Sensores
 
----
+* **Fallo en el Escaneo de Códigos QR:**
+    * **Causa:** Falta de permisos de cámara o condiciones lumínicas deficientes.
+    * **Solución:** Verificar en los ajustes del sistema operativo que la aplicación tiene concedido el permiso de cámara. Asegurarse de que el lente esté limpio y el código QR bien iluminado.
+* **Error en la Validación de Proximidad (GPS):**
+    * **Causa:** El sensor GPS no está activo o se encuentra en modo de "Baja Precisión".
+    * **Solución:** Comprobar que el GPS del dispositivo está encendido y configurado en "Alta Precisión". En zonas con edificios muy altos, el usuario debe desplazarse unos metros para mejorar la recepción de satélites.
 
-### NFR-001 — Tiempo de respuesta
-La aplicación debe mantener tiempos de carga inferiores a **2–3 segundos** en:
-- Pantallas principales  
-- Lista de rutas  
-- Mapa  
-- Misiones  
-- Perfil de usuario  
+## 8.2. Incidencias de Conectividad y Datos
 
-Esto asegura una experiencia fluida.
+* **La App no carga Ciudades o Rutas:**
+    * **Causa:** Pérdida de conexión de datos (4G/5G) o Wi-Fi.
+    * **Solución:** Verificar la conexión a internet. Dado que el backend depende de la sincronización en tiempo real con Firestore, se requiere una conexión estable para descargar el catálogo inicial.
+* **Error de Autenticación / Cierre de Sesión Inesperado:**
+    * **Causa:** Token de sesión de Firebase expirado o falta de sincronización con Firebase Auth.
+    * **Solución:** Reiniciar la aplicación o cerrar sesión y volver a ingresar con las credenciales (Email o Google) para renovar el token de seguridad.
 
----
+## 8.3. Rendimiento del Sistema
 
-### NFR-002 — Seguridad en autenticación
-El acceso al sistema debe gestionarse mediante **Firebase Authentication**.  
-Las credenciales:
-- No se almacenan en local  
-- Se transmiten siempre cifradas  
-- Están protegidas por el sistema de autenticación de Firebase  
-
----
-
-### NFR-003 — Comunicaciones cifradas
-Toda comunicación con servicios externos debe realizarse a través de:
-- **HTTPS**
-
-Esto garantiza confidencialidad e integridad en el intercambio de datos.
+* **Lentitud en la Carga de Imágenes:**
+    * **Causa:** Archivos multimedia pesados en zonas de baja cobertura o saturación de la memoria RAM.
+    * **Solución:** La aplicación utiliza un sistema de caché (`Cached Network Image`), por lo que se recomienda esperar unos segundos a que el recurso se descargue de Cloud Storage; una vez en caché, la carga será instantánea.
 
 ---
 
-### NFR-004 — Interfaz intuitiva
-La app debe mantener:
-- Coherencia visual  
-- Jerarquía clara de elementos  
-- Navegación sencilla para cualquier usuario  
-
----
-
-### NFR-005 — Navegación GPS estable
-El sistema debe actualizar la posición del usuario aproximadamente cada **2–3 segundos**, siempre que la señal GPS lo permita, para:
-- Mostrar ubicación actual  
-- Mejorar la orientación en el mapa  
-
-No se usa el GPS para validar llegada al monumento.
-
----
-
-### NFR-006 — Registro de eventos
-El sistema debe registrar en Firebase Analytics los siguientes eventos:
-- Inicio de sesión  
-- Selección de ruta  
-- Monumentos validados  
-- Misiones completadas  
-- Errores relevantes  
-
-Estos datos permiten mejorar futuras versiones del sistema.
-
----
-
-### NFR-007 — Pruebas de calidad
-La aplicación debe someterse a:
-- Pruebas unitarias  
-- Pruebas de integración  
-- Pruebas funcionales  
-- Pruebas de rendimiento  
-- Pruebas de usabilidad  
-
----
-
-### NFR-008 — Accesibilidad mínima
-El diseño debe respetar criterios de accesibilidad como:
-- Contraste adecuado  
-- Tipografías legibles  
-- Botones accesibles  
-
----
-
-### NFR-009 — Consumo eficiente de recursos
-La app debe minimizar el consumo de:
-- Batería  
-- CPU  
-- Datos móviles  
-
-Especialmente por el uso de GPS y Google Maps.
-
----
-
-### NFR-010 — Disponibilidad y tolerancia a fallos
-El sistema debe mantener funcionamiento aceptable ante:
-- Pérdidas temporales de conexión  
-- Errores en Firestore  
-- Bajo rendimiento del dispositivo  
-
-La aplicación debe almacenar en caché información esencial como:
-- Ciudades  
-- Rutas  
-- Monumentos  
-
-Esto permite consultar la información incluso sin conexión momentánea.
-
----
-
-# 7. Diseño UI/UX y Prototipo Figma
-
-El diseño de RuteX Go sigue una línea visual moderna y accesible centrada en la simplicidad, claridad y usabilidad.  
-El objetivo principal es que cualquier usuario, incluso sin experiencia tecnológica, pueda navegar por la aplicación sin dificultades.
-
-El prototipo completo del sistema está desarrollado en Figma.
-
----
-
-## 7.1 Principios de Diseño
-
-El diseño UI/UX se estructura sobre los siguientes principios:
-
-- **Simplicidad:** Pantallas limpias, sin sobrecarga visual para evitar la fatiga del usuario.
-- **Claridad:** Jerarquía bien definida en títulos, textos y botones de acción principal.
-- **Coherencia:** Todos los módulos comparten la misma guía de estilos, paleta de colores e iconografía.
-- **Accesibilidad:** Colores con buen contraste para lectura en exteriores, tipografías legibles y elementos de interacción de gran tamaño.
-- **Gamificación:** El usuario percibe su progreso visualmente mediante barras de estado, cambio de rangos y puntos acumulados.
-
-Estos principios permiten que la navegación sea intuitiva y agradable durante las rutas turísticas.
-
----
-
-## 7.2 Sistema de Colores
-
-La identidad visual toma inspiración de colores asociados a Extremadura y al turismo cultural.
-
-| Uso | Color | Código |
-|-----|--------|---------|
-| Color principal | Verde oscuro | `#007A3D` |
-| Color secundario | Verde claro | `#4CAF70` |
-| Fondo | Blanco | `#FFFFFF` |
-| Texto secundario | Gris neutro | `#7A8587` |
-| Texto principal | Negro suave | `#2F3333` |
-| Títulos destacados | Negro | `#0B0B0B` |
-
-Se busca una combinación equilibrada entre profesionalidad y estética turística.
-
----
-
-## 7.3 Tipografía
-
-La tipografía elegida para toda la aplicación es **Montserrat**, por su legibilidad y estilo moderno.
-
-| Uso | Tamaño | Peso |
-|-----|--------|-------|
-| H1 | 28 px | Bold |
-| H2 | 22 px | SemiBold |
-| Texto base | 16 px | Regular |
-| Inputs / Secundario | 14 px | Regular |
-
----
-
-## 7.4 Estilo Visual y Componentes
-
-Los componentes mantienen una estética consistente en toda la interfaz para reforzar la identidad de marca y facilitar la interacción:
-
-- Botones con esquinas redondeadas para un aspecto moderno y amigable.
-- Tarjetas con sombra suave para generar profundidad y jerarquía.
-- Iconos claros y minimalistas que facilitan el reconocimiento de funciones.
-- Mapa integrado con marcadores personalizados según el tipo de monumento.
-- Barra de navegación inferior simple para acceso rápido a las secciones clave.
-- Tarjetas rectangulares para una organización limpia de rutas y misiones.
-
-**Componentes destacados:**
-
-- `PrimaryButton`: Botón de acción principal en verde oscuro.
-- `SecondaryButton`: Botón para acciones secundarias o de cancelación.
-- `RouteCard`: Tarjeta con imagen y detalles básicos de cada ruta.
-- `MissionCard`: Contenedor para las trivias y preguntas educativas.
-- `QRScannerButton`: Acceso directo y destacado al lector de códigos.
-- `NavigationBar`: Menú persistente para Inicio, Mapa y Perfil.
-- `RankingItem`: Elemento visual para mostrar la posición, puntos y rango del usuario.
-- `MapMarker (custom)`: Iconografía personalizada sobre la API de Google Maps.
-
----
-
-## 7.5 Flujo de Navegación
-
-Este es el flujo principal del usuario dentro de la app:
-
-```mermaid
-flowchart LR
-    A[Inicio de Sesión] --> B[Selección de Ciudad]
-    B --> C[Lista de Rutas]
-    C --> D[Detalle de Ruta]
-    D --> E[Mapa de Monumentos]
-    E --> F[Escaneo QR]
-    F --> G[Misión / Trivia]
-    G --> H[Resultado y Puntos]
-    H --> C
-```
-
-El flujo garantiza que el usuario siempre sabe “cuál es el siguiente paso”.
-
----
-
-## 7.6 Pantallas del Prototipo
-
-Las pantallas definidas en Figma cubren todo el ecosistema de la aplicación, desde el primer contacto hasta el seguimiento de la progresión del usuario:
-
-### 🔹 Autenticación
-- Inicio de sesión: Acceso mediante credenciales.
-- Registro: Creación de cuenta con validaciones de campos.
-- Recuperación de contraseña: Flujo de envío de email para restablecimiento.
-
-### 🔹 Selección de Ciudad
-- Lista de ciudades activas: Catálogo visual de las ubicaciones disponibles.
-- Vista previa: Tarjeta con imagen representativa y breve descripción histórica.
-
-### 🔹 Rutas Disponibles
-- Tarjetas informativas: Muestran duración estimada, nivel de dificultad y puntos totales a obtener.
-- Orden de visita: Previsualización de los monumentos incluidos.
-
-### 🔹 Detalle de Ruta
-- Descripción: Contexto histórico de la ruta seleccionada.
-- Lista ordenada: Secuencia lógica de monumentos a visitar.
-- Botón de inicio: Activa el seguimiento de la ruta y la navegación.
-
-### 🔹 Vista de Mapa
-- Ubicación actual: Posicionamiento en tiempo real del usuario.
-- Marcadores (POIs): Representación visual de los monumentos en el plano urbano.
-- Acceso QR: Botón flotante destacado para iniciar la validación.
-
-### 🔹 Escáner QR
-- Cámara integrada: Interfaz de lectura en tiempo real.
-- Validación: Comprobación automática del monumento actual.
-- Manejo de errores: Feedback visual si el código es incorrecto o no corresponde al punto.
-
-### 🔹 Misiones
-- Interfaz de trivia: Tres preguntas por monumento con diseño limpio.
-- Interacción: Selección de opciones y avance automático.
-- Puntuación: Resumen inmediato de aciertos y bonus.
-
-### 🔹 Perfil del Usuario
-- Estadísticas: Visualización de puntos totales acumulados.
-- Rango: Insignia y título actual (ej. Explorador).
-- Historial: Listado de rutas finalizadas con éxito.
-
----
-
-## 7.7 Enlace al Prototipo Figma
-
-El prototipo completo puede consultarse aquí:
-
-👉 **https://www.figma.com/design/e0CsJ3JseYF9CZ494aazFS/RuteX-Go?node-id=0-1**
-
-Incluye:
-- Mockups detallados  
-- Prototipo navegable  
-- Biblioteca de componentes  
-- Guía de estilos  
-
----
-
-# 8. Plan de Pruebas y KPIs
-
-El plan de pruebas de RuteX Go tiene como objetivo asegurar que la aplicación funciona de forma estable, cumple los requisitos funcionales y no funcionales y ofrece una buena experiencia al usuario. El proceso incluye pruebas unitarias, de integración, funcionales, de rendimiento, de usabilidad y pruebas reales en entornos turísticos.
-
----
-
-## 8.1 Objetivos del Plan de Pruebas
-
-- Validar que todas las funcionalidades principales se comportan como se espera.  
-- Detectar y corregir errores antes de la entrega del MVP.  
-- Garantizar fluidez en el uso de la aplicación.  
-- Evaluar métricas clave de rendimiento y usabilidad.  
-- Verificar la estabilidad del sistema ante diferentes escenarios (conexión débil, GPS irregular, QR inválido, etc.).
-
----
-
-## 8.2 Tipos de Pruebas
-
-### 8.2.1 Pruebas Unitarias
-Se centran en funciones pequeñas e independientes:
-
-- Validación de respuestas de misiones  
-- Cálculo de puntuaciones y aplicación de bonus  
-- Carga de documentos individuales desde Firestore  
-- Manejo de estados lógicos básicos  
-- Formateo de fechas y puntos visualizados  
-
-**Objetivo:** verificar que cada unidad del código funciona correctamente de manera aislada.
-
----
-
-### 8.2.2 Pruebas de Integración
-Verifican la interacción entre distintos módulos y servicios externos:
-
-- Autenticación ↔ Firestore (creación de perfil post-registro)  
-- Rutas ↔ Monumentos (carga de POIs vinculados)  
-- Monumentos ↔ Misiones (activación de trivia por ID)  
-- Misiones ↔ Perfil (actualización de puntos y rango)  
-- Escaneo QR ↔ Validación de monumento (contraste de identificadores)  
-- Mapa ↔ GPS (posicionamiento de la capa de usuario sobre Google Maps)  
-
-**Objetivo:** asegurar que los componentes funcionan bien cuando colaboran entre sí.
-
----
-
-### 8.2.3 Pruebas Funcionales (End-to-End)
-Simulan el recorrido completo del usuario real:
-
-1. Iniciar sesión o registrarse.  
-2. Seleccionar una ciudad del catálogo.  
-3. Seleccionar e iniciar una ruta específica.  
-4. Orientarse mediante el mapa de monumentos.  
-5. Llegar físicamente a un monumento.  
-6. Escanear el código QR correspondiente.  
-7. Completar la misión/trivia educativa.  
-8. Obtener puntuación, actualizar el rango y avanzar al siguiente punto.  
-
-**Objetivo:** validar que el flujo principal de la aplicación funciona sin interrupciones.
-
----
-
-### 8.2.4 Pruebas de Usabilidad
-Realizadas con usuarios piloto para evaluar la experiencia:
-
-- Claridad de los textos, iconos y botones de acción.  
-- Facilidad para comprender el flujo de navegación.  
-- Tiempo medio empleado para completar las misiones.  
-- Opinión general sobre la estética y el diseño visual.  
-
-**Objetivo:** asegurar una experiencia de usuario intuitiva y accesible.
-
----
-
-### 8.2.5 Pruebas de Rendimiento
-Prueban que la app cumple con los Requisitos No Funcionales definidos:
-
-- Tiempos de carga inferiores a 3 segundos en todas las vistas.  
-- Consumo de batería optimizado durante el uso prolongado del GPS.  
-- Renderizado fluido del mapa sin caídas de frames.  
-- Activación y procesamiento del escáner QR sin retardos.  
-
-**Objetivo:** garantizar un rendimiento óptimo y constante en dispositivos de diversas gamas.
-
----
-
-### 8.2.6 Pruebas Piloto en Entorno Real
-Realizadas específicamente en la ciudad de Mérida para validar el sistema en exteriores:
-
-- **Puntos de control:** Teatro Romano, Templo de Diana, Alcazaba y zona centro.  
-- **Escenarios de prueba:** Escaneo QR en condiciones de luz solar directa o sombras, precisión del GPS entre edificios históricos y rendimiento de la app con cobertura de datos móviles limitada (3G/4G).  
-
-**Objetivo:** confirmar que el MVP es robusto en situaciones reales de uso turístico.
-
----
-
-## 8.3 Estrategia General de Testing
-
-La estrategia se divide en tres fases críticas para asegurar la calidad del software:
-
-### 🟩 Fase 1 — Pruebas internas
-- Verificación de módulos individuales y lógica de negocio.
-- Revisión exhaustiva de la interfaz de usuario (UI) y navegación.
-- Corrección continua durante el ciclo de desarrollo (metodología ágil).
-
-### 🟦 Fase 2 — Pruebas con usuarios reales (piloto)
-- Ejecución de pruebas en rutas turísticas reales bajo condiciones de campo.
-- Recogida de opiniones cualitativas y registro de problemas técnicos detectados.
-- Ajustes finales de diseño y optimización del flujo de usuario.
-
-### 🟥 Fase 3 — Revisión final
-- Validación estricta de todos los requisitos funcionales y no funcionales.
-- Comprobación final de rendimiento y estrés en el servidor (Firestore).
-- Generación de la documentación técnica y manuales finales.
-
----
-
-## 8.4 KPIs (Indicadores Clave de Rendimiento)
-
-Los KPIs permiten medir el éxito técnico y la aceptación por parte del usuario de forma cuantitativa.
-
-### KPIs Técnicos
-| KPI | Objetivo |
-|-----|----------|
-| Tiempo de carga | < 3 segundos |
-| Fallos/crashes | < 1% de las sesiones |
-| Precisión del GPS | Estable en entornos de exteriores |
-| Latencia del escaneo QR | < 0.5 segundos tras el enfoque |
-
----
-
-### KPIs de Usuario
-| KPI | Objetivo |
-|-----|----------|
-| Misiones completadas | > 70% de usuarios piloto |
-| Flujo intuitivo | > 80% navega sin ayuda externa |
-| Satisfacción general | > 4/5 en encuestas de satisfacción |
-| Tiempo medio para volver a rutas | < 2 segundos (transición fluida) |
-
----
-
-### KPIs de Usabilidad
-| KPI | Objetivo |
-|-----|----------|
-| Clics necesarios por acción | 1–3 clics máximo |
-| Tiempo para completar una misión | < 2 minutos por monumento |
-| Errores de QR | < 5% de intentos fallidos |
-
----
-
-## 8.5 Herramientas de Testing
-
-Para la ejecución de este plan, se utilizan herramientas líderes en el ecosistema móvil:
-
-- **Flutter DevTools:** Inspección de widgets y análisis de rendimiento de frames.
-- **Firebase Crashlytics:** Seguimiento y reporte de errores en tiempo real en dispositivos físicos.
-- **Android Studio Profiler:** Análisis detallado del consumo de CPU, memoria RAM y batería.
-- **Google Maps Logs:** Depuración de la carga de mapas y precisión de coordenadas.
-- **Dispositivos reales:** Pruebas de campo en terminales con diversas versiones de Android/iOS.
-
----
-
-## 8.6 Conclusión del Plan de Pruebas
-
-El plan definido cubre todos los aspectos necesarios para garantizar:
-
-- Un funcionamiento estable y seguro de la plataforma.
-- Interacciones correctas entre los módulos de validación y gamificación.
-- Una experiencia de usuario fluida y gratificante en el uso diario.
-- El cumplimiento riguroso de los requisitos originales del proyecto.
-- Una base técnica sólida para escalar el sistema en futuras versiones.
-
-RuteX Go queda evaluada adecuadamente para su presentación y evolución en las próximas etapas del proyecto.
-
----
-
-# 9. Conclusiones Técnicas
-
-El desarrollo de RuteX Go ha permitido construir una arquitectura sólida basada en tecnologías actuales y adecuadas para un proyecto académico con visión realista. La combinación de Flutter, Firebase y Google Maps ofrece un equilibrio óptimo entre simplicidad, escalabilidad y velocidad de desarrollo.
-
-Las decisiones técnicas adoptadas garantizan:
-
-- **Base de datos flexible:** Preparada para crecer con nuevas ciudades y rutas de manera orgánica.
-- **Seguridad nativa:** Un sistema de autenticación robusto sin necesidad de gestionar un backend propio.
-- **Navegación clara:** Orientación efectiva que no compromete la batería ni depende de la precisión del GPS para la lógica de juego.
-- **Fiabilidad en campo:** El uso de códigos QR garantiza la presencialidad del usuario, eliminando el fraude por ubicación simulada.
-- **Modularidad:** Un sistema bien estructurado que facilita el mantenimiento y la actualización de componentes independientes.
-
-La arquitectura está preparada para evolucionar en futuras fases, añadiendo funcionalidades avanzadas sin necesidad de reescribir el sistema base. La calidad del diseño UI/UX, junto con la planificación de pruebas, asegura que la experiencia del usuario sea coherente, fluida y atractiva.
-
-RuteX Go se encuentra en una etapa sólida para continuar su crecimiento y convertirse en una plataforma turística gamificada de referencia en Extremadura.
-
----
-
-# 10. Roadmap y Evolución del Sistema
-
-La planificación del roadmap permite visualizar la evolución del proyecto más allá del MVP actual. RuteX Go está diseñado para crecer de forma modular, incorporando nuevas funcionalidades a medida que avanza su desarrollo académico.
-
----
-
-## 10.1 Mejoras previstas a corto plazo
-
-Estas mejoras se plantean como evolución directa para las próximas evaluaciones:
-
-### 🔹 Firebase Storage
-- Implementación para alojar imágenes y recursos multimedia de alta resolución de forma remota.
-- Optimización del peso de la aplicación al no incluir todos los activos en el paquete local.
-
-### 🔹 Notificaciones Push (Firebase Cloud Messaging)
-- Envío de alertas sobre nuevas rutas añadidas al catálogo.
-- Recordatorios de misiones pendientes para incentivar el retorno del usuario.
-
-### 🔹 Sistema de Logros y Recompensas
-- Desbloqueo de insignias (badges) visuales por hitos conseguidos.
-- Logros temáticos basados en la época histórica de las rutas completadas.
-
-### 🔹 Mejoras del Mapa
-- Inclusión de capas de vista detallada (satélite/terreno).
-- Trazado de líneas de ruta (polylines) entre monumentos para guiar el camino.
-
-### 🔹 Panel de Administración
-- Desarrollo de una interfaz web para la gestión de contenidos (ciudades, rutas y preguntas).
-- Panel de estadísticas para el seguimiento del uso por parte de evaluadores y docentes.
-
----
-
-## 10.2 Evolución a medio plazo
-
-### 🔵 Google Directions API
-Integración de navegación paso a paso con indicaciones de voz y tiempo estimado de llegada entre monumentos.
-
-### 🔵 Funcionalidades Sociales
-- Implementación de rankings competitivos semanales y mensuales.
-- Posibilidad de seguir el progreso de amigos y compartir logros en redes sociales.
-
-### 🔵 Ampliación Geográfica
-- Expansión del catálogo a nuevas ciudades clave de Extremadura como Cáceres, Badajoz, Trujillo y Plasencia. La estructura de datos actual ya permite esta escalabilidad sin cambios en el código.
-
----
-
-## 10.3 Evolución a largo plazo
-
-### 🟣 Tecnologías de proximidad avanzadas
-- **NFC:** Validación automática por contacto.
-- **Beacons:** Detección de presencia por Bluetooth de baja energía para activar contenido sin intervención del usuario.
-- Permiten validar la llegada de forma pasiva, complementando o sustituyendo el escaneo QR.
-
-### 🟣 Realidad aumentada (AR)
-- Recreación histórica digital sobre las ruinas o monumentos actuales.
-- Elementos 3D interactivos que permitan visualizar el aspecto original de los edificios.
-- Explicaciones visuales y guías virtuales superpuestas en la cámara del dispositivo.
-
-### 🟣 Expansión multiplataforma
-- Publicación oficial en la App Store (iOS) mediante el mismo código base de Flutter.
-- Panel web de administración avanzado para la gestión de contenidos.
-- Integración en kioscos turísticos digitales situados en puntos estratégicos de las ciudades.
-
----
-
-## 10.4 Visión final del proyecto
-
-La visión de RuteX Go es convertirse en una plataforma turística gamificada capaz de integrarse con instituciones, museos y comercios locales. Su estructura técnica permite:
-
-- Escalar geográficamente a cualquier región del mundo.
-- Integrar nuevas tecnologías emergentes de forma modular.
-- Ampliar la experiencia educativa y cultural mediante contenido multimedia.
-- Evolucionar desde un prototipo académico hacia un producto profesional de alto impacto.
-
----
-
-## 10.5 Conclusión del Roadmap
-
-El MVP actual sienta los cimientos necesarios para avanzar con seguridad hacia versiones más completas. La aplicación está lista para crecer tanto en complejidad técnica como en contenido, manteniendo siempre la filosofía principal:
-
-**Un turismo cultural más interactivo, educativo y accesible.**
+# 9. Bibliografía y Referencias Técnicas
+
+Para el desarrollo de la plataforma RuteX Go, se han consultado las siguientes fuentes técnicas y documentaciones oficiales que garantizan la viabilidad y el rigor del sistema:
+
+## 9.1. Documentación oficial de Frameworks y Lenguajes
+* **Flutter Documentation:** Guía de referencia para la construcción de interfaces reactivas, gestión del estado y despliegue multiplataforma en Android e iOS. Disponible en: [https://docs.flutter.dev/](https://docs.flutter.dev/).
+* **Dart Language Guide:** Especificaciones técnicas para la implementación de lógica de negocio robusta y tipado fuerte. Disponible en: [https://dart.dev/guides](https://dart.dev/guides).
+
+## 9.2. Infraestructura Cloud y Servicios Backend (BaaS)
+* **Firebase Authentication:** Documentación sobre la implementación de flujos de autenticación segura y persistencia de sesiones mediante tokens de identidad. Disponible en: [https://firebase.google.com/docs/auth](https://firebase.google.com/docs/auth).
+* **Cloud Firestore Documentation:** Modelado de datos NoSQL, estructuración de colecciones jerárquicas y optimización de reglas de seguridad en tiempo real. Disponible en: [https://firebase.google.com/docs/firestore](https://firebase.google.com/docs/firestore).
+* **Firebase Storage Reference:** Almacenamiento y distribución eficiente de activos multimedia bajo demanda. Disponible en: [https://firebase.google.com/docs/storage](https://firebase.google.com/docs/storage).
+
+## 9.3. Librerías y Paquetes del Ecosistema (Pub.dev)
+* **Geolocator Plugin for Flutter:** Documentación técnica para la gestión de servicios nativos de ubicación, cálculo de distancias y consumo eficiente del sensor GPS. Disponible en: [https://pub.dev/packages/geolocator](https://pub.dev/packages/geolocator).
+* **Mobile Scanner API:** Especificaciones para la integración de visión artificial y control nativo de la cámara del dispositivo para la lectura de códigos QR. Disponible en: [https://pub.dev/packages/mobile_scanner](https://pub.dev/packages/mobile_scanner).
+* **Cached Network Image:** Implementación de sistemas de caché local para optimizar el rendimiento y la latencia en la carga de recursos gráficos remotos. Disponible en: [https://pub.dev/packages/cached_network_image](https://pub.dev/packages/cached_network_image).
 
 ---
 
