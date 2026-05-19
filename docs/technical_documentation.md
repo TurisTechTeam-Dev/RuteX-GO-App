@@ -9,26 +9,26 @@
 
 # 📑 Índice
 
-[1. Introducción](#1-introducción)
-[2. Requisitos del Sistema](#2-requisitos-del-sistema)
-   - [2.1. Requisitos de Hardware](#21-requisitos-de-hardware)
-   - [2.2. Requisitos de Software](#22-requisitos-de-software)
-   - [2.3. Diagrama de Casos de Uso](#23-diagrama-de-casos-de-uso)
-[3. Instalación y Configuración](#3-instalación-y-configuración)
-[4. Arquitectura de la Aplicación](#4-arquitectura-de-la-aplicación)
-   - [4.1. Arquitectura del Sistema (Modelo C4)](#41-arquitectura-del-sistema-modelo-c4)
-   - [4.2. Diagrama de Flujo](#42-diagrama-de-flujo)
-   - [4.3. Backend (Infraestructura Cloud)](#43-backend-infraestructura-cloud)
-   - [4.4. Frontend (Arquitectura de Software)](#44-frontend-arquitectura-de-software)
-   - [4.5. Diagramas de Secuencia](#45-diagramas-de-secuencia)
-[5. Base de Datos](#5-base-de-datos)
-[6. Seguridad y Permisos](#6-seguridad-y-permisos)
-   - [6.1. Autenticación y Gestión de Identidades](#61-autenticación-y-gestión-de-identidades)
-   - [6.2. Reglas de Seguridad de la Base de Datos (Cloud Firestore)](#62-reglas-de-seguridad-de-la-base-de-datos-cloud-firestore)
-   - [6.3. Permisos de Hardware y Servicios Nativos](#63-permisos-de-hardware-y-servicios-nativos)
-[7. Pruebas Realizadas](#7-pruebas-realizadas)
-[8. Resolución de Problemas y Soluciones](#8-resolución-de-problemas-y-soluciones)
-[9. Bibliografía y Referencias Técnicas](#9-bibliografía-y-referencias-técnicas)
+- [1. Introducción](#1-introducción)
+- [2. Requisitos del Sistema](#2-requisitos-del-sistema)
+  - [2.1. Requisitos de Hardware](#21-requisitos-de-hardware)
+  - [2.2. Requisitos de Software](#22-requisitos-de-software)
+  - [2.3. Diagrama de Casos de Uso](#23-diagrama-de-casos-de-uso)
+- [3. Instalación y Configuración](#3-instalación-y-configuración)
+- [4. Arquitectura de la Aplicación](#4-arquitectura-de-la-aplicación)
+  - [4.1. Arquitectura del Sistema (Modelo C4)](#41-arquitectura-del-sistema-modelo-c4)
+  - [4.2. Diagrama de Flujo](#42-diagrama-de-flujo)
+  - [4.3. Backend (Infraestructura Cloud)](#43-backend-infraestructura-cloud)
+  - [4.4. Frontend (Arquitectura de Software)](#44-frontend-arquitectura-de-software)
+  - [4.5. Diagramas de Secuencia](#45-diagramas-de-secuencia)
+- [5. Base de Datos](#5-base-de-datos)
+- [6. Seguridad y Permisos](#6-seguridad-y-permisos)
+  - [6.1. Autenticación y Gestión de Identidades](#61-autenticación-y-gestión-de-identidades)
+  - [6.2. Reglas de Seguridad de la Base de Datos (Cloud Firestore)](#62-reglas-de-seguridad-de-la-base-de-datos-cloud-firestore)
+  - [6.3. Permisos de Hardware y Servicios Nativos](#63-permisos-de-hardware-y-servicios-nativos)
+- [7. Pruebas Realizadas](#7-pruebas-realizadas)
+- [8. Resolución de Problemas y Soluciones](#8-resolución-de-problemas-y-soluciones)
+- [9. Bibliografía y Referencias Técnicas](#9-bibliografía-y-referencias-técnicas)
 
 ---
 
@@ -1006,10 +1006,10 @@ Este apartado describe los procedimientos estandarizados para validar las funcio
 
 | ID Escenario Crítico | Procedimiento de Verificación | Resultado Esperado |
 | :--- | :--- | :--- |
-| **TC-01:** Activación por Proximidad (Geofencing) | 1. Activar GPS y comenzar ruta. 2. Desplazarse físicamente hasta entrar en el radio del monumento. | Al detectar la ubicación, el sistema debe disparar automáticamente el mensaje de llegada y habilitar las opciones de "Escanear QR" o "Saltar punto". |
-| **TC-02:** Sincronización de Puntos | 1. Responder Quiz correctamente. 2. Consultar perfil de usuario. 3. Verificar consola Firebase. | El campo puntos en Firestore debe incrementarse de forma atómica y reflejarse inmediatamente en la UI del perfil. |
-| **TC-03:** Generación de Diario PDF | 1. Finalizar una ruta completa. 2. Pulsar "Generar Diario". 3. Abrir archivo resultante. | El PDF generado debe incluir los datos dinámicos de la sesión: nombre, estadísticas y fotos de los puntos visitados. |
-| **TC-04:** Restricción de Admin | 1. Loguearse con cuenta estándar. 2. Intentar forzar la navegación al panel de administración. | El sistema debe validar el campo `isAdmin` y denegar el acceso, manteniendo al usuario en la interfaz de turista. |
+| **TC-01:** Activación por Proximidad (Geofencing) | 1. Activar GPS y comenzar ruta<br>2. Desplazarse físicamente hasta entrar en el radio del monumento | Al detectar la ubicación, el sistema debe disparar automáticamente el mensaje de llegada y habilitar las opciones de "Escanear QR" o "Saltar punto" |
+| **TC-02:** Sincronización de Puntos | 1. Responder Quiz correctamente<br>2. Consultar perfil de usuario<br>3. Verificar consola Firebase | El campo puntos en Firestore debe incrementarse de forma atómica y reflejarse inmediatamente en la UI del perfil |
+| **TC-03:** Generación de Diario PDF | 1. Finalizar una ruta completa<br>2. Pulsar "Generar Diario"<br>3. Abrir archivo resultante | El PDF generado debe incluir los datos dinámicos de la sesión: nombre, estadísticas y fotos de los puntos visitados |
+| **TC-04:** Restricción de Admin | 1. Loguearse con cuenta estándar<br>2. Intentar forzar la navegación al panel de administración | El sistema debe validar el campo `isAdmin` y denegar el acceso, manteniendo al usuario en la interfaz de turista |
 
 ## 7.2. Procedimientos de Pruebas Técnicas
 
