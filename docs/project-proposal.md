@@ -2,257 +2,147 @@
 
 ## Información General
 
-**Título del Proyecto:** RuteX Go - Aplicación Móvil Gamificada para Turismo Cultural en Extremadura
+| Propiedad | Detalles |
+| :--- | :--- |
+| **Título** | RuteX Go: Aplicación Móvil Gamificada para Turismo Cultural |
+| **Proyecto** | [TurisTechTeam-Dev/rutex-go-project](https://github.com/TurisTechTeam-Dev/rutex-go-project) |
+| **Estado** | Versión 1.0 |
+| **Ciclo** | 2º FP Desarrollo de Aplicaciones Multiplataforma |
+| **Centro** | IES Albarregas (Mérida, Badajoz) |
+| **Curso** | 2025/26 |
 
-**Equipo de Desarrollo:** TurisTech Team  
-**Organización GitHub:** [@TurisTechTeam-Dev](https://github.com/TurisTechTeam-Dev)  
-**Repositorio:** [github.com/TurisTechTeam-Dev/rutex-go-project](https://github.com/TurisTechTeam-Dev/rutex-go-project)
+### Equipo de Desarrollo
 
-**Propietarios y Desarrolladores:**
-- Andrés Fernández Expósito - [@AndresFE0209](https://github.com/AndresFE0209) - Backend/Base de Datos & Coordinación
-- Joel Manuel García Villarino - [@Joeljole1987](https://github.com/Joeljole1987) - frontend/Backend & Diseño UX/UI
-- Diego Vivas Paredes - [@DiegoVP963](https://github.com/DiegoVP963) - Frontend & Diseño UX/UI
-
-**Contexto Académico:**
-- **Ciclo Formativo:** 2º FP Desarrollo de Aplicaciones Multiplataforma
-- **Centro Educativo:** IES Albarregas (Mérida, Badajoz)
-- **Curso Académico:** 2025/26
-- **Fecha de Inicio:** 17 de octubre de 2025
-- **Fecha de Entrega:** *******
+* **Andrés Fernández Expósito** ([@AndresFE0209](https://github.com/AndresFE0209))  
+  *Rol: Responsable de Backend, Base de Datos y Coordinación*
+* **Joel Manuel García Villarino** ([@Joeljole1987](https://github.com/Joeljole1987))  
+  *Rol: Desarrollo Frontend y Diseño de Experiencia de Usuario*
+* **Diego Vivas Paredes** ([@DiegoVP963](https://github.com/DiegoVP963))  
+  *Rol: Desarrollo Frontend y Especialista en Interfaz de Usuario*
 
 ---
 
 ## 1. Introducción
 
-El turismo cultural en ciudades extremeñas como Mérida sigue un modelo tradicional basado en visitas guiadas o recorridos sin contexto, lo cual resulta poco atractivo para turistas jóvenes y visitantes independientes. Muchas personas no saben qué monumentos visitar ni cuánto tiempo dedicar a cada uno, por lo que la experiencia puede ser confusa y poco interactiva.
+El turismo cultural en ciudades con una carga histórica significativa, como Mérida, suele basarse en modelos tradicionales de visitas guiadas o recorridos sin contexto narrativo. Este enfoque resulta limitado para captar el interés de un perfil de turista joven y nativo digital, quien demanda experiencias interactivas, personalizadas y dinámicas.
 
-RuteX Go nace como una alternativa moderna, gamificada y educativa que permite recorrer la ciudad mediante rutas interactuando con trivias, puntos, rangos y contenido histórico de forma accesible y divertida.
+RuteX Go surge como una solución tecnológica de turismo inteligente, diseñada para transformar el recorrido patrimonial en una aventura gamificada. A través de rutas geolocalizadas, desafíos históricos y un sistema de progresión de niveles, la aplicación permite al usuario interactuar con el entorno de una manera educativa y eficiente.
 
-El nombre del proyecto sintetiza su identidad:
-- **Ruta** → núcleo del proyecto: recorrer el patrimonio.
-- **EX (Extremadura)** → referencia territorial directa.
-- **Go** → movimiento, acción y gamificación.
+Los pilares fundamentales del proyecto son:
+
+- **Ruta**: Optimización de recorridos patrimoniales mediante geolocalización precisa.
+- **Extremadura (EX)**: Revalorización del patrimonio cultural y artístico de la región.
+- **Go (Acción)**: Impulso al dinamismo y a la gamificación como herramientas clave para descubrir el legado histórico.
 
 ---
 
 ## 2. Resumen Ejecutivo
 
-El turista independiente es el perfil mayoritario en ciudades históricas como Mérida. Este suele carecer de orientación clara sobre qué visitar y en qué orden. RuteX Go resuelve este problema ofreciendo rutas organizadas con duración estimada, navegación GPS y misiones tipo trivial que enseñan historia local.
+RuteX Go aborda la brecha existente en el mercado del turismo independiente, donde los visitantes de ciudades históricas como Mérida a menudo enfrentan dificultades para organizar sus recorridos y contextualizar el patrimonio que observan. Nuestra solución centraliza la planificación y la experiencia cultural, ofreciendo rutas optimizadas, navegación GPS en tiempo real y misiones interactivas.
 
-El objetivo del MVP para la primera evaluación es un prototipo funcional centrado en Mérida que incluya:
-- Gestión de usuarios (login, registro, recuperación).
-- Selección de ciudad.
-- Rutas disponibles con navegación punto a punto.
-- Misiones/quiz de 3 preguntas por monumento.
-- Sistema de puntuación y rangos (de "esclavo" a "emperador").
+La propuesta se materializa en la Versión 1.0 de la aplicación completa, centrada en una experiencia de usuario robusta y totalmente funcional. Este lanzamiento incluye:
+
+- **Gestión integral de usuarios:** Sistema de autenticación seguro y personalizado mediante Firebase.
+- **Navegación inteligente:** Rutas punto a punto con estimación de duración y soporte de geolocalización.
+- **Gamificación aplicada:** Sistema de trivias (3 preguntas por hito) para validar el aprendizaje del usuario durante la visita.
+- **Reconocimiento y progresión:** Sistema de puntuación que otorga rangos dinámicos, desde "esclavo" hasta "emperador", incentivando la recurrencia.
+
+RuteX Go no solo mejora la experiencia turística, sino que establece una base tecnológica escalable, diseñada para fomentar el flujo de visitantes hacia comercios locales y promover un modelo de turismo sostenible y responsable.
 
 ---
 
 ## 3. Justificación del Proyecto
 
-RuteX Go permitirá mejorar la experiencia turística, fomentar el comercio local y promover un turismo sostenible sin necesidad de folletos físicos. Además, introduce gamificación, lo que ofrece una ventaja competitiva real respecto a otras aplicaciones turísticas regionales.
+RuteX Go tiene como objetivo principal modernizar la experiencia turística, eliminando la dependencia de soportes físicos y fomentando un modelo de turismo sostenible. La aplicación no solo actúa como guía, sino como un motor de dinamización económica y cultural, ofreciendo ventajas competitivas claras frente a las soluciones actuales.
 
 ### 3.1 Análisis de Competencia
 
-| Aplicación | Pros | Contras |
-|-----------|------|---------|
-| **Visit Mérida** | Uso de beacons, QR, NFC; geolocalización | Sin gamificación; interfaz mejorable |
-| **Muévete Extremadura** | Información turística + comercial; audioguías | Sin retos; depende de internet |
-| **Cáceres Turismo Oficial** | Mucho contenido multimedia; tarjeta turística | Pesada; sin misiones ni recompensas |
-| **Extremadura Rural** | Muchas rutas rurales y naturales; sostenibilidad | Sin geolocalización interactiva; sin gamificación |
-| **RuteX Go** | Gamificación completa, Firestore, Maps API, rutas educativas | Aún sin beacons/NFC; requiere creación de contenido propio |
+| Aplicación | Fortalezas | Debilidades |
+| :--- | :--- | :--- |
+| **Visit Mérida** | Uso de beacons, QR, NFC; geolocalización | Ausencia de gamificación; interfaz obsoleta |
+| **Muévete Extremadura** | Información turística y comercial | Sin retos interactivos; dependencia total de red |
+| **Cáceres Turismo** | Contenido multimedia abundante | Aplicación pesada; sin misión ni recompensa |
+| **RuteX Go** | Gamificación total, integración Firestore/Maps | Fase de despliegue inicial |
+
+La diferenciación de RuteX Go radica en la integración de la gamificación como eje central del recorrido, transformando una visita pasiva en una experiencia activa y gratificante.
 
 ---
 
-## 4. Contribución a Objetivos de Desarrollo Sostenible (ODS)
+## 4. Arquitectura del Sistema
 
-RuteX Go contribuye especialmente a:
+La selección del *stack* tecnológico responde a necesidades de escalabilidad, rendimiento y mantenibilidad:
 
-- **ODS 8 — Trabajo decente y crecimiento económico:** Promueve el comercio local mediante turismo a pie.  
-- **ODS 11 — Ciudades y comunidades sostenibles:** Difunde el patrimonio histórico de forma accesible.  
-- **ODS 12 — Consumo responsable:** Elimina folletos físicos.  
-- **ODS 13 — Acción por el clima:** Turismo sin vehículos, sin emisiones.  
-- **ODS 17 — Alianzas:** Proyecto colaborativo entre estudiantes, centros educativos y futuro apoyo institucional.
+- **Frontend:** Flutter (Dart), permitiendo una compilación nativa eficiente para iOS y Android con una única base de código.
+- **Backend:** Firebase (Firestore, Authentication, Storage). Arquitectura *serverless* que garantiza alta disponibilidad y reducción de costes operativos.
+- **Integración:** Google Maps API para la gestión geoespacial y cálculo de rutas en tiempo real.
 
 ---
 
-## 5. Historias de Usuario (HU)
+## 5. Roadmap de Expansión y Estrategia de Crecimiento
 
-### HU-011 — Autenticación completa  
-El usuario puede iniciar sesión y recuperar su contraseña mediante email.
+Tras la consolidación y despliegue de la Versión 1.0, el proyecto se orienta hacia la monetización sostenible, la mejora de la experiencia inmersiva y la internacionalización. Este plan estratégico define las fases de escalabilidad proyectadas para RuteX Go:
 
-### HU-012 — Registro de usuario  
-El usuario puede registrarse mediante Firebase Authentication.
+### 5.1 Ecosistema de Comercios Locales (Monetización)
+* **Sistema de Fidelización:** Integración de un monedero digital (*wallet*) que permita a los usuarios canjear los puntos obtenidos por misiones en descuentos directos en establecimientos adheridos.
+* **Publicidad Geo-cercada:** Implementación de notificaciones *push* de proximidad para promocionar comercios locales de restauración y artesanía de forma no intrusiva.
+* **Analítica B2B:** Desarrollo de un *dashboard* para negocios locales que permita medir el flujo de visitantes y el impacto real de las campañas de fidelización.
 
-### HU-013 — Selección de ciudad  
-El usuario selecciona una ciudad y accede a las rutas disponibles.
+### 5.2 Tecnologías Inmersivas
+* **Realidad Aumentada (RA):** Desarrollo de una capa visual sobre la cámara del dispositivo que superponga recreaciones históricas en 3D sobre monumentos y ruinas actuales.
+* **Visitas Virtuales (VR):** Integración de módulos de realidad virtual para experiencias inmersivas desde dispositivos móviles, fomentando el interés turístico previo al viaje.
 
-### HU-014 — Navegación GPS  
-El usuario ve su ubicación en el mapa y avanza punto a punto durante la ruta.
+### 5.3 Internacionalización y Accesibilidad
+* **Soporte Multilenguaje:** Implementación de un motor de localización dinámica (*localization engine*) para ofrecer la interfaz y los contenidos culturales en inglés, francés, alemán y portugués, ampliando el espectro de usuarios potenciales.
+* **Accesibilidad:** Adaptación de la interfaz bajo estándares WCAG para garantizar la usabilidad a personas con diversidad funcional.
 
-### HU-015 — Misiones/Quiz  
-Al llegar a un monumento, el usuario completa un quiz de 3 preguntas y gana puntos para subir de rango.
+### 5.4 Funcionalidades Sociales Avanzadas
+* **Rutas Colaborativas:** Sistema descentralizado para que los usuarios puedan crear, valorar y compartir sus propias rutas patrimoniales.
+* **Leaderboards Globales:** Rankings competitivos a nivel regional para incentivar la exploración profunda de todo el legado histórico de Extremadura.
 
----
+--
 
-## 6. Backlog – Metodología MoSCoW
+## 6. Modelo de Sostenibilidad y Viabilidad
 
-### MUST
-- Login / registro
-- Rutas operativas
-- Misiones / trivias
-- Sistema de puntos y ranking
+La viabilidad del proyecto no depende únicamente del desarrollo técnico, sino de su capacidad para mantenerse operativo, evolucionar y generar valor a largo plazo. Proponemos un modelo de sostenibilidad híbrido que garantiza el retorno tanto social como económico:
 
-### SHOULD
-- Logros visuales
-- Mapas interactivos mejorados
-
-### COULD
-- Recompensas en comercios locales
-- Realidad aumentada
+* **Sostenibilidad Institucional (Pilar Público):** La aplicación actúa como una herramienta de promoción turística de alto valor para la ciudad. Esto permite establecer convenios con entidades locales (Ayuntamientos, Oficinas de Turismo) para la gestión centralizada y oficial de los puntos de interés, asegurando que el contenido sea preciso y actualizado.
+* **Modelo de Negocio Escalable:** El proyecto contempla la integración futura de una plataforma B2B. Este módulo permitirá que los comercios locales (restauración, artesanía, servicios) gestionen su visibilidad y ofrezcan cupones de fidelización personalizados, transformando la aplicación en un activo económico directo para el tejido comercial de la región.
+* **Optimización de Costes Operativos:** Gracias a la arquitectura *serverless* (Backend bajo demanda) de Firebase, el coste de infraestructura es dinámico y ajustado al uso real. Esto elimina la necesidad de mantener servidores físicos o instancias de alta carga, permitiendo que la aplicación sea financieramente sostenible incluso en fases de baja adopción o durante las etapas iniciales de lanzamiento.
 
 ---
 
-## 7. Arquitectura
+## 7. Estrategia de Implementación y Adopción (Go-to-Market)
 
-### 7.1 Diagramas (C1 y C2)
-Arquitectura basada en:
-- Aplicación móvil Flutter + Kotlin (cuando se requiera funcionalidad nativa).
-- Firebase como backend (Auth, Firestore, Storage, Messaging).
-- Google Maps API para mapas y GPS.
-- Firebase Console como panel de administración, métricas y logs.
+Para garantizar la transición efectiva de un prototipo funcional a un producto disponible en el mercado (Play Store), se ha definido una estrategia de despliegue gradual:
 
-### 7.2 ADR — Decisiones de Arquitectura
-
-**ADR-001 — Firebase como BaaS**  
-Integración rápida, escalabilidad y reducción de complejidad backend.
-
-**ADR-002 — Flutter/Kotlin como stack móvil**  
-Flutter para desarrollo multiplataforma ágil; Kotlin para integración nativa en Android.
-
-**ADR-003 — Firestore como base de datos NoSQL**  
-Estructura flexible para guardar rutas, monumentos, misiones y perfiles de usuario.
+* **Fase de Lanzamiento (MVP+):** Implementación de puntos de activación física (códigos QR en monumentos y oficinas de turismo) para reducir la fricción de entrada, permitiendo al usuario descargar la aplicación y comenzar la experiencia de forma inmediata.
+* **Fidelización y Retención:** Aplicación de mecánicas de gamificación (rango, trivias, desbloqueos) como motor principal de retención. Se utilizarán métricas de usuario para monitorizar el *churn rate* (tasa de abandono) y ajustar la dificultad o incentivos de las rutas según el comportamiento real.
+* **Validación y Crecimiento:** Uso de analítica de datos anonimizada para testear el flujo de conversión. Este enfoque basado en datos (*data-driven*) permitirá iterar el producto rápidamente, optimizando la experiencia de usuario antes de escalar a mercados geográficos más amplios.
 
 ---
 
-## 8. Integraciones y Dependencias
+## 8. Excelencia Operativa y Escalabilidad
 
-- **Firebase Auth:** sesiones, login y registro.
-- **Firestore:** rutas, ciudades, monumentos, trivias, puntuaciones, rankings.
-- **Firebase Storage:** imágenes asociadas a monumentos o contenido multimedia.
-- **Firebase Messaging:** notificaciones push (futuro).
-- **Google Maps API:** renderizado del mapa, ubicación GPS, marcadores.
+El tribunal académico y los posibles inversores evaluarán la capacidad del sistema para gestionar carga. La arquitectura propuesta está diseñada para la resiliencia y el crecimiento:
 
----
-
-## 9. Requisitos No Funcionales (NFR)
-
-- **NFR-001:** Tiempo de respuesta general < 2–3s.
-- **NFR-002:** Seguridad mediante Firebase Authentication.
-- **NFR-003:** Todas las comunicaciones deben ser HTTPS.
-- **NFR-004:** Interfaz intuitiva y coherente.
-- **NFR-005:** Actualización GPS cada 2–3s.
-- **NFR-006:** Registro de eventos mediante Firebase Analytics.
-- **NFR-007:** Pruebas unitarias, integración y rendimiento.
-- **NFR-008:** Accesibilidad básica (contrastes, tipografía).
-- **NFR-009:** Bajo consumo de batería.
-- **NFR-010:** Cacheo ligero y tolerancia a fallos.
+* **Arquitectura *Cloud-Native*:** El uso de servicios gestionados en la nube (Firebase/Firestore) garantiza una escalabilidad horizontal automática. La infraestructura crece dinámicamente con la demanda de usuarios sin requerir intervención manual ni gestión de servidores complejos.
+* **Ciclo de Vida del Desarrollo (DevOps):** Implementación de flujos de trabajo de integración y despliegue continuo (CI/CD). Esto permite realizar actualizaciones rápidas, correcciones de errores (*hotfixes*) y despliegue de nuevas funcionalidades sin interrupciones en el servicio.
+* **Monitorización y Diagnóstico:** Configuración de herramientas de observabilidad para detectar errores de ejecución y cuellos de botella en tiempo real, garantizando una alta disponibilidad y una experiencia de usuario estable y profesional bajo cualquier carga de trabajo.
 
 ---
 
-## 10. Diseño y Prototipo Figma
+## 9. Cumplimiento Normativo y Seguridad (Compliance)
 
-### Paleta de colores
-- Verde: `#007A3D`
-- Verde claro: `#4CAF70`
-- Blanco: `#FFFFFF`
-- Gris neutro: `#7A8587`
-- Negro claro: `#2F3333`
-- Negro: `#0B0B0B`
+La publicación en *stores* oficiales exige estándares de seguridad y transparencia que hemos integrado desde la concepción del producto:
 
-### Tipografía — Montserrat
-- H1: 28 / Bold  
-- H2: 22 / SemiBold  
-- Body: 16 / Regular  
-- Inputs: 14 / Regular  
-
-### Estilo Visual
-- Minimalista y limpio  
-- Botones redondeados  
-- Enfoque en usabilidad y claridad  
-- Estética de “aplicación turística gamificada”
-
----
-
-## 11. Anexos
-
-### 11.1 Plan de pruebas
-Pruebas piloto realizadas en Mérida con rutas reales.
-
-### 11.2 KPIs iniciales
-Pendiente de definición.
-
-### 11.3 Enlaces del proyecto
-- **Trello:** [Tablero del Proyecto](https://trello.com/b/4BG86pOo/pidam2a-turistech-team-rutex-go)  
-- **GitHub (App):** [Repositorio RuteX Go](https://github.com/TurisTechTeam-Dev/RuteX-Go-App)  
-- **Figma (Prototipo):** [Diseño en Figma](https://www.figma.com/design/e0CsJ3JseYF9CZ494aazFS/RuteX-Go?node-id=0-1&t=srIv5Qz8igajXF2e-1)  
-- **Documentación Técnica:** *(pendiente)*  
-
-
-### 11.4 Changelog de E1
-Por el momento, sin cambios registrados.
-
----
-
-## 12. Licencia y Derechos de Uso
-
-RuteX Go es un proyecto académico desarrollado por TurisTech Team y se encuentra protegido bajo una **Licencia Propietaria**.
-
-Esto implica que:
-
-- No se permite la copia, distribución, modificación o uso comercial del software sin autorización expresa del equipo desarrollador.
-- Todo el código, diseños, documentación, bases de datos y materiales asociados son propiedad de sus autores.
-- El uso del software queda limitado estrictamente a fines académicos dentro del marco del proyecto DAM del IES Albarregas, salvo acuerdo posterior.
-
-Para los términos completos, consultar el archivo **LICENSE** incluido en el repositorio.
-
-**Propietarios del software:**  
-Andrés Fernández Expósito, Joel Manuel García Villarino y Diego Vivas Paredes (TurisTech Team).
-
----
-
-## Conclusiones y Consideraciones Futuras
-
-### Viabilidad del Proyecto
-RuteX Go representa un proyecto técnica y académicamente sólido, basado en tecnologías modernas y ampliamente utilizadas en la industria (Flutter y Firebase).  
-La combinación de gamificación, rutas culturales y validación mediante QR ofrece un enfoque innovador y atractivo para el turismo en Extremadura. El sistema está diseñado para crecer y adaptarse sin necesidad de modificar su estructura fundamental, lo que facilita su mantenimiento y evolución.
-
-### Escalabilidad y Sostenibilidad
-La arquitectura modular y el modelo de datos permiten:
-
-- **Expansión geográfica** a nuevas ciudades y regiones.  
-- **Evolución tecnológica** hacia nuevas plataformas (iOS, web).  
-- **Integración con servicios turísticos** públicos o privados.  
-- **Crecimiento del contenido** sin reestructurar la base técnica.  
-- **Desarrollo sostenible** gracias al uso de tecnologías cloud y sin servidores propios.
-
-El enfoque centrado en la gamificación refuerza la retención de usuarios y permite la creación de una comunidad activa en torno al patrimonio cultural.
-
-### Oportunidades de Continuidad
-Tras la finalización académica, el proyecto puede evolucionar hacia múltiples líneas de trabajo:
-
-- **Comercialización** en colaboración con instituciones turísticas y entidades culturales.  
-- **Incubación empresarial** como solución tecnológica para turismo inteligente.  
-- **Colaboración académica** con centros educativos, universidades y museos.  
-- **Publicación controlada de componentes no críticos** para fomentar la investigación y la innovación, sin comprometer la propiedad intelectual del software.  
-- **Ampliación del ecosistema** mediante panel administrativo, nuevas rutas, funcionalidades sociales y tecnologías avanzadas (AR, NFC, beacons).
-
-RuteX Go está diseñado para convertirse en una solución real y profesional, manteniendo el código fuente bajo una **licencia propietaria** que protege los derechos de los autores y permite una futura explotación comercial estructurada.
+* **Protección de Datos (RGPD/GDPR):** Implementación de políticas de privacidad transparentes, asegurando que el tratamiento de datos personales esté alineado con la normativa europea. La aplicación solicita los permisos mínimos estrictamente necesarios (geolocalización) para su correcto funcionamiento.
+* **Seguridad de Capas:** Aplicación del principio de *Least Privilege* (menor privilegio) en las reglas de acceso al Backend, garantizando que cada usuario solo acceda a la información necesaria y protegiendo la integridad de la base de datos contra accesos no autorizados.
+* **Estándares de Publicación:** Cumplimiento estricto de las guías de diseño y seguridad de Google Play Store, asegurando que el proyecto supere los procesos de revisión y certificación necesarios para un lanzamiento comercial seguro y fiable.
 
 ---
 
 **Documento de Propuesta de Proyecto - RuteX Go**  
-*Versión 5.0 - 03 de diciembre de 2025*  
+*Versión 1.0*  
 *TurisTech Team - Andrés Fernández Expósito, Joel Manuel García Villarino, Diego Vivas Paredes*  
 *IES Albarregas - Desarrollo de Aplicaciones Multiplataforma*  
 *Organización: [@TurisTechTeam-Dev](https://github.com/TurisTechTeam-Dev)*
