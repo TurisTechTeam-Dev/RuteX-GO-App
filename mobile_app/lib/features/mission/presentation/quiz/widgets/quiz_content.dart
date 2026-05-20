@@ -42,7 +42,7 @@ class QuizContent extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
           child: CustomButton(
             text: _continueButtonText(),
             onPressed: onContinue,
@@ -95,7 +95,7 @@ class QuizContent extends StatelessWidget {
       );
     }
 
-    children.add(const SizedBox(height: 8));
+    children.add(const SizedBox(height: 4));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: children,

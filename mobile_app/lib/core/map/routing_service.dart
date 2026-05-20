@@ -172,6 +172,9 @@ class RoutingService {
         {'lat': end.latitude, 'lon': end.longitude},
       ],
       'costing': 'pedestrian',
+      'costing_options': {
+        'pedestrian': {'shortest': true},
+      },
       'directions_options': {'units': 'kilometers', 'language': 'es-ES'},
     });
 
