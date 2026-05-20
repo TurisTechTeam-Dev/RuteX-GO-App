@@ -186,47 +186,50 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
       ),
-      builder: (sheetContext) => ArrivalBottomSheet(
-        poiName: poi.name,
-        isFinalTarget: isFinalTarget,
-        onScanMission: () async {
-          Navigator.pop(sheetContext);
+      builder: (sheetContext) => PopScope(
+        canPop: false,
+        child: ArrivalBottomSheet(
+          poiName: poi.name,
+          isFinalTarget: isFinalTarget,
+          onScanMission: () async {
+            Navigator.pop(sheetContext);
 
-          final result = await Navigator.pushNamed(
-            context,
-            AppRoutes.missionQrScanner,
-            arguments: MissionScannerArgs(
-              routeId: widget.routeId,
-              totalPois: provider.pointsOfInterest.length,
-              expectedPointId: poi.id,
-              expectedPointName: poi.name,
-            ),
-          );
+            final result = await Navigator.pushNamed(
+              context,
+              AppRoutes.missionQrScanner,
+              arguments: MissionScannerArgs(
+                routeId: widget.routeId,
+                totalPois: provider.pointsOfInterest.length,
+                expectedPointId: poi.id,
+                expectedPointName: poi.name,
+              ),
+            );
 
-          if (!context.mounted) return;
+            if (!context.mounted) return;
 
-          if (result == MissionFlowResult.pointCompleted) {
-            final completedRoute = provider.markCurrentPoiAsCompleted();
-            if (completedRoute) {
-              await _finishRoute(context, provider);
-              return;
+            if (result == MissionFlowResult.pointCompleted) {
+              final completedRoute = provider.markCurrentPoiAsCompleted();
+              if (completedRoute) {
+                await _finishRoute(context, provider);
+                return;
+              }
             }
-          }
 
-          setState(() => _isDialogOpen = false);
-        },
-        onSkipPoint: () async {
-          Navigator.pop(sheetContext);
+            setState(() => _isDialogOpen = false);
+          },
+          onSkipPoint: () async {
+            Navigator.pop(sheetContext);
 
-          if (isFinalTarget) {
-            provider.markCurrentPoiAsCompleted();
-            setState(() => _isDialogOpen = false);
-            await _finishRoute(context, provider);
-          } else {
-            provider.markCurrentPoiAsCompleted();
-            setState(() => _isDialogOpen = false);
-          }
-        },
+            if (isFinalTarget) {
+              provider.markCurrentPoiAsCompleted();
+              setState(() => _isDialogOpen = false);
+              await _finishRoute(context, provider);
+            } else {
+              provider.markCurrentPoiAsCompleted();
+              setState(() => _isDialogOpen = false);
+            }
+          },
+        ),
       ),
     );
   }
