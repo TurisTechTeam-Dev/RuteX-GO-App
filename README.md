@@ -17,7 +17,7 @@
 | <img src="https://github.com/AndresFE0209.png?size=40" width="40"> | [**Andrés Fernández Expósito**](https://github.com/AndresFE0209) | [@AndresFE0209](https://github.com/AndresFE0209) | Backend & Coordinación |
 | <img src="https://github.com/Joeljole1987.png?size=40" width="40"> | [**Joel Manuel García Villarino**](https://github.com/Joeljole1987) | [@Joeljole1987](https://github.com/Joeljole1987) | Backend & Diseño UX/UI |
 | <img src="https://github.com/DiegoVP963.png?size=40" width="40"> | [**Diego Vivas Paredes**](https://github.com/DiegoVP963) | [@DiegoVP963](https://github.com/DiegoVP963) | Frontend & Diseño UX/UI |
-| <img src="https://github.com/mfronceroh01-hash?size=40" width="40"> | [**María Francisca Roncero Holgado**](https://github.com/mfronceroh01-hash) | [@MercedesOrg01](https://github.com/mfronceroh01-hash) | Tutora y Amada Lider del proyecto  |
+| <img src="https://github.com/mfronceroh01-hash.png?size=40" width="40"> | [**María Francisca Roncero Holgado**](https://github.com/mfronceroh01-hash) | [@mfronceroh01-hash](https://github.com/mfronceroh01-hash) | Tutora y Amada Lider del proyecto  |
 
 **Centro:** IES Albarregas (Mérida, Badajoz)  
 **Ciclo:** 2º FP Desarrollo de Aplicaciones Multiplataforma  
