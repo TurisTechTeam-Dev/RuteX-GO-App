@@ -22,8 +22,7 @@ class RoutingService {
   static const _valhalla2RouteUrl = 'https://valhalla.openstreetmap.de/route';
   static const _googleDirectionsUrl =
       'https://maps.googleapis.com/maps/api/directions/json';
-  static const _osmFootBaseUrl =
-      'https://routing.openstreetmap.de/routed-foot/route/v1/driving';
+  static const _osrmFootUrl = 'https://router.project-osrm.org/route/v1/foot';
 
   Future<List<LatLng>> getRoute(LatLng start, LatLng end) async {
     final route = await getNavigationRoute(start, end);
@@ -172,9 +171,6 @@ class RoutingService {
         {'lat': end.latitude, 'lon': end.longitude},
       ],
       'costing': 'pedestrian',
-      'costing_options': {
-        'pedestrian': {'shortest': true, 'use_roads': 1.0},
-      },
       'directions_options': {'units': 'kilometers', 'language': 'es-ES'},
     });
 
@@ -275,7 +271,7 @@ class RoutingService {
     LatLng end,
   ) async {
     final url = Uri.parse(
-      '$_osmFootBaseUrl/'
+      '$_osrmFootUrl/'
       '${start.longitude},${start.latitude};${end.longitude},${end.latitude}'
       '?overview=full&geometries=polyline&steps=true',
     );
