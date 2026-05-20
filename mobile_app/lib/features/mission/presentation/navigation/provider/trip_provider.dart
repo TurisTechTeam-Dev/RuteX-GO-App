@@ -172,12 +172,9 @@ class TripSimulationProvider extends ChangeNotifier {
         source: NavigationRouteSource.googleWalking,
       );
       if (_isDisposed) return;
-      if (route.points.isNotEmpty && !_isRouteUnreasonable(route.points, target)) {
-        nextRoute = route;
-      } else {
-        debugPrint("[ROUTE] Route discarded (too long or empty). Using straight line.");
-        nextRoute = NavigationRoute(points: [_currentPosition, target]);
-      }
+      nextRoute = route.points.isNotEmpty
+          ? route
+          : NavigationRoute(points: [_currentPosition, target]);
     } catch (e) {
       if (_isDisposed) return;
       debugPrint("[ROUTE] Connection error. Falling back to a straight line.");
@@ -235,25 +232,46 @@ class TripSimulationProvider extends ChangeNotifier {
       if (_isDisposed) return;
     }
 
-    Position pos = await Geolocator.getCurrentPosition();
+    // Fallback rápido (fix de red, puede ser impreciso)
+    try {
+      final pos = await Geolocator.getCurrentPosition()
+          .timeout(const Duration(seconds: 3));
+      if (!_isDisposed) _currentPosition = LatLng(pos.latitude, pos.longitude);
+    } catch (_) {}
     if (_isDisposed) return;
-    _currentPosition = LatLng(pos.latitude, pos.longitude);
 
-    _positionStream =
-        Geolocator.getPositionStream(
-          locationSettings: const LocationSettings(
-            accuracy: LocationAccuracy.high,
-            distanceFilter: 5,
-          ),
-        ).listen((Position pos) {
-          if (_isDisposed) return;
-          if (_isSimulating || _hasReachedDestination) return;
+    // Arrancamos el stream y esperamos su primera emisión (fix GPS real)
+    // antes de calcular la primera ruta, para que use la posición más precisa.
+    final firstFix = Completer<void>();
 
-          _currentPosition = LatLng(pos.latitude, pos.longitude);
-          _checkArrivalProximity(_currentPosition);
-          _updateCurrentNavigationStep();
-          _notifyListeners();
-        });
+    _positionStream = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 5,
+      ),
+    ).listen((Position pos) {
+      if (_isDisposed) return;
+
+      _currentPosition = LatLng(pos.latitude, pos.longitude);
+
+      if (!firstFix.isCompleted) {
+        debugPrint("[GPS] First stream fix: ${pos.latitude}, ${pos.longitude}");
+        firstFix.complete();
+      }
+
+      if (_isSimulating || _hasReachedDestination) return;
+      _checkArrivalProximity(_currentPosition);
+      _updateCurrentNavigationStep();
+      _notifyListeners();
+    });
+
+    // Esperamos máximo 5 s al fix del stream; si no llega, usamos el fallback
+    await firstFix.future.timeout(
+      const Duration(seconds: 5),
+      onTimeout: () {
+        debugPrint("[GPS] Stream fix timeout — using network fallback position.");
+      },
+    );
   }
 
   void _checkArrivalProximity(LatLng pos) {
@@ -495,18 +513,6 @@ class TripSimulationProvider extends ChangeNotifier {
     }
 
     return names;
-  }
-
-  bool _isRouteUnreasonable(List<LatLng> points, LatLng target) {
-    final straightLine = NavigationDistanceUtils.metersBetween(_currentPosition, target);
-    if (straightLine < 1) return false;
-    var routeLength = 0.0;
-    for (var i = 0; i < points.length - 1; i++) {
-      routeLength += NavigationDistanceUtils.metersBetween(points[i], points[i + 1]);
-    }
-    final ratio = routeLength / straightLine;
-    debugPrint("[ROUTE] Length ${routeLength.toInt()}m vs straight ${straightLine.toInt()}m (ratio ${ratio.toStringAsFixed(2)})");
-    return ratio > 2.0;
   }
 
   void _notifyListeners() {
