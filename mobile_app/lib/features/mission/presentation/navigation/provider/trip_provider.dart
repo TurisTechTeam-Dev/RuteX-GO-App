@@ -417,7 +417,7 @@ class TripSimulationProvider extends ChangeNotifier {
           correctAnswers: correctAnswers,
           totalAnswers: totalAnswers,
           answerResults: _answerRecords(answers),
-          skippedPois: _poiIds(skippedPois),
+          skippedPois: _poiNames(skippedPois),
           visitedPoiNames: visitedPoiNames,
         ),
       );
@@ -495,16 +495,6 @@ class TripSimulationProvider extends ChangeNotifier {
     }
 
     return names;
-  }
-
-  List<String> _poiIds(List<PointOfInterest> pois) {
-    final ids = <String>[];
-
-    for (final poi in pois) {
-      ids.add(poi.id);
-    }
-
-    return ids;
   }
 
   void _notifyListeners() {

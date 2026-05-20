@@ -32,31 +32,29 @@ class QuizContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final question = questions[currentIndex];
+    final bottomInset = MediaQuery.of(context).padding.bottom;
 
-    return SafeArea(
-      child: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-              child: _buildQuestionContent(context, question),
-            ),
+    return Column(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+            child: _buildQuestionContent(context, question),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: CustomButton(
-              text: _continueButtonText(),
-              onPressed: onContinue,
-            ),
+        ),
+        Container(
+          width: double.infinity,
+          height: 2,
+          color: Theme.of(context).colorScheme.onSurface,
+        ),
+        Padding(
+          padding: EdgeInsets.fromLTRB(16, 12, 16, 12 + bottomInset),
+          child: CustomButton(
+            text: _continueButtonText(),
+            onPressed: onContinue,
           ),
-          Container(
-            width: double.infinity,
-            height: 2,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-          const SizedBox(height: 12),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
