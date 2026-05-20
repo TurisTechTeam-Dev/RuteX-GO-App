@@ -44,11 +44,13 @@ class RoutingService {
       if (googleRoute.points.isNotEmpty) return googleRoute;
     }
 
-    final pedestrianRoute = await _getValhallaPedestrianRoute(start, end);
-    if (pedestrianRoute.points.isNotEmpty) return pedestrianRoute;
-
+    // OSRM routed-foot antes que Valhalla: servidor dedicado peatonal con
+    // mejor cobertura de calles urbanas sin etiqueta de acera en OSM.
     final osrmRoute = await _getOsrmFallbackRoute(start, end);
     if (osrmRoute.points.isNotEmpty) return osrmRoute;
+
+    final pedestrianRoute = await _getValhallaPedestrianRoute(start, end);
+    if (pedestrianRoute.points.isNotEmpty) return pedestrianRoute;
 
     debugPrint('No se pudo calcular ruta walking, usando linea recta.');
     return NavigationRoute(points: [start, end]);
