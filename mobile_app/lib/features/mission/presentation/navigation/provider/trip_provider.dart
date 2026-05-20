@@ -89,7 +89,6 @@ class TripSimulationProvider extends ChangeNotifier {
     _initializeTrip();
   }
 
-  bool get _isUserNormal => userRole == UserRole.normal;
   bool get _isAdminSimulation =>
       userRole == UserRole.admin &&
       navigationMode == NavigationMode.adminSimulation;
@@ -170,9 +169,7 @@ class TripSimulationProvider extends ChangeNotifier {
       final route = await _routingService.getNavigationRoute(
         _currentPosition,
         target,
-        source: _isUserNormal
-            ? NavigationRouteSource.googleWalking
-            : NavigationRouteSource.appWalking,
+        source: NavigationRouteSource.googleWalking,
       );
       if (_isDisposed) return;
       nextRoute = route.points.isNotEmpty
