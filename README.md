@@ -591,9 +591,9 @@ Este proyecto está protegido bajo una **Licencia de Software Propietario y Dere
 
 Se otorga una licencia limitada, revocable y no exclusiva exclusivamente para la instalación y ejecución del software con fines de **evaluación académica y personal**. Queda totalmente prohibida la explotación comercial, redistribución, modificación o ingeniería inversa del sistema sin el consentimiento previo y por escrito de los titulares.
 
-El repositorio cuenta con la documentación legal completa en dos idiomas:
-* 🇪🇸 **Versión en Español:** Consulta el archivo [`LICENSE_ES`](./LICENSE_ES) para leer los términos legales detallados.
-* 🇬🇧 **Versión Internacional:** Consulta el archivo [`LICENSE`](./LICENSE) para la especificación legal equivalente.
+La documentación legal completa se encuentra en la raíz del proyecto y está disponible en dos versiones:
+* 🇪🇸 **Versión en Español:** Consulta los términos legales detallados en el archivo [LICENSE_ES.md](LICENSE_ES.md).
+* 🇬🇧 **Versión Internacional:** Consulta la especificación legal equivalente en el archivo [LICENSE.md](LICENSE.md).
 
 Para consultas sobre la adquisición de licencias comerciales, alianzas de negocio o despliegues institucionales (GovTech), puede ponerse en contacto con el equipo en: **turistechteam@gmail.com**
 
