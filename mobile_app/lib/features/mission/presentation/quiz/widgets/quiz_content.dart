@@ -42,17 +42,17 @@ class QuizContent extends StatelessWidget {
             child: _buildQuestionContent(context, question),
           ),
         ),
-        Container(
-          width: double.infinity,
-          height: 2,
-          color: Theme.of(context).colorScheme.onSurface,
-        ),
         Padding(
-          padding: EdgeInsets.fromLTRB(16, 12, 16, 12 + bottomInset),
+          padding: EdgeInsets.fromLTRB(16, 16, 16, 12 + bottomInset),
           child: CustomButton(
             text: _continueButtonText(),
             onPressed: onContinue,
           ),
+        ),
+        Container(
+          width: double.infinity,
+          height: 2,
+          color: Theme.of(context).colorScheme.onSurface,
         ),
       ],
     );

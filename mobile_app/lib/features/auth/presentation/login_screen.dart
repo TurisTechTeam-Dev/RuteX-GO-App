@@ -58,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
         _passwordController.text.trim(),
       );
 
-      await _navigateAfterLogin(user.uid, user.email);
+      await _navigateAfterLogin(user.uid, user.email, user.isFirstLogin);
     } catch (e) {
       if (!mounted) return;
       _setAudioGuideMessage(e.toString());
@@ -73,7 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final user = await _authUseCases.loginWithGoogle();
-      await _navigateAfterLogin(user.uid, user.email);
+      await _navigateAfterLogin(user.uid, user.email, user.isFirstLogin);
     } on GoogleSignInCancelledException {
       return;
     } catch (e) {
@@ -85,7 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _navigateAfterLogin(String uid, String? email) async {
+  Future<void> _navigateAfterLogin(String uid, String? email, bool isFirstLogin) async {
     final isAdmin = await _authUseCases.checkAdminStatus(uid);
 
     debugPrint("AUTH CHECK: Web=$kIsWeb | Admin=$isAdmin | Email=$email");
@@ -95,7 +95,13 @@ class _LoginScreenState extends State<LoginScreen> {
     if (kIsWeb && isAdmin) {
       Navigator.pushReplacementNamed(context, AppRoutes.adminPanel);
     } else {
-      Navigator.pushReplacementNamed(context, AppRoutes.home);
+      Navigator.pushReplacementNamed(
+        context,
+        AppRoutes.home,
+        arguments: isFirstLogin
+            ? {AppRoutes.showInfoOnHomeStartArg: true}
+            : null,
+      );
     }
   }
 

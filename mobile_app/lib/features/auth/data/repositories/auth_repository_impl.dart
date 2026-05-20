@@ -60,7 +60,7 @@ class AuthRepositoryImpl implements AuthRepository {
           .doc(user.uid)
           .update({UserFields.ultimoAcceso: FieldValue.serverTimestamp()});
 
-      return AuthUserModel.fromFirebaseUser(user);
+      return AuthUserModel.fromFirebaseUser(user, isFirstLogin: userCredential.additionalUserInfo?.isNewUser ?? false);
     } on FirebaseAuthException catch (e) {
       throw Exception(_mapError(e.code));
     }
@@ -94,8 +94,9 @@ class AuthRepositoryImpl implements AuthRepository {
         throw Exception("No se pudo recuperar el usuario tras el login");
       }
 
+      final isNew = userCredential.additionalUserInfo?.isNewUser ?? false;
       await _ensureUserDocument(user);
-      return AuthUserModel.fromFirebaseUser(user);
+      return AuthUserModel.fromFirebaseUser(user, isFirstLogin: isNew);
     } on FirebaseAuthException catch (e) {
       throw Exception(_mapError(e.code));
     } on PlatformException catch (e) {

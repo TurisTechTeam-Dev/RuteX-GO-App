@@ -12,9 +12,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../domain/entities/auth_user.dart';
 
 class AuthUserModel extends AuthUser {
-  const AuthUserModel({required super.uid, super.email});
+  const AuthUserModel({
+    required super.uid,
+    super.email,
+    super.isFirstLogin = false,
+  });
 
-  factory AuthUserModel.fromFirebaseUser(User user) {
-    return AuthUserModel(uid: user.uid, email: user.email);
+  factory AuthUserModel.fromFirebaseUser(User user, {bool isFirstLogin = false}) {
+    return AuthUserModel(uid: user.uid, email: user.email, isFirstLogin: isFirstLogin);
   }
 }

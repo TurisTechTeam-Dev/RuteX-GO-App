@@ -10,6 +10,7 @@
 class AuthUser {
   final String uid;
   final String? email;
+  final bool isFirstLogin;
 
-  const AuthUser({required this.uid, this.email});
+  const AuthUser({required this.uid, this.email, this.isFirstLogin = false});
 }
