@@ -22,7 +22,8 @@ class RoutingService {
   static const _valhalla2RouteUrl = 'https://valhalla.openstreetmap.de/route';
   static const _googleDirectionsUrl =
       'https://maps.googleapis.com/maps/api/directions/json';
-  static const _osrmFootUrl = 'https://router.project-osrm.org/route/v1/foot';
+  static const _osrmFootUrl =
+      'https://routing.openstreetmap.de/routed-foot/route/v1/driving';
 
   Future<List<LatLng>> getRoute(LatLng start, LatLng end) async {
     final route = await getNavigationRoute(start, end);
