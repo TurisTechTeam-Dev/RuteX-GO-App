@@ -173,7 +173,7 @@ class RoutingService {
       ],
       'costing': 'pedestrian',
       'costing_options': {
-        'pedestrian': {'shortest': true},
+        'pedestrian': {'shortest': true, 'use_roads': 1.0},
       },
       'directions_options': {'units': 'kilometers', 'language': 'es-ES'},
     });

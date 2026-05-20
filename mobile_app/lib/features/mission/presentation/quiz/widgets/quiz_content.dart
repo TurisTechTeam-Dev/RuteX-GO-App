@@ -33,22 +33,9 @@ class QuizContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final question = questions[currentIndex];
 
-    return Column(
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-            child: _buildQuestionContent(context, question),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          child: CustomButton(
-            text: _continueButtonText(),
-            onPressed: onContinue,
-          ),
-        ),
-      ],
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+      child: _buildQuestionContent(context, question),
     );
   }
 
@@ -95,15 +82,16 @@ class QuizContent extends StatelessWidget {
       );
     }
 
-    children.add(const SizedBox(height: 4));
+    children.add(const SizedBox(height: 24));
+    children.add(
+      CustomButton(
+        text: currentIndex == questions.length - 1 ? "FINALIZAR" : "SIGUIENTE",
+        onPressed: onContinue,
+      ),
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: children,
     );
-  }
-
-  String _continueButtonText() {
-    final isLastQuestion = currentIndex == questions.length - 1;
-    return isLastQuestion ? "FINALIZAR" : "SIGUIENTE";
   }
 }
