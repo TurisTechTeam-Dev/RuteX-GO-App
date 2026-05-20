@@ -19,9 +19,11 @@ enum NavigationRouteSource { appWalking, googleWalking }
 
 class RoutingService {
   static const _valhallaRouteUrl = 'https://valhalla1.openstreetmap.de/route';
+  static const _valhalla2RouteUrl = 'https://valhalla.openstreetmap.de/route';
   static const _googleDirectionsUrl =
       'https://maps.googleapis.com/maps/api/directions/json';
-  static const _osrmWalkingProfiles = ['foot'];
+  static const _osmFootBaseUrl =
+      'https://routing.openstreetmap.de/routed-foot/route/v1/driving';
 
   Future<List<LatLng>> getRoute(LatLng start, LatLng end) async {
     final route = await getNavigationRoute(start, end);
@@ -152,6 +154,18 @@ class RoutingService {
     LatLng start,
     LatLng end,
   ) async {
+    for (final serverUrl in [_valhallaRouteUrl, _valhalla2RouteUrl]) {
+      final route = await _tryValhallaServer(serverUrl, start, end);
+      if (route.points.isNotEmpty) return route;
+    }
+    return const NavigationRoute(points: []);
+  }
+
+  Future<NavigationRoute> _tryValhallaServer(
+    String serverUrl,
+    LatLng start,
+    LatLng end,
+  ) async {
     final body = jsonEncode({
       'locations': [
         {'lat': start.latitude, 'lon': start.longitude},
@@ -164,7 +178,7 @@ class RoutingService {
     try {
       final response = await http
           .post(
-            Uri.parse(_valhallaRouteUrl),
+            Uri.parse(serverUrl),
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json',
@@ -175,7 +189,7 @@ class RoutingService {
           .timeout(const Duration(seconds: 8));
 
       if (response.statusCode != 200) {
-        debugPrint('Valhalla pedestrian devolvio ${response.statusCode}');
+        debugPrint('Valhalla ($serverUrl) devolvio ${response.statusCode}');
         return const NavigationRoute(points: []);
       }
 
@@ -203,11 +217,11 @@ class RoutingService {
       }
 
       debugPrint(
-        'Ruta Valhalla pedestrian: ${points.length} puntos, ${steps.length} pasos',
+        'Ruta Valhalla pedestrian ($serverUrl): ${points.length} puntos, ${steps.length} pasos',
       );
       return NavigationRoute(points: points, steps: steps);
     } catch (e) {
-      debugPrint('Fallo con Valhalla pedestrian: $e');
+      debugPrint('Fallo con Valhalla ($serverUrl): $e');
       return const NavigationRoute(points: []);
     }
   }
@@ -257,44 +271,40 @@ class RoutingService {
     LatLng start,
     LatLng end,
   ) async {
-    for (final profile in _osrmWalkingProfiles) {
-      final url = Uri.parse(
-        'https://router.project-osrm.org/route/v1/$profile/'
-        '${start.longitude},${start.latitude};${end.longitude},${end.latitude}'
-        '?overview=full&geometries=polyline&steps=true',
-      );
+    final url = Uri.parse(
+      '$_osmFootBaseUrl/'
+      '${start.longitude},${start.latitude};${end.longitude},${end.latitude}'
+      '?overview=full&geometries=polyline&steps=true',
+    );
 
-      try {
-        final response = await http
-            .get(
-              url,
-              headers: {
-                'Accept': 'application/json',
-                'User-Agent': 'RutexGo_App',
-              },
-            )
-            .timeout(const Duration(seconds: 4));
+    try {
+      final response = await http
+          .get(
+            url,
+            headers: {
+              'Accept': 'application/json',
+              'User-Agent': 'RutexGo_App',
+            },
+          )
+          .timeout(const Duration(seconds: 6));
 
-        if (response.statusCode == 200) {
-          final data = json.decode(response.body);
-          if (data['code'] == 'Ok' && data['routes'].isNotEmpty) {
-            final route = data['routes'][0] as Map<String, dynamic>;
-            final encodedPolyline = route['geometry'] as String;
-            final points = _decodePolyline(encodedPolyline);
-            final steps = _osrmStepsFromRoute(route);
-            debugPrint(
-              'Ruta OSRM ($profile): ${points.length} puntos, ${steps.length} pasos',
-            );
-            return NavigationRoute(points: points, steps: steps);
-          }
-        } else {
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['code'] == 'Ok' && (data['routes'] as List).isNotEmpty) {
+          final route = data['routes'][0] as Map<String, dynamic>;
+          final encodedPolyline = route['geometry'] as String;
+          final points = _decodePolyline(encodedPolyline);
+          final steps = _osrmStepsFromRoute(route);
           debugPrint(
-            'OSRM devolvio ${response.statusCode} con perfil $profile',
+            'Ruta OSM foot: ${points.length} puntos, ${steps.length} pasos',
           );
+          return NavigationRoute(points: points, steps: steps);
         }
-      } catch (e) {
-        debugPrint('Fallo con OSRM $profile: $e');
+      } else {
+        debugPrint('OSM foot routing devolvio ${response.statusCode}');
       }
+    } catch (e) {
+      debugPrint('Fallo con OSM foot routing: $e');
     }
 
     return const NavigationRoute(points: []);

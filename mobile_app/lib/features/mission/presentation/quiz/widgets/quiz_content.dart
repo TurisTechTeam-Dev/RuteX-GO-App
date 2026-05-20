@@ -37,25 +37,16 @@ class QuizContent extends StatelessWidget {
       child: Column(
         children: [
           Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final content = _buildQuestionContent(context, question);
-
-                return SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: constraints.maxHeight,
-                    ),
-                    child: IntrinsicHeight(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: content,
-                      ),
-                    ),
-                  ),
-                );
-              },
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+              child: _buildQuestionContent(context, question),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: CustomButton(
+              text: _continueButtonText(),
+              onPressed: onContinue,
             ),
           ),
           Container(
@@ -69,12 +60,9 @@ class QuizContent extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildQuestionContent(
-    BuildContext context,
-    QuizQuestion question,
-  ) {
+  Widget _buildQuestionContent(BuildContext context, QuizQuestion question) {
     final theme = Theme.of(context);
-    final content = <Widget>[
+    final children = <Widget>[
       LinearProgressIndicator(
         value: (currentIndex + 1) / questions.length,
         backgroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.14),
@@ -105,7 +93,7 @@ class QuizContent extends StatelessWidget {
     ];
 
     for (var index = 0; index < question.answers.length; index++) {
-      content.add(
+      children.add(
         QuizAnswerOption(
           index: index,
           text: question.answers[index],
@@ -115,14 +103,11 @@ class QuizContent extends StatelessWidget {
       );
     }
 
-    content.add(const SizedBox(height: 12));
-    content.add(const Spacer());
-    content.add(
-      CustomButton(text: _continueButtonText(), onPressed: onContinue),
+    children.add(const SizedBox(height: 8));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: children,
     );
-    content.add(const SizedBox(height: 15));
-
-    return content;
   }
 
   String _continueButtonText() {

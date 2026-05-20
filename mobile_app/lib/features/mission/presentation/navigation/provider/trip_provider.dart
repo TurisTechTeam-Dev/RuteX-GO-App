@@ -378,11 +378,6 @@ class TripSimulationProvider extends ChangeNotifier {
     final visitedPois = _completedPoiIndices.length;
     final skippedPois = _skippedPois();
 
-    // ✅ Extraer IDs de los monumentos para guardar en Firebase
-    final visitedPoiIds = _poiIds(
-      _completedPoiIndices.map((index) => _pointsOfInterest[index]).toList(),
-    );
-
     // ✅ Extraer nombres de los monumentos para mostrar en la app
     final visitedPoiNames = _poiNames(
       _completedPoiIndices.map((index) => _pointsOfInterest[index]).toList(),
@@ -423,7 +418,7 @@ class TripSimulationProvider extends ChangeNotifier {
           totalAnswers: totalAnswers,
           answerResults: _answerRecords(answers),
           skippedPois: _poiIds(skippedPois),
-          visitedPoiNames: visitedPoiIds,
+          visitedPoiNames: visitedPoiNames,
         ),
       );
     }
