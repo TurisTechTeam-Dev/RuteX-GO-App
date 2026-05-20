@@ -1,9 +1,10 @@
 # RuteX Go – Documentación Técnica
-**TurisTech Team**  
-**Curso Académico:** 2025-2026
-**Tutor/a del Proyecto:** María Mercedes Martínez Fragoso
-**Proyecto:** Desarrollo de Aplicaciones Multiplataformas
-**Stack principal:** Flutter · Firebase · Google Maps API
+
+* **TurisTech Team**  
+* **Curso Académico:** 2025-2026
+* **Tutor/a del Proyecto:** María Francisca Roncero Holgado
+* **Proyecto:** Desarrollo de Aplicaciones Multiplataformas
+* **Stack principal:** Flutter · Firebase · Google Maps API
 
 ---
 
