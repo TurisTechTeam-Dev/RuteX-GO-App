@@ -172,9 +172,12 @@ class TripSimulationProvider extends ChangeNotifier {
         source: NavigationRouteSource.googleWalking,
       );
       if (_isDisposed) return;
-      nextRoute = route.points.isNotEmpty
-          ? route
-          : NavigationRoute(points: [_currentPosition, target]);
+      if (route.points.isNotEmpty && !_isRouteUnreasonable(route.points, target)) {
+        nextRoute = route;
+      } else {
+        debugPrint("[ROUTE] Route discarded (too long or empty). Using straight line.");
+        nextRoute = NavigationRoute(points: [_currentPosition, target]);
+      }
     } catch (e) {
       if (_isDisposed) return;
       debugPrint("[ROUTE] Connection error. Falling back to a straight line.");
@@ -492,6 +495,18 @@ class TripSimulationProvider extends ChangeNotifier {
     }
 
     return names;
+  }
+
+  bool _isRouteUnreasonable(List<LatLng> points, LatLng target) {
+    final straightLine = NavigationDistanceUtils.metersBetween(_currentPosition, target);
+    if (straightLine < 1) return false;
+    var routeLength = 0.0;
+    for (var i = 0; i < points.length - 1; i++) {
+      routeLength += NavigationDistanceUtils.metersBetween(points[i], points[i + 1]);
+    }
+    final ratio = routeLength / straightLine;
+    debugPrint("[ROUTE] Length ${routeLength.toInt()}m vs straight ${straightLine.toInt()}m (ratio ${ratio.toStringAsFixed(2)})");
+    return ratio > 2.0;
   }
 
   void _notifyListeners() {
