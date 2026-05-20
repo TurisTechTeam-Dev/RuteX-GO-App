@@ -32,7 +32,6 @@ class QuizContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final question = questions[currentIndex];
-    final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return Column(
       children: [
@@ -43,16 +42,11 @@ class QuizContent extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: EdgeInsets.fromLTRB(16, 16, 16, 12 + bottomInset),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
           child: CustomButton(
             text: _continueButtonText(),
             onPressed: onContinue,
           ),
-        ),
-        Container(
-          width: double.infinity,
-          height: 2,
-          color: Theme.of(context).colorScheme.onSurface,
         ),
       ],
     );

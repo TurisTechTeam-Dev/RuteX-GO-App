@@ -92,6 +92,16 @@ class _QuizScreenState extends State<QuizScreen> {
                   ? null
                   : () => _continueQuiz(),
             ),
+      bottomNavigationBar: Container(
+        height: 60,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          border: Border(
+            top: BorderSide(color: theme.colorScheme.onSurface, width: 2),
+          ),
+        ),
+        child: const SafeArea(child: SizedBox()),
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       floatingActionButton: AudioGuideWidget(
         text: _quizAudioText(question),
