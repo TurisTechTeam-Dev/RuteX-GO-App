@@ -65,7 +65,7 @@ android {
 
     buildTypes {
         getByName("debug") {
-            signingConfig = signingConfigs.getByName("release")
+            // usa el debug keystore por defecto (~/.android/debug.keystore)
         }
         release {
             // USAMOS LA CONFIGURACIÓN DE RELEASE EN LUGAR DE DEBUG

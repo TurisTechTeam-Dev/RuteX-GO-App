@@ -42,8 +42,31 @@ class MapNavigationScreen extends StatefulWidget {
   State<MapNavigationScreen> createState() => _MapNavigationScreenState();
 }
 
-class _MapNavigationScreenState extends State<MapNavigationScreen> {
+class _MapNavigationScreenState extends State<MapNavigationScreen>
+    with WidgetsBindingObserver {
   bool _isDialogOpen = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!mounted || state != AppLifecycleState.resumed) return;
+    final trip = context.read<TripSimulationProvider>();
+    if (_isDialogOpen &&
+        (!trip.hasReachedDestination || trip.allPoisCompleted)) {
+      setState(() => _isDialogOpen = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -134,6 +157,61 @@ class _MapNavigationScreenState extends State<MapNavigationScreen> {
                   autoRead: autoRead,
                   semanticLabel:
                       'Botón de audioguía. Pulsa para escuchar las indicaciones de navegación.',
+                ),
+              ),
+            if (tripProvider.gpsPermissionDenied)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: Material(
+                  color: Colors.orange.shade700,
+                  child: SafeArea(
+                    bottom: false,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      child: Row(
+                        children: const [
+                          Icon(Icons.location_off, color: Colors.white, size: 18),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Sin permiso de ubicación. Actívalo en ajustes para una navegación precisa.',
+                              style: TextStyle(color: Colors.white, fontSize: 12),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            if (!tripProvider.isLoading && tripProvider.routeCalculationFailed)
+              Positioned(
+                bottom: bottomPadding + 100,
+                left: 30,
+                right: 30,
+                child: Material(
+                  color: Colors.red.shade700,
+                  borderRadius: BorderRadius.circular(12),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    child: Row(
+                      children: [
+                        Icon(Icons.route, color: Colors.white, size: 18),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'No se pudo calcular la ruta. Dirígete al punto indicado en el mapa.',
+                            style: TextStyle(color: Colors.white, fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
           ],

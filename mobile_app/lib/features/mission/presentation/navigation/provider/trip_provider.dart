@@ -45,6 +45,12 @@ class TripSimulationProvider extends ChangeNotifier {
   List<LatLng> _routePoints = [];
   List<LatLng> get routePoints => _routePoints;
 
+  bool _gpsPermissionDenied = false;
+  bool get gpsPermissionDenied => _gpsPermissionDenied;
+
+  bool _routeCalculationFailed = false;
+  bool get routeCalculationFailed => _routeCalculationFailed;
+
   List<NavigationStep> _navigationSteps = [];
   int _currentStepIndex = 0;
   NavigationStep? get currentNavigationStep {
@@ -154,6 +160,7 @@ class TripSimulationProvider extends ChangeNotifier {
     final targetIndex = _currentPoiIndex;
 
     _isCalculatingRoute = true;
+    _routeCalculationFailed = false;
     _routePoints = [];
     _navigationSteps = [];
     _currentStepIndex = 0;
@@ -172,13 +179,11 @@ class TripSimulationProvider extends ChangeNotifier {
         source: NavigationRouteSource.googleWalking,
       );
       if (_isDisposed) return;
-      nextRoute = route.points.isNotEmpty
-          ? route
-          : NavigationRoute(points: [_currentPosition, target]);
+      nextRoute = route;
     } catch (e) {
       if (_isDisposed) return;
-      debugPrint("[ROUTE] Connection error. Falling back to a straight line.");
-      nextRoute = NavigationRoute(points: [_currentPosition, target]);
+      debugPrint("[ROUTE] Connection error: $e");
+      nextRoute = const NavigationRoute(points: []);
     }
 
     final isStaleCalculation =
@@ -195,6 +200,7 @@ class TripSimulationProvider extends ChangeNotifier {
     _routePoints = nextRoute.points;
     _navigationSteps = nextRoute.steps;
     _currentStepIndex = 0;
+    _routeCalculationFailed = nextRoute.points.isEmpty;
     _updateCurrentNavigationStep();
     _isCalculatingRoute = false;
     _notifyListeners();
@@ -230,6 +236,14 @@ class TripSimulationProvider extends ChangeNotifier {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (_isDisposed) return;
+    }
+
+    if (permission == LocationPermission.deniedForever ||
+        permission == LocationPermission.denied) {
+      debugPrint("[GPS] Permission denied — using default position.");
+      _gpsPermissionDenied = true;
+      _notifyListeners();
+      return;
     }
 
     // Fallback rápido (fix de red, puede ser impreciso)

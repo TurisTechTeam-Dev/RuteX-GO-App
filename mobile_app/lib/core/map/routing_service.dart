@@ -25,6 +25,7 @@ class RoutingService {
   static const _osrmFootUrl =
       'https://routing.openstreetmap.de/routed-foot/route/v1/driving';
 
+
   Future<List<LatLng>> getRoute(LatLng start, LatLng end) async {
     final route = await getNavigationRoute(start, end);
     return route.points;
@@ -44,16 +45,14 @@ class RoutingService {
       if (googleRoute.points.isNotEmpty) return googleRoute;
     }
 
-    // OSRM routed-foot antes que Valhalla: servidor dedicado peatonal con
-    // mejor cobertura de calles urbanas sin etiqueta de acera en OSM.
     final osrmRoute = await _getOsrmFallbackRoute(start, end);
     if (osrmRoute.points.isNotEmpty) return osrmRoute;
 
     final pedestrianRoute = await _getValhallaPedestrianRoute(start, end);
     if (pedestrianRoute.points.isNotEmpty) return pedestrianRoute;
 
-    debugPrint('No se pudo calcular ruta walking, usando linea recta.');
-    return NavigationRoute(points: [start, end]);
+    debugPrint('No se pudo calcular ninguna ruta peatonal.');
+    return const NavigationRoute(points: []);
   }
 
   Future<NavigationRoute> _getGoogleWalkingRoute(
@@ -166,14 +165,15 @@ class RoutingService {
   Future<NavigationRoute> _tryValhallaServer(
     String serverUrl,
     LatLng start,
-    LatLng end,
-  ) async {
+    LatLng end, {
+    String costing = 'pedestrian',
+  }) async {
     final body = jsonEncode({
       'locations': [
         {'lat': start.latitude, 'lon': start.longitude},
         {'lat': end.latitude, 'lon': end.longitude},
       ],
-      'costing': 'pedestrian',
+      'costing': costing,
       'directions_options': {'units': 'kilometers', 'language': 'es-ES'},
     });
 
@@ -219,7 +219,7 @@ class RoutingService {
       }
 
       debugPrint(
-        'Ruta Valhalla pedestrian ($serverUrl): ${points.length} puntos, ${steps.length} pasos',
+        'Ruta Valhalla $costing ($serverUrl): ${points.length} puntos, ${steps.length} pasos',
       );
       return NavigationRoute(points: points, steps: steps);
     } catch (e) {

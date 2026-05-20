@@ -94,8 +94,7 @@ class AuthRepositoryImpl implements AuthRepository {
         throw Exception("No se pudo recuperar el usuario tras el login");
       }
 
-      final isNew = userCredential.additionalUserInfo?.isNewUser ?? false;
-      await _ensureUserDocument(user);
+      final isNew = await _ensureUserDocument(user);
       return AuthUserModel.fromFirebaseUser(user, isFirstLogin: isNew);
     } on FirebaseAuthException catch (e) {
       throw Exception(_mapError(e.code));
@@ -146,7 +145,7 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
-  Future<void> _ensureUserDocument(User user) async {
+  Future<bool> _ensureUserDocument(User user) async {
     final userRef = firestore
         .collection(FirestoreCollections.usuarios)
         .doc(user.uid);
@@ -167,7 +166,7 @@ class AuthRepositoryImpl implements AuthRepository {
         UserFields.isAdmin: false,
         UserFields.rango: FirestoreDocs.rangosConfig,
       });
-      return;
+      return true;
     }
 
     final data = snapshot.data() ?? {};
@@ -185,6 +184,7 @@ class AuthRepositoryImpl implements AuthRepository {
       updates[UserFields.avatar] = user.photoURL ?? '';
     }
     await userRef.update(updates);
+    return false;
   }
 
   String _displayNameForGoogleUser(User user) {
