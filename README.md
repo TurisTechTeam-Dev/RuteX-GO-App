@@ -43,19 +43,21 @@
 
 ---
 
-## 📑 Índice
+## 📑 Índice de Contenidos
 
-* [🚀 Estado del Proyecto](#estado-del-proyecto)
-* [✨ Características Principales](#características-principales)
-* [🎯 Objetivos](#objetivos)
-* [🛠️ Tecnologías Utilizadas](#tecnologías-utilizadas)
-* [📁 Estructura del Repositorio](#estructura-del-repositorio)
-* [⚙️ Instalación y Ejecución](#instalación-y-ejecución)
-* [🏗️ Arquitectura y Decisiones Técnicas](#arquitectura-y-decisiones-técnicas)
-* [📚 Documentación](#documentación)
-* [🤝 Proceso de Contribución](#proceso-de-contribución)
-* [📄 Licencia y Derechos](#licencia-y-derechos)
-* [📞 Contacto y Soporte](#contacto-y-soporte)
+* [🚀 Estado del Proyecto](#-estado-del-proyecto)
+* [✨ Características Principales](#-características-principales)
+* [🎯 Objetivos](#-objetivos-del-proyecto)
+* [🛠️ Tecnologías Utilizadas](#️-tecnologías-utilizadas)
+* [📁 Estructura del Repositorio](#-estructura-del-repositorio)
+* [⚙️ Instalación y Ejecución](#️-instalación-y-ejecución)
+* [🚀 Roadmap de Producto & Ciclo de Vida](#-roadmap-de-producto--ciclo-de-vida)
+* [🏗️ Arquitectura y Decisiones Técnicas](#️-arquitectura-y-decisiones-técnicas)
+* [🔗 Integraciones del Sistema](#-integraciones-del-sistema)
+* [📚 Documentación Técnica y Comercial](#-documentación-técnica-y-comercial)
+* [🤝 Proceso de Contribución](#-proceso-de-contribución-y-flujo-de-trabajo)
+* [⚖️ Licencia](#️-licencia)
+* [📞 Contacto y Soporte](#-contacto-y-soporte)
 
 ---
 
@@ -250,8 +252,8 @@ Para ejecutar, depurar o compilar **RuteX Go** en un entorno local, asegúrate d
 #### 1. Clonar el repositorio
 Abre la terminal y descarga el código fuente del proyecto:
 ```bash
-git clone [https://github.com/TurisTechTeam-Dev/rutex-go-project.git](https://github.com/TurisTechTeam-Dev/rutex-go-project.git)
-cd rutex-go-project/mobile_apptex-go-project/mobile_app
+git clone https://github.com/TurisTechTeam-Dev/rutex-go-project.git
+cd rutex-go-project/mobile_app
 ```
 
 ---
@@ -286,7 +288,7 @@ flutter run
 
 - 🩺 **Diagnóstico:** Si encuentras errores al compilar, ejecuta el siguiente comando para verificar que tu entorno esté correctamente configurado:
 ```bash
-  flutter doctor
+flutter doctor
 ```
 
 ---
@@ -295,7 +297,7 @@ flutter run
 
 - **Ver dispositivos disponibles:** (Detectar emuladores o móviles conectados)
 ```bash
-  flutter devices
+flutter devices
 ```
 
 - **Ejecutar en modo release:** (Probar el rendimiento real de la app sin debug)
@@ -637,5 +639,3 @@ Si deseas contactar con el equipo para resolver dudas, reportar incidencias o pr
 ---
 
 **IES Albarregas** | **Desarrollo de Aplicaciones Multiplataforma** | **Curso 2024/25 - 2025/26**
-
-
