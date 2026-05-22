@@ -7,12 +7,18 @@
 ![GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF?logo=github-actions&logoColor=white)
 ![Estado](https://img.shields.io/badge/Estado-En%20Desarrollo-yellow)
 
+<p align="center">
+  <a href="https://rutex-go-landing.vercel.app/">
+    <img src="https://img.shields.io/badge/Visita_nuestra-Landing_Page-02569B?style=for-the-badge&logo=google-chrome&logoColor=white" alt="Landing Page">
+  </a>
+</p>
+
 > [!TIP]
 > **🚀 Despliegue Automático:** El panel de administración se despliega automáticamente en Firebase Hosting mediante GitHub Actions tras cada push a `main`.
 
 
-[![Landing Page](https://img.shields.io/badge/Visita_nuestra-Landing_Page-02569B?style=for-the-badge&logo=google-chrome&logoColor=white)](https://rutex-go-landing.vercel.app/)
-(https://rutex-go-landing.vercel.app/)
+
+
 
 ## 👥 Equipo de Desarrollo — TurisTech Team
 
