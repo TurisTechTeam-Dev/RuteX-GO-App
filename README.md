@@ -91,9 +91,9 @@
 
 🔮 **Últimos pasos antes de la Defensa:**
 - [x] **Desarrollo técnico:** Hoja de ruta técnica cerrada y estable.
-- [ ] **Documentación académica:** Redacción final de la memoria del TFG y manuales técnicos.
-- [ ] **Revisión de Tutoría:** Supervisión por parte de la tutora (**Mercedes**) para ajustes de última hora.
-- [ ] **Cierre del Proyecto:** Preparación de la defensa y generación de builds finales de entrega.
+- [x] **Documentación académica:** Redacción final de la memoria del TFG y manuales técnicos.
+- [x] **Revisión de Tutoría:** Supervisión por parte de la tutora (**Paqui**) para ajustes de última hora.
+- [x] **Cierre del Proyecto:** Preparación de la defensa y generación de builds finales de entrega.
 
 ---
 
