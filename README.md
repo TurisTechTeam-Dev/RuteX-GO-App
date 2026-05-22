@@ -10,6 +10,10 @@
 > [!TIP]
 > **🚀 Despliegue Automático:** El panel de administración se despliega automáticamente en Firebase Hosting mediante GitHub Actions tras cada push a `main`.
 
+
+[![Landing Page](https://img.shields.io/badge/Visita_nuestra-Landing_Page-02569B?style=for-the-badge&logo=google-chrome&logoColor=white)](https://rutex-go-landing.vercel.app/)
+(https://rutex-go-landing.vercel.app/)
+
 ## 👥 Equipo de Desarrollo — TurisTech Team
 
 | Avatar | Desarrollador | GitHub | Rol |
