@@ -1,11 +1,13 @@
-# RuteX Go 🏛️📱
-### *Aplicación móvil gamificada para turismo cultural en Extremadura*
+<h1 align="center">RuteX Go 🏛️📱</h1>
+<p align="center"><i>Aplicación móvil gamificada para turismo cultural en Extremadura</i></p>
 
-![Licencia](https://img.shields.io/badge/Licencia-Propietaria-blue)
-![Flutter](https://img.shields.io/badge/Flutter-02569B?logo=flutter&logoColor=white)
-![Firebase](https://img.shields.io/badge/Firebase-FFCA28?logo=firebase&logoColor=black)
-![GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF?logo=github-actions&logoColor=white)
-![Estado](https://img.shields.io/badge/Estado-En%20Desarrollo-yellow)
+<p align="center">
+  <img src="https://img.shields.io/badge/Licencia-Propietaria-blue" alt="Licencia">
+  <img src="https://img.shields.io/badge/Flutter-02569B?logo=flutter&logoColor=white" alt="Flutter">
+  <img src="https://img.shields.io/badge/Firebase-FFCA28?logo=firebase&logoColor=black" alt="Firebase">
+  <img src="https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF?logo=github-actions&logoColor=white" alt="GitHub Actions">
+  <img src="https://img.shields.io/badge/Estado-En%20Desarrollo-yellow" alt="Estado">
+</p>
 
 <p align="center">
   <a href="https://rutex-go-landing.vercel.app/">
