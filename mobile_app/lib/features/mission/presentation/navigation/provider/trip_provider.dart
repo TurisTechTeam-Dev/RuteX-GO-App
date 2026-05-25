@@ -213,6 +213,9 @@ class TripSimulationProvider extends ChangeNotifier {
       "[PROGRESS] '${_pointsOfInterest[_currentPoiIndex].name}' marked as completed.",
     );
 
+    // Ancla la posición al POI completado antes de recalcular para evitar drift del GPS real
+    _currentPosition = _pointsOfInterest[_currentPoiIndex].location;
+
     if (!_completedPoiIndices.contains(_currentPoiIndex)) {
       _completedPoiIndices.add(_currentPoiIndex);
     }
@@ -266,13 +269,19 @@ class TripSimulationProvider extends ChangeNotifier {
     ).listen((Position pos) {
       if (_isDisposed) return;
 
-      _currentPosition = LatLng(pos.latitude, pos.longitude);
+      final latLng = LatLng(pos.latitude, pos.longitude);
 
       if (!firstFix.isCompleted) {
+        _currentPosition = latLng;
         debugPrint("[GPS] First stream fix: ${pos.latitude}, ${pos.longitude}");
         firstFix.complete();
+        return;
       }
 
+      // En modo simulación admin el GPS real no debe sobreescribir la posición simulada
+      if (_isAdminSimulation) return;
+
+      _currentPosition = latLng;
       if (_isSimulating || _hasReachedDestination) return;
       _checkArrivalProximity(_currentPosition);
       _updateCurrentNavigationStep();

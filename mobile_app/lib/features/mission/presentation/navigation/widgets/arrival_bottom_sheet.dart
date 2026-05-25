@@ -63,12 +63,10 @@ class ArrivalBottomSheet extends StatelessWidget {
               child: ElevatedButton.icon(
                 onPressed: onScanMission,
                 icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
-                label: const Flexible(
-                  child: Text(
-                    "ESCANEAR PARA JUGAR",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white),
-                  ),
+                label: const Text(
+                  "ESCANEAR PARA JUGAR",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white),
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
